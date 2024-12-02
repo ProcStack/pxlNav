@@ -11,6 +11,9 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;\_ Easily load any **FBX file** for a Room (Scene / Level) or Objects
 <br/>&nbsp;&nbsp;&nbsp; \*FBXs are 3d scene files you can make in most CGI programs; like Maya or Blender 
 <br/>&nbsp;\_ **Animation Rig & Clip Files** are easily managed
+<br/>&nbsp;\_ A simple **Animation State Machine** to set the next **Clip**
+<br/>&nbsp;&nbsp;&nbsp; \*Once the current animation clip finishes, set what the animating Rig/Object does next.
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; Loop the clip infinitely, play a specific clip after, or pick a random clip from an array you set in javascript.
 <br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes** *( Off by default, available through `this.pxlEnv` )*
 <br/>&nbsp;\_ **Shader Editor**
 <br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the shader editor with regex added editing
