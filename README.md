@@ -16,10 +16,14 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; Loop the clip infinitely, play a specific clip after, or pick a random clip from an array you set in javascript.
 <br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes**
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; *( Off by default, available through `this.pxlEnv` )*
-<br/>&nbsp;\_ **Shader Editor**
+<br/>&nbsp;\_ **OpenGL ES Shader Editor**
 <br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the shader editor with regex added editing
 <br/>&nbsp;\_ **Subscribe to Callback** & **Trigger** events through the top pxlNav module
 <br/>&nbsp;&nbsp;&nbsp; \*You can subscribe & trigger your own custom events & code for your Room as well
+<br/>&nbsp;\_ Easily assign custom materials (like OpenGL ES Shaders) to objects in your FBX when the file loads.
+<br/>&nbsp;&nbsp;&nbsp; \*Your object will be listed under the Shader Editor's `Edit Shader` pulldown.
+<br/>&nbsp;\_ Pre-made **Particle Effects** or customize the particle system through Shaders
+<br/>&nbsp;&nbsp;&nbsp; \*Pre-made particle effects - Billowing smoke, fire embers, floating environment dust, & snow with floor colider
 *<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to you Room's Javascript object in code*
 <br/>
 
@@ -69,4 +73,4 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  No Selection & Ctrl+2 -> `vec2(.0, .0)`
 <br/>&nbsp;\_ `Ctrl + {Up,Down,Left,Right}` - Quick search
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Searches for your current selection in that direction
-<br/>&nbsp;\_ Click off the editor & hit `Y` - To close the Shader Editor
+<br/>&nbsp;\_ Click off the editor & hit `Y` - To Open / Close the Shader Editor
