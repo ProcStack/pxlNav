@@ -1,0 +1,27 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+# Javascript packing and minifying
+packing/
+
+# Source, Utils, & Misc
+src/
+utils/
+
+# Documentation
+docs/
+*.md
+
+# Environment files
+.env
+.env.*
+
+
+# OS specific files
+.DS_Store
+Thumbs.db
