@@ -35,22 +35,14 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 
 ### Shader Edtior Keyboard Shortcuts -
 &nbsp;\_ Browser default Copy, Cut, Paste, Undo, Redo, etc.
-<br/>&nbsp;\_ `Enter`
-<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  New lines use the existing indent type (Spaces or Tabs)
-<br/>&nbsp;\_ `Ctrl + Enter`
-<br/>&nbsp;&nbsp;&nbsp; Update Shader on Material
-<br/>&nbsp;\_ `Ctrl + D`
-<br/>&nbsp;&nbsp;&nbsp; Duplicate current line
-<br/>&nbsp;\_ `Ctrl + K`
-<br/>&nbsp;&nbsp;&nbsp; Comment current/selected lines
-<br/>&nbsp;\_ `Ctrl + Shift + K`
-<br/>&nbsp;&nbsp;&nbsp; Uncomment current/selected lines
-<br/>&nbsp;\_ `Ctrl + NumPad {1,2,3}`
-<br/>&nbsp;&nbsp;&nbsp; Add selection or '.0' into float(), vec2(), vec3()
+<br/>&nbsp;\_ `Enter` - New lines use the existing indent type (Spaces or Tabs)
+<br/>&nbsp;\_ `Ctrl + Enter` - Update Shader on Material
+<br/>&nbsp;\_ `Ctrl + D` -  Duplicate current line
+<br/>&nbsp;\_ `Ctrl + K` - Comment current/selected lines
+<br/>&nbsp;\_ `Ctrl + Shift + K` - Uncomment current/selected lines
+<br/>&nbsp;\_ `Ctrl + NumPad {1,2,3}` - Add selection or '.0' into float(), vec2(), vec3()
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Select `myVar` & Ctrl+3 -> `vec3(myVar)`
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  No Selection & Ctrl+2 -> `vec2(.0, .0)`
-<br/>&nbsp;\_ `Ctrl + {Up,Down,Left,Right}`
-<br/>&nbsp;&nbsp;&nbsp; Quick search
+<br/>&nbsp;\_ `Ctrl + {Up,Down,Left,Right}` - Quick search
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Searches for your current selection in that direction
-<br/>&nbsp;\_ Click off the editor & hit `Y`
-<br/>&nbsp;&nbsp;&nbsp; To close the Shader Editor
+<br/>&nbsp;\_ Click off the editor & hit `Y` - To close the Shader Editor
