@@ -1,9 +1,18 @@
 # pxlNav
-Javascript + Three.js player controller for first &amp; third person navigation.
+Javascript Player Controller & Environment Manager for Three.js
 
 **`pxlNav` is still being isolated into a package;**
 <br/>**Please see the [procstack.github.io](https://github.com/ProcStack/procstack.github.io) repo for the current `pxlNav` status &amp; working example.**
 <br/><br/>
+
+
+### Intention -
+`pxlNav` is meant to be an interactive layer built on top of Three.js' render engine.
+<br/>Creating a framework which understands FBX files made with certain object tags set through Maya or Blender or *[Name your CGI program here]*.
+<br/>Turning your 3d modeling software into a level editor for Three.js
+<br/>
+<br/>It's basically a game engine add-on for Three.js
+
 
 ### Features -
 &nbsp;\_ **FPV Camera Control** on PC & Mobile
