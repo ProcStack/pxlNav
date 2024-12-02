@@ -28,12 +28,13 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;\_ Jump Pads
 <br/>&nbsp;\_ Point-to-Point Warp Pads ( Teleporters / Portals )
 <br/>&nbsp;&nbsp;&nbsp; \*Link a Collision Surface to a target Transform to move the user to once they step on the surface.
-<br/>&nbsp;\_ Point-to-Room Warp Pads ( Move between other Rooms [ separate FBX files & runtime ] )
+<br/>&nbsp;\_ Point-to-Room Warp Pads
+<br/>&nbsp;&nbsp;&nbsp; \*Move between other Rooms ( separate FBX files & javascript; similar to game levels )
 <br/>
 
 
 
-### Shader Edtior Keyboard Shortcuts -
+### Shader Editor Keyboard Shortcuts -
 &nbsp;\_ Browser default Copy, Cut, Paste, Undo, Redo, etc.
 <br/>&nbsp;\_ `Enter` - New lines use the existing indent type (Spaces or Tabs)
 <br/>&nbsp;\_ `Ctrl + Enter` - Update Shader on Material
