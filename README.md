@@ -102,6 +102,9 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Searches for your current selection in that direction
 <br/>&nbsp;\_ Click off the editor & hit `Y` - To Open / Close the Shader Editor
 
+<img src="docs/assets/ssScriptEditor.jpg" alt="OpenGl ES Shader Editor" style="margin-left:auto;margin-right:auto;"/>
+
+
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
