@@ -1,0 +1,155 @@
+pxlNav Root --
+= ./dist
+│    -pxlNav.cjs.js
+│    -pxlNav.esm.js
+└─   -pxlNavStyle.min.css
+= ./examples
+└─   -readme.md
+= ./packing
+│    -bundle.js
+└─   -bundle_css.js
+= ./src
+│    -README.md
+└─   -pxlNav.js
+│  = ./src/pxlNav
+│  │    -Environment.js
+│  │    -RoomClass.js
+│  └─   -pxlBase.js
+│  │  = ./src/pxlNav/cam
+│  │  │    -AutoCamera.js
+│  │  └─   -Camera.js
+│  │  = ./src/pxlNav/core
+│  │  │    -Animation.js
+│  │  │    -CookieManager.js
+│  │  │    -Device.js
+│  │  │    -FileIO.js
+│  │  │    -QualityController.js
+│  │  │    -Timer.js
+│  │  │    -Types.js
+│  │  │    -User.js
+│  │  │    -Utils.js
+│  │  └─   -readme.md
+│  │  = ./src/pxlNav/effects
+│  │  │    -animations.js
+│  │  └─   -particles.js
+│  │  │  = ./src/pxlNav/effects/animations
+│  │  │  └─   -CountDownParticles.js
+│  │  │  = ./src/pxlNav/effects/particles
+│  │  │  │    -BillowSmoke.js
+│  │  │  │    -EmberWisps.js
+│  │  │  │    -FloatingDust.js
+│  │  │  │    -ParticleBase.js
+│  │  │  └─   -readme.md
+│  │  = ./src/pxlNav/extensions
+│  │  │    -ExtensionBase.js
+│  │  │    -Extensions.js
+│  │  │    -Networking.js
+│  │  │    -PoseEngine.js
+│  │  │    -WebCam.js
+│  │  └─   -readme.md
+│  │  │  = ./src/pxlNav/extensions/PoseEngine
+│  │  │  │    -MediaPipe.js
+│  │  │  └─   -PoseEngine_worker.js
+│  │  = ./src/pxlNav/gui
+│  │  │    -GUI.js
+│  │  │    -GUIBase.js
+│  │  │    -Help.js
+│  │  │    -Info.js
+│  │  │    -Settings.js
+│  │  │    -ShaderEditor.js
+│  │  └─   -User.js
+│  │  │  = ./src/pxlNav/gui/guiUtils
+│  │  │  └─   -svgUtils.js
+│  │  = ./src/pxlNav/media
+│  │  │    -Audio.js
+│  │  │    -MusicUtils.js
+│  │  └─   -Video.js
+│  │  = ./src/pxlNav/shaders
+│  │  │    -animated.js
+│  │  │    -core.js
+│  │  │    -objects.js
+│  │  │    -particles.js
+│  │  │    -rendering.js
+│  │  │    -scene.js
+│  │  └─   -shaders.js
+│  │  │  = ./src/pxlNav/shaders/animated
+│  │  │  │    -AnimatedDuelNoise.js
+│  │  │  │    -AnimatedTexture.js
+│  │  │  │    -ClickableBevel.js
+│  │  │  │    -DArrowShaders.js
+│  │  │  │    -PortalBaseShader.js
+│  │  │  │    -ScrollTextureShader.js
+│  │  │  │    -UserScreenShader.js
+│  │  │  └─   -WallBarrierShader.js
+│  │  │  = ./src/pxlNav/shaders/core
+│  │  │  │    -CamPosVert.js
+│  │  │  │    -Default.js
+│  │  │  │    -DefaultShift.js
+│  │  │  │    -DiscardFrag.js
+│  │  │  └─   -ShaderHeader.js
+│  │  │  = ./src/pxlNav/shaders/objects
+│  │  │  │    -BoostColors.js
+│  │  │  │    -ItemBaseShader.js
+│  │  │  │    -ItemShader.js
+│  │  │  │    -PxlPrincipled.js
+│  │  │  │    -PxlPrincipled_old.js
+│  │  │  └─   -TriplanarRolloff.js
+│  │  │  = ./src/pxlNav/shaders/particles
+│  │  │  │    -CountDownShader.js
+│  │  │  │    -EmberWisps.js
+│  │  │  │    -FloatingDust.js
+│  │  │  │    -README.md
+│  │  │  │    -Smoke.js
+│  │  │  │    -SnowConfettiShader.js
+│  │  │  └─   -SnowShader.js
+│  │  │  = ./src/pxlNav/shaders/rendering
+│  │  │  │    -AntiAliasingPostProcess.js
+│  │  │  │    -ChroAberPostProcess.js
+│  │  │  │    -CompLayersPostProcess.js
+│  │  │  │    -DepthPostProcess.js
+│  │  │  │    -DirectionalBlurPass.js
+│  │  │  │    -FinalOverlayPostProcess.js
+│  │  │  │    -GlowPassShader.js
+│  │  │  │    -InfiniteZoomPostProcess.js
+│  │  │  │    -LKingPostProcess.js
+│  │  │  │    -MediaToggle.js
+│  │  │  │    -MotionBlurPostProcess.js
+│  │  │  │    -StarFieldPostProcess.js
+│  │  │  │    -TextureStorePass.js
+│  │  │  │    -WarpPostProcess.js
+│  │  │  └─   -WorldPositionPass.js
+│  │  │  = ./src/pxlNav/shaders/scene
+│  │  │  │    -BGScreen.js
+│  │  │  │    -HDRRoom.js
+│  │  │  │    -SkyObject.js
+│  │  │  │    -SkyPlane.js
+│  │  │  │    -SkyPlaneNormal.js
+│  │  │  └─   -SkyTexture.js
+│  │  = ./src/pxlNav/webWorkers
+│  │  │    -AudioProcessor.js
+│  │  │    -CameraWorker.js
+│  │  │    -FileWorkerIO.js
+│  │  └─   -webWorkers.js
+│  = ./src/style
+│  │    -envPopupStyle.css
+│  │    -guiHudDisplayStyle.css
+│  │    -guiRangeSliderStyle.css
+│  │    -helpGuiStyle.css
+│  │    -howToStyle.css
+│  │    -infoGuiStyle.css
+│  │    -pxlNavStyle.css
+│  │    -settingsGuiStyle.css
+│  │    -shaderBoxGuiStyle.css
+│  └─   -verbose.css
+│  │  = ./src/style/old
+│  │  │    -artistInfoStyle.css
+│  │  │    -chatBoxGuiStyle.css
+│  │  │    -multiverseGuiStyle.css
+│  │  │    -userControlStyles.css
+│  │  └─   -userProfileBoxGuiStyle.css
+= ./utils
+└─   -fileTreeBuilder.js
+ -LICENSE
+ -README.md
+ -package-lock.json
+ -package.json
