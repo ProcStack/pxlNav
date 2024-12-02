@@ -6,6 +6,7 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/><br/>
 
 --------------------------------------------------------------------------------------------
+
 ## <br/>**Index**
 * [Intention For pxlNav](#intention)
 * [In-Browser / Javascript Features](#in-browser--javascript-features)
