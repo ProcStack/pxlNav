@@ -6,30 +6,38 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/><br/>
 
 ### Features -
-&nbsp;\_ FPV Camera Control on PC & Mobile
-<br/>&nbsp;\_ Navigation using W,A,S,D or Arrow Keys
-<br/>&nbsp;\_ Easily load any FBX file for a Room (Scene / Level) or Objects
+&nbsp;\_ **FPV Camera Control** on PC & Mobile
+<br/>&nbsp;\_ **Navigation using W,A,S,D or Arrow Keys**
+<br/>&nbsp;\_ Easily load any **FBX file** for a Room (Scene / Level) or Objects
 <br/>&nbsp;&nbsp;&nbsp; \*FBXs are 3d scene files you can make in most CGI programs; like Maya or Blender 
-<br/>&nbsp;\_ Animation Rig & Clip files are easily managed
-<br/>&nbsp;\_ Shader Editor
+<br/>&nbsp;\_ **Animation Rig & Clip Files** are easily managed
+<br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes** *( Off by default, available through `this.pxlEnv` )*
+<br/>&nbsp;\_ **Shader Editor**
 <br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the shader editor with regex added editing
-<br/>&nbsp;\_ Subscribe to callback events & trigger events from top pxlNav module
-<br/>&nbsp;&nbsp;&nbsp; \*You can trigger your own custom code in your Room to run as well
+<br/>&nbsp;\_ **Subscribe to Callback** & **Trigger** events through the top pxlNav module
+<br/>&nbsp;&nbsp;&nbsp; \*You can subscribe & trigger your own custom events & code for your Room as well
 <br/>
 
 
 
 ### Features added through your CGI program of choice -
-&nbsp;\_ Instanced geometry
-<br/>&nbsp;\_ Camera Position & Aim
-<br/>&nbsp;\_ Auto Camera Rails
+&nbsp;\_ **Instanced geometry**
+<br/>&nbsp;\_ **Camera Position & Aim**
+<br/>&nbsp;\_ **Auto Camera Rails**
 <br/>&nbsp;&nbsp;&nbsp; \*Animated Camera Paths for Position, Look At, & Up for animation sequencing
-<br/>&nbsp;\_ Item Pickups
-<br/>&nbsp;\_ Jump Pads
-<br/>&nbsp;\_ Point-to-Point Warp Pads ( Teleporters / Portals )
+<br/>&nbsp;\_ **Glowing Materials**
+<br/>&nbsp;\_ **Item Pickups**
+<br/>&nbsp;\_ **Jump Pads**
+<br/>&nbsp;\_ **Ground Collider Objects**
+<br/>&nbsp;&nbsp;&nbsp; \*Floor terrain, things to jump on top of, walls to limit movement 
+<br/>&nbsp;\_ **Point-to-Point Warp Pads** *( Teleporters / Portals )*
 <br/>&nbsp;&nbsp;&nbsp; \*Link a Collision Surface to a target Transform to move the user to once they step on the surface.
-<br/>&nbsp;\_ Point-to-Room Warp Pads
-<br/>&nbsp;&nbsp;&nbsp; \*Move between other Rooms ( separate FBX files & javascript; similar to game levels )
+<br/>&nbsp;\_ **Point-to-Room Warp Pads**
+<br/>&nbsp;&nbsp;&nbsp; \*Move between other Rooms like changing game levels ( separate FBX files & javascript )
+<br/>&nbsp;\_ **Clickable Objects to run javascript functions**
+<br/>&nbsp;\_ **Scriptable Objects**
+<br/>&nbsp;&nbsp;&nbsp; \*Access these objects by their name in your Room's javascript code; `this.geoList[*Your_Object_Name*]`
+*<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to you Room's Javascript object in code*
 <br/>
 
 
