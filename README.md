@@ -14,6 +14,7 @@ Javascript Player Controller & Environment Manager for Three.js
 * [In Progress Features](#work-in-progress-features)
 * [Shader Editor Keyboard Shortcuts](#shader-editor-keyboard-shortcuts)
 <br/>
+
 --------------------------------------------------------------------------------------------
 
 ## Intention
