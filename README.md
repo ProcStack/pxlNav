@@ -5,16 +5,27 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>**Please see the [procstack.github.io](https://github.com/ProcStack/procstack.github.io) repo for the current `pxlNav` status &amp; working example.**
 <br/><br/>
 
+--------------------------------------------------------------------------------------------
+## <br/>**Index**
+* [Intention For pxlNav](#intention)
+* [In-Browser / Javascript Features](#in-browser--javascript-features)
+* [3d Scene File Features](#features-added-through-your-cgi-program-of-choice)
+* [In Progress Features](#work-in-progress-features)
+* [Shader Editor Keyboard Shortcuts](#shader-editor-keyboard-shortcuts)
+<br/>
+--------------------------------------------------------------------------------------------
 
-### Intention -
-`pxlNav` is meant to be an interactive layer built on top of Three.js' render engine.
-<br/>Creating a framework which understands FBX files made with certain object tags set through Maya or Blender or *[Name your CGI program here]*.
+## Intention
+`pxlNav` is an interactive layer built on top of Three.js' render engine.
+<br/>Creating a framework which understands FBX files created with object tags set in Maya or Blender or *[Name your CGI program here]*.
 <br/>Turning your 3d modeling software into a level editor for Three.js
 <br/>
-<br/>It's basically a game engine add-on for Three.js
+<br/>It's basically a game engine for Three.js
 
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
-### Features -
+## In-Browser / Javascript Features
 &nbsp;\_ **FPV Camera Control** on PC & Mobile
 <br/>&nbsp;\_ **Navigation using W,A,S,D or Arrow Keys**
 <br/>&nbsp;\_ Easily load any **FBX file** for a Room (Scene / Level) or Objects
@@ -23,21 +34,23 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;\_ A simple **Animation State Machine** to set the next **Clip**
 <br/>&nbsp;&nbsp;&nbsp; \*Once the current animation clip finishes, set what the animating Rig/Object does next.
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; Loop the clip infinitely, play a specific clip after, or pick a random clip from an array you set in javascript.
-<br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes**
+<br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, multiple **Anti-Aliasing** options, & more premade **Post-Processes**
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; *( Off by default, available through `this.pxlEnv` )*
 <br/>&nbsp;\_ **OpenGL ES Shader Editor**
-<br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the shader editor with regex added editing
+<br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the Shader Editor with regex enabled [Keyboard Shortcuts](#shader-editor-keyboard-shortcuts) for easier editing
 <br/>&nbsp;\_ **Subscribe to Callback** & **Trigger** events through the top pxlNav module
 <br/>&nbsp;&nbsp;&nbsp; \*You can subscribe & trigger your own custom events & code for your Room as well
 <br/>&nbsp;\_ Easily assign custom materials (like OpenGL ES Shaders) to objects in your FBX when the file loads.
 <br/>&nbsp;&nbsp;&nbsp; \*Your object will be listed under the Shader Editor's `Edit Shader` pulldown.
 <br/>&nbsp;\_ Pre-made **Particle Effects** or customize the particle system through Shaders
-<br/>&nbsp;&nbsp;&nbsp; \*Pre-made particle effects - Billowing smoke, fire embers, floating environment dust, & snow with floor colider
+<br/>&nbsp;&nbsp;&nbsp; \*Pre-made particle effects - Billowing smoke, fire embers, floating environment dust, & snow with floor collider
 *<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to you Room's Javascript object in code*
 <br/>
 
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
-### Features added through your CGI program of choice -
+## Features added through your CGI program of choice
 &nbsp;\_ **Instanced geometry**
 <br/>&nbsp;&nbsp;&nbsp; \*Instance individually to Locator/Null Objects; or in mass to every Vertex in an object
 <br/>&nbsp;\_ **Camera Position & Aim**
@@ -59,7 +72,10 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>
 
 
-### Work-in-Progress Features -
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
+
+## Work-in-Progress Features
 &nbsp;\_ Third person control is not easily available, access it through `this.pxlCamera`
 <br/>&nbsp;\_ No movement controls on Mobile yet
 <br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
@@ -69,8 +85,10 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp;&nbsp; \*The default socket messages for `Stream Elements` is currently set up in `./src/pxlNav/extensions/Networking.js`
 <br/>
 
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
-### Shader Editor Keyboard Shortcuts -
+## Shader Editor Keyboard Shortcuts
 &nbsp;\_ Browser default Copy, Cut, Paste, Undo, Redo, etc.
 <br/>&nbsp;\_ `Enter` - New lines use the existing indent type (Spaces or Tabs)
 <br/>&nbsp;\_ `Ctrl + Enter` - Update Shader on Material
