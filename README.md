@@ -26,6 +26,7 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 
 ### Features added through your CGI program of choice -
 &nbsp;\_ **Instanced geometry**
+<br/>&nbsp;&nbsp;&nbsp; \*Instance individually to Locator/Null Objects; or in mass to every Vertex in an object
 <br/>&nbsp;\_ **Camera Position & Aim**
 <br/>&nbsp;\_ **Auto Camera Rails**
 <br/>&nbsp;&nbsp;&nbsp; \*Animated Camera Paths for Position, Look At, & Up for animation sequencing
@@ -51,7 +52,7 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
 <br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
 <br/>&nbsp;\_ Networking as mostly been removed for safety concerns - Avatars, WebCam Video Streaming, & Mic Audio, but it can be implemented through pxlNav `Extensions`
-<br/>&nbsp;&nbsp;&nbsp; \*Enable specific extensions with `pxlNav.initExtension("Networking", *Your_Extension_Loading_Callback*)`
+<br/>&nbsp;&nbsp;&nbsp; \*Enable specific extensions with `pxlNav.initExtension("Networking", *Your_Extension_Loaded_Callback*)`
 <br/>&nbsp;&nbsp;&nbsp; \*The default socket messages for `Stream Elements` is currently set up in `./src/pxlNav/extensions/Networking.js`
 <br/>
 
