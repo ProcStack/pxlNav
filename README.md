@@ -14,13 +14,14 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 <br/>&nbsp;\_ A simple **Animation State Machine** to set the next **Clip**
 <br/>&nbsp;&nbsp;&nbsp; \*Once the current animation clip finishes, set what the animating Rig/Object does next.
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; Loop the clip infinitely, play a specific clip after, or pick a random clip from an array you set in javascript.
-<br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes** *( Off by default, available through `this.pxlEnv` )*
+<br/>&nbsp;\_ **Motion Blur**, **Chromatic Aberrations**, & more premade **Post-Processes**
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; *( Off by default, available through `this.pxlEnv` )*
 <br/>&nbsp;\_ **Shader Editor**
 <br/>&nbsp;&nbsp;&nbsp; \*Hit `Y` in browser to open the shader editor with regex added editing
 <br/>&nbsp;\_ **Subscribe to Callback** & **Trigger** events through the top pxlNav module
 <br/>&nbsp;&nbsp;&nbsp; \*You can subscribe & trigger your own custom events & code for your Room as well
+*<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to you Room's Javascript object in code*
 <br/>
-
 
 
 ### Features added through your CGI program of choice -
@@ -43,6 +44,16 @@ Javascript + Three.js player controller for first &amp; third person navigation.
 *<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to you Room's Javascript object in code*
 <br/>
 
+
+### Work-in-Progress Features -
+&nbsp;\_ Third person control is not easily available, access it through `this.pxlCamera`
+<br/>&nbsp;\_ No movement controls on Mobile yet
+<br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
+<br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
+<br/>&nbsp;\_ Networking as mostly been removed for safety concerns - Avatars, WebCam Video Streaming, & Mic Audio, but it can be implemented through pxlNav `Extensions`
+<br/>&nbsp;&nbsp;&nbsp; \*Enable specific extensions with `pxlNav.initExtension("Networking", *Your_Extension_Loading_Callback*)`
+<br/>&nbsp;&nbsp;&nbsp; \*The default socket messages for `Stream Elements` is currently set up in `./src/pxlNav/extensions/Networking.js`
+<br/>
 
 
 ### Shader Editor Keyboard Shortcuts -
