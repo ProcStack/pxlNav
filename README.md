@@ -8,13 +8,37 @@ Javascript Player Controller & Environment Manager for Three.js
 --------------------------------------------------------------------------------------------
 
 ## <br/>**Index**
+* [Quick Links](#the-good-bits)
 * [Intention For pxlNav](#intention)
 * [In-Browser / Javascript Features](#in-browser--javascript-features)
 * [3d Scene File Features](#features-added-through-your-cgi-program-of-choice)
 * [Shader Editor Keyboard Shortcuts](#shader-editor-keyboard-shortcuts)
-* [In Progress Features](#work-in-progress-features)
+* [In-Progress Features](#work-in-progress-features)
 <br/>
 
+--------------------------------------------------------------------------------------------
+
+## The Good Bits
+*Wanna see example rooms using 3d fbx files?
+<br>&nbsp;&nbsp;**NOT** just the template?*
+<br/>&nbsp;&nbsp;&nbsp; `./Source/pxlRooms`
+
+<br/>&nbsp;&nbsp;For `pxlNav` Documentation -
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Documentation](https://github.com/ProcStack/pxlNav/tree/main/docs)
+
+<br/>&nbsp;&nbsp;For `pxlNav` Repo with Source & Info -
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Repo ](https://github.com/ProcStack/pxlNav)
+
+<br/>&nbsp;&nbsp;Minified pxlNav, style, & assets *(if desired)* -
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;`./Build`
+
+<br/>&nbsp;&nbsp;`pxlNav` dev entry point is -
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;`./Source/js/pxlNav.js`
+
+<br/>&nbsp;&nbsp;`procstack.github.io` public site -
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;`./docs`
+
+##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
 ## Intention
@@ -136,3 +160,6 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Then interupt that Music feed by starting a Video Stream to your target video streaming service.
 *<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to your pxlRoom's Javascript object in code*
 <br/>
+
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------

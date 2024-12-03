@@ -23,7 +23,7 @@ global proc pxlNav_launcher(){
     global string $pxlNav_iconDirectory;
     $pxlNav_iconDirectory=(`internalVar -userScriptDir`+$pxlNav_imgDirectory + "/");
     string $scriptName="pxlNav";
-    string $version="v0.01";
+    string $version="v0.03";
     $pxlNavName=($scriptName +" "+ $version);
     
     TartarusPulldownMenu();
@@ -107,6 +107,33 @@ global proc pxlNav_prepLiquidAttributes(){
 
 
 
+global proc pxlNav_prepItemBaseGeoAttribute(){
+    string $sel[]=`ls -sl -l`;
+    for($x=0; $x<size($sel); ++$x){
+        addAttr -ln "itemBase"  -at bool -dv 1 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".itemBase");
+    }
+}
+//pxlNav_prepItemBaseGeoAttribute();
+
+global proc pxlNav_prepItemGeoAttribute(){
+    string $sel[]=`ls -sl -l`;
+    string $selShort[]=`ls -sl`;
+    string $token[];
+    for($x=0; $x<size($sel); ++$x){
+        tokenize $selShort[$x] "_" $token;
+        print $token;
+        addAttr -ln "itemGeo"  -at bool -dv 1 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".itemGeo");
+        addAttr -ln "itemName"  -dt "string" $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".itemName");
+        setAttr -type "string" ($sel[$x]+".itemName") $token[0];
+        addAttr -ln "itemMessage"  -dt "string" $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".itemMessage");
+        setAttr -type "string" ($sel[$x]+".itemMessage") $token[0];
+    }
+}
+//pxlNav_prepItemGeoAttribute();
 
 
 global proc pxlNav_prepScriptedAttribute(){
@@ -383,7 +410,11 @@ global proc pxlNav_assetPrepWindow(){
        "---",
 	    "pxlNav_prepEmitterAttribute()",
        "---",
-       "pxlNav_prepScriptedAttribute()","pxlNav_prepInstanceAttribute()","pxlNav_prepInstanceFixAttribute()","pxlNav_createInstance()",
+       "pxlNav_prepItemBaseGeoAttribute()","pxlNav_prepItemGeoAttribute()",
+       "---",
+       "pxlNav_prepScriptedAttribute()",
+       "---",
+       "pxlNav_prepInstanceAttribute()","pxlNav_prepInstanceFixAttribute()","pxlNav_createInstance()",
 	    
 	    ".-Video/Specalized Attrs-.",
 	    "pxlNav_prepVideoAttributes('vidName')",
