@@ -3,6 +3,10 @@ logs
 *.log
 npm-debug.log*
 
+# Packaging
+*.tgz
+rollup.config.js
+
 # Dependency directories
 node_modules/
 

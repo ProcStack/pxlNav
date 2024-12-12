@@ -1,6 +1,6 @@
 {
   "name": "pxlnav",
-  "version": "1.0.0",
+  "version": "0.0.13",
   "description": "Player Controller & Environment Framework for Three.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -36,9 +36,7 @@
     "url": "https://github.com/ProcStack/pxlNav/issues"
   },
   "homepage": "https://github.com/ProcStack/pxlNav#readme",
-  "peerDependencies": {
-    "three": "^0.171.0"
-  },
+  "peerDependencies": {},
   "devDependencies": {
     "esbuild": "^0.24.0",
     "rollup": "^4.28.0",
