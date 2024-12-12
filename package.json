@@ -1,6 +1,6 @@
 {
   "name": "pxlnav",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Player Controller & Environment Framework for Three.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
