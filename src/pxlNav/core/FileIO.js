@@ -68,6 +68,14 @@ export class FileIO{
   // mesh = Current Object To Check For UserData Entries
   checkForUserData( envObj, envScene, mesh ){
     if( mesh.hasOwnProperty("userData") ){
+      if( mesh.hasOwnProperty("material") ){
+        if( mesh.userData.hasOwnProperty("doubleSided") && mesh.userData.doubleSided ){
+          mesh.material.side=THREE.DoubleSide;
+        }else{
+          mesh.material.side=THREE.FrontSide;
+        }
+      }
+
       // Add to Glow render pass; ran by blurComposer
       if( mesh.userData.hasOwnProperty("GlowPass") && mesh.userData.GlowPass ){
         if( !envObj.geoList['GlowPass'] ){
@@ -293,8 +301,8 @@ export class FileIO{
           let name = mesh.name;
           this.log("Generate Instance - ",name);
           
-          if( !envObj.geoList.hasOwnProperty("InstancesObjects") ){
-            envObj.geoList['InstancesObjects']={};
+          if( !envObj.geoList.hasOwnProperty("InstanceObjects") ){
+            envObj.geoList['InstanceObjects']={};
           }
           
           let curPos=mesh.position;
@@ -303,8 +311,8 @@ export class FileIO{
           let instBase= envObj.baseInstancesList[ mesh.userData.Instance ];
 
           
-          //console.log(mesh.type, mesh, instBase);
           if( mesh.type == "Mesh" ){
+
             const instancedMesh = new THREE.InstancedMesh(instBase.geometry, instBase.material, mesh.geometry.attributes.position.count);
             instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             instancedMesh.name = name + "Geo";
@@ -343,7 +351,7 @@ export class FileIO{
             instancedMesh.visible = true;
             instancedMesh.updateMatrix();
 
-            envObj.geoList['InstancesObjects'][name] = instancedMesh;
+            envObj.geoList['InstanceObjects'][name] = instancedMesh;
             mesh.parent.add(instancedMesh);
             mesh.visible = false;
             mesh.parent.remove(mesh);
@@ -371,13 +379,12 @@ export class FileIO{
             instancedMesh.visible=true;
             instancedMesh.updateMatrix();
 
-            envObj.geoList['InstancesObjects'][name] = instancedMesh;
+            envObj.geoList['InstanceObjects'][name] = instancedMesh;
             mesh.parent.add(instancedMesh);
             mesh.visible=false;
             mesh.parent.remove(mesh);
           }
            
-          
 
           /*
           // Dupe the base object; single dupe
@@ -397,7 +404,7 @@ export class FileIO{
           dupe.material.side=curSide;
           dupe.name = name+"Geo";
             
-          envObj.geoList['InstancesObjects'][name]=dupe;
+          envObj.geoList['InstanceObjects'][name]=dupe;
           mesh.parent.add( dupe );
           */
     }
@@ -619,28 +626,77 @@ export class FileIO{
       
       // @ Loaded Scene File - Environment Group; 'Camera'
       if(groupNames.indexOf('Camera')>-1){
-        let ch=groups[groupTypes['Camera']].children;
+        let ch=[];
         this.log("Camera - ",groups[groupTypes['Camera']]);
         
+        let rootCamObjects = false;
+        let checkGroups = groups[groupTypes['Camera']].children;
+        checkGroups.forEach( (c,x)=>{
+          if( c.name.includes("Position") || c.name.includes("LookAt") || c.name.includes("ReturnPosition") || c.name.includes("ReturnLookAt") ){
+            ch.push(c);
+            rootCamObjects=true;
+          }else{
+            if( c.children.length > 0 ){
+              ch.push(...c.children);
+            }
+          }
+        });
+
         //envObj.geoList['camera']=groups[groupTypes['Camera']];
-        
         ch.forEach( (c,x)=>{
           c.matrixAutoUpdate=false;
-          if(c.name.includes("Position")){
+          let parentName = c.parent.name;
+          if( parentName == groups[groupTypes['Camera']].name ){
+            parentName = "Default";
+          }
+          if( !envObj.camLocation.hasOwnProperty(parentName) ){
+            envObj.camLocation[parentName]={};
+            envObj.camLocation[parentName]["Position"]=new Vector3( 0, 0, -10 );
+            envObj.camLocation[parentName]["LookAt"]=new Vector3( 0, 0, 0 );
+          }
+          if(c.name.includes("PositionMobile")){
             let toPos=c.position.clone();
             envObj.cameraBooted=true;
             envObj.camInitPos=toPos;
+            envObj.camLocation[parentName]["PositionMobile"]=toPos;
+          }else if(c.name.includes("LookAtMobile")){
+            let toPos=c.position.clone();
+            envObj.camInitLookAt=toPos;
+            envObj.camLocation[parentName]["LookAtMobile"]=toPos;
+          }else if(c.name.includes("Position")){
+            let toPos=c.position.clone();
+            envObj.cameraBooted=true;
+            envObj.camInitPos=toPos;
+            envObj.camLocation[parentName]["Position"]=toPos;
           }else if(c.name.includes("LookAt")){
             let toPos=c.position.clone();
             envObj.camInitLookAt=toPos;
+            envObj.camLocation[parentName]["LookAt"]=toPos;
           }else if(c.name.includes("ReturnPosition")){
             let toPos=c.position.clone();
             envObj.camReturnPos=toPos;
+            envObj.camLocation[parentName]["ReturnPosition"]=toPos;
           }else if(c.name.includes("ReturnLookAt")){
             let toPos=c.position.clone();
             envObj.camReturnLookAt=toPos;
+            envObj.camLocation[parentName]["ReturnLookAt"]=toPos;
           }
         });
+
+
+        // Check for missing Mobile Camera Position/LookAt
+        let locationList = Object.keys( envObj.camLocation );
+        locationList.forEach( (c)=>{
+          let curLoc = envObj.camLocation[c];
+          if( !curLoc.hasOwnProperty("PositionMobile") ){
+            curLoc["PositionMobile"] = curLoc["Position"];
+          }
+          if( !curLoc.hasOwnProperty("LookAtMobile") ){
+            curLoc["LookAtMobile"] = curLoc["LookAt"];
+          }
+        });
+
+
         //this.pxlDevice.touchMouseData.initialQuat=envObj.camera.quaternion.clone();
       }
       
@@ -732,6 +788,7 @@ export class FileIO{
         let groupId = groupTypes['Scene'] || groupTypes['MainScene'];
         let ch = groups[groupId].children;
         this.log("MainScene - ",groups[groupId]);
+
         let curObjId = -1;
         while( curObjId < ch.length ){
           curObjId++;
@@ -780,31 +837,31 @@ export class FileIO{
               //c.geometry.computeFaceNormals();
               //c.geometry.computeVertexNormals();
               //c.material.shading = THREE.SmoothShading;
-              continue;
+            }else{
+              let curMatList = c.material;
+              if( !Array.isArray(c.material) ){
+                curMatList = [ c.material ];
+              }
+
+              if( !this.checkIsGlassLiquid( envObj, envScene, c, curMatList ) ){
+                curMatList.forEach( (m)=>{
+                  if( m.map && !m.emissiveMap && m.emissive.r>0 ){
+                    m.emissiveMap=m.map;
+                    m.emissiveIntensity=m.emissive.r;
+                    m.emissive=new THREE.Color( 0xFFFFFF );
+                  }
+                  m.side=curSide;
+                  //m.depthWrite=true;
+                  //m.depthTest=true;
+                  //m.shading = THREE.SmoothShading;
+                });
+              }
+
+              //c.geometry.computeFaceNormals();
+              //c.geometry.computeVertexNormals();
+              //c.matrixAutoUpdate=false;
             }
            
-            let curMatList = c.material;
-            if( !Array.isArray(c.material) ){
-              curMatList = [ c.material ];
-            }
-
-            if( !this.checkIsGlassLiquid( envObj, envScene, c, curMatList ) ){
-              curMatList.forEach( (m)=>{
-                if( m.map && !m.emissiveMap && m.emissive.r>0 ){
-                  m.emissiveMap=m.map;
-                  m.emissiveIntensity=m.emissive.r;
-                  m.emissive=new THREE.Color( 0xFFFFFF );
-                }
-                m.side=curSide;
-                //m.depthWrite=true;
-                //m.depthTest=true;
-                //m.shading = THREE.SmoothShading;
-              });
-            }
-
-            //c.geometry.computeFaceNormals();
-            //c.geometry.computeVertexNormals();
-            //c.matrixAutoUpdate=false;
               
           }else{ // Current Object isn't a mesh geometry
             if( c.type.includes("Light") ){
@@ -1452,6 +1509,10 @@ export class FileIO{
 
       curFbx.traverse((c)=>{
         this.checkForUserData( envObj, envScene, c );
+
+        if(c.userData.hasOwnProperty("doubleSided") && c.userData.doubleSided){
+          c.material.side=THREE.DoubleSide;
+        }
       });
 
       this.pxlAnim.initObject( meshKey, curFbx );

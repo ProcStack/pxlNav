@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-export const pxlNavVersion = "0.0.9";
+export const pxlNavVersion = "0.0.14";
 //      Written by Kevin Edzenga 2020;2024
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -45,16 +45,9 @@ export const pxlNavVersion = "0.0.9";
 import * as THREE from './libs/three/three.module.js';
 import * as PxlBase from './pxlNav/pxlBase.js';
 import { pxlShaders } from './pxlNav/shaders/shaders.js';
-import { VERBOSE_LEVEL } from './pxlNav/core/Types.js';
+import { VERBOSE_LEVEL, PXLNAV_OPTIONS, ANTI_ALIASING } from './pxlNav/core/Types.js';
+export { VERBOSE_LEVEL, PXLNAV_OPTIONS, ANTI_ALIASING };
 
-
-// Bool to load the environment asset fbx file;
-//   This is the included file with test pick-ups / assets
-//     ./Public/images/assets/EnvironmentAssets.fbx
-//     ./Public/images/assets/EnvironmentAssets_mobile.fbx
-//   For further information of each item & object,
-//     See pxlNav_docScripts/docs/
-const loadEnvAssetFile = true;
 
 const pxlCore = "pxlNav-coreCanvas"; // Name of DIV in Index
 var cloud3dTexture = null;
@@ -116,7 +109,7 @@ var sH = window.innerHeight;
  * 
  */
 export class pxlNav{
-  constructor( verbose, projectTitle, pxlRoomRoot, startingRoom, roomBootList ){
+  constructor( options, projectTitle, pxlRoomRoot, startingRoom, roomBootList ){
     this._active = false;
 
     this.options = {
@@ -124,8 +117,16 @@ export class pxlNav{
       // TODO : Get these to be pxlNav options pre-boot
       //loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "ChromaticAberration", "WarpAnimTexture", "MathFuncs"],
     };
+    this.options = Object.assign( this.options, options );
+    let optionKeys=Object.keys( this.options );
+    let defaultKeys=Object.keys( PXLNAV_OPTIONS );
+    defaultKeys.forEach( (k)=>{
+      if( !optionKeys.includes( k ) ){
+        this.options[k]=PXLNAV_OPTIONS[k];
+      }
+    });
 
-    this.verbose = verbose;
+    this.verbose = this.options["verbose"];
     this.projectTitle = projectTitle;
     this.startingRoom = startingRoom;
     if( !roomBootList.includes( startingRoom ) ){
@@ -162,6 +163,17 @@ export class pxlNav{
     };
     this.validEventsKeys = Object.keys( this.validEvents );
 
+
+
+    // Bool to load the environment asset fbx file;
+    //   This is the included file with test pick-ups / assets
+    //     ./Source/assets/EnvironmentAssets.fbx
+    //   For further information of each item & object,
+    //     See https://github.com/ProcStack/pxlNav/tree/main/docs
+    // TODO : Turning this off breaks loading, fix that
+    this.loadEnvAssetFile = true;
+
+
     this.pxlTimer = new PxlBase.Timer();
     this.pxlShaders = pxlShaders;
     this.pxlCookie = new PxlBase.CookieManager( projectTitle, "/" );
@@ -180,7 +192,7 @@ export class pxlNav{
 
     this.pxlUser = new PxlBase.User();
 
-    this.pxlEnv = new PxlBase.Environment( this.startingRoom, pxlRoomRoot, this.verbose, this.mobile );
+    this.pxlEnv = new PxlBase.Environment( this.options, this.startingRoom, pxlRoomRoot, this.verbose, this.mobile );
     this.pxlDevice = new PxlBase.Device( projectTitle, pxlCore, this.mobile, this.autoCam );
     this.pxlCamera = new PxlBase.Camera();
     this.pxlAnim = new PxlBase.Animation( this.folderDict["assetRoot"], this.pxlTimer );
@@ -518,8 +530,9 @@ export class pxlNav{
             mobileSuffix="_mobile";
         }
         
-        if( loadEnvAssetFile ){
-          let sceneFile=this.folderDict["assetRoot"]+"EnvironmentAssets"+mobileSuffix+".fbx";
+        if( this.loadEnvAssetFile ){
+          //let sceneFile=this.folderDict["assetRoot"]+"EnvironmentAssets"+mobileSuffix+".fbx";
+          let sceneFile=this.folderDict["assetRoot"]+"EnvironmentAssets.fbx";
           // This is a separate fbx loaded specifically for the Environment Asset FBX
           //   It opens up the found scene objects to easier global access
           this.pxlFile.loadSceneFBX(sceneFile, textureList, transformList, this.verbose,'EnvironmentAssets',[this.pxlEnv.scene]);

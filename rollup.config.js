@@ -12,6 +12,11 @@ export default {
     {
       file: 'dist/pxlNav.esm.js',
       format: 'esm'
+    },
+    {
+      name: 'pxlNav',
+      file: 'dist/pxlNav.umd.js',
+      format: 'umd'
     }
   ],
   plugins: [

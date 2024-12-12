@@ -51,6 +51,9 @@ global proc string[] pxlNav_findEnvGroups(){
             $envGroupChildren=`listRelatives -f $envRoot[$x]`;
             print($envGroupChildren);
             print("\n");
+            if( `size($envGroupChildren)`==0){
+                continue;
+            }
             if( `objectType($envGroupChildren[0])` == "transform" ){
                 $envGroupObj=$envRoot[$x];
                 break;

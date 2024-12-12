@@ -2,7 +2,7 @@
 import * as THREE from "../../../libs/three/three.module.js";
 
 import ParticleBase from './ParticleBase.js';
-import { smokeVert, smokeFrag } from '../../shaders/particles/Smoke.js';
+import { smokeVert, smokeFrag } from './shaders/Smoke.js';
 
 // Campfire's spiralling smoke sprites
 
@@ -36,7 +36,7 @@ export class BillowSmoke extends ParticleBase{
       time:{type:"f",value: this.room.msRunner },
       pointScale:{type:"f",value: this.pscale },
       intensity:{type:"f",value:0.8},
-      rate:{type:"f",value:2.0}
+      rate:{type:"f",value:2.85}
     };
     
     let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, smokeVert(), smokeFrag() );
