@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////
 // Asset & Scene Utility Scripts for pxlNav  //
 //   Maya Pipeline; Mel Window               //
-//   Written by Kevin Edzenga 2020-2023      //
+//   Written by Kevin Edzenga 2020-202      //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 // By running the mel script contents here,  //
 //   A window will launch with two tabs.     //
@@ -14,8 +14,10 @@
 global proc pxlNav_launcher(){
     global string $pxlNavName = "AssetPrepper";
     global int $pxlNav_ww=485; // window width
-    global int $pxlNav_wh=460; // window height
+    global int $pxlNav_wh=750; // window height
     global int $pxlNav_btnHeight=30;// Button height
+    
+    global string $pxlNav_descriptionBox="";// Help description box
     
     global string $pxlNav_imgDirectory="pxlNavAssets";
     global string $pxlNav_imgDirectory;
@@ -23,7 +25,7 @@ global proc pxlNav_launcher(){
     global string $pxlNav_iconDirectory;
     $pxlNav_iconDirectory=(`internalVar -userScriptDir`+$pxlNav_imgDirectory + "/");
     string $scriptName="pxlNav";
-    string $version="v0.03";
+    string $version="v0.04";
     $pxlNavName=($scriptName +" "+ $version);
     
     TartarusPulldownMenu();
@@ -70,6 +72,11 @@ global proc string[] pxlNav_findEnvGroups(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
+global proc pxlNav_prepColliderAttributes_desc(){
+	global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'checkX' and 'checkZ' attributes to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepColliderAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -81,6 +88,11 @@ global proc pxlNav_prepColliderAttributes(){
 }
 //pxlNav_prepColliderAttributes();
 
+global proc pxlNav_prepDoubleSidedAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'doubleSided' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepDoubleSidedAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -90,6 +102,11 @@ global proc pxlNav_prepDoubleSidedAttributes(){
 }
 //pxlNav_prepDoubleSidedAttributes();
 
+global proc pxlNav_prepGlassAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'isGlass' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepGlassAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -99,6 +116,11 @@ global proc pxlNav_prepGlassAttributes(){
 }
 //pxlNav_prepGlassAttributes();
 
+global proc pxlNav_prepLiquidAttributes_desc(){ 
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'isLiquid' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepLiquidAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -110,6 +132,12 @@ global proc pxlNav_prepLiquidAttributes(){
 
 
 
+global proc pxlNav_prepItemBaseGeoAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'itemBase' attribute to selected objects.";
+    $desc += "\n  The geometry will be used as the 'aura' or surrounding object around the item in pxlNav.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepItemBaseGeoAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -119,6 +147,15 @@ global proc pxlNav_prepItemBaseGeoAttribute(){
 }
 //pxlNav_prepItemBaseGeoAttribute();
 
+global proc pxlNav_prepItemGeoAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Add 'itemGeo', 'itemName', 'itemMessage' attribute to selected Locator.";
+    $desc += "\n'itemGeo' - Boolean \n   The geo used for Item .";
+    $desc += "\n'itemName' - String \n   The pxlNav item name.";
+    $desc += "\n'itemMessage' - String \n   The message displayed on pickup.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepItemGeoAttribute(){
     string $sel[]=`ls -sl -l`;
     string $selShort[]=`ls -sl`;
@@ -139,6 +176,11 @@ global proc pxlNav_prepItemGeoAttribute(){
 //pxlNav_prepItemGeoAttribute();
 
 
+global proc pxlNav_prepScriptedAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Scripted' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepScriptedAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -148,6 +190,13 @@ global proc pxlNav_prepScriptedAttribute(){
 }
 //pxlNav_prepScriptedAttribute();
 
+global proc pxlNav_prepInstanceAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Instance' attribute to selected objects.";
+    $desc += "\n   Set the name of the object from your 'Instances' group.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepInstanceAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -157,6 +206,11 @@ global proc pxlNav_prepInstanceAttribute(){
 }
 //pxlNav_prepInstanceAttribute();
 
+global proc pxlNav_prepInstanceFixAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'fixInstMatrix' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepInstanceFixAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -170,13 +224,37 @@ global proc pxlNav_prepInstanceFixAttribute(){
 
 
 
-global proc pxlNav_createInstance(){
+global proc pxlNav_createInstanceLocatorFromSelection_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Creates a locator with 'Instance' attribute pre-set.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
+global proc pxlNav_createInstanceLocatorFromSelection(){
     string $sel[]=`ls -sl`;
+    if( `size($sel)`==0 ){
+        error("Select an Instance Object you'd like to create a Locator with 'Instance' attribute pre-set.");
+    }
+    string $loc[]=`spaceLocator`;
+    select $loc[0];
+    pxlNav_prepInstanceAttribute();
+    setAttr -type "string" ($loc[0]+".Instance") $sel[0];
+    
+    select -cl;
+    select $sel[0];
+    select -add $loc[0];
     parentConstraint -weight 1 $sel[0] $sel[1];
     connectAttr -f ($sel[0]+".scale") ($sel[1]+".scale");
 }
 //pxlNav_createInstance();
 
+global proc pxlNav_prepEmitterAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Emitter' attribute to selected Locator.";
+    $desc += "   pxlNav will place a particle system of that name at that location.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepEmitterAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -186,6 +264,11 @@ global proc pxlNav_prepEmitterAttribute(){
 }
 //pxlNav_prepEmitterAttribute();
 
+global proc pxlNav_prepCameraThirdPersonAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'isThirdPerson' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepCameraThirdPersonAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -196,6 +279,11 @@ global proc pxlNav_prepCameraThirdPersonAttribute(){
 //pxlNav_prepCameraThirdPersonAttribute();
 
 
+global proc pxlNav_prepGlowPassAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'GlowPass' and 'GlowPerc' attributes to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepGlowPassAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -207,6 +295,11 @@ global proc pxlNav_prepGlowPassAttribute(){
 }
 //pxlNav_prepGlowPassAttribute();
 
+global proc pxlNav_prepGlowPercAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'GlowPerc' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepGlowPercAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -216,17 +309,43 @@ global proc pxlNav_prepGlowPercAttribute(){
 }
 //pxlNav_prepGlowPercAttribute();
 
-global proc pxlNav_prepInteractableAttribute(){
+global proc pxlNav_prepHoverAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Hover' attributes to selected objects.";
+    $desc += "\n  Subscribe to that object's event in your pxlRoom.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
+global proc pxlNav_prepHoverAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
         addAttr -ln "Hover"  -at bool -dv 1 $sel[$x];
         setAttr -e-keyable true ($sel[$x]+".Hover");
+    }
+}
+//pxlNav_prepHoverAttributes();
+
+       
+global proc pxlNav_prepClickAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Click' attributes to selected objects.";
+    $desc += "\n  Subscribe to that object's event in your pxlRoom.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
+global proc pxlNav_prepClickAttributes(){
+    string $sel[]=`ls -sl -l`;
+    for($x=0; $x<size($sel); ++$x){
         addAttr -ln "Click"  -at bool -dv 1 $sel[$x];
         setAttr -e-keyable true ($sel[$x]+".Click");
     }
 }
-//pxlNav_prepInteractableAttribute();
-
+//pxlNav_prepClickAttributes();
+       
+       
+global proc pxlNav_prepCamPathAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "For Auto Camera Rigs; Adds 'duration' attribute to polygon / nurb curve objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepCamPathAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -236,6 +355,11 @@ global proc pxlNav_prepCamPathAttributes(){
 }
 //pxlNav_prepCamPathAttributes();
 
+global proc pxlNav_prepScreenAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'djScreen' and 'performerScreen' attributes to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepScreenAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -247,6 +371,11 @@ global proc pxlNav_prepScreenAttributes(){
 }
 //pxlNav_prepScreenAttributes();
 
+global proc pxlNav_prepDjAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'dj' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepDjAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -256,6 +385,11 @@ global proc pxlNav_prepDjAttributes(){
 }
 //pxlNav_prepDjAttributes();
 
+global proc pxlNav_prepPerformerAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'performer' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepPerformerAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -265,6 +399,11 @@ global proc pxlNav_prepPerformerAttributes(){
 }
 //pxlNav_prepPerformerAttributes();
 
+global proc pxlNav_prepAdAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'ad' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepAdAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -274,6 +413,12 @@ global proc pxlNav_prepAdAttributes(){
 }
 //pxlNav_prepAdAttributes();
 
+global proc pxlNav_prepVideoAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'video' and 'portrait' attributes to selected objects.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
 global proc pxlNav_prepVideoAttributes(string $vidName){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
@@ -386,6 +531,7 @@ global proc pxlNav_assetPrepWindow(){
 	global string $pxlNavAssetPrepWindowObject;
 	global string $pxlNav_imgDirectory;
 	global float $pxlNavMinEdge;
+    global string $pxlNav_descriptionBox;
 	string $toolWindow="User Data Attributes";
 	string $toolWindowName=($toolWindow +" - "+ $pxlNavName);
 	if(`window -exists $pxlNavAssetPrepWindowObject`){
@@ -402,27 +548,31 @@ global proc pxlNav_assetPrepWindow(){
 	
 	string $assetFuncs[]={
 	    ".-General/Visual Attrs-.",
-       "pxlNav_prepDoubleSidedAttributes()",
+       "pxlNav_prepDoubleSidedAttributes",
        "---",
-       "pxlNav_prepGlassAttributes()",
-       "pxlNav_prepLiquidAttributes()",
+       "pxlNav_prepInstanceAttribute","pxlNav_prepInstanceFixAttribute","pxlNav_createInstanceLocatorFromSelection",
        "---",
-       "pxlNav_prepGlowPassAttribute()","pxlNav_prepGlowPercAttribute()",
+       "pxlNav_prepScriptedAttribute",
        "---",
-       "pxlNav_prepColliderAttributes()","pxlNav_prepInteractableAttribute()","pxlNav_prepCamPathAttributes()",
+       "pxlNav_prepGlassAttributes",
+       "pxlNav_prepLiquidAttributes",
        "---",
-	    "pxlNav_prepEmitterAttribute()",
+       "pxlNav_prepGlowPassAttribute","pxlNav_prepGlowPercAttribute",
        "---",
-       "pxlNav_prepItemBaseGeoAttribute()","pxlNav_prepItemGeoAttribute()",
+       "pxlNav_prepColliderAttributes",
        "---",
-       "pxlNav_prepScriptedAttribute()",
+       "pxlNav_prepClickAttributes","pxlNav_prepHoverAttributes",
        "---",
-       "pxlNav_prepInstanceAttribute()","pxlNav_prepInstanceFixAttribute()","pxlNav_createInstance()",
+       "pxlNav_prepCamPathAttributes",
+       "---",
+	    "pxlNav_prepEmitterAttribute",
+       "---",
+       "pxlNav_prepItemBaseGeoAttribute","pxlNav_prepItemGeoAttribute",
 	    
 	    ".-Video/Specalized Attrs-.",
-	    "pxlNav_prepVideoAttributes('vidName')",
+	    "pxlNav_prepVideoAttributes",
        "---",
-       "pxlNav_prepScreenAttributes()","pxlNav_prepDjAttributes()","pxlNav_prepPerformerAttributes()","pxlNav_prepAdAttributes()"
+       "pxlNav_prepScreenAttributes","pxlNav_prepDjAttributes","pxlNav_prepPerformerAttributes","pxlNav_prepAdAttributes"
 	};       
        
 
@@ -453,7 +603,48 @@ global proc pxlNav_assetPrepWindow(){
     string $sceneGroupsTab = `scrollLayout -horizontalScrollBarThickness 0 -verticalScrollBarThickness 10 -cr 1 -backgroundColor .35 .35 .35 -h ($pxlNav_wh-55-$pxlNav_btnHeight)`;
 		columnLayout -adj 1  -backgroundColor .35 .35 .35 ;
 			image -image ($pxlNav_imgDirectory+"pxlNav_windowHeader_sceneGroups.png") -h 35 -w 446;
-			scrollField -editable false -height 62 -isObscured -wordWrap true -backgroundColor .8 .8 .8 -text "Not implemented yet. \n";
+			string $groupDescText = "- Feature not implemented yet -";
+			$groupDescText += "\n\nHowever, these are the available Group types pxlNav understands.";
+			$groupDescText += "\n\nStart with a top group --";
+			$groupDescText += "\n+YourEnvironmentName_grp";
+			$groupDescText += "\n   |-'Instances_grp'";
+			$groupDescText += "\n   |-'Camera_grp'";
+			$groupDescText += "\n   |-'[...]'";
+			$groupDescText += "\n   |-'MainScene_grp'";
+			
+			$groupDescText += "\n\nName your groups with the name of the group below somewhere in the name.  As long as 'Camera' is in your group name somewhere, it will load just fine.";
+			$groupDescText += "\n  So your camera group can be 'Camera', 'Camera_grp', 'FunTimesCamera_grp', etc.";
+			$groupDescText += "\nYou're main geometry should be in your 'Scene' group.";
+			
+			$groupDescText += "\n\nSome Groups have 'Asset Attributes' you can use as well, leaving your object in your 'MainScene'";
+			
+			$groupDescText += "\n\nRequired groups to use the associated feature -";
+			$groupDescText += "\n -Camera";
+			$groupDescText += "\n -AutoCamPaths";
+			$groupDescText += "\n -Sky";
+			$groupDescText += "\n -Colliders";
+			$groupDescText += "\n -Items ( For the Geo to use as the Item )";
+			$groupDescText += "\n -Instances ( For the Geo to instance, not locations )";
+			$groupDescText += "\n\nAsset Attribute supported -";
+			$groupDescText += "\n -Glass";
+			$groupDescText += "\n -Clickable";
+			$groupDescText += "\n -Scripted";
+			$groupDescText += "\n\nLights will load from 'Lights_grp' or 'MainScene_grp'.";
+			$groupDescText += "\n\nCameras can either be -";
+			$groupDescText += "\n+YourEnvironmentName_grp";
+			$groupDescText += "\n   |-Cameras_grp";
+			$groupDescText += "\n      |- Position_loc";
+			$groupDescText += "\n      |- LookAt_loc";
+			$groupDescText += "\nFor Camera Positions, Group each locator-";
+			$groupDescText += "\n+YourEnvironmentName_grp";
+			$groupDescText += "\n   |- Cameras_grp";
+			$groupDescText += "\n       |- CamLocationName_grp";
+			$groupDescText += "\n           |- Position_loc";
+			$groupDescText += "\n           |- LookAt_loc";
+			$groupDescText += "\n       |- OtherLocationName_grp";
+			$groupDescText += "\n           |- Position_loc";
+			$groupDescText += "\n           |- LookAt_loc";
+			scrollField -editable false -height 350 -isObscured -wordWrap true -backgroundColor .8 .8 .8 -text $groupDescText;
 				setParent..;
 				string $envGrpCol=`columnLayout -adj 1 -backgroundColor .55 .55 .55`;
 				setParent..;
@@ -473,24 +664,28 @@ global proc pxlNav_assetPrepWindow(){
 		columnLayout -adj 1  -backgroundColor .35 .35 .35 ;
 			image -image ($pxlNav_imgDirectory+"pxlNav_windowHeader_assetAttributes.png") -h 35 -w 446;
 			
-			scrollField -editable false -height 62 -isObscured -wordWrap true -backgroundColor .8 .8 .8 -text "Select an object you'd like to add an override to.\nClicking a button will add a new channel to your selection, change the values from there. \n";
+			$pxlNav_descriptionBox = `scrollField -editable false -height 78 -isObscured -wordWrap true -backgroundColor .8 .8 .8 -text "Select an object you'd like to add an override to.\nClicking a button will add a new channel to your selection, change the values from there. \n"`;
 			
          string $assetAttrTabs = `tabLayout -innerMarginWidth 1 -innerMarginHeight 1 -noBackground false -p $assetUserDataTab  -backgroundColor .2 .2 .2 `;
 
          string $curLayout;
+         string $curRowColLayout;
+         string $curHelpDesc;
+         string $curCol;
 			for($x=0;$x<size($assetFuncs);++$x){
 			    
 			    $label = $assetFuncs[$x];
 			    if( $label=="---" ){
-			        separator -p $curLayout;
+			        separator -height 7 -p $curRowColLayout;
+			        separator -height 7 -p $curRowColLayout;
 			        continue;
 			    }
 			    
 			    tokenize $label "--" $token;
 			    if( size($token)>1 ){
-			        $curLayout=`scrollLayout -horizontalScrollBarThickness 0 -verticalScrollBarThickness 10 -cr 1  -h ($pxlNav_wh-55-$pxlNav_btnHeight)`;
+		            $curRowColLayout=`rowColumnLayout -numberOfColumns 2 -columnWidth 1 400 -columnWidth 2 40`;
 		            setParent..;
-                 tabLayout -edit -tabLabel $curLayout $token[1] $assetAttrTabs;
+                 tabLayout -edit -tabLabel $curRowColLayout $token[1] $assetAttrTabs;
                  continue;
 			    }
 			    
@@ -502,8 +697,11 @@ global proc pxlNav_assetPrepWindow(){
 			    $label=`pxlNav_camelToHumanReadable($label)`;
 			    
                 $label= substituteAllString($label, ($replacePrefix+" "), ($toPrefix+" ")) ;
-
-			    button -backgroundColor .65 .65 .65 -label $label -height $pxlNav_btnHeight -p $curLayout -command $assetFuncs[$x];
+                
+                $curHelpDesc = ($assetFuncs[$x]+"_desc");
+               
+			    button -backgroundColor .65 .65 .65 -label $label -height $pxlNav_btnHeight -p $curRowColLayout -command ($assetFuncs[$x]+"();"+$curHelpDesc+"()") -statusBarMessage $assetFuncs[$x];
+			    button -backgroundColor .65 .65 .65 -label "?" -height $pxlNav_btnHeight -p $curRowColLayout -command ($curHelpDesc+"()") -statusBarMessage $curHelpDesc;
 			}
 		setParent..;
 	
@@ -519,7 +717,6 @@ global proc pxlNav_assetPrepWindow(){
 	showWindow $pxlNavAssetPrepWindowObject;
 	window -edit -wh $pxlNav_ww $pxlNav_wh -backgroundColor .3 .3 .3 $pxlNavAssetPrepWindowObject;
 }
-
 
 
 
