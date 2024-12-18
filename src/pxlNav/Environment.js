@@ -17,7 +17,7 @@
 
 import * as THREE from "../libs/three/three.module.js";
 
-import { PXLNAV_OPTIONS, ANTI_ALIASING } from "./core/Types.js";
+import { PXLNAV_OPTIONS, ANTI_ALIASING, VERBOSE_LEVEL } from "./core/Types.js";
 
 import { EffectComposer } from '../libs/three/postprocessing/EffectComposer.js';
 import { RenderPass } from '../libs/three/postprocessing/RenderPass.js';
@@ -34,14 +34,14 @@ import { BloomPass } from '../libs/three/postprocessing/BloomPass.js';
 
 
 export class Environment{
-  constructor( options, mainRoom='Default', pxlRoomName='pxlRooms', verbose, mobile ){
-    this.verbose=verbose;
+  constructor( options, mainRoom='Default', mobile ){
     this.engine=null;
     this.scene=null;
     this.parentGroupList={};
     this.parentGroupList[mainRoom]=[];
     this.parentNameList=[];
     this.options=options;
+
 
 
     // -- -- -- --
@@ -53,11 +53,23 @@ export class Environment{
     this.renderInterval = 1.0 / this.fps;
     // -- -- -- --
 
+    let pxlRoomName = "Default";
+    if( this.options.hasOwnProperty("pxlRoomName") ){
+      pxlRoomName = this.options.pxlRoomName;
+    }else{
+      pxlRoomName = mainRoom;
+    }
+
     this.pxlRoomAbsRoot = pxlRoomName;
     let splitRoot = pxlRoomName.split("/");
     splitRoot.splice(0,1);
     splitRoot = splitRoot.join("/");
-    this.pxlRoomLclRoot = "../../"+pxlRoomName.split("/").pop();
+    this.pxlRoomLclRoot = pxlRoomName;
+    if( this.options.hasOwnProperty("pxlRoomRoot") ){
+      this.pxlRoomLclRoot = this.options.pxlRoomRoot;
+    }else{
+      this.pxlRoomLclRoot = "./"+pxlRoomName.split("/").pop();
+    }
     
     this.mainRoom=mainRoom; // Main environment room
     this.bootRoom=mainRoom; // Room to start pxlNav in
@@ -178,7 +190,7 @@ export class Environment{
     this.blurScreenMerge=null;
     this.pxlRenderSettings={
       'exposure':1.0,
-      'mult':( mobile ? 1.5 : 1.0 ),
+      'mult':( mobile ? 1.0 : 1.0 ),
       'bloomStrength':0.5,
       'bloomThresh':.6,
       'bloomRadius':.05,
@@ -257,6 +269,12 @@ export class Environment{
 
   }
   
+  log( msg, level=VERBOSE_LEVEL.INFO ){
+    if( this.options.verbose > VERBOSE_LEVEL.INFO ){
+      console.log( msg );
+    }
+  }
+
   // Function required
   init(){
 
@@ -270,7 +288,6 @@ export class Environment{
 
     //this.setExposure( 0 );
     let subList=Object.keys( this.roomSubList );
-    console.log("subList", subList);
     subList.forEach( (s)=>{
         this.roomSubList[ s ].init();
     });
@@ -405,14 +422,12 @@ export class Environment{
   loadRoom(roomName){
     return new Promise( (resolve, reject) =>{
 
-      if( this.verbose>2 ){
-        console.log("Loading Room - ", roomName);
-      }
-
-      var curImport=import(`${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`);
+      this.log("Loading Room - ", roomName);
+      
+      var curImport=import(`../${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`);
       
       curImport.then((module)=>{
-        let roomObj=new module[roomName]( roomName, `../${this.pxlRoomLclRoot}/${roomName}/`, this.pxlFile, this.pxlAnim, this.pxlUtils, this.pxlDevice, this, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
+        let roomObj=new module[roomName]( roomName, `./js/${this.pxlRoomLclRoot}/${roomName}/`, this.pxlFile, this.pxlAnim, this.pxlUtils, this.pxlDevice, this, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
 
         roomObj.camera=this.pxlCamera.camera;
         roomObj.scene=new THREE.Scene();
@@ -525,15 +540,15 @@ export class Environment{
   //   Should see if this is still necessary
   buildRoomEnvironments(){
     
-    //this.log("Building Room Environments");
-    //this.log(this.roomNameList);
+    this.log("Building Room Environments");
+    this.log(this.roomNameList);
     let loadPromisList=[];
     
     this.roomNameList.forEach( (r)=>{
-      //if( r != this.mainRoom){
-        this.roomSceneList[ r ].init();
+      this.roomSceneList[ r ].init();
+      if( this.roomSceneList[ r ].build ){
         this.roomSceneList[ r ].build();
-      //}
+      }
     });
   }
   
@@ -669,7 +684,30 @@ export class Environment{
   }
   //%
   
-    
+  // Load the given texture file from the internal pxlNav 'assetRoot'
+  //   Default is "./assets/" from the web root.
+  //     Please pass the path to your asset folder when creating your pxlNav object.
+  // It would be best if you pass channel count and mods
+  //   But you can tell it attempts to mitigate the issue.
+    getAssetTexture( assetName, channels=null, mods=null ){
+      this.log("Get Internal Texture - ", assetName);
+      let curTexturePath = this.pxlUtils.assetRoot + assetName;
+      if(!channels){
+        let assetSplit = assetName.split(".");
+        let assetExt = assetSplit.pop().toLowerCase();
+        if( assetExt=="jpg" || assetExt=="jpeg"  ){
+          channels=3;
+        }else if( assetExt=="png" ){
+          channels=4;
+        }
+      }
+      if(!mods){
+        mods={"magFilter":THREE.LinearFilter, "minFilter":THREE.LinearFilter};
+      }
+
+      let textureRead = this.pxlUtils.loadTexture( curTexturePath, channels, mods );
+      return textureRead;
+    }
     
     
     buildSnow(){
@@ -941,6 +979,7 @@ export class Environment{
     });
     //this.mapWorldPosMaterial.side=THREE.DoubleSide;
     this.mapWorldPosMaterial.side=THREE.FrontSide;
+    this.mapWorldPosMaterial.name="mapWorldPosMaterial";
       
     ///////////////////////////////////////////////////
     // -- 2-Step Blur Composer  -- -- -- -- -- -- -- //
@@ -964,11 +1003,13 @@ export class Environment{
     this.shaderPasses.blurXShaderPass.material.transparent = true;
     this.shaderPasses.blurXShaderPass.needsSwap = true;
     this.shaderPasses.blurXShaderPass.enabled=false;
+    this.shaderPasses.blurXShaderPass.name="blurXShaderPass";
     this.blurComposer.addPass( this.shaderPasses.blurXShaderPass );
     
     
     this.shaderPasses.dirBlurCopyPass = new ShaderPass(CopyShader);
     this.shaderPasses.dirBlurCopyPass.enabled=false;
+    this.shaderPasses.dirBlurCopyPass.name="dirBlurCopyPass";
     this.blurComposer.addPass(this.shaderPasses.dirBlurCopyPass);
     
     this.shaderPasses.blurYShaderPass = new ShaderPass(
@@ -988,6 +1029,7 @@ export class Environment{
     );
     this.shaderPasses.blurYShaderPass.material.transparent = true;
     this.shaderPasses.blurYShaderPass.enabled=false;
+    this.shaderPasses.blurYShaderPass.name="blurYShaderPass";
     this.blurComposer.addPass( this.shaderPasses.blurYShaderPass );
   
     
@@ -1006,6 +1048,7 @@ export class Environment{
     );
     this.shaderPasses.scatterMixShaderPass.material.transparent = true;
     this.shaderPasses.scatterMixShaderPass.enabled=false;
+    this.shaderPasses.scatterMixShaderPass.name="scatterMixShaderPass";
     this.blurComposer.addPass( this.shaderPasses.scatterMixShaderPass );
     
       
@@ -1051,6 +1094,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapMotionBlurPass.needsSwap = true;
+    this.mapMotionBlurPass.name = "mapMotionBlurPass";
     this.mapComposerMotionBlur.addPass(this.mapMotionBlurPass);
     this.mapMotionBlurPass.enabled=false;
     this.mapComposerMotionBlur.renderToScreen=false;
@@ -1078,9 +1122,11 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.blurScreenMerge.needsSwap = true;
+    this.blurScreenMerge.name = "blurScreenMerge";
     this.mapComposerGlow.addPass(this.blurScreenMerge);
     
     let glowCopyPassBlur = new ShaderPass(CopyShader);
+    glowCopyPassBlur.name = "glowCopyPassBlur";
     this.mapComposerGlow.addPass(glowCopyPassBlur);
     
     //this.mapGlowPass = new UnrealBloomPass( new THREE.Vector2( this.pxlDevice.mapW*this.pxlQuality.bloomPercMult, this.pxlDevice.mapH*this.pxlQuality.bloomPercMult ), .28, 0.08, 0.13 );
@@ -1121,6 +1167,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapOverlayHeavyPass.needsSwap = true;
+    this.mapOverlayHeavyPass.name = "mapOverlayHeavyPass";
 
     this.mapOverlayPass = new ShaderPass(
       new THREE.ShaderMaterial( {
@@ -1146,6 +1193,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapOverlayPass.needsSwap = true;
+    this.mapOverlayPass.name = "mapOverlayPass";
     
     this.mapOverlaySlimPass = new ShaderPass(
       new THREE.ShaderMaterial( {
@@ -1169,6 +1217,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapOverlaySlimPass.needsSwap = true;
+    this.mapOverlaySlimPass.name = "mapOverlaySlimPass";
 
     // -- -- -- -- -- -- -- -- -- -- //
     
@@ -1187,6 +1236,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapGlowPass.needsSwap = true;
+    this.mapGlowPass.name = "mapGlowPass";
 
     // -- -- -- -- -- -- -- -- -- -- //
     
@@ -1219,6 +1269,7 @@ export class Environment{
     );
         this.pxlUser.lKingPass=this.lizardKingPass;
         this.lizardKingPass.enabled=false;
+        this.pxlUser.lKingPass.name = "lizardKingPass";
     
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     this.pxlUser.sFieldPass = new ShaderPass(
@@ -1236,6 +1287,7 @@ export class Environment{
       } ), "tDiffuse"
     );
         this.pxlUser.sFieldPass.enabled=false;
+        this.pxlUser.sFieldPass.name = "sFieldPass";
     
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
     this.pxlUser.iZoomPass = new ShaderPass(
@@ -1253,6 +1305,7 @@ export class Environment{
       } ), "tDiffuse"
     );
         this.pxlUser.iZoomPass.enabled=false;
+        this.pxlUser.iZoomPass.name = "iZoomPass";
     
         
         
@@ -1272,6 +1325,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.chroAberrationPass.enabled=false;
+    this.chroAberrationPass.name = "chroAberrationPass";
     this.mapComposer.addPass( this.chroAberrationPass );
     this.mapComposer.addPass( this.lizardKingPass );
     //if( !this.mobile ) {
@@ -1296,6 +1350,7 @@ export class Environment{
     );
     this.mapComposerWarpPass.needsSwap = true;
     this.mapComposerWarpPass.enabled=false;
+    this.mapComposerWarpPass.name = "mapComposerWarpPass";
     this.mapComposer.addPass( this.mapComposerWarpPass );
     
         // 8 Samples
@@ -1313,6 +1368,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapBoxAAPass.enabled=false;
+    this.mapBoxAAPass.name = "mapBoxAAPass";
     this.mapComposer.addPass( this.mapBoxAAPass );
         
         // 4 samples
@@ -1330,6 +1386,7 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.mapCrossAAPass.enabled=false;
+    this.mapCrossAAPass.name = "mapCrossAAPass";
     this.mapComposer.addPass( this.mapCrossAAPass );
     
     this.mapComposer.autoClear=true;
@@ -1341,6 +1398,7 @@ export class Environment{
     this.roomComposer=new EffectComposer(this.engine);
 
     this.roomRenderPass = new RenderPass(bootScene, this.pxlCamera.camera);
+    this.roomRenderPass.name = "roomRenderPass";
     this.roomComposer.addPass(this.roomRenderPass);
         
         
@@ -1359,6 +1417,7 @@ export class Environment{
     this.roomBloomPass.threshold = this.pxlRenderSettings.bloomThresh;
     this.roomBloomPass.strength = this.pxlRenderSettings.bloomStrength;
     this.roomBloomPass.radius = this.pxlRenderSettings.bloomRadius;
+    this.roomBloomPass.name = "roomBloomPass";
     this.roomComposer.addPass( this.roomBloomPass );
     
     
@@ -1380,6 +1439,8 @@ export class Environment{
       } ), "tDiffuse"
     );
     this.roomGlowPass.needsSwap = true;
+    this.roomGlowPass.name = "roomGlowPass";
+
     this.roomComposer.addPass( this.roomGlowPass );
     
     this.roomComposer.addPass( this.chroAberrationPass );

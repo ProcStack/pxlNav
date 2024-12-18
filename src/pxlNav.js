@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-export const pxlNavVersion = "0.0.14";
+export const pxlNavVersion = "0.0.15";
 //      Written by Kevin Edzenga 2020;2024
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -69,9 +69,8 @@ var sH = window.innerHeight;
  * pxlNav - Core Engine
  *   The primary entry point for the pxlNav engine.
  * Initialize
- * @param {number} verbose - The level of verbosity for console logging, INFO(0), WARN(1), ERROR(2), NONE(3)
+ * @param {object} options - The options object for the pxlNav environment
  * @param {string} projectTitle - The title of the project
- * @param {string} pxlRoomRoot - The root folder for the room assets
  * @param {string} startingRoom - The initial room to load
  * @param {string[]} roomBootList - A list of rooms to load
  * @example
@@ -109,10 +108,14 @@ var sH = window.innerHeight;
  * 
  */
 export class pxlNav{
-  constructor( options, projectTitle, pxlRoomRoot, startingRoom, roomBootList ){
+  constructor( options, projectTitle, startingRoom, roomBootList ){
     this._active = false;
 
     // -- -- --
+    let pxlRoomRoot = "./pxlRooms";
+    if( options.hasOwnProperty("pxlRoomRoot") ){
+      pxlRoomRoot = options["pxlRoomRoot"];
+    }
 
     // Option Checks & Defaults
 
@@ -160,6 +163,9 @@ export class pxlNav{
       "roomChange-Middle" : "Emitted when the room change process occurs mid transition.",
       "roomChange-End" : "Returns a [bool]; Emitted when the room change transition ends.",
       "fromRoom" : "Returns a custom object; Emitted from your Room code you choose to emit during run time.",
+      "device-keydown" : "Returns an [int]; The just pressed key.",
+      "device-keyup" : "Returns an [int]; The just released key.",
+      "device-resize" : "Returns an [{height:#,width:#}]; Height Width object of the new window size.",
       "pxlNavEventNameHere" : "Never emitted; You did some copy'pasta.",
       "" : "** NOTE : callbacks get an event object shaped -  **",
       "" : "** { 'type' : *eventName*, 'value' : *data* } **",
@@ -198,9 +204,14 @@ export class pxlNav{
 
     this.pxlUser = new PxlBase.User();
 
-    this.pxlEnv = new PxlBase.Environment( this.options, this.startingRoom, pxlRoomRoot, this.verbose, this.mobile );
+    this.pxlEnv = new PxlBase.Environment( this.options, this.startingRoom, this.mobile );
     this.pxlDevice = new PxlBase.Device( projectTitle, pxlCore, this.mobile, this.autoCam );
     this.pxlCamera = new PxlBase.Camera();
+    // Disable Free-Roam camera mode if static camera is enabled
+    if( this.options["staticCamera"] ){
+      this.pxlCamera.toggleMovement( false );
+    }
+
     this.pxlAnim = new PxlBase.Animation( this.folderDict["assetRoot"], this.pxlTimer );
 
     this.pxlGuiDraws = new PxlBase.GUI( this.verbose, projectTitle, this.folderDict["assetRoot"], this.folderDict["guiRoot"] );
@@ -279,7 +290,8 @@ export class pxlNav{
       })
        .finally( ()=>{
         if( this.verbose > VERBOSE_LEVEL.ERROR ){
-          console.log("pxlNavCore Promise Chain Completed; ", this.loadPercent);
+          console.log("pxlNavCore Room Build Promise-Chain Completed; ", this.loadPercent);
+          console.log("  -- Starting pxlNav in Room `"+this.pxlEnv.bootRoom+"`");
         }
         this.start();
        });
@@ -920,6 +932,14 @@ export class pxlNav{
       case "warptoroom":
         this.pxlCamera.warpToRoom( eventValue, true, eventObj );
         break;
+      case "camera":
+        let curEventVal = eventValue.toLowerCase();
+        if( curEventVal == "roam" ){
+          this.pxlCamera.toggleMovement( true ); // Enable camera movement from user inputs
+        }else if( curEventVal == "static" ){
+          this.pxlCamera.toggleMovement( false ); // Prevent camera movement from user inputs
+        }
+        break;
       case "ping":
         this.emit("pingPong", "pong");
         break;
@@ -943,8 +963,14 @@ export class pxlNav{
   subscribe( eventType, callbackFunc ){
     let triggerHelp = false;
     if( this.validEventsKeys.includes( eventType ) ){
-      if( eventType == "pxlNavEventNameHere" ||  eventType == "help" || eventType == "test" ){
-        console.warn("Warning : `pxlNav.subscribe( 'pxlNavEventNameHere', ... )` was used; need some help?");
+      if( eventType == "test" ){
+        console.log("Test Event : `pxlNav.subscribe( 'test', ... )` was used; subscription list -");
+      }else if( eventType == "pxlNavEventNameHere" ||  eventType == "help" ){
+        if( eventType == "pxlNavEventNameHere" ){
+          console.warn("Warning : `pxlNav.subscribe( 'pxlNavEventNameHere', ... )` was used; need some help?");
+        }else if( eventType == "help" ){
+          console.log("Help Requested : `pxlNav.subscribe( 'help', ... )` was used; Subscription items--");
+        }
 
         // developer triggered the emit help event
         //   Dump all the events and info!
@@ -954,7 +980,12 @@ export class pxlNav{
         });
 
       }else{
-        this.callbacks[eventType] = callbackFunc;
+        let eventSplit = eventType.split("-");
+        if( eventSplit[0] == "device" ){
+          this.pxlDevice.subscribe(  eventSplit[1], callbackFunc );
+        }else{
+          this.callbacks[eventType] = callbackFunc;
+        }
       }
     }else{
       console.warn("Warning : `pxlNav.subscribe( '"+eventType+"', ... )` was used; use 'help' for a list of valid events.");  
@@ -980,5 +1011,4 @@ export class pxlNav{
       this.callbacks[eventType]( msg );
     }
   }
-
 }

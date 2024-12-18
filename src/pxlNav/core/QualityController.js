@@ -42,6 +42,8 @@ export class QualityController{
     
     // Default Quality Settings & Benchmark Settings
     //   Numbers or Booleans ONLY; or update GuiDraw.setRadioValues()
+    // TODO : Movement settings shouldn't be on the Quality controller
+    //          "Quality" should strictly remain Render Settings
     this.settings={
       leftRight:true, // Turn, Strafe
       mouse:true, // Drag, Point
@@ -389,7 +391,7 @@ export class QualityController{
         let circleGateColor=.6;
     
         if( this.settings.fog==2 ){
-          this.pxlEnv.mapMotionBlurPass.enabled=true;  
+          this.pxlEnv.mapMotionBlurPass.enabled=false;  
           this.pxlEnv.mapOverlayHeavyPass.enabled=true;
           this.pxlEnv.mapOverlayPass.enabled=false;
           this.pxlEnv.mapOverlaySlimPass.enabled=false;
@@ -404,7 +406,7 @@ export class QualityController{
                     }*/
                     
         }else if( this.settings.fog==1 ){
-          this.pxlEnv.mapMotionBlurPass.enabled=true;  
+          this.pxlEnv.mapMotionBlurPass.enabled=false;  
           this.pxlEnv.mapOverlayHeavyPass.enabled=false;
           this.pxlEnv.mapOverlayPass.enabled=true;
           this.pxlEnv.mapOverlaySlimPass.enabled=false;
@@ -424,7 +426,6 @@ export class QualityController{
           portalIntensity=.4;
         }
         
-                
         if( this.settings.bloom ){
           this.pxlEnv.mapGlowPass.enabled=true;  
           this.pxlEnv.roomBloomPass.enabled=true;  
@@ -467,7 +468,6 @@ export class QualityController{
                     cVid.material.color.g=circleGateColor;
                     cVid.material.color.b=circleGateColor;
                 }
-                
                 
         this.pxlEnv.portaluserScreenIntensity.x=portalIntensity;
         //this.pxlEnv.pxlRenderSettings.mult=multVal;

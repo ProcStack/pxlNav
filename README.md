@@ -1,7 +1,8 @@
-# pxlNav v0.0.14
+# pxlNav v0.0.15
 Javascript Player Controller & Environment Manager for Three.js
 
 **`pxlNav` is still being isolated into a package;**
+<br/>&nbsp;&nbsp; **CJS version needs testing.**
 <br/>&nbsp;&nbsp; **Please bare with me while I work out any NPM packaging issues.**
 <br/>**See the [procstack.github.io repo](https://github.com/ProcStack/procstack.github.io) for the current `pxlNav` status &amp; working example.**
 <br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see pxlNav in action.**
@@ -10,6 +11,7 @@ Javascript Player Controller & Environment Manager for Three.js
 --------------------------------------------------------------------------------------------
 
 ## <br/>**Index**
+* [Install Files](#install-files)
 * [Quick Links](#the-good-bits)
 * [Intention For pxlNav](#intention)
 * [In-Browser / Javascript Features](#in-browser--javascript-features)
@@ -19,6 +21,13 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>
 
 --------------------------------------------------------------------------------------------
+
+## Install Files
+ - `./dist/pxlNav.umd.js` - JS Module file
+ - `./dist/pxlNavStyle.min.css` - CSS Style for things like Loading bar, Shader Editor, and more
+ - `./dist/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
+ - `./dist/three.module.js` - pxlNav is not propperly including three.js through node_modules yet.
+
 
 ## The Good Bits
 **Wanna see example rooms using 3d fbx files?**
@@ -118,7 +127,6 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Searches for your current selection in that direction
 <br/>&nbsp;\_ Click off the editor & hit `Y` - To Open / Close the Shader Editor
 
-<img src="docs/assets/ssScriptEditor.jpg" alt="OpenGl ES Shader Editor" style="margin-left:auto;margin-right:auto;"/>
 
 
 ##### <p align="right">[^ Top](#index)</p>

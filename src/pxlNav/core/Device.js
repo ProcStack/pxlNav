@@ -45,6 +45,7 @@ export class Device{
     //this.wheelDelta=0;
     
     this.gammaCorrection = new Vector3(1,1,1);
+    this.lightShift = new Vector2(1,1);
     
     this.firefox=/Firefox/i.test(navigator.userAgent);
     this.mobile=mobile;
@@ -68,7 +69,7 @@ export class Device{
     this.keyDownCount=[0,0,0];
     this.directionKeyDown=false;
     this.directionKeysPressed=[0,0,0,0];
-    this.shiftBoost=0;
+    this.shiftBoost=1;
     this.controlKey=false;
     
     this.objectPercList=[];
@@ -125,6 +126,18 @@ export class Device{
       'releaseTime':0,
     };
         
+    this.subscriptableEvents=[
+        //"touchstart",
+        //"touchmove",
+        //"touchend",
+        //"mousedown",
+        //"mousemove",
+        //"mouseup",
+        "keydown",
+        "keyup",
+        "resize"
+      ];
+    this.callbackList={};
     
     this.init();
   }
@@ -163,13 +176,12 @@ export class Device{
         console.log( e );
         //JSON.stringify(e.state);
     });*/
-    
     document.addEventListener("visibilitychange", function(e) {
         tmpThis.windowHidden=document.hidden ;
               
         tmpThis.directionKeysPressed=[0,0,0,0];
         tmpThis.directionKeyDown=false;
-        tmpThis.shiftBoost=0;
+        tmpThis.shiftBoost=1;
         tmpThis.pxlCamera.workerFunc("focus", !document.hidden);
         
         tmpThis.runHiddenCalcs();
@@ -208,35 +220,44 @@ export class Device{
   //     **Linux seems wrong, but can't find any reliable values other than `1`
   setGammaCorrection( value=null ){
     if( value != null ){ // Set from Settings Menu
-      this.gammaCorrection = new Vector3( 1/value, value, value );
+      this.gammaCorrection.x = 1/value;
+      this.gammaCorrection.y = value;
+      this.gammaCorrection.z = value;
       return;
     }
     
     // Detect based on device operating system
     let toGamma = 1.5; // Most devices will be 1 (Mobile); Fail to middle ground
+    let lightShift = 1.1; // Most devices will be 1 (Mobile); Fail to middle ground
     let shadowShift = 1.2; // Most devices will be 1 (Mobile); Fail to middle ground
     let shadowBoost = .5;
     if( window && window.navigator && window.navigator.userAgent ){
       let isWindows = window.navigator.userAgent.match(/(windows|win32|win64|wince)/i)
       if( isWindows && isWindows.length>0 ){ 
         toGamma = 2.2; // Windows
+        lightShift = 0.95;
         shadowShift = 1;
         shadowBoost = 0;
       }else{
         let isMac = window.navigator.userAgent.match(/(macintosh|macintel|macppc|mac68k|iphone|ipad|ipod)/i)
         if( isMac && isMac.length>0 ){ 
           toGamma = 1.8; // Mac
+          lightShift = 0.9;
           shadowShift = .97;
-          shadowBoost = .5;
+          shadowBoost = .1;
         }else{ 
-          toGamma = 1; // Linux / Android
-          shadowShift = .95;
-          shadowBoost = 1;
+          toGamma = 1.8; // Linux / Android
+          lightShift = 0.70;
+          shadowShift = .96;
+          shadowBoost = .1;
         }
       }
     }
     // Color space is bugging me.... Just designing for windows and adjusting for the others
-    this.gammaCorrection = new Vector3( 1/toGamma, shadowShift, shadowBoost );
+    this.gammaCorrection.x = 1/toGamma;
+    this.gammaCorrection.y = shadowShift;
+    this.gammaCorrection.z = shadowBoost;
+    this.lightShift.x = lightShift;
   }
     
   // -- -- -- -- -- -- -- -- -- -- //
@@ -252,7 +273,7 @@ export class Device{
   resetUserInput(e){
     this.directionKeysPressed=[0,0,0,0];
     this.directionKeyDown=false;
-    this.shiftBoost=0;
+    this.shiftBoost=1;
     this.mapLockCursor(false,0);
     this.pxlCamera.camJumpKey(false);
     this.pxlCamera.deviceKey("space", false);
@@ -366,10 +387,13 @@ export class Device{
       }
       
       if(lock==true){
-                this.pxlGuiDraws.pxlNavCanvas.focus();
-        this.pxlGuiDraws.pxlNavCanvas.requestPointerLock();
+        this.pxlGuiDraws.pxlNavCanvas.focus();
+        this.pxlGuiDraws.pxlNavCanvas.requestPointerLock()
+          .catch((err)=>{}); // User likely hit ESC out of the cursor lock
       }else{
-        document.exitPointerLock();
+        if( document.pointerLockElement ){
+          document.exitPointerLock();
+        }
       }
       this.cursorLockActive=lock;
     }
@@ -390,7 +414,7 @@ export class Device{
       this.touchMouseData.curDistance=new Vector2(0,0);
       this.touchMouseData.curStepDistance=new Vector2(0,0);
       this.touchMouseData.dragCount=0;
-            this.pxlAutoCam.touchBlender=false;
+      this.pxlAutoCam.touchBlender=false;
       this.setCursor("grabbing");
       this.mapLockCursor(true, e.button);
     }
@@ -625,67 +649,78 @@ export class Device{
     // -- -- -- -- -- -- //
     
   async keyDownCall(e){
+
+    this.emit("keydown", e);
+
     //e.this.preventDefault(e)();
         if( e.ctrlKey ){
             this.controlKey=true;
         }
     if(document.activeElement.type==undefined ){
-            //%=
-            if(false){
-            //%
-            if( e.ctrlKey || e.altKey || e.code.includes("F") ){
-                e.preventDefault();
-                return false;
-            }
-            //%=
-            }
-            //%
-            
-            if( this.pxlTimer.active){
-                let keyHit=e.keyCode || e.which;
-                //if( !this.pxlGuiDraws.howToActive ){
-                    if(keyHit==37 || keyHit==65){ // Left
-                        this.directionKeyDown=true;
-                        this.keyDownCount[0]=this.pxlQuality.fpsCounter.z;
-                        this.directionKeysPressed[0]=1;
-                        this.pxlCamera.deviceKey(0, true);
-                    }
-                    if(e.ctrlKey && keyHit==87 && this.directionKeysPressed[1]==1){
-                        e.this.preventDefault(e)();
-                    }
-                    if(keyHit==38 || keyHit==87){ // Up
-                        this.directionKeyDown=true;
-                        this.keyDownCount[1]=this.pxlQuality.fpsCounter.z;
-                        this.directionKeysPressed[1]=1;
-                        this.pxlCamera.deviceKey(1, true);
-                    }
-                    if(keyHit==39 || keyHit==68){ // Right
-                        this.directionKeyDown=true;
-                        this.keyDownCount[0]=this.pxlQuality.fpsCounter.z;
-                        this.directionKeysPressed[2]=1;
+      //%=
+      if(false){
+      //%
+      if( e.ctrlKey || e.altKey || e.code.includes("F") ){
+          e.preventDefault();
+          return false;
+      }
+      //%=
+      }
+      //%
+      
+      if( this.pxlTimer.active){
+        if( e.repeat ){
+          return;
+        }
 
-                        this.pxlCamera.deviceKey(2, true);
-                    }
-                    if(keyHit==40 || keyHit==83){ // Down
-                        this.directionKeyDown=true;
-                        this.keyDownCount[1]=this.pxlQuality.fpsCounter.z;
-                        this.directionKeysPressed[3]=1;
-                        this.pxlCamera.deviceKey(3, true);
-                    }
-                    if(keyHit==16 || keyHit==224){ // Shift
-                        this.shiftBoost=7;
-                        this.pxlCamera.deviceKey("shift", true);
-                    }
-                    if(keyHit==32){
-                        this.pxlCamera.camJumpKey(true);
-                        this.pxlCamera.deviceKey("space", true);
-                    }
-                //}
-            }
-    }
+        let keyHit=e.keyCode || e.which;
+        if(keyHit==37 || keyHit==65){ // Left
+          this.directionKeyDown=true;
+          this.keyDownCount[0]=this.pxlQuality.fpsCounter.z;
+          this.directionKeysPressed[0]=1;
+          this.pxlCamera.deviceKey(0, true);
+        }
+        if(e.ctrlKey && keyHit==87 && this.directionKeysPressed[1]==1){
+          e.this.preventDefault(e)();
+        }
+        if(keyHit==38 || keyHit==87){ // Up
+          this.directionKeyDown=true;
+          this.keyDownCount[1]=this.pxlQuality.fpsCounter.z;
+          this.directionKeysPressed[1]=1;
+          this.pxlCamera.deviceKey(1, true);
+        }
+        if(keyHit==39 || keyHit==68){ // Right
+          this.directionKeyDown=true;
+          this.keyDownCount[0]=this.pxlQuality.fpsCounter.z;
+          this.directionKeysPressed[2]=1;
+
+          this.pxlCamera.deviceKey(2, true);
+        }
+        if(keyHit==40 || keyHit==83){ // Down
+          this.directionKeyDown=true;
+          this.keyDownCount[1]=this.pxlQuality.fpsCounter.z;
+          this.directionKeysPressed[3]=1;
+          this.pxlCamera.deviceKey(3, true);
+        }
+        if(keyHit==16 || keyHit==224){ // Shift
+          this.shiftBoost=7;
+          this.pxlCamera.deviceKey("shift", true);
+        }
+        if(keyHit==32){
+          this.pxlCamera.camJumpKey(true);
+          this.pxlCamera.deviceKey("space", true);
+        }
+      }
+    }//else{
+      // pxlNav Canvas not in focus
+      //   User likely typing within a text field or other focus'ed object 
+    //}
   }
     
   async keyUpCall(e){
+
+    this.emit("keyup", e);
+
     //e.this.preventDefault(e)();
         if( e.ctrlKey ){
             this.controlKey=false;
@@ -762,42 +797,40 @@ export class Device{
         if(keyHit==37 || keyHit==65){ // Left
           this.directionKeysPressed[0]=0;
           //this.pxlAutoCam.prevNextAutoCam(-1);
-          this.pxlAutoCam.getNextPath(false, -1);
-                    this.pxlCamera.deviceKey(0, false);
+          //this.pxlAutoCam.getNextPath(false, -1);
+          this.pxlCamera.deviceKey(0, false);
         }
         if(keyHit==38 || keyHit==87){ // Up
           this.directionKeysPressed[1]=0;
-                    if( this.pxlAutoCam.active ){
-                        this.pxlAutoCam.step(true);
-                        this.pxlCamera.deviceKey(1, false);
-                    }
+          if( this.pxlAutoCam.active ){
+              this.pxlAutoCam.step(true);
+          }
+          this.pxlCamera.deviceKey(1, false);
         }
         if(keyHit==39 || keyHit==68){ // Right
           this.directionKeysPressed[2]=0;
-          //this.pxlAutoCam.prevNextAutoCam(1);
-          this.pxlAutoCam.getNextPath(false, 1);
-                    this.pxlCamera.deviceKey(2, false);
+          this.pxlCamera.deviceKey(2, false);
         }
         if(keyHit==40 || keyHit==83){ // Down
           this.directionKeysPressed[3]=0;
-                    if( this.pxlAutoCam.active ){
-                        this.pxlAutoCam.setRoom(true);
-                        this.pxlCamera.deviceKey(3, false);
-                    }
+          if( this.pxlAutoCam.active ){
+              this.pxlAutoCam.setRoom(true);
+          }
+          this.pxlCamera.deviceKey(3, false);
         }
         if(!this.directionKeysPressed.includes(1)){
           this.directionKeyDown=false;
         }
         // Shift
         if(keyHit==16 || keyHit==224){ // Shift
-          this.shiftBoost=0;
-                    this.pxlCamera.deviceKey("shift", false);
+          this.shiftBoost=1; // Shift multiplier, 1 = normal speed
+          this.pxlCamera.deviceKey("shift", false);
           return;
         }
         // Space
         if(keyHit==32){
           this.pxlCamera.camJumpKey(false);
-                    this.pxlCamera.deviceKey("space", false);
+          this.pxlCamera.deviceKey("space", false);
           return;
         }
         
@@ -1019,9 +1052,6 @@ export class Device{
 
     this.pxlEnv.updateCompUniforms();
     
-    this.pxlGuiDraws.resize();
-        
-        
     this.pxlEnv.roomNameList.forEach( (r)=>{
       this.pxlEnv.roomSceneList[ r ].pxlCamAspect = aspectRatio ;
       //if( r != this.pxlEnv.mainRoom){
@@ -1030,11 +1060,52 @@ export class Device{
       }
     });
         
+    // Emit the resize calculations 
+    this.emit("resize", {
+      "width" : this.mapW,
+      "height" : this.mapH,
+      "xPixelPerc" : this.screenRes.x,
+      "yPixelPerc" : this.screenRes.y,
+      "aspectRatio" : aspectRatio
+    });
         
-        if( !this.pxlTimer.active ){
-            this.pxlEnv.mapRender( false );
-        }
+    if( !this.pxlTimer.active ){
+        this.pxlEnv.mapRender( false );
+    }
     
     //this.pxlEnv.engine.render(this.pxlEnv.scene,this.pxlCamera.camera);
   }
+
+  // -- -- -- -- -- -- -- -- -- -- //
+  // -- Module Communication -- -- //
+  // -- -- -- -- -- -- -- -- -- -- //
+
+  subscribe( eventType, callbackFn ){
+    if( !this.subscriptableEvents.includes( eventType ) ){
+      console.error( "Event type not subscribable: ", eventType );
+      return;
+    }
+    if( !this.callbackList[eventType] ){
+      this.callbackList[eventType] = [];
+    }
+    this.callbackList[eventType].push( callbackFn );
+  }
+
+  unsubscribe( eventType, callbackFn ){
+    if( this.callbackList[eventType] ){
+      let index = this.callbackList[eventType].indexOf( callbackFn );
+      if( index >= 0 ){
+        this.callbackList[eventType].splice( index, 1 );
+      }
+    }
+  }
+
+  emit( eventType, data ){
+    if( this.callbackList.hasOwnProperty( eventType ) ){
+      this.callbackList[eventType].forEach( (callbackFn)=>{
+        callbackFn( data );
+      });
+    }
+  }
+
 }

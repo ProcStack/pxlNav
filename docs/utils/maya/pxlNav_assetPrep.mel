@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////
 // Asset & Scene Utility Scripts for pxlNav  //
 //   Maya Pipeline; Mel Window               //
-//   Written by Kevin Edzenga 2020-202      //
+//   Written by Kevin Edzenga 2020-2024      //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 // By running the mel script contents here,  //
 //   A window will launch with two tabs.     //
@@ -14,7 +14,7 @@
 global proc pxlNav_launcher(){
     global string $pxlNavName = "AssetPrepper";
     global int $pxlNav_ww=485; // window width
-    global int $pxlNav_wh=750; // window height
+    global int $pxlNav_wh=810; // window height
     global int $pxlNav_btnHeight=30;// Button height
     
     global string $pxlNav_descriptionBox="";// Help description box
@@ -87,6 +87,26 @@ global proc pxlNav_prepColliderAttributes(){
     }
 }
 //pxlNav_prepColliderAttributes();
+
+
+
+global proc pxlNav_prepWarpPadAttribute_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'warpTo' attribute to selected Collider.";
+    $desc += "   pxlNav will place a particle system of that name at that location.";
+    $desc += "\n\n*Note: To edit 'String' attributes, edit in-\n   Attribute Editor > Transform > Extra Attributes";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
+global proc pxlNav_prepWarpPadAttribute(){
+    string $sel[]=`ls -sl -l`;
+    for($x=0; $x<size($sel); ++$x){
+        addAttr -ln "warpToCam"  -dt "string" $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".warpToCam");
+    }
+}
+//pxlNav_prepWarpPadAttribute();
+
+
 
 global proc pxlNav_prepDoubleSidedAttributes_desc(){
    global string $pxlNav_descriptionBox;
@@ -559,7 +579,7 @@ global proc pxlNav_assetPrepWindow(){
        "---",
        "pxlNav_prepGlowPassAttribute","pxlNav_prepGlowPercAttribute",
        "---",
-       "pxlNav_prepColliderAttributes",
+       "pxlNav_prepColliderAttributes", "pxlNav_prepWarpPadAttribute",
        "---",
        "pxlNav_prepClickAttributes","pxlNav_prepHoverAttributes",
        "---",
