@@ -28,6 +28,8 @@ Javascript Player Controller & Environment Manager for Three.js
  - `./dist/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
  - `./dist/three.module.js` - pxlNav is not propperly including three.js through node_modules yet.
 
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
 ## The Good Bits
 **Wanna see example rooms using 3d fbx files?**
