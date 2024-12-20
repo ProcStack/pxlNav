@@ -1,11 +1,12 @@
-# pxlNav v0.0.15
+# pxlNav v0.0.16
 Javascript Player Controller & Environment Manager for Three.js
 
 **`pxlNav` is still being isolated into a package;**
 <br/>&nbsp;&nbsp; **CJS version needs testing.**
 <br/>&nbsp;&nbsp; **Please bare with me while I work out any NPM packaging issues.**
 <br/>**See the [procstack.github.io repo](https://github.com/ProcStack/procstack.github.io) for the current `pxlNav` status &amp; working example.**
-<br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see pxlNav in action.**
+<br/><br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see pxlNav in action.**
+<br/>**For an Environment to roam around in visit [procstack.github.io/pxlNav.htm](https://procstack.github.io/pxlNav.htm)**
 <br/><br/>
 
 --------------------------------------------------------------------------------------------
