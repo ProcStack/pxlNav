@@ -158,7 +158,7 @@ List of available Trigger Events-
 <br/> ```pxlNav.trigger( 'warptoroom', *pxlRoomName*, *cameraLocationName* );```
  
 <br/> _`camera` - "Static" or "Roam" to toggle the camera from still cam to controlable
-<br/> ```pxlNav.trigger( 'warptoroom', *camera*, 'Roam' );```
+<br/> ```pxlNav.trigger( 'camera', 'Roam' );```
 
 <br/> _`ping` - Trigger's the `PingPong` callback subscription event; with a value of 'pong'
 <br/> ```pxlNav.trigger( 'ping' );```
