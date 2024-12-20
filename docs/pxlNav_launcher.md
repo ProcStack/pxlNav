@@ -13,10 +13,11 @@
 
 ## Imports
 
-List of exports from `pxlNav`
- _`pxlNav` - Main pxlNav object to manage your environments
- _`pxlEnums` - Available enums in a single object
- _`PXLNAV_OPTIONS` - Options Objects with Default settings
+List of exports from `pxlNav` -
+<br/> _`pxlNav` - Main pxlNav object to manage your environments
+<br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.16`
+<br/> _`pxlEnums` - Available enums in a single object
+<br/> _`PXLNAV_OPTIONS` - Options Objects with Default settings
 ```
 import { pxlNav, pxlNavVersion, pxlEnums, PXLNAV_OPTIONS } from './pxlNav.js';
 ```
