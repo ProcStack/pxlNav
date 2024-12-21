@@ -1,7 +1,7 @@
 ### pxlNav Source
 #### Javascript + CSS + Assets
 
-Look in `pxlRooms` for an Example & Template pxlNav rooms;
+Look in `pxlRooms` for the Template pxlNav room;
 <br/>&nbsp; 'Rooms' are like levels in a game,
 <br/>&nbsp;&nbsp;&nbsp; Just other zones you can portal over to.
 <br/>Head to `js` for the pxlNav javascript.

@@ -62,9 +62,11 @@ global proc string[] pxlNav_findEnvGroups(){
             }
         }
     }
-    string $retArr[]=`listRelatives -children $envGroupObj`;
-    stringArrayInsertAtIndex(0, $retArr, $envGroupObj);
-    
+    string $retArr[];
+    if( $envGroupObj ){
+        $retArr=`listRelatives -children $envGroupObj`;
+        stringArrayInsertAtIndex(0, $retArr, $envGroupObj);
+    }
     return $retArr;
 }
 

@@ -1,73 +1,127 @@
 # pxlNav Docs - Launcher Options
-   Available Options / Settings for `pxlNav`;
-   For core `pxlNav` scripting, the entry-point is `./src/js/pxlNavCore.js`
+### Available Options / Settings for `pxlNav`;
+This is the rundown of how to interact with `pxlNav` and your `pxlRoom`'s custom javascript.
+<br/>&nbsp;&nbsp; Import, make a pxlNav object, and launch!
+
+<br/>For pxlNav room information
+<br/>&nbsp;&nbsp; See [pxlRoom's Documentation](pxlRooms.md)
+
+<br/>For core `pxlNav` source
+<br/>&nbsp;&nbsp; Entry-point is `./src/js/pxlNavCore.js`
 
 ## <br/>**Index**
-* [Imports](#imports)
+* [Available Imports](#available-imports)
 * [pxlNav Object](#pxlnav-object)
 * [Enums & Options](#enums--options)
 * [Events for Callback Subscriptions](#events-for-callback-subscriptions)
 * [Triggerable Events](#triggerable-events)
-* [Launcher Example](#launcher-example)
+* [pxlBase Object](#pxlbase-object)
+* [Full Launcher Example](#launcher-example)
 <br/>
 
-## Imports
+## Available Imports
+
+```
+import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions, RoomEnvironment, pxlEffects, pxlShaders, pxlBase } from './pxlNav.###.js';
+```
 
 List of exports from `pxlNav` -
 <br/> _`pxlNav` - Main pxlNav object to manage your environments
 <br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.16`
 <br/> _`pxlEnums` - Available enums in a single object
-<br/> _`PXLNAV_OPTIONS` - Options Objects with Default settings
-```
-import { pxlNav, pxlNavVersion, pxlEnums, PXLNAV_OPTIONS } from './pxlNav.js';
-```
+<br/> _`pxlOptions` - Options Objects with Default settings
+<br/> _`pxlEffects` - Particle Systems you can add to your room
+<br/> _`pxlShaders` - Shader Materials you can assign to objects in your scene
+<br/> _`RoomEnvironment` - Options Objects with Default settings
+<br/> _`pxlBase` - All available `pxlNav` sub-classes
 
- * Note : No need to import three.js for this version of pxlNav.  It will be decoupled from pxlNav's environment in an upcoming version.  Please bare with me while I open up pxlNav to more usability.
+
+ * *Note* : No need to import three.js for this version of pxlNav.
+<br/>&nbsp;&nbsp; The `./js/libs/three` folder holds the needed files for Three.
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; Due to needed changes to the `FBXLoader`, the files have been localized.
+<br/>&nbsp;&nbsp; Change the files to change your version of Three,
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; However changes to the `FBXLoader` would need to be made if replaced.
+
 
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
 ## pxlNav Object
 
+**Import and Start pxlNav -**
+```
+import { pxlEnums, pxlOptions, pxlNav } from './pxlNav.js';
+
+const projectTitle = "Your Project Name";
+const bootRoomList = ["YourRoomA", "YourRoomB"];
+const startingRoom = bootRoomList[0];
+
+const pxlNavEnv = new pxlNav( PXLNAV_OPTIONS, projectTitle, startingRoom, bootRoomList );
+pxlNavEnv.init();
+```
+
 **The Title of your Project**
-<br/>&nbsp;&nbsp; This will be displayed on the load bar
+<br/>&nbsp;&nbsp; This will be displayed over-top the load bar
 <br/>```const projectTitle = "Your Project Name";```
 
+**`pxlRoomRootPath` - Your `pxlRoom` folder path**
+<br/>&nbsp;&nbsp; by default is the same folder as `pxlNav.esm.js`**
+<br/>&nbsp;&nbsp; Available to change relative to the location of your `pxlNav.###.js`
+<br/>```const pxlRoomRootPath = "../pxlRooms";```
 
-**Your Room folder name + main javascript file names**
+**`bootRoomList` - Your Room folder name + main javascript file names**
 <br/>&nbsp;&nbsp; This must be a list object; [,]
 <br/>```const bootRoomList = ["YourRoomA", "YourRoomB"];```
 <br/>Loading the js file from- `./pxlRooms/YourRoomA/YourRoomA.js`
 
-**Set which of your rooms will load the user into.**
+**`startingRoom` - Set which of your rooms will load the user into.**
 <br/>&nbsp;&nbsp; The `startingRoom` must be in your `bootRoomList`
 <br/>```const startingRoom = bootRoomList[0];```
 
-**Create your `pxlNav` object-**
+**`pxlNavEnv` - Create your `pxlNav` object-**
 <br/>```const pxlNavEnv = new pxlNav( PXLNAV_OPTIONS, projectTitle, startingRoom, bootRoomList );```
 
-**Initialize the `pxlNav` runtime;**
+**`pxlNavEnv.init()` - Initialize & Start Running the `pxlNav` runtime;**
 <br/>&nbsp;&nbsp; Puts up the load screen with your title and any loader phrases
 <br/>&nbsp;&nbsp; Load your pxlRooms from `bootRoomList`
 <br/>&nbsp;&nbsp; And let the system run!
-```pxlNavEnv.init();```
+<br/>```pxlNavEnv.init();```
 
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
 ## Enums & Options
 
-<br/>Assign a new object with `PXLNAV_OPTIONS` to isolate out a copy of the Default settings-
-<br/>```let pxlNavOptions = Object.assign({},PXLNAV_OPTIONS);```
+```
+import { pxlEnums, pxlOptions } from './pxlNav.js;
+
+let yourOptions = Object.assign({},pxlOptions);
+
+// -- Default Values --
+yourOptions.verbose = pxlEnums.VERBOSE_LEVEL.NONE;
+yourOptions.pxlRoomRoot = "./pxlRooms";
+yourOptions.staticCamera = false;
+yourOptions.autoCamera = false;
+yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
+yourOptions.shadowMapBiasing = pxlEnums.SHADOW_MAP.BASIC;
+yourOptions.LoadEnvAssetFile = false;
+yourOptions.skyHaze = pxlEnums.SKY_HAZE.OFF;
+yourOptions.loaderPhrases = ['...loading the pixels...'];
+
+const pxlNavEnv = new pxlNav( yourOptions, *projectTitle*, *startingRoom*, *bootRoomList* );
+```
+
+<br/>Assign a new object with `pxlOptions` to isolate out a copy of the Default settings-
+<br/>```let yourOptions = Object.assign({},pxlOptions);```
 
 <br/>**Console logging level**
 <br/>&nbsp;&nbsp; Options are - `NONE`, `ERROR`, `WARN`, `INFO`
-<br/>```pxlNavOptions.verbose = pxlEnums.VERBOSE_LEVEL.INFO;```
+<br/>```yourOptions.verbose = pxlEnums.VERBOSE_LEVEL.INFO;```
 
 <br/>**If you'd like to move your `pxlRooms` folder**
 <br/>&nbsp;&nbsp; Update with your Relative path
-<br/>```pxlNavOptions.pxlRoomRoot = './pxlRooms';```
-
+<br/>```yourOptions.pxlRoomRoot = './pxlRooms';```
+   
 <br/>**Set a list of phrases to display during the loading process**
 <br/>&nbsp;&nbsp; The loader with randomly pick a phrase from the list
 ```
@@ -81,28 +135,28 @@ const loaderPhrases = [
   "...crashing the glasses...",
   "...sharpening the pencils...",
 ];
-pxlNavOptions.loaderPhrases = loaderPhrases;
+yourOptions.loaderPhrases = loaderPhrases;
 ```
 
 <br/>**Anti-aliasing level**
 <br/>&nbsp;&nbsp; Options are - `NONE`, `LOW`, `MEDIUM`, `HIGH`
-```pxlNavOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
+```yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
 
 **Shadow + Edge softness**
 <br/>&nbsp;&nbsp; Default is `BASIC` - a simple shadow edge
 <br/>&nbsp;&nbsp; Options are - `OFF`, `BASIC`, `SOFT`
 <br/>&nbsp;&nbsp;&nbsp;&nbsp; *Mobile devices are limited to `OFF` or `BASIC` automatically
-<br/>```const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;```
+<br/>```yourOptions.shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;```
 
 **Set camera to static Camera Positions**
 <br/>&nbsp;&nbsp; Locations pulled from the 'Camera' group in the pxlRoom's FBX file
 <br/>&nbsp;&nbsp; Default is `false`
-<br/>```pxlNavOptions.staticCamera = false;```
+<br/>```yourOptions.staticCamera = false;```
 
 **Visual effect for the sky**
 <br/>&nbsp;&nbsp; Default is `OFF`
 <br/>&nbsp;&nbsp; Options are - `OFF`, `VAPOR`
-<br/>```const skyHaze = pxlEnums.SKY_HAZE.VAPOR;```
+<br/>```yourOptions.skyHaze = pxlEnums.SKY_HAZE.VAPOR;```
 
 <br/>Then pass your options object when creating `pxlNav`
 <br/>```const pxlNavEnv = new pxlNav( pxlNavOptions, projectTitle, startingRoom, bootRoomList );```
@@ -111,7 +165,6 @@ pxlNavOptions.loaderPhrases = loaderPhrases;
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
----
 
 ## Events for Callback Subscriptions
 
@@ -163,18 +216,38 @@ List of available Trigger Events-
 <br/> _`ping` - Trigger's the `PingPong` callback subscription event; with a value of 'pong'
 <br/> ```pxlNav.trigger( 'ping' );```
 
-<br/> _`roommessage` - Send data to your room's `onMessage( event )` function.  If there is no added `onMessage` function, the message contents will print to the console.
+<br/> _`roommessage` - Send data to your room's `onMessage( event )` function.
+<br/>&nbsp;&nbsp; If there is no added `onMessage` function, the message contents will print to the console.
 <br/> ```pxlNav.trigger( 'roommessage', 'yourCustomEventName', *eventData* );```
 
  
 You can use `pxlNav.trigger()` directly or pass it to another object to handle trigger emits-
-```yourObject.bindTriggerEmits( pxlNavEnv.trigger.bind(pxlNavEnv) );```
+<br/>```yourObject.bindTriggerEmits( pxlNavEnv.trigger.bind(pxlNavEnv) );```
 
 
 
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
+## pxlBase Object
+
+This object will only really be used by individuals doing more web dev than needed to run `pxlNav` as intended.
+<br/>&nbsp;&nbsp; These are the base classes that you can create your own object for your own purposes outside of the `pxlNav` framework.
+
+All available `pxlNav` sub-classes
+```
+pxlBase = {
+   Utils, FileIO, QualityController, CookieManager, Timer, User,
+   Device, Animation, Environment, GUI, Camera, AutoCamera,
+   Extensions, MusicUtils, Audio, Video
+};
+```
+Only needed if you want to use the functionality outside of pxlNav's framework itself.
+<br/>&nbsp;&nbsp; Like in a non-pxlRoom javascript file. 
+
+
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
 
 ## Launcher Example
