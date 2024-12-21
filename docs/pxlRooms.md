@@ -37,7 +37,7 @@ If you have any hoverable or clickable objects in your scene,
 
 
 
-## pxlRoom Common Template -
+## pxlRoom Common Template
 ```
 import * as THREE from "../../three.module.min.js";
 import { pxlEffects, RoomEnvironment } from "../../pxlNav.esm.js";
