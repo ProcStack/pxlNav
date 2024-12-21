@@ -4,8 +4,8 @@
 
  - **[`pxlRoom` Documentation](pxlRooms.md)**
 
- - **[pxlEffects Documentation](pxlEffects.md)**
+ - **[`pxlEffects` Documentation](pxlEffects.md)**
 
- - **[pxlShaders Documentation](pxlShaders.md)**
+ - **[`pxlShaders` Documentation](pxlShaders.md)**
 
  
