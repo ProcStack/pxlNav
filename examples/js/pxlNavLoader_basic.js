@@ -9,7 +9,7 @@
 //   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, PXLNAV_OPTIONS } from './pxlNav.umd.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions } from './pxlNav.esm.js';
 
 
 // Console logging level
@@ -77,7 +77,7 @@ const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 
 // -- Prepare pxlNav options --
 
-let pxlNavOptions = Object.assign({},PXLNAV_OPTIONS);
+let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;

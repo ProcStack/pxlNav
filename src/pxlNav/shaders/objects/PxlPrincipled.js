@@ -1,6 +1,8 @@
 
 //import {shaderHeader} from "../core/ShaderHeader.js";
-import * as THREE from "../../../libs/three/three.module.js";
+import { 
+  ShaderChunk
+} from "../../../libs/three/three.module.min.js";
 
 ///////////////////////////////////////////////////////////
 // Geometry Shaders                                     //
@@ -29,8 +31,8 @@ export function pxlPrincipledVert(shadows=false){
     `;
     if( shadows ){
       ret += `
-        ${THREE.ShaderChunk[ "common" ]}
-        ${THREE.ShaderChunk[ "shadowmap_pars_vertex" ]}
+        ${ShaderChunk[ "common" ]}
+        ${ShaderChunk[ "shadowmap_pars_vertex" ]}
       `;
     }
     ret += `
@@ -57,8 +59,8 @@ export function pxlPrincipledVert(shadows=false){
         `;
         if( shadows ){
           ret += `
-            ${THREE.ShaderChunk[ "worldpos_vertex" ]}
-            ${THREE.ShaderChunk[ "shadowmap_vertex" ]}
+            ${ShaderChunk[ "worldpos_vertex" ]}
+            ${ShaderChunk[ "shadowmap_vertex" ]}
           `;
         }
         ret += `
@@ -145,7 +147,7 @@ export function pxlPrincipledFrag( ShaderParms, useColor, useFog, lights, shadow
     if(shadows){
       ret+=`
       
-      ${THREE.ShaderChunk[ "packing" ]}
+      ${ShaderChunk[ "packing" ]}
       
       #if NUM_POINT_LIGHT_SHADOWS > 0
           uniform sampler2D pointShadowMap[ NUM_POINT_LIGHT_SHADOWS ];
@@ -354,6 +356,10 @@ export function pxlPrincipledFrag( ShaderParms, useColor, useFog, lights, shadow
         }
         ret+=`
         Cd*=cdMult;
+        
+        // Convert to sRGB
+        Cd.rgb = mix( 12.92 * Cd.rgb, 1.055 * pow(Cd.rgb, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, Cd.rgb) );
+
         gl_FragColor=Cd;
     }`;
   return ret;

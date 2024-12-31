@@ -1,4 +1,4 @@
-// ProcStack.Git.io Javascript
+// pxlNav Launcher Javascript
 //  Written by Kevin Edzenga; 2024
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -6,10 +6,11 @@
 //   This is an example implementation of `pxlNav` in a project;
 //     Tieing in `ProcPages` to manage the pages of the site,
 //       Listening to / triggering events on `pxlNav`
-//   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
+//   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, PXLNAV_OPTIONS } from './pxlNav.umd.js';
+
+import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions } from './pxlNav.esm.js';
 
 
 // Console logging level
@@ -23,8 +24,8 @@ const projectTitle = "pxlNav : Field Env.";
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "./pxlRooms";
 
-// Current possible rooms - "CampfireEnvironment", "SaltFlatsEnvironment", "FieldEnvironment", "VoidEnvironment"
-const bootRoomList = ["FieldEnvironment", "VoidEnvironment"];
+// Add your own room, or copy Rooms from `./examples/js/pxlRooms`
+const bootRoomList = ["FieldEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -52,7 +53,7 @@ const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
 // Default is `BASIC` - a simple shadow edge
 //   Options are - OFF, BASIC, SOFT
 //     *Mobile devices are limited to `OFF` or `BASIC` automatically
-const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
+const shadowMapBiasing = pxlEnums.SHADOW_MAP.OFF;
 
 // Set camera to static Camera Positions
 //   Locations pulled from the 'Camera' group in the pxlRoom's FBX file
@@ -77,7 +78,7 @@ const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 
 // -- Prepare pxlNav options --
 
-let pxlNavOptions = Object.assign({},PXLNAV_OPTIONS);
+let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;

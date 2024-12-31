@@ -1,7 +1,9 @@
 {
   "name": "pxlnav",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Player Controller & Environment Framework for Three.js",
+  "author": "Kevin Edzenga <kevin@metal-asylum.net>",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildTree": "node ./utils/fileTreeBuilder.js",
@@ -32,12 +34,16 @@
       "require": "./dist/pxlNav.cjs.js"
     }
   },
-  "author": "Kevin Edzenga <kevin@metal-asylum.net>",
-  "license": "GPL-3.0-or-later",
+  
   "bugs": {
     "url": "https://github.com/ProcStack/pxlNav/issues"
   },
   "homepage": "https://github.com/ProcStack/pxlNav#readme",
+
+  "peerDependencies": {
+    "three": "^0.171.0"
+  },
+
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "esbuild": "^0.24.0",

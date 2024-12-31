@@ -56,7 +56,7 @@ const projectTitle = "Your Project Name";
 const bootRoomList = ["YourRoomA", "YourRoomB"];
 const startingRoom = bootRoomList[0];
 
-const pxlNavEnv = new pxlNav( PXLNAV_OPTIONS, projectTitle, startingRoom, bootRoomList );
+const pxlNavEnv = new pxlNav( pxlOptions, projectTitle, startingRoom, bootRoomList );
 pxlNavEnv.init();
 ```
 
@@ -79,7 +79,7 @@ pxlNavEnv.init();
 <br/>```const startingRoom = bootRoomList[0];```
 
 **`pxlNavEnv` - Create your `pxlNav` object-**
-<br/>```const pxlNavEnv = new pxlNav( PXLNAV_OPTIONS, projectTitle, startingRoom, bootRoomList );```
+<br/>```const pxlNavEnv = new pxlNav( pxlOptions, projectTitle, startingRoom, bootRoomList );```
 
 **`pxlNavEnv.init()` - Initialize & Start Running the `pxlNav` runtime;**
 <br/>&nbsp;&nbsp; Puts up the load screen with your title and any loader phrases
@@ -140,7 +140,7 @@ yourOptions.loaderPhrases = loaderPhrases;
 
 <br/>**Anti-aliasing level**
 <br/>&nbsp;&nbsp; Options are - `NONE`, `LOW`, `MEDIUM`, `HIGH`
-```yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
+<br/>```yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
 
 **Shadow + Edge softness**
 <br/>&nbsp;&nbsp; Default is `BASIC` - a simple shadow edge
@@ -180,7 +180,7 @@ List of available events to subscribe to -
 <br/> _`device-keyup` - Returns an [int]; The just released key.
 <br/> _`device-resize` - Returns an [{height:#,width:#}]; Height Width object of the new window size.
 <br/> _`pxlNavEventNameHere` - Never emitted; You did some copy'pasta.
-<br/> _`help` - Hello! I'm here to help you!
+<br/> _`help` - Hello! I'm here to help you! *(Print this list to Console)*
 <br/> _`pingPong` - Send 'ping', Get 'pong'! - pxlNav.trigger('ping');
 
 
@@ -255,7 +255,7 @@ Only needed if you want to use the functionality outside of pxlNav's framework i
 // pxlNav Launcher
 //   Help docs - https://github.com/ProcStack/pxlNav/tree/main/docs
 
-import { pxlNav, pxlNavVersion, pxlEnums, PXLNAV_OPTIONS } from './pxlNav.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions } from './pxlNav.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -306,7 +306,7 @@ const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 
 // -- Prepare pxlNav options --
 
-let pxlNavOptions = Object.assign({},PXLNAV_OPTIONS);
+let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
