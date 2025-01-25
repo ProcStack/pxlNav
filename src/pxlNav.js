@@ -1,7 +1,7 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.17";
-//      Written by Kevin Edzenga 2020;2024
+const pxlNavVersion = "0.0.18";
+//      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // 
@@ -144,8 +144,10 @@ class pxlNav{
       pxlRoomRoot = options["pxlRoomRoot"];
     }
 
-    // Option Checks & Defaults
+    // Enums object
+    this.pxlEnums = pxlEnums;
 
+    // Option Checks & Defaults
     this.options = {
       loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "WarpAnimTexture"],
       // TODO : Get these to be pxlNav options pre-boot
@@ -193,6 +195,12 @@ class pxlNav{
       "device-keydown" : "Returns an [int]; The just pressed key.",
       "device-keyup" : "Returns an [int]; The just released key.",
       "device-resize" : "Returns an [{height:#,width:#}]; Height Width object of the new window size.",
+      "camera-move" : "Returns a {'pos':vec3(),'dist':float}; Emitted when the camera moves.",
+      "camera-rotate" : "Returns a [quaternion]; Emitted when the camera rotates.",
+      "camera-jump" : "Returns a [bool]; Emitted when the camera jumps to a new position.",
+      "camera-fall" : "Returns a [bool]; Emitted when the camera starts to free-fall / gravity.",
+      "camera-landed" : "Returns a [bool]; Emitted when the camera lands from a jump / fall.",
+      "camera-collision" : "Returns a [bool]; Emitted when the camera collides with an object.",
       "pxlNavEventNameHere" : "Never emitted; You did some copy'pasta.",
       "" : "** NOTE : callbacks get an event object shaped -  **",
       "" : "** { 'type' : *eventName*, 'value' : *data* } **",
@@ -233,6 +241,13 @@ class pxlNav{
 
     this.pxlEnv = new pxlBase.Environment( this.options, this.startingRoom, this.mobile );
     this.pxlDevice = new pxlBase.Device( projectTitle, pxlCore, this.mobile, this.autoCam );
+    
+    // Default Grid Size 50, Collider Bounds as reference 1000.0
+    //  The reference bounds are used to scale down the grid size for smaller bbox colliders,
+    //    Helping with higher poly counts for performance
+    this.pxlColliders = new pxlBase.Colliders( this.verbose, this.options["collisionScale"]["gridSize"], this.options["collisionScale"]["gridReference"] );
+
+
     this.pxlCamera = new pxlBase.Camera();
     // Disable Free-Roam camera mode if static camera is enabled
     if( this.options["staticCamera"] ){
@@ -243,6 +258,8 @@ class pxlNav{
 
     this.pxlGuiDraws = new pxlBase.GUI( this.verbose, projectTitle, this.folderDict["assetRoot"], this.folderDict["guiRoot"] );
     
+    // TODO : These should really be requested via pxlEnv methods, but for now...
+    //          Too many dependencies still to refactor, but it's cleaner than its ever been, so I'll take it!
     this.pxlQuality.setDependencies( this );
     this.pxlUtils.setDependencies( this );
     this.pxlFile.setDependencies( this );
@@ -251,6 +268,7 @@ class pxlNav{
     this.pxlEnv.setDependencies( this );
     this.pxlAnim.setDependencies( this );
     this.pxlDevice.setDependencies( this );
+    this.pxlColliders.setDependencies( this );
     this.pxlCamera.setDependencies( this );
     this.pxlGuiDraws.setDependencies( this );
 
@@ -487,9 +505,11 @@ class pxlNav{
         this.pxlEnv.warpZoneRenderTarget.texture.magFilter=LinearFilter;
         this.pxlEnv.warpZoneRenderTarget.texture.generateMipmaps=false;*/
         
-        var aspectRatio=this.pxlGuiDraws.pxlNavCanvas.width/this.pxlGuiDraws.pxlNavCanvas.height;
+        // TODO : Aspect Ratio is a bit off, need to fix this
+        //var aspectRatio=this.pxlGuiDraws.pxlNavCanvas.width/this.pxlGuiDraws.pxlNavCanvas.height;
         // To change the near and far, see Environment .init()
-        this.pxlCamera.camera=new PerspectiveCamera( this.pxlEnv.pxlCamFOV, 1, this.pxlEnv.camNear, this.pxlEnv.camFar);
+        let curFOV=this.pxlEnv.pxlCamFOV[ this.pxlDevice.mobile ? 'MOBILE' : 'PC' ];
+        this.pxlCamera.camera=new PerspectiveCamera( curFOV, 1, this.pxlEnv.camNear, this.pxlEnv.camFar);
         this.pxlAutoCam.camera=this.pxlCamera.camera;
         
         //this.pxlEnv.listener = new AudioListener();
@@ -1011,6 +1031,36 @@ class pxlNav{
         let eventSplit = eventType.split("-");
         if( eventSplit[0] == "device" ){
           this.pxlDevice.subscribe(  eventSplit[1], callbackFunc );
+        }else if( eventSplit[0] == "camera" ){
+          let camEventType = pxlEnums.CAMERA_EVENT.MOVE;
+
+          // Find the camera event type
+          switch( eventSplit[1] ){
+              case "move":
+                camEventType = pxlEnums.CAMERA_EVENT.MOVE;
+                break;
+              case "rotate":
+                camEventType = pxlEnums.CAMERA_EVENT.ROTATE;
+                break;
+              case "jump":
+                camEventType = pxlEnums.CAMERA_EVENT.JUMP;
+                break;
+              case "fall":
+                camEventType = pxlEnums.CAMERA_EVENT.FALL;
+                break;
+              case "landed":
+                camEventType = pxlEnums.CAMERA_EVENT.LANDED;
+                break;
+              case "collision":
+                camEventType = pxlEnums.CAMERA_EVENT.COLLISION;
+                break;
+              default:
+                console.warn("Warning : `pxlNav.subscribe( 'camera-"+eventSplit[1]+"', ... )` was used; use 'help' for a list of valid events.");
+                break;
+            }
+
+          this.pxlCamera.subscribe( camEventType, callbackFunc );
+
         }else{
           this.callbacks[eventType] = callbackFunc;
         }

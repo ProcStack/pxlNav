@@ -9,7 +9,7 @@ export const VERBOSE_LEVEL = {
 	'ERROR' : 1,
 	'WARN' : 2,
 	'INFO' : 3
-}
+};
 
 // Anti-aliasing settings
 //   Low - cross kernal sampling, 1 center sample + 4 samples diangonally from center pixel
@@ -19,13 +19,22 @@ export const ANTI_ALIASING = {
   'LOW' : 1,
   'MEDIUM' : 2,
   'HIGH' : 3
+};
+
+// Render Order Layers
+export const RENDER_LAYER = {
+  "SKY": 0,
+  "SCENE": 1,
+  "PARTICLES": 2,
+  "GLOW": 3
 }
+
 
 // Sky Haze settings should be passed through the pxlNav.Options
 export const SKY_HAZE = {
   'OFF' : 0,
   'VAPOR' : 1
-}
+};
 
 // Shadow edge softness, currently mapped to THREE.PCFSoftShadowMap THREE.PCFShadowMap
 // Set in pxlNav.js, used in pxlNav.Environment.js
@@ -33,7 +42,44 @@ export const SHADOW_MAP = {
   'OFF' : 0,
   'BASIC' : 1,
   'SOFT' : 2
-}
+};
+
+// Collder internal types
+//  'FLOOR' -> `colliderX` and `colliderZ` attributes from the FBX
+export const COLLIDER_TYPE = {
+  'FLOOR' : 0, // Default ground/floor type collider
+  'WALL' : 1, // Can't walk through, even if there is 'FLOOR' beneath it
+  'WALL_TOP' : 2, // The Wall Top; Will be removed in future versions, use 'FLOOR' instead
+  'CEILING' : 3, // Not implemented yet
+  'PORTAL_WARP' : 4, // Warp to another location in the same room
+  'ROOM_WARP' : 5, // Warp to another location in a different room
+  'ITEM' : 6, // Callback to item list managed by pxlNav & from Room FBX
+  'SCRIPTED' : 7, // Callback to current room on collision
+  'HOVERABLE' : 8, // Mouse hoverable, but not clickable
+  'CLICKABLE' : 9 // Mouse clickable
+};
+
+// Geometry side types
+//   Used when casting rays to determine which side of the geometry was hit
+//     More specifics will be added as needed
+export const GEOMETRY_SIDE = {
+  'FRONT' : 0,
+  'BACK' : 1,
+  'DOUBLE' : 2
+};
+
+// Camera event types
+//   Subscribe to the pxlCamera object using these event types
+//    `pxlNav.pxlCamera.subscribe( CAMERA_EVENT.MOVE, function() { ... } );`
+export const CAMERA_EVENT = {
+  'MOVE' : 0,
+  'ROTATE' : 1,
+  'JUMP' : 2,
+  'FALL' : 3,
+  'LANDED' : 4,
+  'COLLISION' : 5
+};
+
 
 
 // 'COLOR_SHIFT' is used in Utils.js, inturn used when loading assets through FileIO.js
@@ -69,7 +115,7 @@ export const COLOR_SHIFT = {
   'WINDOWS_TO_LINEAR' : 6,
   'LINEAR_TO_UNIX' : 7,
   'UNIX_TO_LINEAR' : 8
-}
+};
 
 // -- -- --
 
@@ -78,7 +124,11 @@ export const COLOR_SHIFT = {
 export const pxlEnums = {
   'VERBOSE_LEVEL' : VERBOSE_LEVEL,
   'ANTI_ALIASING' : ANTI_ALIASING,
+  'RENDER_LAYER' : RENDER_LAYER,
   'SKY_HAZE' : SKY_HAZE,
   'SHADOW_MAP' : SHADOW_MAP,
+  'CAMERA_EVENT' : CAMERA_EVENT,
+  'COLLIDER_TYPE' : COLLIDER_TYPE,
+  'GEOMETRY_SIDE' : GEOMETRY_SIDE,
   'COLOR_SHIFT' : COLOR_SHIFT
-}
+};

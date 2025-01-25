@@ -34,7 +34,7 @@ import {
   LinearSRGBColorSpace
 } from "../libs/three/three.module.min.js";
 
-import { ANTI_ALIASING, VERBOSE_LEVEL } from "./core/Enums.js";
+import { ANTI_ALIASING, VERBOSE_LEVEL, COLLIDER_TYPE } from "./core/Enums.js";
 import { pxlOptions } from "./core/Options.js";
 
 import { EffectComposer } from '../libs/three/EffectComposer.js';
@@ -106,8 +106,10 @@ export class Environment{
     this.currentAudioZone=0;
     
     this.pxlUtils=null;
+    this.pxlEnums=null;
     this.pxlTimer=null;
     this.pxlAnim=null;
+    this.pxlColliders=null;
     this.pxlAutoCam=null;
     this.pxlAudio=null;
     this.pxlFile=null;
@@ -119,13 +121,6 @@ export class Environment{
     this.pxlCamera=null;
     this.pxlGuiDraws=null;
     
-    
-    this.renderLayerEnum = {
-      "SCENE": 0,
-      "PARTICLES": 1,
-      "GLOW": 2,
-      "SKY": 3
-    }
     
     this.cloud3dTexture=null;
     this.softNoiseTexture=null;
@@ -159,7 +154,7 @@ export class Environment{
     this.camReturnLookAt=new Vector3(0,0,0);
     this.camLobbyPos=new Vector3(0, 15, 0);
     this.camLobbyLookAt=new Vector3(0, 15, -100);
-    this.pxlCamFOV=mobile?80:60;
+    this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
     this.pxlCamZoom=1;
     this.pxlCamAspect=1;
     this.pxlCamNearClipping = this.camNear;
@@ -269,8 +264,10 @@ export class Environment{
   setDependencies( pxlNav ){
     this.scene=pxlNav.scene;
     this.pxlUtils=pxlNav.pxlUtils;
+    this.pxlEnums=pxlNav.pxlEnums;
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlAnim=pxlNav.pxlAnim;
+    this.pxlColliders=pxlNav.pxlColliders;
     this.pxlAutoCam=pxlNav.pxlAutoCam;
     this.pxlAudio=pxlNav.pxlAudio;
     this.pxlFile=pxlNav.pxlFile;
@@ -329,49 +326,16 @@ export class Environment{
 
     //this.buildSnow();
     
-    /*
-    // Prevent Web Camera from booting 
-    if( this.pxlDevice.mobile || this.pxlAutoCam.enabled){
-        this.pxlAutoCam.toggleAutoCam();
-        this.fogMult.x = 1;
-        if( ! this.pxlAutoCam.enabled ){
-            this.pxlGuiDraws.toggleMobileWelcome(true);
-        }else{
-            this.postIntro=true;
-            this.pxlCamera.colliderValid=true;
-            this.pxlCamera.eventCheckStatus=true;
-            this.pxlCamera.colliderShiftActive=true;
-            this.pxlCamera.nearestFloorObjName="mobile";
-            this.pxlCamera.colliderCurObjHit="AudioTrigger_2";
-            this.pxlCamera.proximityScaleTrigger=true;
-            this.exposureShiftActive=true;
-            this.pxlAudio.setFadeActive( 1 );
-        }
-    }else{
-        this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
-    }
-    */
-    
-    /*
-    // Prevent audio and video booting
-    setTimeout( ()=>{
-        this.pxlAudio.postBoot();
-        
-        if( this.pxlDevice.mobile ){
-          this.pxlAudio.djPlayerMuteToggle(true);
-        }
-        
-        if(this.pxlVideo){
-          this.pxlVideo.postBoot('dj');
-        }
-        
-    }, 1000);
-    */
   }
     
   postHelpIntro(){
+    // If the device is a computer, without autocam, send player details to the server
+    //   TODO : This will need to be accessible from the room object and set-up networking as an extention
     if( !this.pxlDevice.mobile && !this.pxlAutoCam.enabled ){
       this.pxlCamera.jogServerMemory();
+    
+    // If the device is a mobile, or autocam is enabled,
+    //   Trigger a valid collider to allow the camera to be placed.
     }else{
       this.pxlCamera.colliderValid=true;
       this.pxlCamera.eventCheckStatus=true;
@@ -381,6 +345,7 @@ export class Environment{
       this.pxlCamera.proximityScaleTrigger=true;
       this.exposureShiftActive=true;
       
+      // TODO : Media (audio, video, music) needs to be an setting on the pxlOptions object
       if( !this.pxlDevice.mobile ){
         this.pxlAudio.play();
         setTimeout( ()=>{
@@ -446,7 +411,8 @@ export class Environment{
       /* webpackIgnore: true */
       import( curImportPath )
         .then((module)=>{
-          let roomObj=new module[roomName]( roomName, `${this.pxlRoomLclRoot}/${roomName}/`, this.pxlFile, this.pxlAnim, this.pxlUtils, this.pxlDevice, this, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
+          let roomObj=new module[roomName]( roomName, `${this.pxlRoomLclRoot}/${roomName}/`, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
+          roomObj.setDependencies( this );
 
           roomObj.camera=this.pxlCamera.camera;
           roomObj.scene=new Scene();
@@ -507,7 +473,7 @@ export class Environment{
   }
     
   newSubRoom( roomObject ){
-    this.roomSubList[ roomObject.roomName ]=roomObject;
+    this.roomSubList[ roomObject.getName() ]=roomObject;
   }
   addToRooms( obj ){
     let roomObjDict={};
@@ -729,57 +695,6 @@ export class Environment{
     }
     
     
-    buildSnow(){
-        //sprite = ImageUtils.loadTexture( "textures/sprites/disc.png" );
-
-    let vertexCount = 12000; // Point Count
-        let pScale = 12;  // Point Base Scale
-
-    let geo = new BufferGeometry();
-    let verts = [];
-    let seeds = [];
-    let atlasId = [];
-
-        const atlasGen=()=>{ return Math.floor( (Math.random() * 4000) % 4 )*.25; };
-
-    for( let x=0; x<vertexCount; ++x ){
-            verts.push( 0,0,0 );
-      seeds.push( (Math.random()),(Math.random()),(Math.random()*2-1), (Math.random()*.5+.5) );
-      atlasId.push( atlasGen(), atlasGen() );
-    }
-
-    let posAttribute = new Float32BufferAttribute( verts, 3 );
-    let seedAttribute = new Float32BufferAttribute( seeds, 4 );
-    let atlasAttribute = new Float32BufferAttribute( atlasId, 2 );
-    //let idAttribute = new Uint8BufferAttribute( pId, 1 ); // ## would only be 0-65536; set up vector array for ids
-    geo.setAttribute( 'position', posAttribute );
-    geo.setAttribute( 'seeds', seedAttribute );
-    geo.setAttribute( 'atlas', atlasAttribute );
-    //geo.setAttribute( 'id', idAttribute );
-        
-        let snowUniforms={
-      snowTexture:{type:"t",value: this.pxlUtils.loadTexture( this.pxlUtils.assetRoot+"snow.jpg", 1, {"encoding":LinearSRGBColorSpace, "magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} ) },
-      pointScale:{type:"f",value: pScale*this.pxlQuality.screenResPerc },
-      intensity:{type:"f",value:1.0},
-      rate:{type:"f",value:.035},
-    };
-    console.log(this.pxlShaders.particles)
-        let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, this.pxlShaders.particles.snowVert( this.mobile ), this.pxlShaders.particles.snowFrag() );
-    mtl.side=DoubleSide;
-        mtl.transparent=true;
-        mtl.blending=AdditiveBlending;
-        mtl.depthTest=true;
-        mtl.depthWrite=false;
-
-        let snow = new Points( geo, mtl );
-        snow.sortParticles = false;
-        snow.frustumCulled = false;
-        this.scene.add( snow );
-        snow.layers.set(1);
-        snow.pBaseScale=pScale;
-        this.geoList['snow']=snow;
-    }
-    
     // A screen filled plane to render outside of effect composer passes
     buildBackgroundObject( customUniforms={}, bgVert=null, bgFrag=null){
         let geo = new PlaneBufferGeometry();
@@ -808,54 +723,39 @@ export class Environment{
   // In-Scene clickables
   clickUserDetect(){
     
-    if( this.roomSceneList[this.currentRoom].castRay ){
-      this.roomSceneList[this.currentRoom].castRay( true, this.pxlDevice.touchMouseData.button )
-    }
+    // Current Room Obj
+    let curRoomObj = this.roomSceneList[ this.currentRoom ];
+
+    // Cast mouse or touch position to NDC
+    let mouseScreenSpace = this.pxlUtils.screenToNDC( this.pxlDevice.mouseX, this.pxlDevice.mouseY, this.pxlDevice.sW, this.pxlDevice.sH );
     
-    if( this.pxlDevice.mobile ){ 
-        return;
+    // Get clickable objects under mouse
+    let rayHits={};
+    if( curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) ){
+      let curObjList = curRoomObj.getColliders( COLLIDER_TYPE.CLICKABLE );
+      rayHits = this.pxlColliders.castInteractRay( this.currentRoom, curObjList, this.pxlCamera.camera, mouseScreenSpace );
     }
-        
-    let objHit=null;
-    let mouseScreenSpace=new Vector2( this.pxlDevice.mouseX/this.pxlDevice.sW*2-1, -this.pxlDevice.mouseY/this.pxlDevice.sH*2+1 );
-    this.pxlCamera.objRaycast.setFromCamera(mouseScreenSpace, this.pxlCamera.camera );
-    var rayHits=[];
-    //if(this.camScreenData.screenClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.camScreenData.screenClickable);//this.scene.children);
-    if(this.objectClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.objectClickable);//this.scene.children);
-    if(rayHits.length > 0){
-      let closestHit=99999;
-      for(var x=0; x<rayHits.length;++x){
-        var obj=rayHits[x];//.object;
-        let curDist=obj.distance;
-        if(curDist<closestHit){
-          objHit=obj.object;
-          closestHit=Math.min(closestHit, curDist);
-        }
-      }
-    }
-    if(objHit){
+
+    // Get nearest object hit,
+    //   rayHits.order is an array of objects hit, in order of distance
+    if( rayHits.hasOwnProperty("order") && rayHits.order.length > 0 ){
+      let objHit = rayHits.order[0];
       this.clickableActions(objHit.name);
+      return;
     }
-        
-        
-    let promoHit=null;
-    if(this.promoClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.promoClickable);//this.scene.children);
-    if(rayHits.length > 0){
-      let closestHit=99999;
-      for(var x=0; x<rayHits.length;++x){
-        var obj=rayHits[x];//.object;
-        let curDist=obj.distance;
-        if(curDist<closestHit){
-          promoHit=obj.object;
-          closestHit=Math.min(closestHit, curDist);
-        }
-      }
+
+    // -- -- --
+
+    // If no clickable object hit, check for promo clickables
+    rayHits = {};
+    rayHits = this.pxlColliders.castInteractRay( this.currentRoom, this.promoClickable, this.pxlCamera.camera, mouseScreenSpace );
+
+    if(rayHits.hasOwnProperty("order") && rayHits.order.length > 0){
+      let promoHit = rayHits.order[0];
+      this.promoActions( promoHit );
     }
-    if(promoHit){
-      this.promoActions(promoHit);
-    }
-        
   }
+
   clickableActions(action=null){
     if(action == "CallToAction" && this.clickablePrevActiveObject){
       this.pxlGuiDraws.ctaBuildPopup();
@@ -877,28 +777,24 @@ export class Environment{
   // Hover over clickable
   hoverUserDetect(){
     
-    if( this.roomSceneList[this.currentRoom].castRay ){
-      this.roomSceneList[this.currentRoom].castRay( false, this.pxlDevice.touchMouseData.button )
-    }
+    // Current Room Obj
+    let curRoomObj = this.roomSceneList[ this.currentRoom ];
+
+    // Cast mouse or touch position to NDC
+    let mouseScreenSpace = this.pxlUtils.screenToNDC( this.pxlDevice.mouseX, this.pxlDevice.mouseY, this.pxlDevice.sW, this.pxlDevice.sH );
     
-    let objHit=null;
-    let mouseScreenSpace=new Vector2( this.pxlDevice.mouseX/this.pxlDevice.sW*2-1, -this.pxlDevice.mouseY/this.pxlDevice.sH*2+1 );
-    this.pxlCamera.objRaycast.setFromCamera(mouseScreenSpace, this.pxlCamera.camera );
-    var rayHits=[];
-    //if(this.camScreenData.screenClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.camScreenData.screenClickable);//this.scene.children);
-    if(this.objectClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.objectClickable);
-    if(rayHits.length > 0){
-      let closestHit=99999;
-      for(var x=0; x<rayHits.length;++x){
-        var obj=rayHits[x];//.object;
-        let curDist=obj.distance;
-        if(curDist<closestHit){
-          objHit=obj.object;
-          closestHit=Math.min(closestHit, curDist);
-        }
-      }
+    // Get hoverable objects under mouse
+    let rayHits={};
+    if( curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) || curRoomObj.hasColliderType( COLLIDER_TYPE.HOVERABLE ) ){
+      // Combine objectClickable with objectHoverable This may change
+      let curObjList = [ ...curRoomObj.getColliders( COLLIDER_TYPE.CLICKABLE ), ...curRoomObj.getColliders( COLLIDER_TYPE.HOVERABLE ) ];
+      rayHits = this.pxlColliders.castInteractRay( this.currentRoom, curObjList, this.pxlCamera.camera, mouseScreenSpace );
     }
-    if(objHit){
+
+    // Get nearest object hit,
+    //   rayHits.order is an array of objects hit, in order of distance
+    if( rayHits.hasOwnProperty("order") && rayHits.order.length > 0 ){
+      let objHit = rayHits.order[0];
       this.pxlDevice.setCursor("help");
       if(this.objectClickableObjectList[objHit.name]){
         if(this.clickablePrevActiveObject==null){
@@ -907,7 +803,7 @@ export class Environment{
         this.objectClickableObjectList[objHit.name]['Inactive'].visible=false;
         this.objectClickableObjectList[objHit.name]['Hover'].visible=true;
       }
-            return;
+      return;
     }else{
       if(this.clickablePrevActiveObject){
         this.objectClickableObjectList[this.clickablePrevActiveObject]['Inactive'].visible=true;
@@ -916,22 +812,15 @@ export class Environment{
       }
       this.pxlDevice.setCursor("grab");
     }
-       
-        
-    let promoHit=null;
-    if(this.promoClickable.length>0) rayHits=this.pxlCamera.objRaycast.intersectObjects(this.promoClickable);
-    if(rayHits.length > 0){
-      let closestHit=99999;
-      for(var x=0; x<rayHits.length;++x){
-        var obj=rayHits[x];//.object;
-        let curDist=obj.distance;
-        if(curDist<closestHit){
-          promoHit=obj.object;
-          closestHit=Math.min(closestHit, curDist);
-        }
-      }
-    }
-    if(promoHit){
+
+    // -- -- --
+
+    // If no clickable object hit, check for promo clickables
+    rayHits = {};
+    rayHits = this.pxlColliders.castInteractRay( this.currentRoom, this.promoClickable, this.pxlCamera.camera, mouseScreenSpace );
+
+    if(rayHits.hasOwnProperty("order") && rayHits.order.length > 0){
+      let promoHit = rayHits.order[0];
       this.pxlDevice.setCursor("alias");
       if(this.promoClickableObjectList[promoHit.name]){
         if(this.promoPrevActiveObject==null){
@@ -1671,13 +1560,12 @@ export class Environment{
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){
         curRoom.step();
-        
-        curRoom.camera.layers.disable( this.renderLayerEnum.SKY );
+        curRoom.camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
         this.engine.setRenderTarget(curRoom.scene.renderTarget);
         this.engine.clear();
         this.engine.render( curRoom.scene, curRoom.camera);
         this.engine.setRenderTarget(null);
-        curRoom.camera.layers.enable( this.renderLayerEnum.SKY );
+        curRoom.camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
         
         if( false && this.pxlQuality.settings.fog>0 ){
           this.pxlCamera.camera.layers.disable( 1 );
@@ -1734,10 +1622,10 @@ export class Environment{
             }
           }
           
-          //this.pxlEnv.renderLayerEnum SCENE PARTICLES GLOW
-          camera.layers.disable( this.renderLayerEnum.SCENE );
-          camera.layers.disable( this.renderLayerEnum.PARTICLES );
-          camera.layers.disable( this.renderLayerEnum.SKY );
+          //this.pxlEnv.pxlEnums.RENDER_LAYER SCENE PARTICLES GLOW
+          camera.layers.disable( this.pxlEnums.RENDER_LAYER.SCENE );
+          camera.layers.disable( this.pxlEnums.RENDER_LAYER.PARTICLES );
+          camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
           
           this.engine.setRenderTarget(target);
           let bgCd=0x000000;
@@ -1751,9 +1639,9 @@ export class Environment{
           scene.background.g=curgb.g;
           scene.background.b=curgb.b;
           
-          camera.layers.enable( this.renderLayerEnum.SCENE );
-          camera.layers.enable( this.renderLayerEnum.PARTICLES );
-          camera.layers.enable( this.renderLayerEnum.SKY );
+          camera.layers.enable( this.pxlEnums.RENDER_LAYER.SCENE );
+          camera.layers.enable( this.pxlEnums.RENDER_LAYER.PARTICLES );
+          camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
           this.engine.setRenderTarget(null);
           
           if(curRoom.geoList["GlowPass"]){

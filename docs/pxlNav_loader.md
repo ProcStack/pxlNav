@@ -22,12 +22,12 @@ This is the rundown of how to interact with `pxlNav` and your `pxlRoom`'s custom
 ## Available Imports
 
 ```
-import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions, RoomEnvironment, pxlEffects, pxlShaders, pxlBase } from './pxlNav.###.js';
+import { pxlNav, pxlNavVersion, pxlEnums,  pxlOptions, pxlEffects, pxlShaders, RoomEnvironment, pxlBase } from './pxlNav.###.js';
 ```
 
 List of exports from `pxlNav` -
 <br/> _`pxlNav` - Main pxlNav object to manage your environments
-<br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.16`
+<br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.18`
 <br/> _`pxlEnums` - Available enums in a single object
 <br/> _`pxlOptions` - Options Objects with Default settings
 <br/> _`pxlEffects` - Particle Systems you can add to your room
@@ -103,6 +103,10 @@ yourOptions.pxlRoomRoot = "./pxlRooms";
 yourOptions.staticCamera = false;
 yourOptions.autoCamera = false;
 yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
+yourOptions.collisionScale = {
+    'gridSize' : 50,
+    'gridReference' : 1000
+  },
 yourOptions.shadowMapBiasing = pxlEnums.SHADOW_MAP.BASIC;
 yourOptions.LoadEnvAssetFile = false;
 yourOptions.skyHaze = pxlEnums.SKY_HAZE.OFF;
@@ -142,6 +146,12 @@ yourOptions.loaderPhrases = loaderPhrases;
 <br/>&nbsp;&nbsp; Options are - `NONE`, `LOW`, `MEDIUM`, `HIGH`
 <br/>```yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
 
+
+<br/>**Collision Detection Scaling**
+<br/>&nbsp;&nbsp; `gridSize` - The size grids to check for collision object triangles to pre-cache collision detection
+<br/>&nbsp;&nbsp; `gridReference` - *(No need to edit this)* If we forget to scale the grid size with a new larger scene, the system will adjust the `gridSize` proportionally to the `gridReference`. It would be better to simply update the `gridSize` to your needs as the scene size grows.
+<br/>```yourOptions.antiAliasing = pxlEnums.ANTI_ALIASING.LOW;```
+
 **Shadow + Edge softness**
 <br/>&nbsp;&nbsp; Default is `BASIC` - a simple shadow edge
 <br/>&nbsp;&nbsp; Options are - `OFF`, `BASIC`, `SOFT`
@@ -176,9 +186,18 @@ List of available events to subscribe to -
 <br/> _`roomChange-Middle` - Emitted when the room change process occurs mid transition.
 <br/> _`roomChange-End` - Returns a [bool]; Emitted when the room change transition ends.
 <br/> _`fromRoom` - Returns a custom object; Emitted from your Room code you choose to emit during run time.
+
 <br/> _`device-keydown` - Returns an [int]; The just pressed key.
 <br/> _`device-keyup` - Returns an [int]; The just released key.
 <br/> _`device-resize` - Returns an [{height:#,width:#}]; Height Width object of the new window size.
+
+<br/> _`camera-move` - Returns a {'pos':vec3(),'dist':float}; Emitted when the camera moves.
+<br/> _`camera-rotate` - Returns a [quaternion]; Emitted when the camera rotates.
+<br/> _`camera-jump` - Returns a [bool]; Emitted when the camera jumps to a new position.
+<br/> _`camera-fall` - Returns a [bool]; Emitted when the camera starts to free-fall / gravity.
+<br/> _`camera-landed` - Returns a [bool]; Emitted when the camera lands from a jump / fall.
+<br/> _`camera-collision` - Returns a [bool]; Emitted when the camera collides with an object.
+      
 <br/> _`pxlNavEventNameHere` - Never emitted; You did some copy'pasta.
 <br/> _`help` - Hello! I'm here to help you! *(Print this list to Console)*
 <br/> _`pingPong` - Send 'ping', Get 'pong'! - pxlNav.trigger('ping');

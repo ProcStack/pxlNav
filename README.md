@@ -1,12 +1,11 @@
-# pxlNav v0.0.16
+# pxlNav v0.0.18
 Javascript Player Controller & Environment Manager for Three.js
 
-**`pxlNav` is still being isolated into a package;**
-<br/>&nbsp;&nbsp; **CJS version needs testing.**
+
+<br/>&nbsp;&nbsp; **CJS & UMD versions needs testing, see `./builds` for these versions.**
 <br/>&nbsp;&nbsp; **Please bare with me while I work out any NPM packaging issues.**
-<br/>**See the [procstack.github.io repo](https://github.com/ProcStack/procstack.github.io) for the current `pxlNav` status &amp; working example.**
-<br/><br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see pxlNav in action.**
-<br/>**For an Environment to roam around in visit [procstack.github.io/pxlNav.htm](https://procstack.github.io/pxlNav.htm)**
+<br/><br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see static-camera pxlNav action.**
+<br/>**For an Environment to roam around in FPV, visit [procstack.github.io/pxlNav_fieldEnv.htm](https://procstack.github.io/pxlNav_fieldEnv.htm)**
 <br/><br/>
 
 --------------------------------------------------------------------------------------------
@@ -24,23 +23,27 @@ Javascript Player Controller & Environment Manager for Three.js
 --------------------------------------------------------------------------------------------
 
 ## Install Files
- - `./dist/pxlNav.umd.js` - JS Module file
+ - `./dist/pxlNav.esm.js` - JS Module file
  - `./dist/pxlNavStyle.min.css` - CSS Style for things like Loading bar, Shader Editor, and more
  - `./dist/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
- - `./dist/three.module.js` - pxlNav is not propperly including three.js through node_modules yet.
+ - `./examples/pxlNavLoader_switchSpace.js` - Basic implementation of a external trigger to swap room environments
+ - `./dist/libs/three/...` - Some changes needed to be made to the FBXLoader.js file, please include the `libs` folder along side `pxlNav.esm.js` to run pxlNav
 
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
 
 ## The Good Bits
 **Wanna see example rooms using 3d fbx files?**
-<br/>&nbsp;&nbsp;&nbsp; [procstack.github.io Rooms](https://github.com/ProcStack/procstack.github.io/tree/main/Source/pxlRooms)
+<br/>&nbsp;&nbsp;&nbsp; [procstack.github.io Rooms](https://github.com/ProcStack/pxlNav/tree/main/examples/js/pxlRooms)
 
 <br/>&nbsp;&nbsp;**For `pxlNav` Documentation -**
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Documentation](https://github.com/ProcStack/pxlNav/tree/main/docs)
 
+<br/>&nbsp;&nbsp;**For `pxlNav` changes between versions -**
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Change Log](https://github.com/ProcStack/pxlNav/blob/main/ChangeLog.md)
+
 <br/>&nbsp;&nbsp;`pxlNav` dev entry point is -
-<br/>&nbsp;&nbsp;&nbsp;&nbsp;`./src/js/pxlNav.js`
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;`./src/pxlNav.js`
 
 ##### <p align="right">[^ Top](#index)</p>
 --------------------------------------------------------------------------------------------
@@ -140,12 +143,6 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;\_ No movement controls on Mobile yet
 <br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
 <br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
-
-<br/>&nbsp;\_ Instancing Geometry needs to be through an empty transform or mesh geometry object,
-<br/>&nbsp;&nbsp;&nbsp; With an 'instance' string attribute (User Details) of the desired source object's name.
-<br/>&nbsp;&nbsp;&nbsp; \*Since Instancing can be set up in many different ways, and in each cgi program themselves.
-<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pxlNav doesn't attempt to regain control over any found Instanced Objects in your FBX scene file.
-<br/>&nbsp;&nbsp;&nbsp; Use built-in Instancing from Maya, Blender, Houdini, etc... at your own risk.
 
 <br/>&nbsp;\_ Networking as mostly been removed for safety concerns -
 <br/>&nbsp;&nbsp;&nbsp; Avatars, WebCam Video Streaming, & Mic Audio, but it can be implemented through pxlNav `Extensions`

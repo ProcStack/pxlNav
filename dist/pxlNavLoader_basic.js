@@ -1,4 +1,4 @@
-// pxlNav Launcher Javascript
+// ProcStack.Git.io Javascript
 //  Written by Kevin Edzenga; 2024
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -6,7 +6,7 @@
 //   This is an example implementation of `pxlNav` in a project;
 //     Tieing in `ProcPages` to manage the pages of the site,
 //       Listening to / triggering events on `pxlNav`
-//   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
+//   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
 //
 
 
@@ -24,8 +24,8 @@ const projectTitle = "pxlNav : Field Env.";
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "./pxlRooms";
 
-// Add your own room, or copy Rooms from `./examples/js/pxlRooms`
-const bootRoomList = ["FieldEnvironment"];
+// Current possible rooms - "CampfireEnvironment", "SaltFlatsEnvironment", "FieldEnvironment", "VoidEnvironment"
+const bootRoomList = ["FieldEnvironment" ];//, "VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -65,6 +65,15 @@ const enableStaticCamera = false;
 //  Options are - OFF, VAPOR
 const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 
+// Collision Detection Grid
+//   Collision objects are split into a grid for faster collision detection
+//   gridSize - The size of the grid
+//   gridReference - Grid scene reference threshold to scale `gridSize`
+const collisionScale = {
+  'gridSize' : 100,
+  'gridReference' : 1000
+};
+
 
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -81,6 +90,7 @@ const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.antiAliasing = antiAliasing;
+pxlNavOptions.collisionScale = collisionScale;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
 pxlNavOptions.staticCamera = enableStaticCamera;
 pxlNavOptions.skyHaze = skyHaze;

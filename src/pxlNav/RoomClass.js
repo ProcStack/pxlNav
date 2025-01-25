@@ -32,19 +32,22 @@ import {
 } from "../libs/three/three.module.min.js";
 import { pxlPrincipledVert, pxlPrincipledFrag } from "./shaders/objects/PxlPrincipled.js";
 
+import { RENDER_LAYER, COLLIDER_TYPE } from "./core/Enums.js";
+
 class RoomEnvironment{
-  constructor( roomName='CampfireEnvironment', assetPath=null, pxlFile=null, pxlAnim=null, pxlUtils=null, pxlDevice=null, pxlEnv=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+  constructor( roomName='CampfireEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     this.roomName=roomName;
-    this.pxlFile=pxlFile;
-    this.pxlUtils=pxlUtils;
-    this.pxlAnim=pxlAnim;
-    this.pxlDevice=pxlDevice;
-    this.pxlEnv=pxlEnv;
+    this.pxlFile=null;
+    this.pxlUtils=null;
+    this.pxlAnim=null;
+    this.pxlColliders=null;
+    this.pxlDevice=null;
+    this.pxlEnv=null;
     this.booted=false;
     this.initScene=true;
     this.active=true;
     this.assetPath=assetPath+"Assets/";
-    this.mobile=pxlDevice.mobile;
+    this.mobile=false;
     
     this.sceneFile = this.assetPath+"CampfireEnvironment.fbx";
     this.animFile = this.assetPath+"Campfire_RabbitDruidA_anim.fbx";
@@ -66,7 +69,7 @@ class RoomEnvironment{
     this.camHoldWarpPos=true;
     this.camLocation = {};
     
-    this.pxlCamFOV=(this.mobile?80:60);
+    this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
     this.pxlCamZoom=1;
     this.pxlCamAspect=1;
     this.pxlCamNearClipping = 5;
@@ -103,25 +106,30 @@ class RoomEnvironment{
     this.glassList=[]
     this.particleList={};
     
-    this.portalList={};
 
     this.enableRaycast = false;
-    this.hoverableExists=false;
+    this.hasHoverables=false;
     this.hoverableList=[];
     this.hoverableObj=null;
-    this.clickableExists=false;
+    
+    this.hasClickables=false;
     this.clickableList=[];
     this.clickableObj=null;
     
     
     this.collidersExist=false;
     this.colliderActive=false;
+    this.colliderHashMap={};
     this.colliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
     this.antiColliderActive=false;
     this.antiColliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
     this.antiColliderTopActive=false;
     this.antiColliderTopList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
     
+    this.hasPortalExit=false;
+    this.portalList={};
+
+    this.hasRoomWarp=false;
     this.roomWarp=[];
     this.warpPortalTexture=null;
     this.warpZoneRenderTarget=null;
@@ -135,9 +143,24 @@ class RoomEnvironment{
     this.cloud3dTexture=null;
     this.smoothNoiseTexture=null;
         
+    // Helper objects for debug visualizations
+    this.hasHelpers = false;
+    this.helperObjects = {};
+
     //%=
     this.currentShader=null;
     //%
+  }
+
+// Set pxlNav dependencies
+  setDependencies( pxlNav ){
+    this.pxlEnv = pxlNav;
+    this.pxlFile = pxlNav.pxlFile;
+    this.pxlAnim = pxlNav.pxlAnim;
+    this.pxlUtils = pxlNav.pxlUtils;
+    this.pxlDevice = pxlNav.pxlDevice;
+    this.pxlColliders = pxlNav.pxlColliders;
+    this.mobile = pxlNav.mobile;
   }
 
 // Run after all needed pxlNav services are loaded/built
@@ -166,6 +189,9 @@ class RoomEnvironment{
 // Per-Frame Render updates
   step(){
     this.runTime.x=this.msRunner.x;
+
+    // Update helper objects, if they exist
+    this.stepColliderHelper( COLLIDER_TYPE.FLOOR );
     
     //this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
     
@@ -187,6 +213,8 @@ class RoomEnvironment{
     //this.pxlEnv.roomBloomPass.enabled=this.bloomPreState;
   }
   
+  // -- -- --
+
 // Runs on window resize
   resize( sW, sH ){
     /*if(this.worldPosRenderTarget){
@@ -198,7 +226,7 @@ class RoomEnvironment{
   }
   
   setUserHeight( toHeight=1 ){
-    this.pxlEnv.pxlCamera.userScale = toHeight;
+    this.pxlEnv.pxlCamera.setUserHeight( toHeight, this.roomName );
   }
 
   resetCamera(){
@@ -255,6 +283,10 @@ class RoomEnvironment{
     }*/
   }
   
+  getName(){
+    return this.roomName;
+  }
+
   getArtistInfo(){
     return null;
   }
@@ -315,16 +347,16 @@ class RoomEnvironment{
     if(!this.enableRaycast){
       return;
     }
-    if( ( !isClick && !this.hoverableExists ) || ( isClick && !this.clickableExists ) ){
+    if( ( !isClick && !this.hasHoverables ) || ( isClick && !this.hasClickables ) ){
       //console.log("No Cickable / Hoverable Objects Found");
       this.mouseRayHits=[];
       return;
     }
     
     let castableObjects = []
-    if( !isClick && this.hoverableExists ) {
+    if( !isClick && this.hasHoverables ) {
       castableObjects = this.hoverableList;
-    }else if( isClick && this.clickableExists ){
+    }else if( isClick && this.hasClickables ){
       castableObjects = this.clickableList;
     }
     
@@ -339,6 +371,208 @@ class RoomEnvironment{
 
     this.mouseRayHits=rayHits;
   }
+
+  // -- -- --
+
+  hitColliders( colliderList=[], colliderType=COLLIDER_TYPE.FLOOR ){
+    if( colliderList.length == 0 ){
+      return;
+    }
+    // Implement custom-event logic in this function to handle collisions in your room
+    /* switch( colliderType ){
+      case COLLIDER_TYPE.FLOOR:
+        break;
+      case COLLIDER_TYPE.WALL:
+        break;
+      case COLLIDER_TYPE.WALL_TOP:
+        break;
+      case COLLIDER_TYPE.CEILING:
+        break;
+      case COLLIDER_TYPE.PORTAL_WARP:
+        break;
+      case COLLIDER_TYPE.ROOM_WARP:
+        break;
+      case COLLIDER_TYPE.ITEM:
+        break;
+      case COLLIDER_TYPE.SCRIPTED:
+        break;
+      case COLLIDER_TYPE.HOVERABLE:
+        break;
+      case COLLIDER_TYPE.CLICKABLE:
+        break;
+      default:
+        break;
+    } */
+  }
+
+  // -- -- --
+
+  hasColliders(){
+    return this.collidersExist
+  }
+
+  hasColliderType( colliderType=COLLIDER_TYPE.FLOOR ){
+    let hasCollidersOfType = false;
+    if( !this.hasColliders() ){
+      return hasCollidersOfType;
+    }
+
+    switch( colliderType ){
+      case COLLIDER_TYPE.FLOOR:
+        hasCollidersOfType = this.colliderActive;
+        break;
+      case COLLIDER_TYPE.WALL:
+        hasCollidersOfType = this.antiColliderActive;
+        break;
+      case COLLIDER_TYPE.WALL_TOP:
+        hasCollidersOfType = this.antiColliderTopActive;
+        break;
+      case COLLIDER_TYPE.CEILING:
+        // Not implemented yet
+        break;
+      case COLLIDER_TYPE.PORTAL_WARP:
+        hasCollidersOfType = this.hasPortalExit;
+        break;
+      case COLLIDER_TYPE.ROOM_WARP:
+        hasCollidersOfType = this.hasRoomWarp;
+        break;
+      case COLLIDER_TYPE.ITEM:
+        // Not implemented yet
+        break;
+      case COLLIDER_TYPE.SCRIPTED:
+        // Not implemented yet
+        break;
+      case COLLIDER_TYPE.HOVERABLE:
+        hasCollidersOfType = this.hasHoverables;
+        break;
+      case COLLIDER_TYPE.CLICKABLE:
+        hasCollidersOfType = this.hasClickables;
+        break;
+    }
+
+    return hasCollidersOfType;
+  }
+
+  // -- -- --
+
+  getColliders( colliderType=COLLIDER_TYPE.FLOOR ){
+    let forHashing = [];
+    if( !this.hasColliders() ){
+      return forHashing;
+    }
+
+    // Kick out if the collider type is not active
+    //  ( No colliders of the given type exist )
+    if( colliderType == COLLIDER_TYPE.WALL && !this.antiColliderActive ){
+      forHashing = this.antiColliderList;
+      return forHashing;
+    }else if( colliderType == COLLIDER_TYPE.WALL_TOP && !this.antiColliderTopActive ){
+      forHashing = this.antiColliderTopList;
+      return forHashing;
+    }else if( colliderType == COLLIDER_TYPE.PORTAL_WARP && !this.hasPortalExit ){
+      forHashing = this.portalList;
+      return forHashing;
+    }else if( colliderType == COLLIDER_TYPE.ROOM_WARP && !this.hasRoomWarp ){
+      forHashing = this.roomWarp;
+      return forHashing;
+    }else if( colliderType == COLLIDER_TYPE.HOVERABLE && !this.hasHoverables ){
+      forHashing = this.hoverableList;
+      return forHashing;
+    }else if( colliderType == COLLIDER_TYPE.CLICKABLE && !this.hasClickables ){
+      forHashing = this.clickableList;
+      return forHashing;
+    }
+    
+    // TODO : Quadrant hashing for colliders should be removed from pxlNav support, with new grid hashing system implemented
+    // TODO : Maya tools and FBX requirements needs updating for the new collider system
+    switch( colliderType ){
+      case COLLIDER_TYPE.FLOOR:
+        forHashing = [ 
+          ...this.colliderList['noAxis'],
+          ...this.colliderList['11'],
+          ...this.colliderList['01'],
+          ...this.colliderList['10'],
+          ...this.colliderList['00']
+        ];
+        break;
+      case COLLIDER_TYPE.WALL:
+        forHashing = [ 
+          ...this.colliderList['noAxis'],
+          ...this.colliderList['11'],
+          ...this.colliderList['01'],
+          ...this.colliderList['10'],
+          ...this.colliderList['00']
+        ];
+        break;
+      case COLLIDER_TYPE.WALL_TOP:
+        forHashing = [ 
+          ...this.antiColliderTopList['noAxis'],
+          ...this.antiColliderTopList['11'],
+          ...this.antiColliderTopList['01'],
+          ...this.antiColliderTopList['10'],
+          ...this.antiColliderTopList['00']
+        ];
+        break;
+      case COLLIDER_TYPE.CEILING:
+        // Not implemented yet
+        break;
+      case COLLIDER_TYPE.PORTAL_WARP:
+        forHashing = this.portalList;
+        break;
+      case COLLIDER_TYPE.ROOM_WARP:
+        forHashing = this.roomWarp;
+        break;
+      case COLLIDER_TYPE.ITEM:
+        // Not implemented yet
+        break;
+      case COLLIDER_TYPE.SCRIPTED:
+        // Not implemented yet
+        break;
+      default:
+        break;
+    }
+
+    //forHashing = this.colliderHashMap;
+    return forHashing;
+  }
+
+  // -- -- --
+
+  // Collider helper functions
+  addColliderHelper( colliderType=COLLIDER_TYPE.FLOOR ){
+    if( !this.hasColliders() ){
+      return;
+    }
+    if( !this.helperObjects.hasOwnProperty('colliders') ){
+      this.helperObjects['colliders'] = {};
+      this.helperObjects['colliders'][colliderType] = null;
+    }else if( !this.helperObjects['colliders'].hasOwnProperty(colliderType) ){
+      this.helperObjects['colliders'][colliderType] = null;
+    }
+
+    // This is only used to easierly reveal the helper objects to the pxlRoom
+    //   This is only for debugging purposes
+    this.helperObjects['colliders'][colliderType] = this.pxlColliders.buildHelper( this, colliderType );
+
+    if( this.helperObjects['colliders'][colliderType] ){
+      this.scene.add( this.helperObjects['colliders'][colliderType] );
+      this.hasHelpers = true;
+    }
+  }
+
+  stepColliderHelper( colliderType=COLLIDER_TYPE.FLOOR ){
+    if( !this.hasHelpers ||
+        !this.hasColliders() ||
+        !this.helperObjects.hasOwnProperty('colliders') ||
+        !this.helperObjects['colliders'].hasOwnProperty(colliderType) ){
+      return;
+    }
+
+    this.helperObjects['colliders'][colliderType].stepHelper( this, colliderType );
+  }
+
+
+  // -- -- --
     
   toCameraPos( positionName ){
     if( this.cameraBooted && this.camLocation.hasOwnProperty( positionName ) ){
@@ -370,9 +604,9 @@ class RoomEnvironment{
         
         if(this.geoList.hasOwnProperty('GlowPass') && this.geoList['GlowPass'].length > 0){
           this.geoList['GlowPass'].forEach((g)=>{
-            //g.layers.set( this.pxlEnv.renderLayerEnum.SCENE )
-            //g.layers.toggle( this.pxlEnv.renderLayerEnum.GLOW )
-            g.layers.set( this.pxlEnv.renderLayerEnum.GLOW )
+            //g.layers.set( RENDER_LAYER.SCENE )
+            //g.layers.toggle( RENDER_LAYER.GLOW )
+            g.layers.set( RENDER_LAYER.GLOW )
           })
         }
         

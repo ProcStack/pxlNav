@@ -76,16 +76,16 @@ global proc string[] pxlNav_findEnvGroups(){
 
 global proc pxlNav_prepColliderAttributes_desc(){
 	global string $pxlNav_descriptionBox;
-    string $desc = "Adds 'checkX' and 'checkZ' attributes to selected objects.";
+    string $desc = "Adds 'collider_ground' and 'collider_wall' attributes to selected objects.";
 	scrollField -e -tx $desc $pxlNav_descriptionBox;
 }
 global proc pxlNav_prepColliderAttributes(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
-        addAttr -ln "checkX"  -at long  -min -2 -max 1 -dv 0 $sel[$x];
-        setAttr -e-keyable true ($sel[$x]+".checkX");
-        addAttr -ln "checkZ"  -at long  -min -2 -max 1 -dv 0 $sel[$x];
-        setAttr -e-keyable true ($sel[$x]+".checkZ");
+        addAttr -ln "collider_ground"  -at bool -dv 0 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".collider_ground");
+        addAttr -ln "collider_wall"  -at bool -dv 0 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".collider_wall");
     }
 }
 //pxlNav_prepColliderAttributes();
@@ -227,6 +227,24 @@ global proc pxlNav_prepInstanceAttribute(){
     }
 }
 //pxlNav_prepInstanceAttribute();
+
+global proc pxlNav_prepMeshInstanceAttributes_desc(){
+   global string $pxlNav_descriptionBox;
+    string $desc = "Adds 'Instance -to- Mesh' attributes to selected objects.";
+    $desc += "\nAdds 'MinScale' & 'MaxScale' attribute to selected objects.";
+	scrollField -e -tx $desc $pxlNav_descriptionBox;
+}
+
+global proc pxlNav_prepMeshInstanceAttributes(){
+    string $sel[]=`ls -sl -l`;
+    for($x=0; $x<size($sel); ++$x){
+        addAttr -ln "MinScale"  -at double  -min 0 -max 100 -dv 0 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".MinScale");
+        addAttr -ln "MaxScale"  -at double  -min 0 -max 100 -dv 1 $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".MaxScale");
+    }
+}
+//pxlNav_prepMeshInstanceAttributes();
 
 global proc pxlNav_prepInstanceFixAttribute_desc(){
    global string $pxlNav_descriptionBox;
@@ -572,7 +590,7 @@ global proc pxlNav_assetPrepWindow(){
 	    ".-General/Visual Attrs-.",
        "pxlNav_prepDoubleSidedAttributes",
        "---",
-       "pxlNav_prepInstanceAttribute","pxlNav_prepInstanceFixAttribute","pxlNav_createInstanceLocatorFromSelection",
+       "pxlNav_prepInstanceAttribute","pxlNav_prepMeshInstanceAttributes","pxlNav_prepInstanceFixAttribute","pxlNav_createInstanceLocatorFromSelection",
        "---",
        "pxlNav_prepScriptedAttribute",
        "---",

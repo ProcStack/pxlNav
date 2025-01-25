@@ -23,13 +23,12 @@ import {
 } from "../../libs/three/three.module.min.js";
 import { FBXLoader } from "../../libs/three/FBXLoader.js";
 
-import { COLOR_SHIFT } from "./Enums.js";
-
 export class FileIO{
   constructor( folderDict={}){
     this.pxlTimer=null;
     this.pxlUtils=null;
     this.pxlQuality=null;
+    this.pxlEnums=null;
     this.pxlVideo=null;
     this.pxlCamera=null;
     this.pxlAutoCam=null;
@@ -38,6 +37,7 @@ export class FileIO{
     this.pxlAnim=null;
     this.pxlDevice=null;
     this.pxlShaders=null;
+    this.pxlColliders=null;
 
     this.options={};
     
@@ -61,6 +61,7 @@ export class FileIO{
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlUtils=pxlNav.pxlUtils;
     this.pxlQuality=pxlNav.pxlQuality;
+    this.pxlEnums=pxlNav.pxlEnums;
     this.pxlVideo=pxlNav.pxlVideo;
     this.pxlCamera=pxlNav.pxlCamera;
     this.pxlAutoCam=pxlNav.pxlAutoCam;
@@ -69,6 +70,7 @@ export class FileIO{
     this.pxlAnim=pxlNav.pxlAnim;
     this.pxlDevice=pxlNav.pxlDevice;
     this.pxlShaders=pxlNav.pxlShaders;
+    this.pxlColliders=pxlNav.pxlColliders;
     this.options=pxlNav.options;
   }
 
@@ -99,7 +101,7 @@ export class FileIO{
 
   // -- -- --
 
-  convertVertColor( meshObj, space=COLOR_SHIFT.KEEP ){
+  convertVertColor( meshObj, space=this.pxlEnums.COLOR_SHIFT.KEEP ){
     if (meshObj.geometry && meshObj.geometry.attributes && meshObj.geometry.attributes.color) {
       let colors = meshObj.geometry.attributes.color;
       for( let x=0; x<colors.count; ++x ){
@@ -169,11 +171,11 @@ export class FileIO{
       
       //Hoverable Object
       if( mesh.userData.hasOwnProperty("Hover") && mesh.userData.Hover ){
-        envObj.hoverableExists=true;
+        envObj.hasHoverables=true;
         envObj.hoverableList.push(mesh);
       }
       if( mesh.userData.hasOwnProperty("Click") && mesh.userData.Click ){
-        envObj.clickableExists=true;
+        envObj.hasClickables=true;
         envObj.clickableList.push(mesh);
       }
       
@@ -248,7 +250,7 @@ export class FileIO{
     let ret = true;
     //if( mesh.hasOwnProperty("userData") && mesh.userData.hasOwnProperty("Scripted") && mesh.userData.Scripted ){
     if( envObj.geoList.hasOwnProperty('Scripted') && envObj.geoList.Scripted.hasOwnProperty(mesh.name) ){
-      console.log(envObj.geoList.Scripted, envObj.geoList.Scripted.hasOwnProperty(mesh.name), mesh.name)
+      //console.log(envObj.geoList.Scripted, envObj.geoList.Scripted.hasOwnProperty(mesh.name), mesh.name)
       ret=false;
     }
     return ret;
@@ -266,7 +268,6 @@ export class FileIO{
   }
   
   checkIsGlassLiquid( envObj, envScene, mesh, matList ){
-
     let isGlass = false;
     if( mesh.userData.hasOwnProperty("isGlass") && mesh.userData.isGlass ){
       isGlass=true;
@@ -304,7 +305,7 @@ export class FileIO{
     mesh.material.side=BackSide;
     mesh.material.depthWrite=false;
     mesh.matrixAutoUpdate=false;
-    mesh.renderOrder = 1;
+    mesh.renderOrder = 1 + envObj.glassList.length;
     envObj.glassList.push(mesh);
     envObj.glassGroup.add(mesh);
     
@@ -316,7 +317,7 @@ export class FileIO{
     cFrontMesh.material.shininess=40;
     cFrontMesh.material.side=FrontSide;
     cFrontMesh.matrixAutoUpdate=false;
-    cFrontMesh.renderOrder = 2;
+    cFrontMesh.renderOrder = 1 + envObj.glassList.length;
     
     
     let curPos=mesh.position;
@@ -362,17 +363,27 @@ export class FileIO{
           let curScale=mesh.scale;
           let instBase= envObj.baseInstancesList[ mesh.userData.Instance ];
 
-          //console.log(name);
-          //console.log(instBase.material);
           if( mesh.type == "Mesh" ){
-
-
-            const matrix = new Matrix4();
-            const position = new Vector3();
-            const normal = new Vector3();
-            const quaternion = new Quaternion();
-            const scale = new Vector3(1, 1, 1);
+            let matrix = new Matrix4();
+            let position = new Vector3();
+            let normal = new Vector3();
+            let quaternion = new Quaternion();
+            let scale = new Vector3(1, 1, 1);
             const hasColor = mesh.geometry.attributes.hasOwnProperty("color");
+            let userDataKeys = Object.keys( mesh.userData );
+            let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
+
+            let hasFitScale = false;
+            let minScale = 0;
+            let maxScale = 1;
+            if( userDataKeysLower.includes("minscale") ){
+              hasFitScale = true;
+              minScale = mesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
+            }
+            if( userDataKeysLower.includes("maxscale") ){
+              hasFitScale = true;
+              maxScale = mesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
+            }
 
             // Prevent dupelicate instances
             //   Verts are split, so neighboring polygons have stacked vertices
@@ -382,15 +393,22 @@ export class FileIO{
             for (let x = 0; x < mesh.geometry.attributes.position.count; ++x) {
               position.fromBufferAttribute(mesh.geometry.attributes.position, x);
               let entry = position.toArray();
-              entry = entry.join(",");
+
+              // Flatten array elements to 0.01 precision joined by ","
+              entry = this.pxlUtils.flattenArrayToStr( entry );
+
               if( !pointRecorder.hasOwnProperty(entry) ){
                 normal.fromBufferAttribute(mesh.geometry.attributes.normal, x);
                 let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
                 quaternion.setFromEuler(randomRot);
                 
-                let curScale = scale;
+                curScale = scale;
                 if( hasColor ){
                   let curScalar = mesh.geometry.attributes.color.getX(x);
+                  if( hasFitScale ){
+                    // Scale the object based on object parameter `minScale` & `maxScale`
+                    curScalar = minScale + (maxScale - minScale) * curScalar;
+                  }
                   curScale = new Vector3(curScalar, curScalar, curScalar);
                 }
                 matrix.compose(position, quaternion, curScale);
@@ -659,7 +677,7 @@ export class FileIO{
       this.runDebugger = false;
     }
     if(meshKey==null){ // Prep for IsLoaded checks
-        meshKey = envObj.roomName;
+        meshKey = envObj.getName();
     }
     if( !fbxPath ){
       fbxPath = envObj.sceneFile;
@@ -679,7 +697,6 @@ export class FileIO{
     var fbxLoader=new FBXLoader();
     fbxLoader.load( objPath, (curFbx)=>{
       //envScene.add(curFbx);
-      //console.log(curFbx)
       let groups=curFbx.children;
       let groupTypes={};
       let groupNames=[];
@@ -778,7 +795,7 @@ export class FileIO{
         let ch=groups[groupTypes['AutoCamPaths']].children;
         this.log("AutoCamPaths - ",groups[groupTypes['AutoCamPaths']]);
         
-        this.pxlAutoCam.autoCamPaths[ envObj.roomName ]=[];
+        this.pxlAutoCam.autoCamPaths[ envObj.getName() ]=[];
         while(ch.length>0){
           let g=ch.pop();
           //ch.push(...c.children);
@@ -792,7 +809,7 @@ export class FileIO{
             g.visible=false;
             g.matrixAutoUpdate=false;
             envScene.add(g);
-            this.pxlAutoCam.autoCamPaths[ envObj.roomName ].push( autoPathDict );
+            this.pxlAutoCam.autoCamPaths[ envObj.getName() ].push( autoPathDict );
           }
         }
       }
@@ -832,6 +849,15 @@ export class FileIO{
                 }
               }
               c.matrixAutoUpdate=false;
+            }else{
+              if( c.material.map && !c.material.emissiveMap && c.material.color.r>0 ){
+                let curMap = c.material.map;
+                c.material.emissiveMap=curMap;
+                c.material.emissiveIntensity=c.material.color.r*.4;
+                c.material.emissive= c.material.color.clone();
+                
+              }
+              
             }
 
 
@@ -882,26 +908,29 @@ export class FileIO{
       // @ Loaded Scene File - Environment Group; 'MainScene'
       if(groupNames.includes('Scene') || groupNames.includes('MainScene')){
         let groupId = groupTypes['Scene'] || groupTypes['MainScene'];
-        let ch = groups[groupId].children;
+        let ch = [...groups[groupId].children];
         this.log("MainScene - ",groups[groupId]);
 
         let curObjId = -1;
-        while( curObjId < ch.length ){
-          curObjId++;
+        while(ch.length>0){
+          //curObjId++;
           
-          if( curObjId >= ch.length ){
+          /*if( curObjId >= ch.length ){
             break;
-          }
+          }*/
 
-          let c=ch[ curObjId ];
+          let c=ch.pop();
           
+          this.log( "Cur Object - ", c.name );
           this.checkForUserData( envObj, envScene, c );
+          //console.log(c)
 
           if(c.isMesh){
             if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show == 0) ){
               c.visible = false;
             }
             
+            c.layers.set( this.pxlEnums.RENDER_LAYER.SCENE );
             envObj.geoList[c.name]=c;
               
             let curSide = FrontSide;
@@ -969,14 +998,14 @@ export class FileIO{
                 let scriptedList = Object.keys(envObj.geoList['Scripted']);
                 //addChildren = false;
               }
-
+              //console.log("Group - ", c.name, c.children.length, addChildren);
               if( addChildren ){
                 ch.push( ...c.children );
               }
             }
           }
         }
-        envScene.add( groups[groupId] );
+        envScene.add( ...groups[groupId].children );
       }
       
       
@@ -1053,8 +1082,12 @@ export class FileIO{
         
         let colliderGroups=colliderParent.children;
         envObj.collidersExist=colliderGroups.length>0;
+
+        let collisionMinMax = { min:new Vector3(0,0,0), max:new Vector3(0,0,0) };
+
         for(let x=0; x<colliderGroups.length; ++x){
           let pName=colliderGroups[x].name;
+
           let curChildren=colliderGroups[x].children;
           while(curChildren.length>0){
             let child=curChildren.pop();
@@ -1076,6 +1109,7 @@ export class FileIO{
                 envObj.antiColliderTopList[ axisArray ].push(child);
               }else{
                 if( pName == "RoomWarpZone"){
+                  envObj.hasRoomWarp=true;
                   envObj.roomWarp.push(child);
                 }
                 envObj.colliderActive=true;
@@ -1087,7 +1121,23 @@ export class FileIO{
             }
           }
         }
+
+        // -- -- --
+
+        // Parse grid Vertex-Faces for collision detection
+        //   Prep barycentric coordinate dependency values
+        //     Vert-Edge lengths, Edge Dot Products, Vert-Face areas & data
+        if( envObj.hasColliderType( this.pxlEnums.COLLIDER_TYPE.FLOOR ) ){
+          this.pxlColliders.prepColliders( envObj, this.pxlEnums.COLLIDER_TYPE.FLOOR );
+        }else if( envObj.hasColliderType( this.pxlEnums.COLLIDER_TYPE.WALL ) ){
+          this.pxlColliders.prepColliders( envObj, this.pxlEnums.COLLIDER_TYPE.WALL );
+        }else if( envObj.hasColliderType( this.pxlEnums.COLLIDER_TYPE.WALL_TOP ) ){
+          this.pxlColliders.prepColliders( envObj, this.pxlEnums.COLLIDER_TYPE.WALL_TOP );
+        }else if( envObj.hasColliderType( this.pxlEnums.COLLIDER_TYPE.ROOM ) ){
+          this.pxlColliders.prepColliders( envObj, this.pxlEnums.COLLIDER_TYPE.ROOM );
+        }
       }
+      
       
       // @ Loaded Scene File - Environment Group; 'PortalExit'
       if(groupNames.indexOf('PortalExit')>-1){
@@ -1097,6 +1147,7 @@ export class FileIO{
         while(ch.length>0){
           let c=ch.pop();
           c.matrixAutoUpdate=false;
+          envObj.hasPortalExit=true;
           envObj.portalList[c.name]=c;
         }
       }  
@@ -1120,6 +1171,7 @@ export class FileIO{
             mtl.side=FrontSide;
             mtl.flatShading=true;
             c.material=mtl;
+            c.layers.set( this.pxlEnums.RENDER_LAYER.SCENE );
             c.matrixAutoUpdate=false;
             envScene.add(c);
             //addToScene[1].add(c.clone());
@@ -1160,6 +1212,7 @@ export class FileIO{
               c.material=mtl;
             }
             
+            c.layers.set( this.pxlEnums.RENDER_LAYER.SCENE );
             c.matrixAutoUpdate=false;
             envScene.add(c);
             //addToScene[1].add(c.clone());
@@ -1195,9 +1248,9 @@ export class FileIO{
             c.material = curMat;
             c.matrixAutoUpdate = false;
             c.frustumCulled = false;
-            c.layers.set( this.pxlEnv.renderLayerEnum.SKY )
-            //c.material.depthTest=true;
-            //c.material.depthWrite=true;
+            c.layers.set( this.pxlEnums.RENDER_LAYER.SKY )
+            c.material.depthTest=true;
+            c.material.depthWrite=false;
             envObj.geoList[ c.name ] = c;
             envObj.materialList[ c.name ] = curMat;
             //envObj.shaderGeoList[c.name]=c;
@@ -1509,7 +1562,7 @@ export class FileIO{
 
   loadAnimFBX( envObj, meshKey, rigPath, animPath, stateConnections ){
     if(meshKey==''){ // Prep for IsLoaded checks
-        meshKey = envObj.roomName;
+        meshKey = envObj.getName();
     }
     this.pxlEnv.geoLoadListComplete=0;
     this.pxlEnv.geoLoadList[meshKey]=0;
