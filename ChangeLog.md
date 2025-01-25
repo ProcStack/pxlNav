@@ -47,31 +47,32 @@ const pxlNavEnv = new pxlNav( pxlNavOptions, "Your Site Name", startingRoom, boo
 
  - `Camera.js` has better velocity easing and graduated magic-number variables to the Object level, added set functions for each.
  - `Camera.js` has updated 'set' functions (Not setters/getters, just functions to update settings) --
-<br/>&nbsp;&nbsp; _`Setter functions available on the Camera class -
-<br/>&nbsp;&nbsp; _`setJumpScalar( val )'
-<br/>&nbsp;&nbsp; _`setUserHeight( val, roomName="default" )'
-<br/>&nbsp;&nbsp; _`setUserScale( val )'
-<br/>
-<br/>&nbsp;&nbsp; _`setMovementScalar( val )'
-<br/>&nbsp;&nbsp; _`setMovementEase( val )'
-<br/>&nbsp;&nbsp; _`setInputMovementMult( val )'
-<br/>&nbsp;&nbsp; _`setCameraRotateEasing( val )'
-<br/>&nbsp;&nbsp; _`setTouchSensitivity( val )'
-<br/>&nbsp;&nbsp; _`setPositionBlend( val )'
-<br/>
-<br/>&nbsp;&nbsp; _`setGravityRate( val )'
-<br/>&nbsp;&nbsp; _`setGravityMax( val )'
-<br/>
-<br/>&nbsp;&nbsp; _`setWalkBounceHeight( val )'
-<br/>&nbsp;&nbsp; _`setWalkBounceRate( val )'
-<br/>&nbsp;&nbsp; _`setWalkBounceEaseIn( val )'
-<br/>&nbsp;&nbsp; _`setWalkBounceEaseOut( val )'
-<br/>
+
+<br/>&nbsp;&nbsp; _Setter functions available on the Camera class -
+<br/>&nbsp;&nbsp; _ `setJumpScalar( val )` 
+<br/>&nbsp;&nbsp; _ `setUserHeight( val, roomName="default" )` 
+<br/>&nbsp;&nbsp; _ `setUserScale( val )` 
+
+<br/>&nbsp;&nbsp; _ `setMovementScalar( val )` 
+<br/>&nbsp;&nbsp; _ `setMovementEase( val )` 
+<br/>&nbsp;&nbsp; _ `setInputMovementMult( val )` 
+<br/>&nbsp;&nbsp; _ `setCameraRotateEasing( val )` 
+<br/>&nbsp;&nbsp; _ `setTouchSensitivity( val )` 
+<br/>&nbsp;&nbsp; _ `setPositionBlend( val )` 
+
+<br/>&nbsp;&nbsp; _ `setGravityRate( val )` 
+<br/>&nbsp;&nbsp; _ `setGravityMax( val )` 
+
+<br/>&nbsp;&nbsp; _ `setWalkBounceHeight( val )` 
+<br/>&nbsp;&nbsp; _ `setWalkBounceRate( val )` 
+<br/>&nbsp;&nbsp; _ `setWalkBounceEaseIn( val )` 
+<br/>&nbsp;&nbsp; _ `setWalkBounceEaseOut( val )` 
+
 <br/>&nbsp;&nbsp; -Pre-existing functions -
-<br/>&nbsp;&nbsp; _`setFOV( fov )'
-<br/>&nbsp;&nbsp; _`setStats( fov, aspect, near, far )'
-<br/>&nbsp;&nbsp; _`setAspect( aspect )' - Aspect needs updates, use FOV for now
-<br/>&nbsp;&nbsp; _`setTransform( pos, lookAt=null )'
+<br/>&nbsp;&nbsp; _ `setFOV( fov )` 
+<br/>&nbsp;&nbsp; _ `setStats( fov, aspect, near, far )` 
+<br/>&nbsp;&nbsp; _ `setAspect( aspect )` - Aspect needs updates, use FOV for now
+<br/>&nbsp;&nbsp; _ `setTransform( pos, lookAt=null )` 
 
 <br/>&nbsp;&nbsp; __When setting user/player height from your room, `pxlRoom.setUserHeight( toHeight=1 )` automatically adds your room name for `pxlCamera.setUserHeight( val, roomName )`
 <br/>&nbsp;&nbsp; ___`pxlRoom.setUserHeight( 22.5 )` will set your player's height to 22.5 when in that room. This will override your camera's starting height as your player height in the specific room.
