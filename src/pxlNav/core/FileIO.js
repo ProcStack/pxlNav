@@ -698,6 +698,16 @@ export class FileIO{
     fbxLoader.load( objPath, (curFbx)=>{
       //envScene.add(curFbx);
       let groups=curFbx.children;
+
+      if( groups.length == 1 ){
+        let curGroup = groups[0];
+        let isMainScene = curGroup.name.toLowerCase().includes("scene");
+        if( !isMainScene ){
+          groups = curGroup.children;
+          console.warn("-- pxlFile.loadRoomFBX() - Top level Environment Group not found --\n Attempting to use the first child group as FBX Scene\n Make sure your top group holds all sub-groups.");
+        }
+      }
+
       let groupTypes={};
       let groupNames=[];
       

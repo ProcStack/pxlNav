@@ -39,6 +39,7 @@ class RoomEnvironment{
     this.roomName=roomName;
     this.pxlFile=null;
     this.pxlUtils=null;
+    this.pxlTimer=null;
     this.pxlAnim=null;
     this.pxlColliders=null;
     this.pxlDevice=null;
@@ -157,11 +158,32 @@ class RoomEnvironment{
     this.pxlEnv = pxlNav;
     this.pxlFile = pxlNav.pxlFile;
     this.pxlAnim = pxlNav.pxlAnim;
+    this.pxlTimer = pxlNav.pxlTimer;
     this.pxlUtils = pxlNav.pxlUtils;
     this.pxlDevice = pxlNav.pxlDevice;
     this.pxlColliders = pxlNav.pxlColliders;
     this.mobile = pxlNav.mobile;
   }
+  
+  // -- -- --
+  
+// Obfuscate pxlTimer for easier deltaTime access
+  get deltaTime(){
+    return this.pxlTimer.deltaTime;
+  }
+
+  get avgDeltaTime(){
+    return this.pxlTimer.avgDeltaTime;
+  }
+
+  getLerpRate( rate ){
+    return this.pxlTimer.getLerpRate( rate );
+  }
+
+  getLerpAvgRate( rate ){
+    return this.pxlTimer.getLerpAvgRate( rate );
+  }
+  // -- -- --
 
 // Run after all needed pxlNav services are loaded/built
 //   So it's safe to access global assets at this point

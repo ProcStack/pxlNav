@@ -147,7 +147,7 @@
     this.msRunner=msRunner;
       - Global Timer THREE.Vector2 Object
           this.msRunner.x - Seconds Since Boot; 0.001 precision, miliseconds
-          this.msRunner.y - Average Seconds per Frame
+          this.msRunner.y - Average Delta Time
     this.camera=camera;
       - pxlNav Camera Object
     this.autoCamPaths={}; 

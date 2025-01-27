@@ -53,6 +53,10 @@ export class Camera{
     // Movement Speed Scalar
     this.movementScalar=1.0;
 
+    // Max Movement Settings
+    this.hasMovementLimit=true;
+    this.movementMax = 10.0; // Meters per second
+
     // Jump Height Scalar
     this.jumpScalar=1.0;
 
@@ -71,12 +75,14 @@ export class Camera{
     this.touchMaxSensitivity = 500;
     
     // The jumping impulse per frame
-    this.cameraJumpImpulse= [ 0.045, 0.085 ];// [.035,.075]; // [ Grav, Low Grav ]
-    this.cameraMaxJumpHold=[.55,1.0]; // Second; [ Grav, Low Grav ]
+    //this.cameraJumpImpulse= [ 0.045, 0.085 ];// [.035,.075]; // [ Grav, Low Grav ]
+    this.cameraJumpImpulse= [ .9, 3.0 ];// [.035,.075]; // [ Grav, Low Grav ]
+    this.cameraMaxJumpHold=[2.55,1.2]; // Second; [ Grav, Low Grav ]
 
+    this.gravityCount=0;
     this.gravityRate=0;
-    this.gravityMax=2.5; // Gravity at scale of 1 / avg human(1.8 meters) * 9.8mms = 5.44;  But this is digital here, lower is lighter
-    this.gravityMPS=[1,.5]; // Influence of M/S^2 .. I guess haha; [ Grav, Low Grav ]
+    this.gravityMax=15.5; // Gravity at scale of 1 / avg human(1.8 meters) * 9.8mms = 5.44;  But this is digital here, lower is lighter
+    this.gravityMPS=[.42,.25]; // Influence of M/S^2 .. I guess haha; [ Grav, Low Grav ]
 
     // -- -- -- //
     // -- -- -- //
@@ -138,7 +144,7 @@ export class Camera{
     this.cameraAllowJump=true;
     this.cameraJumpHeight=0;
     this.cameraJumpVelocity=0;
-    this.cameraJumpVelocityEaseOut=.8; // Ease out Jump Button Influence after Button Released
+    this.cameraJumpVelocityEaseOut=.90; // Ease out Jump Button Influence after Button Released
     this.cameraJumpInAir=false;
     
     this.floorColliderInitialHit=false;
@@ -150,13 +156,13 @@ export class Camera{
     
     this.gravitySourceActive=false;
     this.gravityDirection=new Vector3( 0, -1, 0 );
-    this.gravityEaseOutRate=.80;
+    this.gravityEaseOutRate=.50;
 
     this.jump=0;
     // TODO : Unsure if I'd rather a contant timer for all "allowed" jumps or not
     //          For now, this lock holds that the player should jump again when the timer is up
     this.releaseJumpLockTime = 0;
-    this.releaseJumpLockDelay = .065; // Seconds dely between repeated jumping, its less jaring with a slight delay
+    this.releaseJumpLockDelay = .085; // Seconds dely between repeated jumping, its less jaring with a slight delay
 
     this.runMain=true;
     this.workerActive=false;
@@ -515,7 +521,7 @@ export class Camera{
       if( this.hasGravity && this.cameraJumpActive ){
           this.camJump(this.pxlTimer.prevMS);
       }else if(this.cameraJumpVelocity>0 ){
-          this.killJumpImpulse();
+          this.killJumpImpulse( this.pxlTimer.deltaTime );
       }
     }
     
@@ -1000,10 +1006,10 @@ export class Camera{
    * @param {number} curTime - The current time.
    */
   camJump(curTime){
-    let timeDelta= (curTime-this.pxlDevice.keyDownCount[2]);
+    let timeDelta= (curTime-this.pxlDevice.keyDownCount[2]) ;
     let fpsRateAdjust=1;//Math.min(1, 1/(20*this.pxlTimer.msRunner.y));
     // let jumpPerc=Math.min(1, timeDelta/(this.cameraMaxJumpHold[this.pxlUser.lowGrav]*fpsRateAdjust) );
-    let jumpPerc=Math.min(1, timeDelta / this.cameraMaxJumpHold[this.pxlUser.lowGrav] );
+    let jumpPerc=Math.min(1, timeDelta / (this.cameraMaxJumpHold[this.pxlUser.lowGrav] ) ) ;
         
     if(this.cameraJumpActive){
       let jumpRate=jumpPerc ;
@@ -1013,7 +1019,7 @@ export class Camera{
         jumpRate=(1-jumpRate)*(1-jumpRate);
         jumpRate=jumpRate* ( jumpRate*.5+.5);
       }
-      this.cameraJumpVelocity+=Math.max(0, jumpRate) * this.cameraJumpImpulse[this.pxlUser.lowGrav] * this.jumpScalar;
+      this.cameraJumpVelocity+=Math.max(0, jumpRate) * this.cameraJumpImpulse[this.pxlUser.lowGrav] * this.jumpScalar * this.pxlTimer.deltaTime;
     }
     this.cameraJumpVelocity*=(1-jumpPerc);//*.5+.5;
 
@@ -1025,8 +1031,9 @@ export class Camera{
    * Kills the jump impulse.
    * Space released before max jump
    */
-  killJumpImpulse(){
-    let toImpulse=this.cameraJumpVelocity * this.cameraJumpVelocityEaseOut;
+  killJumpImpulse(deltaTime){
+    let toImpulse=this.cameraJumpVelocity * (this.cameraJumpVelocityEaseOut);
+
     this.cameraJumpVelocity= toImpulse>.1 ? toImpulse : 0;
     this.workerFunc( "killJumpImpulse" );
   }
@@ -1038,27 +1045,34 @@ export class Camera{
    * Updates the gravity for the camera.
    * Gravity is updated and offset landing height with an ease back to standing upright
    */
-  updateGravity(){
+  updateGravity( deltaTime ){
     if( this.runMain ){
-      this.gravityRate = Math.max(0, this.gravityRate-this.cameraJumpVelocity*.2 );
+      this.gravityRate = Math.max(0, this.gravityRate-this.cameraJumpVelocity  );
       
       let gravityRate = this.gravityMPS[ this.pxlUser.lowGrav ];
 
       if( this.hasGravity ){
-        this.gravityRate = Math.min( this.gravityMax, (this.gravityRate+this.gravityMax*this.pxlTimer.msRunner.y)) * gravityRate;
+        this.gravityCount += (gravityRate * 2.5) * deltaTime;
+        //this.gravityRate = Math.min( 1, ((this.gravityRate+this.gravityMax)*deltaTime)) * gravityRate;
+        this.gravityRate = Math.min( 1, ((this.gravityRate+this.gravityMax))) * this.gravityCount;
+        //this.gravityRate +=  this.gravityRate * this.gravityCount;
       }
       if( this.gravityRate != 0 ){
         // gMult not used, testing for need
         let gMult=1;
         if( !this.hasGravity ){
-          this.gravityRate=this.gravityRate>.01 ? this.gravityRate*this.gravityEaseOutRate*gravityRate : 0;
+          this.gravityRate=this.gravityRate>.01 ? this.gravityRate*this.gravityEaseOutRate*gravityRate * deltaTime : 0;
           gMult= this.gravityRate;
         }else{
-          gMult=this.gravityRate*.08;
+          //gMult=this.gravityRate*.08*gravityRate;
+          gMult=this.gravityRate;
         }
         gMult=Math.min(1, gMult);
         
-        this.standingHeightGravInfluence = Math.min(1, this.gravityRate*1.2 / this.gravityMax ) * this.standingMaxGravityOffset;
+        this.standingHeightGravInfluence = Math.min(1, this.gravityRate / this.gravityMax ) * this.standingMaxGravityOffset;
+        //this.standingHeightGravInfluence = Math.min(1, gMult / this.gravityMax ) * this.standingMaxGravityOffset;
+        //this.standingHeightGravInfluence = Math.min(this.gravityMax, this.gravityRate * deltaTime ) * this.standingMaxGravityOffset;
+        //this.standingHeightGravInfluence = Math.min(this.gravityMax, this.gravityRate * deltaTime ) * this.standingMaxGravityOffset;
       }
     }
   }
@@ -1067,6 +1081,7 @@ export class Camera{
    * Ran during Jump Landing, Room & Portal Warps currently
    */
   resetGravity(){
+    this.gravityCount=0;
     this.gravityRate=0;
     this.workerFunc( "resetGravity" );
     this.jumpLanding( false ); // resetGravity runs jumpLanding on Worker
@@ -1083,6 +1098,7 @@ export class Camera{
       this.releaseJumpLockTime = this.pxlTimer.runtime + this.releaseJumpLockDelay;
     }
 
+    this.gravityCount=0;
     this.hasGravity=false; // Should probably name it cameraInAir
     this.cameraJumpVelocity=0;
     this.cameraJumpInAir=false; // hasGravity should indicate this value; residual from logic rework
@@ -1622,7 +1638,7 @@ export class Camera{
       // Subtract forward/back from strafing movement to reduce diagonal super-speed
       let turnRate=this.pxlQuality.settings.leftRight ?  this.cameraEasing[ easingMode ] : ( 1 - Math.min(1, Math.abs(this.cameraMovement[1]*.3)) ) *.5 ;
       rate[0]=( (this.pxlQuality.settings.leftRight ? 1.0 : 6.0) + (deltas[0]*(deltas[0])) * .1 ) * turnRate;
-      rate[0]= Math.min(this.pxlDevice.shiftBoost,rate[0]) * this.movementScalar;
+      rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar;
     }else{
       // Bother Left AND Right direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[0]=curTime;
@@ -1634,12 +1650,18 @@ export class Camera{
 
       // Subtract strafing movement from dolly movement to reduce diagonal super-speed
       let dollyRate=(1- Math.min(1, Math.abs(this.cameraMovement[0]*.07))) * this.cameraEasing[ easingMode ]; 
-      rate[1]=( ((deltas[1]*(deltas[1]*3+2+this.pxlDevice.shiftBoost))*.15) ) * dollyRate; 
-      rate[1]= Math.min(this.pxlDevice.shiftBoost,rate[1]) * this.movementScalar;
+      rate[1]=( ((deltas[1]*(deltas[1]*3+2+this.pxlUser.moveSpeed))*.5) ) * dollyRate; 
+      rate[1]= Math.min( this.pxlUser.moveSpeed, rate[1] ) * this.movementScalar;
     }else{
       // Both Up AND Down direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[1]=curTime;
     }
+
+    let moveSpeed = ( rate[0]**2 + rate[1]**2 ) ** 0.5;
+    
+    this.hasMovementLimit=true;
+    this.movementMax = 10.0; // Meters per second
+
     this.cameraMovement[0]+=strafe*rate[0];
     this.cameraMovement[1]+=dolly*rate[1];
   }
@@ -2141,7 +2163,7 @@ export class Camera{
         // If in air, gravity grows 
         //   This only updates gravity prior to jump calculations
         // User vertical based calculations are ran in `applyGravity()`
-        this.updateGravity();
+        this.updateGravity( this.pxlTimer.deltaTime );
       
         // When Jumping / Falling, Collion Hit Position and Object are marked as Invalid
         if( !this.colliderValid && !this.colliderValidityChecked ){

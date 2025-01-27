@@ -1,22 +1,32 @@
 
 export class User{
   constructor(id=null){
+
+    this.pxlEnums=null;
+    this.pxlEnv=null;
+
     this.id=null;
-    this.jitsiUserId=null;
-    this.jmaActive=false;
     this.jmaConnectObj=false;
     this.jmaServer=false;
     this.jmaRoom=false;
     this.jmaUserId=null;
     this.jmaUserName=null;
     this.jmaTempUserIdActive=false;
-    this.pxlEnv=null;
     
     this.welcome=false;
     
     this.tankStrafe=false;
     this.invertMouse=false;
+
+    // -- -- --
     
+    this.moveSpeed = 1.0;
+    this.moveSpeedSlow = 0.5;
+    this.moveSpeedBase = 1.0;
+    this.moveSpeedBoost = 2.0; // Hold shift to boost
+
+    // -- -- --
+
     this.renderSettingsCookie="settings_renderSettings";
     this.controlModeCookie="settings_controlMode";
     this.tankStrageCookie="settings_tankStrage";
@@ -60,6 +70,53 @@ export class User{
     this.iZoomPass=null;
         
   }
+
+  // -- -- --
+
+  setDependencies( pxlNav ){
+    this.pxlEnums=pxlNav.pxlEnums;
+    this.pxlEnv=pxlNav.pxlEnv;
+  }
+
+  // -- -- --
+
+  setSlowSpeed( speed ){
+    speed = Math.max( 0.001, speed );
+    this.moveSpeedSlow = speed;
+  }
+
+  setBaseSpeed( speed ){
+    speed = Math.max( 0.001, speed );
+    this.moveSpeedBase = speed;
+  }
+
+  setBoostSpeed( speed ){
+    speed = Math.max( 0.001, speed );
+    this.moveSpeedBoost = speed;
+  }
+  
+  // -- -- --
+
+  // Nothing triggers STOP or SLOW yet
+  //   But can be ran from pxlRooms
+  setSpeed( enumType ){
+    switch(enumType){
+      case this.pxlEnums.USER_SPEED.STOP:
+        this.moveSpeed = 0;
+        break;
+      case this.pxlEnums.USER_SPEED.SLOW:
+        this.moveSpeed = this.moveSpeedBase * this.moveSpeedSlow;
+        break;
+      case this.pxlEnums.USER_SPEED.BASE:
+        this.moveSpeed = this.moveSpeedBase;
+        break;
+      case this.pxlEnums.USER_SPEED.BOOST:
+        this.moveSpeed = this.moveSpeedBase * this.moveSpeedBoost;
+        break;
+    }
+  }
+
+  // -- -- --
 
   checkItemWearOff(curTime){
     if(this.itemActiveList.length > 0){

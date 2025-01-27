@@ -80,7 +80,7 @@ export const CAMERA_EVENT = {
   'COLLISION' : 5
 };
 
-
+// -- -- --
 
 // 'COLOR_SHIFT' is used in Utils.js, inturn used when loading assets through FileIO.js
 //
@@ -119,6 +119,20 @@ export const COLOR_SHIFT = {
 
 // -- -- --
 
+
+// User Settings
+
+// User Speed Settings
+export const USER_SPEED = {
+  'STOP' : 0,
+  'SLOW' : 1,
+  'BASE' : 2,
+  'BOOST' : 3
+};
+
+
+// -- -- --
+
 // Easy access to the enums
 //   Reduce the need to import the enums individually
 export const pxlEnums = {
@@ -130,5 +144,6 @@ export const pxlEnums = {
   'CAMERA_EVENT' : CAMERA_EVENT,
   'COLLIDER_TYPE' : COLLIDER_TYPE,
   'GEOMETRY_SIDE' : GEOMETRY_SIDE,
-  'COLOR_SHIFT' : COLOR_SHIFT
+  'COLOR_SHIFT' : COLOR_SHIFT,
+  'USER_SPEED' : USER_SPEED
 };

@@ -1,6 +1,6 @@
 
 import { ShaderChunk } from "../../libs/three/three.module.min.js";
-import { pxlShaders }  from "../../pxlNav.esm.js";
+import { pxlShaders }  from "../../pxlNav.js";
 const shaderHeader = pxlShaders.core.shaderHeader;
 
 
@@ -65,6 +65,7 @@ export function envGroundFrag( pointLightCount ){
 	//let ret=shaderHeader();
 	let ret=`
   uniform sampler2D diffuse;
+  uniform vec3 ambientLightColor;
     
   uniform sampler2D dirtDiffuse;
   uniform sampler2D crackedDirtDiffuse;
@@ -109,13 +110,6 @@ export function envGroundFrag( pointLightCount ){
     uniform DirLight directionalLights[NUM_DIR_LIGHTS];
   #endif
     
-    /***********************************/
-    /** Start of THREE Shader Includes **/
-    /***********************************/
-    ${ShaderChunk[ "packing" ]}
-    /*********************************/
-    /** End of THREE Shader Includes **/
-    /*********************************/
     
         
     void main(){
@@ -151,7 +145,7 @@ export function envGroundFrag( pointLightCount ){
         
         // -- -- --
         
-        vec2 detailUv = fract(abs(pos.xz*.2 + nCd.rg*.05 ));
+        vec2 detailUv = abs(pos.xz + nCd.rg*(.15+nCd.b) );
         float detailMult = (texture2D(dirtDiffuse,detailUv).r)*3.0 * depthFade;
         float dirtNoise = texture2D(uniformNoise,detailUv).r;
         dirtNoise = dirtNoise*.5+.5;
@@ -168,14 +162,15 @@ export function envGroundFrag( pointLightCount ){
         //   Helps curvature disrupt noticable tiling
         // Masking the fire pit since there is too much variation in normals
         
-        vec2 subUv = fract( pos.xz + baseDirtNoise );
+        //vec2 subUv = fract( pos.xz + baseDirtNoise );
+        vec2 subUv = ( pos.xz*.9 );
         
         // Read world-uv'ed textures
         vec3 crackDirtCd = texture2D(crackedDirtDiffuse,subUv).rgb ;
-        vec3 mossCd = texture2D(mossDiffuse,fract( pos.xz*1.1 )).rgb ;
+        vec3 mossCd = texture2D(mossDiffuse,( pos.xz*1.5 * nCd.rg )).rgb ;
         
         // Shift the rocky hill texture so it reads it more horizontally
-        vec2 hillLayerUv = fract( vec2( subUv.x,  vLocalPos.y*.01 ) );
+        vec2 hillLayerUv =  vec2( subUv.x+subUv.y*.35,  vLocalPos.y*.01 ) ;
         vec3 rockyHillCd = texture2D(hillDiffuse,hillLayerUv).rgb ;
         
         // -- -- --
@@ -208,18 +203,20 @@ export function envGroundFrag( pointLightCount ){
         // -- Texture Color Mixing -- --
         // -- -- -- -- -- -- -- -- -- -- --
         
+        float mossMix = clamp( dataCd.g - dataCd.r, 0.0, 1.0);
+        float rockyMix = clamp( dataCd.r - mossMix, 0.0, 1.0);
+        
         // Mix base Dirt color --
         float baseCdMix = clamp( dot( normalize(baseCd.rgb), normalize(vCd.rgb) ) * vCd.r * vCd.g * vCd.b * 10.0, 0.0, 1.0 );
         //vec4 Cd = vec4( mix( dirtCd, baseCd.rgb*dirtNoise, cNoise*baseCdMix ), 1.0);
         vec4 Cd = vec4( mix( baseCd.rgb, dirtCd, cNoise*baseCdMix )*dirtNoise, 1.0);
         
+        // Add rocky hill sides, reduce region around campfire, remove pit itself
+        Cd.rgb = mix( Cd.rgb, rockyHillCd, rockyMix);
+        
         // Add moss
-        //float mossMix = clamp( dataCd.g + mossCd.g*(1.0-min(1.0,dataCd.g*1.0)), 0.0, 1.0);
-        float mossMix = clamp( dataCd.g, 0.0, 1.0);
         Cd.rgb = mix( Cd.rgb, mossCd, mossMix);
         
-        // Add rocky hill sides, reduce region around campfire, remove pit itself
-        Cd.rgb = mix( Cd.rgb, rockyHillCd, dataCd.r);
         
         // Mix in under water colors
         float waterMix = dataCd.b;
@@ -235,16 +232,20 @@ export function envGroundFrag( pointLightCount ){
             vec3 lightDelta = (vPos - pointLights[i].position);
             vec3 lightVector = normalize(lightDelta);
             float lightNormDot = clamp(dot(-lightVector, vN), 0.0, 1.0);
-            vec3 lightInf=  pointLights[i].color;
-            float lightDist = max( 0.0, (1.0-length( lightDelta )*.0015) );
-            lights *= vec3( pointLights[i].color * ( lightDist ) );
-            lights += lightInf * lightNormDot;
-            //float lightDist = max( 0.0, (1.0-length( lightDelta )*.001) );
-            //float lightDist = pow( length( lightDelta ) / pointLights[i].distance, pointLights[i].decay);
-            //lights += vec3( pointLights[i].color * ( lightDist ) ) * lightInf * lightNormDot   ;
+            
+            // Calculate distance attenuation
+            float lightDistFit = max( 1.0, length(lightDelta) / pointLights[i].distance ) * .001;
+            float attenuation = 1.0 / (1.0 + pointLights[i].decay * lightDistFit * lightDistFit);
+            
+            // Calculate light intensity
+            float lightDist = max(0.0, (0.50 - lightDistFit )) * attenuation;
+            lights += pointLights[i].color * lightNormDot * lightDist;
         }
-        Cd.rgb *= lights;
+        Cd.rgb *= max( ambientLightColor, lights);
+      #else
+        Cd.rgb *= ambientLightColor;
       #endif
+
         float lightMag = length( lights );
         
         float shadowInf = 0.0;
@@ -258,11 +259,13 @@ export function envGroundFrag( pointLightCount ){
         lights = vec3(0.0, 0.0, 0.0);
       #if NUM_DIR_LIGHTS > 0
         for(int i = 0; i < NUM_DIR_LIGHTS; i++) {
-            vec3 lightInf= ( max(0.0, dot(directionalLights[i].direction, vN ))) * directionalLights[i].color;
+            //float lDirN = dot( directionalLights[i].direction, vN );
+            //vec3 lightInf= ( max(0.0, dot(directionalLights[i].direction, reflect(vN, normalize(vPos-vCamPos ))))) * lDirN * directionalLights[i].color;
+            vec3 lightInf= ( max(0.0, dot(directionalLights[i].direction, vN))) * directionalLights[i].color;
             lights += lightInf;
         }
         // 'baseDirtNoise' is acting as bump map here, sorta
-        Cd.rgb += lights * baseDirtNoise;
+        Cd.rgb += Cd.rgb * lights * baseDirtNoise;
       #endif
         
         float fogMix = clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
@@ -320,17 +323,19 @@ export function grassClusterVert(){
         vec3 transformedNormal = objectNormal;
         // -- -- --
 
+        vec4 noiseMaskPos = pos*.3;
+        vec3 nSeed = vec3( 1.0, 1.0, 1.0 );
+        #ifdef USE_INSTANCING
+          noiseMaskPos = instanceMatrix * noiseMaskPos;
+          nSeed = instanceMatrix[3].xyz;
+        #endif
 
         // Running texture reads first
         float timer = (-time.x*.005);
-        vec2 waveUv = vec2( .5, uv.y*.05 + (-time.x*.005));
+        vec2 waveUv = vec2( (nSeed.x+nSeed.z)*.001, nSeed.y*.001  + timer);
         vec3 nCd = texture2D(noiseTexture,waveUv).rgb;
 
-        vec4 noiseMaskPos = pos;
-        #ifdef USE_INSTANCING
-          noiseMaskPos = instanceMatrix * noiseMaskPos;
-        #endif
-        waveUv = vec2( noiseMaskPos.x*.0005, noiseMaskPos.z*.0001 + (-time.x*.01));
+        waveUv = vec2( nSeed.x*.01+noiseMaskPos.x*.0005, nSeed.z+nSeed.y*.01 - timer);
         vec3 nMaskCd = texture2D(noiseTexture,waveUv).rgb;
         
         // -- -- --
@@ -345,25 +350,20 @@ export function grassClusterVert(){
         // -- -- --
 
         // Local Wind Sway
-        vec3 offset = (nCd-.5) * color.y * 1.5 ;
-        
-        // -- -- --
+        vec3 offset = (nCd-.5) * 1.5 ;
 
-        // Add some bounce to the sway, sudden anim shifts
-        offset = mix(  offset, offset*2.5, min(0.0, offset.z) );
-        offset.y=0.0;
         
         // -- -- --
 
         // Mask Wind with Noise Peaks
         //   This visually looks like wind gusts in clusters moving through the scene
         float nMask = max(nMaskCd.x, max(nMaskCd.y, nMaskCd.z) );
-        nMask = clamp( nMask*2.7-.9, 0.0, 1.0 );
+        nMask = clamp( nMask*2.3-.2, 0.0, 1.0 );
         
         // -- -- --
 
         // Add offset position in Model Space, pre-instance positioning
-        pos.xyz += offset * nMask;
+        pos.xyz += offset * nMask * color.r;
         
         // -- -- --
         
@@ -373,7 +373,7 @@ export function grassClusterVert(){
         #endif
         
         // Global Wind
-        pos.z += max(offset.x, max(offset.y, offset.z)) * .5 * nMask;
+        pos.z += max(offset.x, max(offset.y, offset.z)) * nMask;
         
         // -- -- --
 
@@ -440,7 +440,6 @@ export function grassClusterFrag(pointLightCount){
     uniform DirLight directionalLights[NUM_DIR_LIGHTS];
   #endif
     
-    ${ShaderChunk[ "packing" ]}
     
         
     

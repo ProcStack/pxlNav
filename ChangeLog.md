@@ -1,81 +1,37 @@
-pxlNav Change Log :: 0.17 - 0.18
+# pxlNav Change Log :: 0.0.18 - 0.0.19
 ---------------------
 
- - `FileIO.js` had an issue when reading your scene's `MainScene` group if it contained groups-in-groups; `this.pxlFile.loadRoomFBX()`. The bug would miss adding the last few objects to your room.  All objects + grouped objects are processed now.
+ - `Timer.js` now has `deltaTime` & `avgDeltaTime` (Everage the last two `deltaTime` values)
+ - `Timer.js` with added deltaTime, blending rates need to be exponential.  Added helper script `getLerpRate()` and `getLerpAvgRate()` to easily fit your blending rate into either `deltaTime` or `avgDeltaTime`
 
- - `pxlRoom` constructor arguments have changed; removing any pxlNav engine dependencies.  `pxlEnv` will automatically pass itself to your room using `pxlRoom.setDependencies`
-<br/>&nbsp;&nbsp; _The pxlRoom constructor for 0.0.18 --
- ```
-export class FieldEnvironment extends RoomEnvironment{
-  constructor( roomName='FieldEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
-    super( roomName, assetPath, msRunner, camera, scene, cloud3dTexture );
-```
+ - `Camera.js` converted over the static values to `deltaTime` influence for more than just jump calculations ( Jumping was the only thing using deltaTime before now ), but still some better implementation needed of `deltaTime`, it isn't perfect yet for when/where applied.
+<br/>&nbsp;&nbsp; - All jumping, gravity, and movement values have been updated, please check your default movement/jump in your room.
+ - `Camera.js` + `User.js` uses movement speed limits from `User.js` now, which can be set with -
+<br/>&nbsp;&nbsp; - `pxlUser.setSlowSpeed( .5 )` - Slow down multiplier
+<br/>&nbsp;&nbsp; - `pxlUser.setBaseSpeed( 1 )` - Base movement speed
+<br/>&nbsp;&nbsp; - `pxlUser.setBoostSpeed( .5 )` - Speed up multiplier (When holding shift)
 
+ - `FileIO.js` Since I kept accidentally exporting a "root group" for my scene export, which would break loading the FBX scene file, it now checks for a sub-folder containing all of the scene groups, then warns the user.
+ <br/>&nbsp;&nbsp; _Your FBX should be TopLevelGroup -> With all group types as children (Scene, Colliders, Lights, etc.)
+
+ 
 ---
 
- - `FileIO.js` - Instances -to- Mesh Vertices now supports User Detail / Parameters `MinScale` & `MaxScale` (case insensitive)
- <br/>&nbsp;&nbsp; _When settings a Mesh/Geometry to have a string `Instance` parameter, it will read `color.r` from the individual verticies to get a 0-1 scale value for the instance for that point.  If there is a `MinScale` and/or `MaxScale` it will use them to fit the 0-1 color to the range provided -
-```
-  let instanceScale = ( color.r - MinScale ) / ( MaxScale - MinScale );
-```
- <br/>&nbsp;&nbsp; _I went with this method since it seems exceedingly difficult to export non-color vertex attributes from Blender and some Maya versions. Yet no issue for Houdini.  Then there is the issue that Three.js doesn't support reading those custom vertex attributes upon importing the FBX file.
+### Expected changes --
+pxlNav v0.0.19 - Mobile Support + GUI Update
 
----
+<br/>&nbsp;&nbsp; _Re-enable gui elements that don't display, but are there, for onboarding, settings, help, and info
 
- - Collider Manager added; `Colliders.js` 
- <br/>&nbsp;&nbsp; _Stores triangle data for Barycentric Ray Intersection using Moller-Trumbore intersection.  It basically what Three.js is using by default, but implemented my own to register colliders with pxlRooms + pre-calculate vertex-face-edge relationships
- <br/>&nbsp;&nbsp; _Sometimes ya just need the first object hit, might as well have that!
+<br/>&nbsp;&nbsp; _Mobile thumbs sticks, allow for CSS override.  Circle, on tap to torus with dot that drags with visual guide to finger.
+<br/>&nbsp;&nbsp; _Delegate left vs right side of screen tap, even with tap order of multi-touch.
+<br/>&nbsp;&nbsp; _GUI updates to pass move and tap calls to same camera systems. This should likely go through User class. But user class doesn't fully exist yet.
+<br/>&nbsp;&nbsp; _Add external settings for constant walking for drag-given-distance, vs only walk when dragged, being relativistic offset per frame.
 
- -`FileIO.js` + `Colliders.js` Added grid hashing system to split up Collision Objects into individual triangles based on the location of the Camera in space.  This automatically runs when any colliders are found in your scene. They are registered with the Collider Manager under their given `pxlEnums.COLLIDER_TYPE`
-<br/>&nbsp;&nbsp; _Currently, they still need to live in a 'Colliders' group in your FBX under the main `YourEnvironmentGroup`
-<br/>&nbsp;&nbsp; _It doesn't work with animated collision objects yet.
-<br/>&nbsp;&nbsp; __Next updates will include the world matrix of the object to account for object based movement, but still wont have rigged / blendshape'ing object collision detection.
-<br/>&nbsp;&nbsp; _Set your grid size (In Units, being your scene's unit scale) through the `pxlOptions` passed to `pxlNav` when constructing the object -
-```
-import { pxlNav, pxlOptions } from './pxlNav.js';
-pxlOptions[ 'collisionScale' ][ 'gridSize' ] = 50;
-const pxlNavEnv = new pxlNav( pxlNavOptions, "Your Site Name", startingRoom, bootRoomList );
-```
+<br/>&nbsp;&nbsp; ++ This isn't the update for User Class, but maybe I should move everything over to user class that I can.  Freeing up Third Person view to ray cast from player, rather than always from Camera
 
+<br/>&nbsp;&nbsp; _User class would allow for better Item support for short term, which I don't believe is working after stripping out Evals(), with no replacement of Callbacks with bounded scopes.
 
+<br/>&nbsp;&nbsp; _GUI update for mobile support can allow for inventory display and more.  Custom CSS should be accepted
 
----
-
- - `Camera.js` Fixed the "hasUpdated" issues where moving the mouse would trigger collision detection to run.  
-<br/>&nbsp;&nbsp; _Collision detection only runs when the camera has moved
-<br/>&nbsp;&nbsp; _Clickable/hoverable interactive collision detections are still ran when moving the mouse
-
- - `Camera.js` has better velocity easing and graduated magic-number variables to the Object level, added set functions for each.
- - `Camera.js` has updated 'set' functions (Not setters/getters, just functions to update settings) --
-
-<br/>&nbsp;&nbsp; _Setter functions available on the Camera class -
-<br/>&nbsp;&nbsp; _ `setJumpScalar( val )` 
-<br/>&nbsp;&nbsp; _ `setUserHeight( val, roomName="default" )` 
-<br/>&nbsp;&nbsp; _ `setUserScale( val )` 
-
-<br/>&nbsp;&nbsp; _ `setMovementScalar( val )` 
-<br/>&nbsp;&nbsp; _ `setMovementEase( val )` 
-<br/>&nbsp;&nbsp; _ `setInputMovementMult( val )` 
-<br/>&nbsp;&nbsp; _ `setCameraRotateEasing( val )` 
-<br/>&nbsp;&nbsp; _ `setTouchSensitivity( val )` 
-<br/>&nbsp;&nbsp; _ `setPositionBlend( val )` 
-
-<br/>&nbsp;&nbsp; _ `setGravityRate( val )` 
-<br/>&nbsp;&nbsp; _ `setGravityMax( val )` 
-
-<br/>&nbsp;&nbsp; _ `setWalkBounceHeight( val )` 
-<br/>&nbsp;&nbsp; _ `setWalkBounceRate( val )` 
-<br/>&nbsp;&nbsp; _ `setWalkBounceEaseIn( val )` 
-<br/>&nbsp;&nbsp; _ `setWalkBounceEaseOut( val )` 
-
-<br/>&nbsp;&nbsp; -Pre-existing functions -
-<br/>&nbsp;&nbsp; _ `setFOV( fov )` 
-<br/>&nbsp;&nbsp; _ `setStats( fov, aspect, near, far )` 
-<br/>&nbsp;&nbsp; _ `setAspect( aspect )` - Aspect needs updates, use FOV for now
-<br/>&nbsp;&nbsp; _ `setTransform( pos, lookAt=null )` 
-
-<br/>&nbsp;&nbsp; __When setting user/player height from your room, `pxlRoom.setUserHeight( toHeight=1 )` automatically adds your room name for `pxlCamera.setUserHeight( val, roomName )`
-<br/>&nbsp;&nbsp; ___`pxlRoom.setUserHeight( 22.5 )` will set your player's height to 22.5 when in that room. This will override your camera's starting height as your player height in the specific room.
-<br/>&nbsp;&nbsp; ___Initial player height is still your camera's Y value in your FBX. It's easier to position your camera in the FBX opposed to adding more javascript, but either option works the same.
 
 ---

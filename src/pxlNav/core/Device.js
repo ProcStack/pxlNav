@@ -14,6 +14,7 @@ export class Device{
     this.projectTitle=projectTitle;
     this.pxlCore=pxlCore;
     this.pxlEnv=null;
+    this.pxlEnums=null;
     this.pxlTimer=null;
     this.pxlAudio=null;
     this.pxlUser=null;
@@ -72,7 +73,6 @@ export class Device{
     this.keyDownCount=[0,0,0];
     this.directionKeyDown=false;
     this.directionKeysPressed=[0,0,0,0];
-    this.shiftBoost=1;
     this.controlKey=false;
     
     this.objectPercList=[];
@@ -147,6 +147,7 @@ export class Device{
 
   setDependencies( pxlNav ){
     this.pxlEnv=pxlNav.pxlEnv;
+    this.pxlEnums=pxlNav.pxlEnums;
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlAudio=pxlNav.pxlAudio;
     this.pxlUser=pxlNav.pxlUser;
@@ -179,28 +180,17 @@ export class Device{
         console.log( e );
         //JSON.stringify(e.state);
     });*/
-    document.addEventListener("visibilitychange", function(e) {
-        tmpThis.windowHidden=document.hidden ;
-              
-        tmpThis.directionKeysPressed=[0,0,0,0];
-        tmpThis.directionKeyDown=false;
-        tmpThis.shiftBoost=1;
-        tmpThis.pxlCamera.workerFunc("focus", !document.hidden);
-        
-        tmpThis.runHiddenCalcs();
-      });
+    document.addEventListener("visibilitychange", this.onVisibilityChange.bind(this), false);
       
       if( typeof window.onblur == "object" ){
-          window.onblur=(e)=>{
-              tmpThis.resetUserInput(e);
-          };
+          window.onblur= this.resetUserInput.bind(this);
       }
         /*
     window.addEventListener( 'blur', (e)=>{
       tmpThis.directionKeysPressed=[0,0,0,0];
       tmpThis.directionKeyDown=false;
-      tmpThis.shiftBoost=0;
-            tmpThis.pxlCamera.workerFunc("focus");
+      tmpThis.pxlUser.setSpeed( tmpThis.pxlEnums.USER_SPEED.STOP );
+      tmpThis.pxlCamera.workerFunc("focus");
     });*/
     window.addEventListener( 'beforeunload', (e)=>{
       if( tmpThis.controlKey==true ){
@@ -273,10 +263,21 @@ export class Device{
       }
   }
   
+  onVisibilityChange(){
+    this.windowHidden=document.hidden ;
+          
+    this.directionKeysPressed=[0,0,0,0];
+    this.directionKeyDown=false;
+    this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BASE );
+    this.pxlCamera.workerFunc("focus", !document.hidden);
+    
+    this.runHiddenCalcs();
+  }
+
   resetUserInput(e){
     this.directionKeysPressed=[0,0,0,0];
     this.directionKeyDown=false;
-    this.shiftBoost=1;
+    this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BASE );
     this.mapLockCursor(false,0);
     this.pxlCamera.camJumpKey(false);
     this.pxlCamera.deviceKey("space", false);
@@ -706,7 +707,7 @@ export class Device{
           this.pxlCamera.deviceKey(3, true);
         }
         if(keyHit==16 || keyHit==224){ // Shift
-          this.shiftBoost=7;
+          this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BOOST );
           this.pxlCamera.deviceKey("shift", true);
         }
         if(keyHit==32){
@@ -826,7 +827,7 @@ export class Device{
         }
         // Shift
         if(keyHit==16 || keyHit==224){ // Shift
-          this.shiftBoost=1; // Shift multiplier, 1 = normal speed
+          this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BASE );
           this.pxlCamera.deviceKey("shift", false);
           return;
         }

@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.18";
+const pxlNavVersion = "0.0.19-dev";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -265,6 +265,7 @@ class pxlNav{
     this.pxlFile.setDependencies( this );
     this.pxlAudio.setDependencies( this );
     this.pxlAutoCam.setDependencies( this );
+    this.pxlUser.setDependencies( this );
     this.pxlEnv.setDependencies( this );
     this.pxlAnim.setDependencies( this );
     this.pxlDevice.setDependencies( this );

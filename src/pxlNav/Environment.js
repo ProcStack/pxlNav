@@ -457,6 +457,10 @@ export class Environment{
           this.roomSceneList[ roomName ]=roomObj;
       
           resolve(true);
+        })
+        .catch((err)=>{
+          console.log(err);
+          reject(err);
         });
     });
   }
@@ -1581,7 +1585,7 @@ export class Environment{
         }
         
         if( this.mapComposerGlow && ( this.pxlQuality.settings.bloom || this.pxlQuality.settings.fog ) ){ //  || this.pxlQuality.settings.motion ){ 
-            this.mapComposerGlow.render();
+          this.mapComposerGlow.render();
         }
         
         this.mapRenderBlurStack( curRoom, curRoom.camera, curRoom.scene, this.scene.renderGlowTarget)
@@ -1591,7 +1595,13 @@ export class Environment{
       }
       
       if( this.pxlUser.iZoom ){
-          this.delayComposer.render();
+        this.delayComposer.render();
+      }
+    }else{
+      // Step room calculations for render-independent user input and collision calculations
+      let curRoom=this.roomSceneList[this.currentRoom];
+      if(curRoom && curRoom.booted){
+        curRoom.step();
       }
     }
         
@@ -1601,70 +1611,67 @@ export class Environment{
   }
   
   mapRenderBlurStack( curRoom, camera, scene, target ){
-    
-        if(this.blurComposer){
-          if(curRoom.geoList["GlowPass"]){
-            curRoom.geoList["GlowPass"].forEach((g)=>{
-              if( g.userData.hasOwnProperty('GlowPerc') ){
-                let multVal = g.userData['GlowPerc']
-                if( g.material.hasOwnProperty('uniforms') && g.material.uniforms.mult ){
-                  g.material.uniforms.mult.value = multVal;
-                }
-              }
-            });
-            
-            if( curRoom.geoList.hasOwnProperty('GlowPassMask') ){
-              curRoom.geoList['GlowPassMask'].forEach( (m)=>{
-                if( m.material.uniforms && m.material.uniforms.cdMult ){
-                  m.material.uniforms.cdMult.value = 0;
-                }
-              });
+    if(this.blurComposer){
+      if(curRoom.geoList["GlowPass"]){
+        curRoom.geoList["GlowPass"].forEach((g)=>{
+          if( g.userData.hasOwnProperty('GlowPerc') ){
+            let multVal = g.userData['GlowPerc']
+            if( g.material.hasOwnProperty('uniforms') && g.material.uniforms.mult ){
+              g.material.uniforms.mult.value = multVal;
             }
           }
-          
-          //this.pxlEnv.pxlEnums.RENDER_LAYER SCENE PARTICLES GLOW
-          camera.layers.disable( this.pxlEnums.RENDER_LAYER.SCENE );
-          camera.layers.disable( this.pxlEnums.RENDER_LAYER.PARTICLES );
-          camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
-          
-          this.engine.setRenderTarget(target);
-          let bgCd=0x000000;
-          let curgb = scene.background.clone()
-          scene.background.set( bgCd );
-          this.engine.setClearColor(bgCd, 0);
-          //this.engine.clear();
-          this.engine.render( scene, camera);
-          //this.scene.overrideMaterial=null;
-          scene.background.r=curgb.r;
-          scene.background.g=curgb.g;
-          scene.background.b=curgb.b;
-          
-          camera.layers.enable( this.pxlEnums.RENDER_LAYER.SCENE );
-          camera.layers.enable( this.pxlEnums.RENDER_LAYER.PARTICLES );
-          camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
-          this.engine.setRenderTarget(null);
-          
-          if(curRoom.geoList["GlowPass"]){
-            curRoom.geoList["GlowPass"].forEach((g)=>{
-              if( g.userData.hasOwnProperty('GlowPerc') ){
-                if( g.material.hasOwnProperty('uniforms') && g.material.uniforms.mult ){
-                  g.material.uniforms.mult.value = 1;
-                }
-              }
-            });
-            if( curRoom.geoList.hasOwnProperty('GlowPassMask') ){
-              curRoom.geoList['GlowPassMask'].forEach( (m)=>{
-                if( m.material.uniforms && m.material.uniforms.cdMult ){
-                  m.material.uniforms.cdMult.value = 1;
-                }
-              });
+        });
+        
+        if( curRoom.geoList.hasOwnProperty('GlowPassMask') ){
+          curRoom.geoList['GlowPassMask'].forEach( (m)=>{
+            if( m.material.uniforms && m.material.uniforms.cdMult ){
+              m.material.uniforms.cdMult.value = 0;
             }
-          }
-          
-          this.blurComposer.render();
-          this.roomBloomPass.enabled = false;
+          });
         }
+      }
+      
+      //this.pxlEnv.pxlEnums.RENDER_LAYER SCENE PARTICLES GLOW
+      camera.layers.disable( this.pxlEnums.RENDER_LAYER.SCENE );
+      camera.layers.disable( this.pxlEnums.RENDER_LAYER.PARTICLES );
+      camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
+      
+      this.engine.setRenderTarget(target);
+      let bgCd=0x000000;
+      let curgb = scene.background.clone()
+      scene.background.set( bgCd );
+      this.engine.setClearColor(bgCd, 0);
+      //this.engine.clear();
+      this.engine.render( scene, camera);
+      //this.scene.overrideMaterial=null;
+      scene.background.r=curgb.r;
+      scene.background.g=curgb.g;
+      scene.background.b=curgb.b;
+      
+      camera.layers.enable( this.pxlEnums.RENDER_LAYER.SCENE );
+      camera.layers.enable( this.pxlEnums.RENDER_LAYER.PARTICLES );
+      camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
+      this.engine.setRenderTarget(null);
+      
+      if(curRoom.geoList["GlowPass"]){
+        curRoom.geoList["GlowPass"].forEach((g)=>{
+          if( g.userData.hasOwnProperty('GlowPerc') ){
+            if( g.material.hasOwnProperty('uniforms') && g.material.uniforms.mult ){
+              g.material.uniforms.mult.value = 1;
+            }
+          }
+        });
+        if( curRoom.geoList.hasOwnProperty('GlowPassMask') ){
+          curRoom.geoList['GlowPassMask'].forEach( (m)=>{
+            if( m.material.uniforms && m.material.uniforms.cdMult ){
+              m.material.uniforms.cdMult.value = 1;
+            }
+          });
+        }
+      }
+      
+      this.blurComposer.render();
+      this.roomBloomPass.enabled = false;
+    }
   }
-  
-  
 }
