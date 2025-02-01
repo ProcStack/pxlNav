@@ -1,5 +1,5 @@
 # pxlNav Docs - pxlRooms
-### You custom FBX environment
+### Your custom FBX environment
 This is the rundown of your `pxlRoom` and loading your resources.
 <br/>&nbsp;&nbsp; FBX Scene File, pxlRoom, and interact!
 

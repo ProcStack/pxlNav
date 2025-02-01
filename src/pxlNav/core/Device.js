@@ -923,6 +923,11 @@ export class Device{
         this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.settingsIcon, "settings" );
         return;
       }
+      // 72 H; 191  ?
+      if( keyHit == 191 || keyHit == 72 ){ // Open Help Screen
+        this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
+        return;
+      }
       
       // 67  C
       if(keyHit == 67){
@@ -942,11 +947,6 @@ export class Device{
       }
       // 86  V
       if(keyHit == 86){
-      }
-      // 191  ?
-      if(keyHit == 191){ // Open Help Screen
-        this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
-        return;
       }
       
       // P 

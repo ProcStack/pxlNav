@@ -439,14 +439,19 @@ export class QualityController{
           this.pxlEnv.mapGlowPass.enabled=false;
           this.pxlEnv.roomBloomPass.enabled=false;
           this.pxlEnv.roomGlowPass.enabled=false;
+          
+          if( this.pxlEnv?.mapComposerGlow?.renderTarget2 ){
+            this.pxlEnv.engine.setRenderTarget(this.pxlEnv.mapComposerGlow.renderTarget2);
+            this.pxlEnv.engine.clear();
+          }
+          if( this.pxlEnv?.roomGlowPass?.renderTarget2 ){
+            this.pxlEnv.engine.setRenderTarget(this.pxlEnv.roomGlowPass.renderTarget2);
+            this.pxlEnv.engine.clear();
+          }
+          
+          this.pxlEnv.engine.setRenderTarget(null);
                     
-                    this.pxlEnv.engine.setRenderTarget(this.pxlEnv.mapComposerGlow.renderTarget2);
-                    this.pxlEnv.engine.clear();
-                    this.pxlEnv.engine.setRenderTarget(this.pxlEnv.roomGlowPass.renderTarget2);
-                    this.pxlEnv.engine.clear();
-                    this.pxlEnv.engine.setRenderTarget(null);
-                    
-                    this.pxlEnv.userScreenIntensity.x=.8;
+          this.pxlEnv.userScreenIntensity.x=.8;
           this.pxlEnv.userScreenIntensity.y=0;
                     
           //multVal=1.0;

@@ -134,12 +134,14 @@ export class FileIO{
         if( !envObj.geoList['GlowPass'] ){
           envObj.geoList['GlowPass'] = [];
         }
+        mesh.layers.set( this.pxlEnums.RENDER_LAYER.GLOW )
         envObj.geoList['GlowPass'].push(mesh);
       }
       if( mesh.userData.hasOwnProperty("GlowPassMask") && mesh.userData.GlowPass ){
         if( !envObj.geoList['GlowPassMask'] ){
           envObj.geoList['GlowPassMask'] = [];
         }
+        mesh.layers.set( this.pxlEnums.RENDER_LAYER.GLOW_MASK )
         envObj.geoList['GlowPassMask'].push(mesh);
       }
       
@@ -241,6 +243,18 @@ export class FileIO{
       }
     }
   }
+
+  // -- -- --
+  
+  checkForMeshSettings( meshMaterial, baseMaterial ){
+    if( baseMaterial.hasOwnProperty("meshSettings") ){
+      if( baseMaterial.meshSettings.hasOwnProperty("renderOrder") ){
+        meshMaterial.renderOrder = baseMaterial.meshSettings.renderOrder;
+      }
+    }
+  }
+
+  // -- -- --
   
   canAppendChildren( envObj, mesh ){
     if( mesh.type != "Group" ){
@@ -338,6 +352,8 @@ export class FileIO{
     return isGlass;
   }
   
+  // -- -- --
+
   // ## Make Instancing actually Instance
   //   Instancing is currently not actually instancing
   //   Object is cloned, raising ram/vram usage
@@ -421,11 +437,12 @@ export class FileIO{
               instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
               instancedMesh.name = name + "Geo";
 
-              if( instBase.material.hasOwnProperty("meshSettings") ){
+              /*if( instBase.material.hasOwnProperty("meshSettings") ){
                 if( instBase.material.meshSettings.hasOwnProperty("renderOrder") ){
                   instancedMesh.renderOrder = instBase.material.meshSettings.renderOrder;
                 }
-              }
+              }*/
+              this.checkForMeshSettings( instancedMesh, instBase.material );
               
               for (let x = 0; x < instanceMatricies.length; ++x) {
                 instancedMesh.setMatrixAt( x, instanceMatricies[x] );
@@ -444,6 +461,10 @@ export class FileIO{
             let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
             instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
             instancedMesh.name = name+"Geo";
+
+
+            this.checkForMeshSettings( instancedMesh, instBase.material );
+
 
             let altInstPlacement = false;
             if( mesh.userData.hasOwnProperty("fixInstMatrix") ){
@@ -1099,8 +1120,6 @@ export class FileIO{
         let colliderGroups=colliderParent.children;
         envObj.collidersExist=colliderGroups.length>0;
 
-        let collisionMinMax = { min:new Vector3(0,0,0), max:new Vector3(0,0,0) };
-
         for(let x=0; x<colliderGroups.length; ++x){
           let pName=colliderGroups[x].name;
 
@@ -1110,27 +1129,28 @@ export class FileIO{
             curChildren.push(...child.children);
             if(child.isMesh){
               child.visible=false;
-              //child.material.depthTest=false;
-              //child.material.depthWrite=true;
-              let axisArray='noAxis';
-              if( child.userData.checkX && child.userData.checkZ ){
-                axisArray = ( ~~(child.userData.checkX>0)+"" ) + ( ~~(child.userData.checkZ>0)+"" );
-              }
-                            
-              if( pName == "ColliderWalls"){
+
+              if( pName == "ColliderWalls"){ // Movement limiting walls
                 envObj.antiColliderActive=true;
-                envObj.antiColliderList[ axisArray ].push(child);
-              }else if( pName == "ColliderTops"){
+                envObj.antiColliderList.push( child );
+
+              // TODO : ColliderTops are implemented in `Ground` colliders to a degree.
+              //          Full removal of the `ColliderTops` collider group is pending
+              }else if( pName == "ColliderTops"){ // Top surface of wall, standable top
                 envObj.antiColliderTopActive=true;
-                envObj.antiColliderTopList[ axisArray ].push(child);
-              }else{
+                envObj.antiColliderTopList.push( child );
+
+              }else{ // `Ground`, `RoomWarp`, & All Other Colliders
+
                 if( pName == "RoomWarpZone"){
                   envObj.hasRoomWarp=true;
                   envObj.roomWarp.push(child);
                 }
+
                 envObj.colliderActive=true;
-                envObj.colliderList[ axisArray ].push(child);
+                envObj.colliderList.push( child );
               }
+
               child.matrixAutoUpdate=false;
               envScene.add(child);
               envObj.geoList[child.name]=child;
@@ -1246,20 +1266,24 @@ export class FileIO{
           let c=ch.pop();
           ch.push(...c.children);
           if(c.isMesh){
-            let curMat=new ShaderMaterial({
-              uniforms:{
-                diffuse: { type:"t",value:c.material.map },
-                envDiffuse: { type:"t",value:null },
-                noiseTexture: { type:"t",value:this.pxlEnv.cloud3dTexture },
-                fogColor:{ value: envScene.fog.color },
-                time:{ value:this.pxlTimer.msRunner },
-                camNear:{ type:"f", value: envObj.camera.near },
-                camFar:{ type:"f", value: envObj.camera.far*.85 },
-                resUV: { value: this.pxlDevice.screenRes },
-              },
-              vertexShader:this.pxlShaders.scene.skyObjectVert(),
-              fragmentShader:this.pxlShaders.scene.skyObjectFrag( this.pxlOptions.skyHaze )
-            });
+            let curMat = null;
+            if( materialList.hasOwnProperty( c.name ) ){
+              curMat = materialList[ c.name ];
+            }else{
+              curMat=new ShaderMaterial({
+                uniforms:{
+                  diffuse: { type:"t",value:c.material.map },
+                  noiseTexture: { type:"t",value:null },
+                  fogColor:{ value: envScene.fog.color },
+                  time:{ value:this.pxlTimer.msRunner },
+                  camNear:{ type:"f", value: envObj.camera.near },
+                  camFar:{ type:"f", value: envObj.camera.far*.85 },
+                  resUV: { value: this.pxlDevice.screenRes },
+                },
+                vertexShader:this.pxlShaders.scene.skyObjectVert(),
+                fragmentShader:this.pxlShaders.scene.skyObjectFrag( this.pxlOptions.skyHaze )
+              });
+            }
             //c.geometry.computeVertexNormals();
             c.material = curMat;
             c.matrixAutoUpdate = false;
@@ -1267,6 +1291,20 @@ export class FileIO{
             c.layers.set( this.pxlEnums.RENDER_LAYER.SKY )
             c.material.depthTest=true;
             c.material.depthWrite=false;
+
+            if( c.material?.uniforms.hasOwnProperty("noiseTexture") && envObj?.cloud3dTexture ){
+              c.material.uniforms.noiseTexture.value = envObj.cloud3dTexture;
+            }
+
+            // Currently unused as the vapor sky object shader no longer has horizon detection
+            //   It's a desired effect as an option, but not currently implemented internally
+            // Accessible via the `pxlRoom.materialList` object
+            //   Simply add a texture uniform of `depthTexture` to your custom shader
+            // TODO : Expand this to allow for depthMap derived fog / env effects in the sky
+            if( c.material?.uniforms.hasOwnProperty("depthTexture") && envScene?.renderTarget?.depthTexture ){
+              c.material.uniforms.envDiffuse.value = envScene.renderTarget.depthTexture;
+            }
+
             envObj.geoList[ c.name ] = c;
             envObj.materialList[ c.name ] = curMat;
             //envObj.shaderGeoList[c.name]=c;

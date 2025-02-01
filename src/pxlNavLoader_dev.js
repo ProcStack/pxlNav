@@ -9,7 +9,7 @@
 //   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlOptions } from './pxlNav.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.js';
 
 
 // Console logging level
@@ -41,6 +41,26 @@ const loaderPhrases = [
   "...crashing the glasses...",
   "...sharpening the pencils...",
 ];
+
+// -- -- --
+
+// User settings for the default/initial pxlNav environment
+//   These can be adjusted from your `pxlRoom` but easily set defaults here
+const userSettings = Object.assign({}, pxlUserSettings);
+userSettings['height']['standing'] = 1.75; // Standing height in units; any camera in your room's FBX will override this height once loaded
+userSettings['height']['stepSize'] = 5; // Max step height in units
+userSettings['movement']['scalar'] = 1.0; // Overall movement rate scalar
+userSettings['movement']['max'] = 10.0; // Max movement speed
+userSettings['movement']['easing'] = 0.55; // Easing rate between Step() calls
+userSettings['headBounce']['height'] = 0.3; // Bounce magnitude in units
+userSettings['headBounce']['rate'] = 0.025; // Bounce rate per Step()
+userSettings['headBounce']['easeIn'] = 0.03; // When move key is pressed, the ease into bounce; `bounce * ( boundInf + easeIn )`
+userSettings['headBounce']['easeOut'] = 0.95; // When move key is let go, the ease back to no bounce; `bounce * easeOut`
+userSettings['jump']['impulse'] = 0.75; // Jump impulse force applied to the player while holding the jump button
+userSettings['jump']['holdMax'] = 2.85; // Max influence of holding the jump button on current jump; in seconds
+userSettings['jump']['repeatDelay'] = 0.08; // Delay between jumps when holding the jump button
+userSettings['gravity']['UPS'] = 0.3; // Units per Step() per Step()
+userSettings['gravity']['Max'] = 15.5; // Max gravity rate
 
 // -- -- --
 
@@ -96,6 +116,7 @@ const collisionScale = {
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.fps = targetFPS;
+pxlNavOptions.userSettings = userSettings;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.collisionScale = collisionScale;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;

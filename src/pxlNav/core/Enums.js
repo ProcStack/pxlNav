@@ -23,10 +23,11 @@ export const ANTI_ALIASING = {
 
 // Render Order Layers
 export const RENDER_LAYER = {
-  "SKY": 0,
-  "SCENE": 1,
-  "PARTICLES": 2,
-  "GLOW": 3
+  'SKY': 0,
+  'SCENE': 1,
+  'PARTICLES': 2,
+  'GLOW': 3,
+  'GLOW_MASK' : 4
 }
 
 
@@ -160,7 +161,7 @@ export const DEVICE_EVENT = {
 //    https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API
 //  `B_` - Your action buttons
 //     The right group of buttons; the 4 Lettered / Colored / Shaped buttons
-//      "ABXY" -- "Square, Triangle, Circle, X" -- "Red, Green, Blue, Yellow" -- etc.
+//      'ABXY' -- 'Square, Triangle, Circle, X' -- 'Red, Green, Blue, Yellow' -- etc.
 //  *They are ussually numbered-inputs clockwise starting from the left-top-left
 export const DEVICE_BUTTON = {
   'B_L' : 0,

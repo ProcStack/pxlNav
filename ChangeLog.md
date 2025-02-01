@@ -5,6 +5,66 @@
  `pxlOptions.fps = { 'PC':60, 'Mobile':30 }`
  - `Options.js` has `subTickCalculations` for running `pxlRoom.step()` calculations between frame renders; `false` by default.  If you have a strong computer, sub-tick calculations can make a room more responsive, instead of locked to frame-rate.
 
+ - `Options.js` now has a default User Setting object, `pxlUserSettings` -
+```
+export const pxlUserSettings = {
+  'height' : {
+      'standing' : 1.75,
+      'stepSize' : 5
+    },
+  'movement' : {
+      'scalar' : 1.0,
+      'max' : 10.0,
+      'easing' : 0.55
+    },
+  'headBounce' : {
+      'height' : 0.3,
+      'rate' : 0.025,
+      'easeIn' : 0.03,
+      'easeOut' : 0.95
+    },
+  'jump' : {
+      'impulse' : 0.75,
+      'holdMax' : 2.85,
+      'repeatDelay' : 0.08
+    },
+  'gravity' : {
+      'UPS' : 0.3, // Units per Step()
+      'Max' : 15.5
+    },
+  };
+```
+ - `Camera.js` can now recieve a `pxlUserSettings` structured object to set all available settings from `pxlCamera.setUserSettings( YOUT_USER_SETTINGS )`
+<br/>&nbsp;&nbsp; - Simply update your `pxlOptions.userSettings` object when constructing the `pxlNav` object
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; - No need to run from your `pxlRoom` object unless you want custom settings per room
+
+---
+
+ - `GUIBase.js` + `Environment.js` has re-enabled GUI screens
+ <br/>&nbsp;&nbsp; - Initial `Help` screen for onboarding automatically loads after boot
+ <br/>&nbsp;&nbsp; - `G` for Graphics Settings
+ <br/>&nbsp;&nbsp; - `I` for pxlNav info
+
+---
+
+ - `FileIO.js` ChangeLog Correction - Incorrectly listed in prior `ChangeLog.md`
+<br/>&nbsp;&nbsp; - Instance-to-Mesh Scaling is calculated from vertex attribute `color.r` with -
+```
+  let instanceScale = MinScale + (MaxScale - MinScale) * color.r;
+```
+
+ - `FileIO.js` now has an meshObject settings check using `checkForMeshSettings()`
+ <br/>&nbsp;&nbsp; - Checks `pxlRoom.materialList[ YourObject ][ 'meshSettings' ]` for `renderOrder` setting of targeted custom material object.
+ - `FileIO.js` automatically sets `GlowPass` & `GlowPassMask` objects render layers to `pxlEnum.RENDER_LAYER.GLOW` & `pxlEnum.RENDER_LAYER.GLOW_MASK` respectively.
+ - `FileIO.js` + `pxlRoom.js` supports a custom sky shader now
+<br/>&nbsp;&nbsp; - Just add your sky object's name to the `pxlRoom.materialList[ YOUR_OBJ_NAME ] = THREE.material` like any other custom object material in your FBX scene.
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; - Automatically sets required mesh options to operate as a sky box/object
+ - `FileIO.js` + `pxlRoom.js` sky shader automatically sets any found 'depthTexture' uniform with the scene's depthTexture from the renderTarget.
+<br/>&nbsp;&nbsp; - This sampler can be used to read the horizon of the scene for horizon-based sky effects
+
+ - `FileIO.js` + `Colliders.js` Axis based collision tags have been changed from {} to []
+<br/>&nbsp;&nbsp; - No collider axis flags are used, as collider triangles are delegated to grid-hashes based on vertext locations automatically.
+
 ---
 
  - `EventManager.js` semi-added; subscription, timeout, and interval manager for `requestAnimationFrame()` based timouts and intervals

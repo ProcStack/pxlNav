@@ -18,7 +18,6 @@ Javascript Player Controller & Environment Manager for Three.js
 * [3d Scene File Features](#features-added-through-your-cgi-program-of-choice)
 * [Shader Editor Keyboard Shortcuts](#shader-editor-keyboard-shortcuts)
 * [In-Progress Features](#work-in-progress-features)
-* [Pull Requests; My Code Grammar](#code-gammar-note)
 <br/>
 
 --------------------------------------------------------------------------------------------

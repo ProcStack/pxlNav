@@ -16,6 +16,7 @@ import {
   Euler
 } from "../../libs/three/three.module.min.js";
 
+import { pxlUserSettings } from "../core/Options.js";
 import { COLLIDER_TYPE, CAMERA_EVENT } from "../core/Enums.js";
 
 // TODO : Extend this damn monolith of a chunky boy
@@ -76,13 +77,13 @@ export class Camera{
     
     // The jumping impulse per frame
     //this.cameraJumpImpulse= [ 0.045, 0.085 ];// [.035,.075]; // [ Grav, Low Grav ]
-    this.cameraJumpImpulse= [ .9, 3.0 ];// [.035,.075]; // [ Grav, Low Grav ]
-    this.cameraMaxJumpHold=[2.55,1.2]; // Second; [ Grav, Low Grav ]
+    this.cameraJumpImpulse= [ .75, 1.5 ];// [.035,.075]; // [ Grav, Low Grav ]
+    this.cameraMaxJumpHold=[ 2.85, 2.0 ]; // Second; [ Grav, Low Grav ]
 
     this.gravityCount=0;
     this.gravityRate=0;
     this.gravityMax=15.5; // Gravity at scale of 1 / avg human(1.8 meters) * 9.8mms = 5.44;  But this is digital here, lower is lighter
-    this.gravityMPS=[.42,.25]; // Influence of M/S^2 .. I guess haha; [ Grav, Low Grav ]
+    this.gravityUPS=[.3,.15]; // Units Per Step(); Influence of M/S^2 .. I guess haha; [ Grav, Low Grav ]
 
     // -- -- -- //
     // -- -- -- //
@@ -162,7 +163,7 @@ export class Camera{
     // TODO : Unsure if I'd rather a contant timer for all "allowed" jumps or not
     //          For now, this lock holds that the player should jump again when the timer is up
     this.releaseJumpLockTime = 0;
-    this.releaseJumpLockDelay = .085; // Seconds dely between repeated jumping, its less jaring with a slight delay
+    this.releaseJumpLockDelay = .08; // Seconds dely between repeated jumping, its less jaring with a slight delay
 
     this.runMain=true;
     this.workerActive=false;
@@ -173,13 +174,7 @@ export class Camera{
     this.deviceKey=()=>{}; // Browser Compatibility
     
     this.portalList={};
-    this.collidersExist=false;
-    this.colliderActive=false;
-    this.colliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
-    this.antiColliderActive=false;
-    this.antiColliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
-    this.antiColliderTopActive=false;
-    this.antiColliderTopList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
+
     this.roomWarpZone=[];
     this.colliderCurObjHit=null;
     this.colliderPrevObjHit=null;
@@ -387,11 +382,7 @@ export class Camera{
   // TODO : Move these to the User class when updated for pxlNav
   //          User is currently as it was for Antibody.club, so it needs to be updated for the pxlNav module
   
-  // Default is 1
-  setJumpScalar( val ){
-    val = Math.max( val, 0.01 );
-    this.jumpScalar=val;
-  }
+
   // Default is 1.75
   setUserHeight( val, roomName="default" ){
     val = Math.max( val, 0.01 );
@@ -405,6 +396,13 @@ export class Camera{
 
     this.roomStandingHeight[roomName]=val;
   }
+
+  // Default is 5
+  setMaxStepHeight( val ){
+    val = Math.max( val, 0.01 );
+    this.maxStepHeight=val;
+  }
+
   // Default is 1
   setUserScale( val ){
     val = Math.max( val, 0.01 );
@@ -415,12 +413,18 @@ export class Camera{
     val = Math.max( val, 0.01 );
     this.movementScalar=val;
   }
+  // Default is 10
+  setMovementMax( val ){
+    val = Math.max( val, 0.01 );
+    this.movementMax=val;
+  }
   // Default is 0.85
   setMovementEase( val ){
     val = Math.min( 1, Math.max( val, 0.01 ) );
     this.cameraMovementEase=val;
   }
 
+  // Default is 0.75
   setPositionBlend( val ){
     val = Math.min( 1, Math.max( val, 0.01 ) );
     this.camPosBlend=val;
@@ -432,6 +436,32 @@ export class Camera{
     this.cameraMoveLengthMult=val;
   }
 
+  // -- -- --
+
+  // Default is 1
+  setJumpScalar( val ){
+    val = Math.max( val, 0.01 );
+    this.jumpScalar=val;
+  }
+  // Default is 0.75
+  setJumpImpulse( val ){
+    val = Math.max( val, 0.01 );
+    this.cameraJumpImpulse[0]=val;
+  }
+  // Default is 2.85
+  setJumpHoldMax( val ){
+    val = Math.max( val, 0.01 );
+    this.cameraMaxJumpHold[0]=val;
+  }
+  // Default is 0.08
+  setJumpRepeatDelay( val ){
+    val = Math.max( val, 0.01 );
+    this.releaseJumpLockDelay=val;
+  }
+
+  // -- -- --
+
+  // Default is 0.85
   setCameraRotateEasing( val ){
     if( !Array.isArray(val) ){
       if( typeof val == "number" ){
@@ -496,6 +526,77 @@ export class Camera{
     this.walkBounceEaseOut=val;
   }
 
+  // -- -- --
+
+  // Set camera values from `pxlUserSettings` structure
+  //   Should custom entries have been added, they wont be processed
+  // TODO : This is a bit messy at the moment
+  // TODO : Add a per-room userSettings with lookup into the `pxlUserSettings` structure
+  //          Since with this set structure, it doesn't need to be individual variables
+  setUserSettings( userSettingsObject ){
+    // User & collider step height settings
+    if( userSettingsObject.hasOwnProperty("height") ){
+      if( userSettingsObject.height.hasOwnProperty("standing") ){
+        this.setUserHeight( userSettingsObject.height.standing );
+      }
+      if( userSettingsObject.height.hasOwnProperty("stepSize") ){
+        this.setMaxStepHeight( userSettingsObject.height.stepSize );
+      }
+    }
+    // -- -- --
+    // Camera movement settings
+    if( userSettingsObject.hasOwnProperty("movement") ){
+      if( userSettingsObject.movement.hasOwnProperty("scalar") ){
+        this.setMovementScalar( userSettingsObject.movement.scalar );
+      }
+      if( userSettingsObject.movement.hasOwnProperty("max") ){
+        this.setMovementMax( userSettingsObject.movement.max );
+      }
+      if( userSettingsObject.movement.hasOwnProperty("easing") ){
+        this.setMovementEase( userSettingsObject.movement.easing );
+      }
+    }
+    // -- -- --
+    // Head bounce settings
+    if( userSettingsObject.hasOwnProperty("headBounce") ){
+      if( userSettingsObject.headBounce.hasOwnProperty("height") ){
+        this.setWalkBounceHeight( userSettingsObject.headBounce.height );
+      }
+      if( userSettingsObject.headBounce.hasOwnProperty("rate") ){
+        this.setWalkBounceRate( userSettingsObject.headBounce.rate );
+      }
+      if( userSettingsObject.headBounce.hasOwnProperty("easeIn") ){
+        this.setWalkBounceEaseIn( userSettingsObject.headBounce.easeIn );
+      }
+      if( userSettingsObject.headBounce.hasOwnProperty("easeOut") ){
+        this.setWalkBounceEaseOut( userSettingsObject.headBounce.easeOut );
+      }
+    }
+    // -- -- --
+    // Jump settings
+    if( userSettingsObject.hasOwnProperty("jump") ){
+      if( userSettingsObject.jump.hasOwnProperty("impulse") ){
+        this.setJumpScalar( userSettingsObject.jump.impulse );
+      }
+      if( userSettingsObject.jump.hasOwnProperty("holdMax") ){
+        this.setJumpHoldMax( userSettingsObject.jump.holdMax );
+      }
+      if( userSettingsObject.jump.hasOwnProperty("repeatDelay") ){
+        this.setJumpRepeatDelay( userSettingsObject.jump.repeatDelay );
+      }
+    }
+    // -- -- --
+    // Gravity settings
+    //   From a Jump or running off a ledge
+    if( userSettingsObject.hasOwnProperty("gravity") ){
+      if( userSettingsObject.gravity.hasOwnProperty("UPS") ){
+        this.setGravityRate( userSettingsObject.gravity.UPS );
+      }
+      if( userSettingsObject.gravity.hasOwnProperty("Max") ){
+        this.setGravityMax( userSettingsObject.gravity.Max );
+      }
+    }
+  }
 
 
 /////////////////////////
@@ -1049,7 +1150,7 @@ export class Camera{
     if( this.runMain ){
       this.gravityRate = Math.max(0, this.gravityRate-this.cameraJumpVelocity  );
       
-      let gravityRate = this.gravityMPS[ this.pxlUser.lowGrav ];
+      let gravityRate = this.gravityUPS[ this.pxlUser.lowGrav ];
 
       if( this.hasGravity ){
         this.gravityCount += (gravityRate * 2.5) * deltaTime;
@@ -1132,7 +1233,7 @@ export class Camera{
     //   geoList["floorCollider"] Collision Detection
     let objHit=null;
     this.movementBlocked=false;
-    //if((this.cameraMoveLength>0 || this.colliderPrevObjHit==null || this.nearestFloorObjName==null) && this.cameraBooted && this.collidersExist){
+    
     if( (this.cameraMoveLength>0 || this.colliderPrevObjHit==null || this.nearestFloorObjName==null) &&
            this.cameraBooted && this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].collidersExist
         ){
@@ -1157,7 +1258,7 @@ export class Camera{
       if(rayHits.length > 0){ // Hit a wall, check if you are standing on the wall
         // this.floorColliderInitialHit=true;
         curRoomObj.hitColliders( rayHits, COLLIDER_TYPE.WALL );
-        if(this.antiColliderTopActive){
+        if(curRoomObj.hasColliderType( COLLIDER_TYPE.WALL_TOP )){
           let rayTopHits=this.pxlColliders.castRay( this.pxlEnv.currentRoom, castPos, castDir, COLLIDER_TYPE.WALL_TOP );
           if( rayTopHits.length > 0 ){
             curRoomObj.hitColliders( rayTopHits, COLLIDER_TYPE.WALL_TOP );
@@ -1245,7 +1346,6 @@ export class Camera{
         castPos.y += castHeight + this.maxStepHeight;
         
                 
-        //if( (this.colliderActive && this.antiColliderTopActive) || this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].colliderActive  ){
         if( this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].hasColliders() ){
           rayHits=this.pxlColliders.castRay( this.pxlEnv.currentRoom, castPos, castDir, COLLIDER_TYPE.FLOOR );
         }else{

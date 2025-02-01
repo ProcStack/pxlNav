@@ -209,11 +209,11 @@
             
     ** Please see 3d Scene Organization for more details **
     
-      this.colliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] }; - SET AUTOMATICALLY FROM YOUR FBX
+      this.colliderList = []; - SET AUTOMATICALLY FROM YOUR FBX
         - Ground Collider Objects
-      this.antiColliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] }; - SET AUTOMATICALLY FROM YOUR FBX
+      this.antiColliderList = []; - SET AUTOMATICALLY FROM YOUR FBX
         - Obstacle Collider Objects
-      this.antiColliderTopList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] }; - SET AUTOMATICALLY FROM YOUR FBX
+      this.antiColliderTopList = []; - SET AUTOMATICALLY FROM YOUR FBX
         - Obstacle Top Collider Objects
 
 

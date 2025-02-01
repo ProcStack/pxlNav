@@ -35,7 +35,6 @@ export function skyObjectFrag( skyHazeValue=SKY_HAZE.OFF ){
   let ret=shaderHeader();
   ret+=`     
     uniform sampler2D diffuse;
-    uniform sampler2D envDiffuse;
     uniform sampler2D noiseTexture;
     uniform vec2 time;
     uniform float camNear;
@@ -61,11 +60,17 @@ export function skyObjectFrag( skyHazeValue=SKY_HAZE.OFF ){
   if( skyHazeValue == SKY_HAZE.VAPOR ){
     ret+=`
 
+        // -- -- -- -- -- -- -- -- --
+        // -- Horizon Vapor Code - -- --
+        // -- -- -- -- -- -- -- -- -- -- --
+
         vec3 lPos = vLocalPos;
         lPos.y = abs(lPos.y)*0.05;
 
         float t = time.x*.6;
 
+        // Duel noise texture sampling
+        //   Creates a flowing vapor effect flowing through the noise texture
         vec2 nUv =  vec2(vUv.x*0.40, vUv.y*.5 - t*.0065  - vN.y );
         vec3 noiseBaseCd = texture2D( noiseTexture, nUv ).rgb;
         nUv = ( nUv*vec2(1.0,.5)+noiseBaseCd.rg*(noiseBaseCd.b) + t*.02);
@@ -75,20 +80,28 @@ export function skyObjectFrag( skyHazeValue=SKY_HAZE.OFF ){
         
         float reachDepth = 0.0 ;
         
+        // Calculate mask based on the local position
+        //   Assuming for a sky-box / sky-sphere object
         vec3 normPos = normalize(vLocalPos);
         normPos.y = 1.0-min(1.0,(normPos.y)*3.0);
         normPos.y = normPos.y*normPos.y*normPos.y;
         
+        // Noise-influence of the normal vector to drive the vapoe mask
         reachDepth =  min(1.0, (vN.y * 1. * noiseCd.x  * max(noiseCd.y, noiseCd.z))) ;
 
-        float depth = clamp(reachDepth+normPos.y * max(.95, noiseBaseCd.x*noiseBaseCd.z+vN.y*.5), 0.0, 1.0)*.1;
+        float vaporMask = clamp(reachDepth+normPos.y * max(.95, noiseBaseCd.x*noiseBaseCd.z+vN.y*.5), 0.0, 1.0)*.1;
         
         float fogMixer = (Cd.r+Cd.g+Cd.b) - (fogColor.r+fogColor.g+fogColor.b) ;
         vec3 toFogColor = mix(  Cd.rgb, fogColor,  fogMixer );
-        float blender = (sin(noiseCd.r*PI+t+uv.x))*max(0.0,1.0-(depth+fogMixer))*.1 ;
-        vec3 baseColor = (toFogColor-min(1.0,blender+ depth*10.0)) ;
+        float blender = (sin(noiseCd.r*PI+t+uv.x))*max(0.0,1.0-(vaporMask+fogMixer))*.1 ;
+        vec3 baseColor = (toFogColor-min(1.0,blender+ vaporMask*10.0)) ;
 
-        Cd.rgb = mix(Cd.rgb, baseColor, depth * step( -0.10, vN.y ));
+        Cd.rgb = mix(Cd.rgb, baseColor, vaporMask * step( -0.10, vN.y ));
+
+        // -- -- -- -- -- -- -- -- -- -- --
+        // -- End of Horizon Vapor -- --
+        // -- -- -- -- -- -- -- -- --
+
     `;
   }
   ret+=`

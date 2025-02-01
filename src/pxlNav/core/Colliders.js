@@ -402,6 +402,7 @@ export class Colliders{
 
     let roomName = pxlRoomObj.getName();
     let curInteractables = pxlRoomObj.getColliders( colliderType );
+    console.log( curInteractables );
 
     if( curInteractables.length == 0 ) return; // No interactables found, user may have removed objects from the scene during runtime
 

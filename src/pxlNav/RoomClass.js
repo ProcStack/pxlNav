@@ -121,11 +121,11 @@ class RoomEnvironment{
     this.collidersExist=false;
     this.colliderActive=false;
     this.colliderHashMap={};
-    this.colliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
+    this.colliderList= [];
     this.antiColliderActive=false;
-    this.antiColliderList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
+    this.antiColliderList= [];
     this.antiColliderTopActive=false;
-    this.antiColliderTopList={ 'noAxis':[], '11':[], '01':[], '10':[], '00':[] };
+    this.antiColliderTopList= [];
     
     this.hasPortalExit=false;
     this.portalList={};
@@ -509,31 +509,13 @@ class RoomEnvironment{
     // TODO : Maya tools and FBX requirements needs updating for the new collider system
     switch( colliderType ){
       case COLLIDER_TYPE.FLOOR:
-        forHashing = [ 
-          ...this.colliderList['noAxis'],
-          ...this.colliderList['11'],
-          ...this.colliderList['01'],
-          ...this.colliderList['10'],
-          ...this.colliderList['00']
-        ];
+        forHashing = [ ...this.colliderList ];
         break;
       case COLLIDER_TYPE.WALL:
-        forHashing = [ 
-          ...this.colliderList['noAxis'],
-          ...this.colliderList['11'],
-          ...this.colliderList['01'],
-          ...this.colliderList['10'],
-          ...this.colliderList['00']
-        ];
+        forHashing = [ ...this.colliderList ];
         break;
       case COLLIDER_TYPE.WALL_TOP:
-        forHashing = [ 
-          ...this.antiColliderTopList['noAxis'],
-          ...this.antiColliderTopList['11'],
-          ...this.antiColliderTopList['01'],
-          ...this.antiColliderTopList['10'],
-          ...this.antiColliderTopList['00']
-        ];
+        forHashing = [ ...this.antiColliderTopList ];
         break;
       case COLLIDER_TYPE.CEILING:
         // Not implemented yet
@@ -624,25 +606,11 @@ class RoomEnvironment{
           pointLightCount = this.lightList.PointLight.length;
         }
         
-        if(this.geoList.hasOwnProperty('GlowPass') && this.geoList['GlowPass'].length > 0){
-          this.geoList['GlowPass'].forEach((g)=>{
-            //g.layers.set( RENDER_LAYER.SCENE )
-            //g.layers.toggle( RENDER_LAYER.GLOW )
-            g.layers.set( RENDER_LAYER.GLOW )
-          })
-        }
-        
-        if( this.geoList['Sky_EqRect_Mesh'] ){
-          let skyMtl = this.geoList['Sky_EqRect_Mesh'].material;
-          if( skyMtl.uniforms && skyMtl.uniforms.envDiffuse ){
-            skyMtl.uniforms.envDiffuse.value = this.scene.renderTarget.depthTexture;
-          }
-        }
         
         
-        var ambientLight = new AmbientLight( 0x303030 ); // soft white light
+        /*var ambientLight = new AmbientLight( 0x303030 ); // soft white light
         //this.lightList.push( ambientLight );
-        this.scene.add( ambientLight );
+        this.scene.add( ambientLight );*/
         
         let lightTypeList = Object.keys( this.lightList );
         if(lightTypeList.length>0){
@@ -703,11 +671,11 @@ class RoomEnvironment{
               }
               
               let mat=this.pxlFile.pxlShaderBuilder(
-                        shaderUniforms,
-                        pxlPrincipledVert( useShadows ),
-                        pxlPrincipledFrag( ShaderParms, useColor, useFog, useLights, useShadows, pointLightCount ),
-                        defines
-                      );
+                  shaderUniforms,
+                  pxlPrincipledVert( useShadows ),
+                  pxlPrincipledFrag( ShaderParms, useColor, useFog, useLights, useShadows, pointLightCount ),
+                  defines
+                );
               //mat.side=FrontSide;
               mat.transparent= false;
               mat.lights= true;

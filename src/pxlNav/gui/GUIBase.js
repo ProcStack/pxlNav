@@ -18,7 +18,7 @@ import {VERBOSE_LEVEL} from '../core/Enums.js';
 
 
 export class GUIManager{
-  constructor(verbose, projectTitle="Metal-Asylum", assetRoot="images/assets/", guiRoot="images/GUI/"){
+  constructor(verbose, projectTitle="Metal-Asylum", assetRoot="./assets/", guiRoot="./assets/GUI/"){
 
   this.projectTitle = projectTitle;
   this.verbose = verbose;
@@ -105,14 +105,18 @@ export class GUIManager{
   this.djPlayerObj=null;
     
   this.buildGuiStatus={
-  hud:false,
-  userTopBar:false,
-  bottomBar:false,
-  djPlayer:false,
-  roomControls:false,
-  verseList:false,
-  medalion:true,
-  loadingBranding:false
+    hud:false,
+    userTopBar:false,
+    bottomBar:false,
+    djPlayer:false,
+    roomControls:false,
+    verseList:false,
+    medalion:false,
+    loadingBranding:false
+  };
+
+  this.settingsFields = {
+    'changeUsername' : false, // Display Change Username Field
   };
   
   this.requestVerseList=false;
@@ -471,7 +475,7 @@ export class GUIManager{
     });
     location.search=retSearch
   }
-  
+   
   guiToggleVisibility( active=null ){
     active = active==null ? !this.hudVisibility : active;
     this.hudVisibility=active;
@@ -591,11 +595,11 @@ export class GUIManager{
     });
   });
     }else{
-  setTimeout( ()=>{
-          if(faderObj.classList.contains("visOff")){
-            faderObj.style.display="none";
-          }
-  }, 1000);
+      setTimeout( ()=>{
+        if(faderObj.classList.contains("visOff")){
+          faderObj.style.display="none";
+        }
+      }, 1000);
     }
   }
   }
@@ -837,10 +841,10 @@ export class GUIManager{
       medalion:true
     };
     this.branding={
-      loader:guiRoot+"branding/OffGrid_logogram.svg",
-      logo:guiRoot+"branding/OffGrid_logomark.svg",
-      medalion:guiRoot+"branding/OffGrid_logomark.svg",
-      stack:guiRoot+"branding/OffGrid_logostack.svg"
+      loader:guiRoot+"branding/logogram.svg",
+      logo:guiRoot+"branding/logomark.svg",
+      medalion:guiRoot+"branding/logomark.svg",
+      stack:guiRoot+"branding/logostack.svg"
     };
   svgIconPromise( url, id, clickEvent, curVal=null, style=null, postLoadCmd=null ){
   */
@@ -1238,50 +1242,53 @@ export class GUIManager{
     if(this.hudBlock.obj){
       this.hudBlock.obj.style.display="none";
     }
-  if(func=="click"){
-    if(mode=="chat"){
-  this.toggleChatBox();
-  return;
-    }else if(mode=="musicToggle"){
-  this.pxlAudio.djPlayerMuteToggle();
-  this.toggleIcon(obj, !this.pxlAudio.djMuted, true );
-  return;
-    }else if(mode=="userSpeakerToggle"){
-  this.setUserControls( obj );
-  return;
-    }else if(mode=="speakerToggle"){
-  this.toggleIcon(obj, false, true );
-  return;
-    }else if(mode=="speakerChoice"){
-  let curType="audiooutput";
-  this.flipIcon(obj, this.guiWindows[curType] && this.guiWindows[curType].active );
-  return;
-    }else if(mode=="help"){
-  let tmp=this.guiWindows.helpGui ? this.guiWindows.helpGui.active : false;
-  this.checkOpenWindows(true);
-  this.helpGuiToggle( !tmp );
-  return;
-    }else if(mode=="info"){
-  let tmp=this.guiWindows.infoGui ? this.guiWindows.infoGui.active : false;
-  this.checkOpenWindows(true);
-  this.infoGuiToggle( !tmp );
-  return;
-    }else if(mode=="settings"){
-  let tmp=this.guiWindows.settingsGui ? this.guiWindows.settingsGui.active : false;
-  this.checkOpenWindows(true);
-  this.settingsGuiToggle( !tmp );
-  return;
-  
-    }else if(mode=="userProfile"){
-  this.toggleUserProfile();
-  return;
-    //&=
-    }else if(mode=="users"){
-    //&
-    }else if(mode=="stats"){
-  return;
+    if(func=="click"){
+      switch (mode) {
+        case "chat":
+          this.toggleChatBox();
+          break;
+        case "musicToggle":
+          this.pxlAudio.djPlayerMuteToggle();
+          this.toggleIcon(obj, !this.pxlAudio.djMuted, true);
+          break;
+        case "userSpeakerToggle":
+          this.setUserControls(obj);
+          break;
+        case "speakerToggle":
+          this.toggleIcon(obj, false, true);
+          break;
+        case "speakerChoice":
+          let curType = "audiooutput";
+          this.flipIcon(obj, this.guiWindows[curType] && this.guiWindows[curType].active);
+          break;
+        case "help":
+          let helpActive = this.guiWindows.helpGui ? this.guiWindows.helpGui.active : false;
+          this.checkOpenWindows(true);
+          this.helpGuiToggle(!helpActive);
+          break;
+        case "info":
+          let infoActive = this.guiWindows.infoGui ? this.guiWindows.infoGui.active : false;
+          this.checkOpenWindows(true);
+          this.infoGuiToggle(!infoActive);
+          break;
+        case "settings":
+          let settingsActive = this.guiWindows.settingsGui ? this.guiWindows.settingsGui.active : false;
+          this.checkOpenWindows(true);
+          this.settingsGuiToggle(!settingsActive);
+          break;
+        case "userProfile":
+          this.toggleUserProfile();
+          break;
+        //&=
+        case "users":
+          break;
+        //&
+        case "stats":
+        default:
+          // Handle unknown mode if necessary
+          break;
+      }
     }
-  }
   }
   
   setMicVolumeLevel( volLevel ){
@@ -1509,7 +1516,7 @@ export class GUIManager{
 
 
   pxlNavDataUpdate(){
-    if( this.pxlNavData.active ){
+    if( this.pxlNavData.active && this.pxlNavData?.fps ){
       if( this.pxlTimer.msRunner.x > this.pxlNavData.fpsSet ){
         this.pxlNavData.fpsSet=this.pxlTimer.msRunner.x+1;
         this.pxlNavData.fps.innerText=parseInt(1  / this.pxlTimer.msRunner.y);
@@ -1540,15 +1547,14 @@ export class GUIManager{
   }
   toggleGuiWindowContainer(e, active, closeWindows=false ){
   if(e){
-    
     let target= e.path ? e.path[0] : e.target;
     let targetId=target.getAttribute("id");
     if(targetId!="guiWindowBackground"){
-  // ## Bad way to do this....
-  let exitObjList=["gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
-  if( !exitObjList.includes( targetId ) ){
-    return null;
-  }
+      // ## Bad way to do this....
+      let exitObjList=["gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
+      if( !exitObjList.includes( targetId ) ){
+        return null;
+      }
     }
   }
     let openStatus=this.checkOpenWindows( closeWindows );
@@ -1563,122 +1569,122 @@ export class GUIManager{
   }
 
   helpGuiBuild(){
-  this.guiWindows.helpGui={};
-  this.guiWindows.helpGui.gui=null;
-  this.guiWindows.helpGui.active=false;
-  
-  let helpGuiDiv=document.createElement( "div" );
-  helpGuiDiv.id="gui_helpGuiWindow";
-  helpGuiDiv.classList.add("gui_helpGuiParentStyle");
-  this.prepPromptFader( helpGuiDiv );
-  this.guiWindowBG.appendChild( helpGuiDiv );
-  
-  let html="";
-  html+=`
-    <div id="gui_helpContent" class="gui_contentStyle">
-  <div class="gui_body">
-    <div id="gui_helpGui_keyboardParent" class="gui_helpGui_keyboardParent">
-    <div id="gui_helpGui_controlsKeyboard" class="guiPadding settings_sectionHeader">keyboard controls</div>
-    <div class="gui_helpGui_ASDWorUDLR">
-      <div id="gui_helpGui_asdw" class="gui_helpGui_asdw"></div>
-      <div id="gui_helpGui_or" class="gui_helpGui_text">or</div>
-      <div id="gui_helpGui_udlr" class="gui_helpGui_udlr"></div>
-    </div>
-    <div id="gui_helpGui_useKeys" class="gui_helpGui_text" style="display:inline-block;">Use your keyboard <span class="gui_boldText">ARROWS</span> or<br><span class="gui_boldText">AWSD</span> keys to move around</div>
-    </div>
-    <div id="gui_helpGui_mouse" class="gui_helpGui_mouse">
-    <div id="gui_helpGui_MouseControls" class="guiPadding settings_sectionHeader">mouse controls</div>
-    <div id="gui_helpGui_MouseOutlined" class="gui_helpGui_mouseOutline"></div>
-    <div id="gui_helpGui_useMouse" class="guiPadding gui_helpGui_text" style="display:inline-block;">To orient your view:<br><span class="gui_boldText">LEFT CLICK</span> and drag your mouse<br><span class="gui_boldText">RIGHT CLICK</span> to lock your mouse</div>
-    </div>
-  </div>
-  <div id="gui_helpGui_hotKeys" class="gui_helpGui_hotKeys">
-          You can change <span class="gui_boldText">Navigation</span> and <span class="gui_boldText">Look controls</span> in the <span class="gui_boldText">Settings</span> <span id="gui_helpGui_settingIcon"></span> menu
-        </div>
-  <div id="guiHelpFooter" class="gui_footer">
-    <div class="guiButton" id="guiHelpBackButton">close</div>
-  </div>
-  <div class="gui_spacer"></div>
-    </div>
-  `;
-  helpGuiDiv.innerHTML=html;
+    this.guiWindows.helpGui={};
+    this.guiWindows.helpGui.gui=null;
+    this.guiWindows.helpGui.active=false;
     
-  let svgDivList=[
-    //[this.guiRoot+"global/ANTIBODYCLUB.svg", "gui_helpGui_ANTIBODYCLUB","guiAntibodyClubTitle",false],
+    let helpGuiDiv=document.createElement( "div" );
+    helpGuiDiv.id="gui_helpGuiWindow";
+    helpGuiDiv.classList.add("gui_helpGuiParentStyle");
+    this.prepPromptFader( helpGuiDiv );
+    this.guiWindowBG.appendChild( helpGuiDiv );
     
-    //[this.guiRoot+"keyboard/controlsKeyboard.svg", "gui_helpGui_controlsKeyboard","guiSectionHeaderText",false],
-    [this.guiRoot+"keyboard/asdw.svg", "gui_helpGui_asdw","guiKeyDispSVG",false],
-    //[this.guiRoot+"keyboard/or.svg", "gui_helpGui_or","guiKeyOrSVG",false],
-    [this.guiRoot+"keyboard/udlr.svg", "gui_helpGui_udlr","guiKeyDispSVG",false],
-    //[this.guiRoot+"keyboard/useKeys.svg", "gui_helpGui_useKeys","guiSectionHelpText",false],
+    let html="";
+    html+=`
+      <div id="gui_helpContent" class="gui_contentStyle">
+    <div class="gui_body">
+      <div id="gui_helpGui_keyboardParent" class="gui_helpGui_keyboardParent">
+      <div id="gui_helpGui_controlsKeyboard" class="guiPadding settings_sectionHeader">keyboard controls</div>
+      <div class="gui_helpGui_ASDWorUDLR">
+        <div id="gui_helpGui_asdw" class="gui_helpGui_asdw"></div>
+        <div id="gui_helpGui_or" class="gui_helpGui_text">or</div>
+        <div id="gui_helpGui_udlr" class="gui_helpGui_udlr"></div>
+      </div>
+      <div id="gui_helpGui_useKeys" class="gui_helpGui_text" style="display:inline-block;">Use your keyboard <span class="gui_boldText">WASD</span> or<br><span class="gui_boldText">ARROWS</span> keys to move around</div>
+      </div>
+      <div id="gui_helpGui_mouse" class="gui_helpGui_mouse">
+      <div id="gui_helpGui_MouseControls" class="guiPadding settings_sectionHeader">mouse controls</div>
+      <div id="gui_helpGui_MouseOutlined" class="gui_helpGui_mouseOutline"></div>
+      <div id="gui_helpGui_useMouse" class="guiPadding gui_helpGui_text" style="display:inline-block;">To orient your view:<br><span class="gui_boldText">LEFT CLICK</span> and drag your mouse<br><span class="gui_boldText">RIGHT CLICK</span> to lock your mouse</div>
+      </div>
+    </div>
+    <div id="gui_helpGui_hotKeys" class="gui_helpGui_hotKeys">
+            You can change <span class="gui_boldText">Navigation</span> and <span class="gui_boldText">Look controls</span> in the <span class="gui_boldText">Settings (G)</span> <span id="gui_helpGui_settingIcon"></span> menu
+            <br> To show this screen again, open the <span class="gui_boldText">Help (H)</span> screen
+            <br> For additional info, see the <span class="gui_boldText">Info (I)</span> screen
+          </div>
+    <div id="guiHelpFooter" class="gui_footer">
+      <div class="guiButton" id="guiHelpBackButton">close</div>
+    </div>
+    <div class="gui_spacer"></div>
+      </div>
+    `;
+    helpGuiDiv.innerHTML=html;
+      
+    let svgDivList=[
+      //[this.guiRoot+"keyboard/controlsKeyboard.svg", "gui_helpGui_controlsKeyboard","guiSectionHeaderText",false],
+      [this.guiRoot+"keyboard/asdw.svg", "gui_helpGui_asdw","guiKeyDispSVG",false],
+      //[this.guiRoot+"keyboard/or.svg", "gui_helpGui_or","guiKeyOrSVG",false],
+      [this.guiRoot+"keyboard/udlr.svg", "gui_helpGui_udlr","guiKeyDispSVG",false],
+      //[this.guiRoot+"keyboard/useKeys.svg", "gui_helpGui_useKeys","guiSectionHelpText",false],
+      
+      //[this.guiRoot+"mouse/MouseControls.svg", "gui_helpGui_MouseControls","guiSectionHeaderText",false],
+      [this.guiRoot+"mouse/MouseOutlined.svg", "gui_helpGui_MouseOutlined","guiMouseDispSVG",false],
+      //[this.guiRoot+"mouse/useMouse.svg", "gui_helpGui_useMouse","guiSectionHelpText",false],
+      
+      //[this.guiRoot+"global/close.svg", "guiHelpFooter",["buttonHover","guiHelpEnterButton"],true,"close"]
+    ];
+    svgDivList.forEach( (s)=>{
+      SVGUtils.svgButtonPromise( ...s );
+    });
     
-    //[this.guiRoot+"mouse/MouseControls.svg", "gui_helpGui_MouseControls","guiSectionHeaderText",false],
-    [this.guiRoot+"mouse/MouseOutlined.svg", "gui_helpGui_MouseOutlined","guiMouseDispSVG",false],
-    //[this.guiRoot+"mouse/useMouse.svg", "gui_helpGui_useMouse","guiSectionHelpText",false],
+    // Close Button
+    let tmpThis=this;
+    let guiClose=document.getElementById("guiHelpBackButton");
+    guiClose.onclick=(e)=>{ 
+        if(tmpThis.introHelpActive){
+          tmpThis.introHelpActive=false;
+          tmpThis.pxlEnv.postHelpIntro();
+        }
+        tmpThis.svgCheckClick(e, "close");
+      };
     
-    //[this.guiRoot+"global/close.svg", "guiHelpFooter",["buttonHover","guiHelpEnterButton"],true,"close"]
-  ];
-  svgDivList.forEach( (s)=>{
-    SVGUtils.svgButtonPromise( ...s );
-  });
-  
-  // Close Button
-  let tmpThis=this;
-  let guiClose=document.getElementById("guiHelpBackButton");
-  guiClose.onclick=(e)=>{ 
-      if(tmpThis.introHelpActive){
-        tmpThis.introHelpActive=false;
-        tmpThis.pxlEnv.postHelpIntro();
+    // Remove linking from hud icons only
+    //let hudIconKeys=Object.keys( this.hudIcons );
+    let hudIconKeys=Object.keys( this.textDescriptions );
+    //hudIconKeys.push( "djPlayerVolumeParent" );
+    /*hudIconKeys.forEach( (i)=>{
+      let textDesc = this.textDescriptions[ i ];
+      if(textDesc){
+        let text = textDesc.text;
+        let pos = textDesc.pos;
+        let helpObj = document.createElement( "div" );
+        helpObj.id = "helpText_"+i;
+        helpObj.classList.add( "helpTextDescriptionParent" );
+        helpObj.innerHTML = text;
+        helpGuiDiv.appendChild( helpObj );
+        this.textDescriptions[ i ].obj = helpObj;
       }
-      tmpThis.svgCheckClick(e, "close");
-    };
+    });*/
   
-  // Remove linking from hud icons only
-  //let hudIconKeys=Object.keys( this.hudIcons );
-  let hudIconKeys=Object.keys( this.textDescriptions );
-  //hudIconKeys.push( "djPlayerVolumeParent" );
-  hudIconKeys.forEach( (i)=>{
-    let textDesc = this.textDescriptions[ i ];
-    if(textDesc){
-  let text = textDesc.text;
-  let pos = textDesc.pos;
-  let helpObj = document.createElement( "div" );
-  helpObj.id = "helpText_"+i;
-  helpObj.classList.add( "helpTextDescriptionParent" );
-  helpObj.innerHTML = text;
-  helpGuiDiv.appendChild( helpObj );
-  this.textDescriptions[ i ].obj = helpObj;
+      
+    let settingsIcon=document.getElementById("gui_helpGui_settingIcon");
+    if(settingsIcon && this.hudIcons.settingsIcon){
+      settingsIcon.innerHTML=this.hudIcons.settingsIcon.svg.parentNode.innerHTML;
+      settingsIcon.style.position="relative";
+      settingsIcon.style.top="7.3px";
+      settingsIcon.style.width="30px";
+      settingsIcon.style.padding="2px";
+      settingsIcon.style.cursor="pointer";
+      settingsIcon.children[0].style.height="26px";
+      settingsIcon.onclick=()=>{
+        tmpThis.iconEvent("click", null, "settings");
+      };
     }
-  });
-  
+      
+    // -- -- -- -- -- -- -- -- -- -- //
+    // Store gui window as object
+    this.guiWindows.helpGui.gui=helpGuiDiv;
     
-  let settingsIcon=document.getElementById("gui_helpGui_settingIcon");
-  if(settingsIcon && this.hudIcons.settingsIcon){
-    settingsIcon.innerHTML=this.hudIcons.settingsIcon.svg.parentNode.innerHTML;
-    settingsIcon.style.position="relative";
-    settingsIcon.style.top="7.3px";
-    settingsIcon.style.width="30px";
-    settingsIcon.style.padding="2px";
-    settingsIcon.style.cursor="pointer";
-    settingsIcon.children[0].style.height="26px";
-    settingsIcon.onclick=()=>{
-      tmpThis.iconEvent("click", null, "settings");
-    };
-  }
-    
-  // -- -- -- -- -- -- -- -- -- -- //
-  // Store gui window as object
-  this.guiWindows.helpGui.gui=helpGuiDiv;
-  
-  // Let the browser update sizing and any potential display:block limitations
-  setTimeout( ()=>{
-    this.resize();
-  }, 50);
+    // Let the browser update sizing and any potential display:block limitations
+    setTimeout( ()=>{
+      this.resize();
+    }, 50);
   }
   helpGuiToggle( active=null, bgVis=true ){
-  if( !this.guiWindows.helpGui ){
-    this.helpGuiBuild();
-  }
+    if( !this.guiWindows.helpGui ){
+      this.helpGuiBuild();
+    }
   
   active= active==null ? !this.guiWindows.helpGui.active : active;
   this.guiWindows.helpGui.active=active;
@@ -1718,13 +1724,11 @@ export class GUIManager{
     <div id="gui_infoContent" class="gui_contentInfoStyle">
   <div class="gui_infoBody">
     <div id="gui_infoGuiParent" class="gui_infoGuiParent">
-    <br>${this.projectTitle}, created by <a href="https://www.theumbrella.nyc/">The Umbrella</a>,
-    <br>an experience design collective.
+    <br>${this.projectTitle}
+    <br>&nbsp;&nbsp; Created by <a href="https://github.com/ProcStack" target="_blank">Kevin Edzenga / ProcStack</a> 2024; 2025
     <br>
-    <br>Want to chat?
-    <br><a href="mailto:info@theumbrella.nyc">info@theumbrella.nyc</a>
-    <br>
-    <br>We’re in active development. Get in touch if you have any issues.
+    <br>If any bugs are found in pxlNav, you can share them on the GitHub issues page:
+    <br>&nbsp;&nbsp; <a href="https://github.com/ProcStack/pxlNav/issues" target="_blank">pxlNav / issues</a>
     <br>
     </div>
   </div>
@@ -1794,18 +1798,25 @@ export class GUIManager{
     <div id="gui_settingsContent" class="gui_contentSettingsStyle">
   <div class="gui_settingsBody">
     <div class="gui_settingsParentGrid">
-      <!-- -- Username -- -- -->
-    <div class="cellMargin settings_icon" id="settings_user"></div>
-    <div class="settings_optionHeader">Username</div>
-    <div class="settings_radio" style="grid-auto-flow: row; justify-content: start;">
-                    <div id="guiuserProfileBoxFieldParent" class="gui_userProfileBoxFieldParentStyle">
-                      <input type="text" placeholder="Set your username" value="${curName}" id="settings_usernameInput" class="settings_usernameInput"></input>
-                      <input type="button" value="Set" id="settings_sendUsername" class="sendUsername">
-                    </div>
-                    <div id="settings_usernameResponseMessage" class="usernameResponseMessageStyle"></div>
-                </div>
+    `;
+    if( this.settingsFields.changeUsername ){
+      html+=`
+        <!-- -- Username -- -- -->
+        <div class="cellMargin settings_icon" id="settings_user"></div>
+        <div class="settings_optionHeader">Username</div>
+        <div class="settings_radio" style="grid-auto-flow: row; justify-content: start;">
+            <div id="guiuserProfileBoxFieldParent" class="gui_userProfileBoxFieldParentStyle">
+              <input type="text" placeholder="Set your username" value="${curName}" id="settings_usernameInput" class="settings_usernameInput"></input>
+              <input type="button" value="Set" id="settings_sendUsername" class="sendUsername">
+            </div>
+            <div id="settings_usernameResponseMessage" class="usernameResponseMessageStyle"></div>
+        </div>
       <!-- -- -- -- -- -- -->
-    <div class="settingsGridSpan settingsSpacer"></div>
+      <div class="settingsGridSpan settingsSpacer"></div>
+      <!-- -- -- -- -- -- -->
+      `;
+    }
+    html+=`
       <!-- -- Left/Right -- -- -->
     <div class="cellMargin settings_icon" id="settings_left_right"></div>
     <div class="settings_optionHeader">Left/Right</div>
@@ -1955,19 +1966,24 @@ export class GUIManager{
     
   
   let msgInput=document.getElementById( "settings_usernameInput" );
-  msgInput.onkeyup=(e)=>{ tmpThis.keyUsernameSet(e); };
-  msgInput.onkeydown=(e)=>{ tmpThis.keyDownUsernameSet(e); };
-  this.guiWindows.settingsGui.usernameInput=msgInput;
+  if( msgInput ){
+    msgInput.onkeyup=(e)=>{ tmpThis.keyUsernameSet(e); };
+    msgInput.onkeydown=(e)=>{ tmpThis.keyDownUsernameSet(e); };
+    this.guiWindows.settingsGui.usernameInput=msgInput;
+
+    let button=document.getElementById( "settings_sendUsername" );
+    button.addEventListener("click", ()=>{
+      tmpThis.sendUsernameUpdate( msgInput );
+    });
+
+    // If the `changeUsername` field is enabled, set the username input to the current username
+    let retMessage=document.getElementById( "settings_usernameResponseMessage" );
+    if( retMessage ){
+      this.guiWindows.settingsGui.usernameReturn=retMessage;
+    }
+  }
     
-  let button=document.getElementById( "settings_sendUsername" );
-  button.addEventListener("click", ()=>{
-    tmpThis.sendUsernameUpdate( msgInput );
-  });
   
-  let retMessage=document.getElementById( "settings_usernameResponseMessage" );
-  this.guiWindows.settingsGui.usernameReturn=retMessage;
-    
-    
   // -- -- -- -- -- -- -- //
   
   let radioList,rLength;
@@ -2123,7 +2139,7 @@ export class GUIManager{
   
   active= active==null ? !this.guiWindows.settingsGui.active : active;
     
-    if(active && this.guiWindows.settingsGui){
+    if(active && this.guiWindows?.settingsGui?.usernameReturn){
       this.guiWindows.settingsGui.usernameReturn.innerText="";
     }
     
@@ -2154,28 +2170,34 @@ export class GUIManager{
     this.pxlNavData.active=active;
     
     let toHeight= this.pxlNavData.height || 200;
-    this.pxlNavData.gui.style.maxHeight= active ? toHeight+"px" : "0px" ;
-    if( !active ){
-      this.pxlNavData.height=this.pxlNavData.gui.offsetHeight;
+    if( this.pxlNavData?.gui ){
+      this.pxlNavData.gui.style.maxHeight= active ? toHeight+"px" : "0px" ;
+      if( !active ){
+        this.pxlNavData.height=this.pxlNavData.gui.offsetHeight;
+      }
     }
+
   }
 
+  // -- -- --
+
+  // Settings GUI Functions for resolution and glow settings
 
   renderRadius(val){
-  this.pxlEnv.mapGlowPass.strength = Number( val );
-  this.pxlEnv.roomBloomPass.strength = Number( val );
+    this.pxlEnv.mapGlowPass.strength = Number( val );
+    this.pxlEnv.roomBloomPass.strength = Number( val );
   }
   renderThreshold(val){
-  this.pxlEnv.mapGlowPass.threshold = Number( val );
-  this.pxlEnv.roomBloomPass.threshold = Number( val );
+    this.pxlEnv.mapGlowPass.threshold = Number( val );
+    this.pxlEnv.roomBloomPass.threshold = Number( val );
   }
   renderGlowRadius(val){
-  this.pxlEnv.mapGlowPass.radius = Number( val );
-  this.pxlEnv.roomBloomPass.radius = Number( val );
+    this.pxlEnv.mapGlowPass.radius = Number( val );
+    this.pxlEnv.roomBloomPass.radius = Number( val );
   }
   renderResolution(val){
-  this.pxlQuality.screenResPerc=val*.75+.25;
-  this.pxlDevice.resizeRenderResolution();
+    this.pxlQuality.screenResPerc=val*.75+.25;
+    this.pxlDevice.resizeRenderResolution();
   }
 
 /////////////////////////////////////////////

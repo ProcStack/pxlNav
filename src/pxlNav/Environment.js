@@ -325,6 +325,13 @@ export class Environment{
     this.posted=true;
 
     //this.buildSnow();
+
+    // Trigger Mobile or PC How-To 
+    if( this.pxlDevice.mobile || this.pxlAutoCam.enabled){
+      this.pxlGuiDraws.toggleMobileWelcome(true);
+    }else{
+      this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
+    }
     
   }
     

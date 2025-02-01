@@ -314,21 +314,6 @@ export class FieldEnvironment extends RoomEnvironment{
     // }
     if(this.geoList['ForceField']){}
     
-    if(this.geoList.hasOwnProperty('GlowPass') && this.geoList['GlowPass'].length > 0){
-      this.geoList['GlowPass'].forEach((g)=>{
-        //g.layers.set( this.pxlEnv.RENDER_LAYER.SCENE )
-        //g.layers.toggle( this.pxlEnv.RENDER_LAYER.GLOW )
-        g.layers.set( this.pxlEnv.RENDER_LAYER.GLOW )
-      })
-    }
-    
-    if( this.geoList['Sky_EqRect_Mesh'] ){
-      let skyMtl = this.geoList['Sky_EqRect_Mesh'].material;
-      if( skyMtl.uniforms && skyMtl.uniforms.envDiffuse ){
-        skyMtl.uniforms.envDiffuse.value = this.scene.renderTarget.depthTexture;
-      }
-    }
-    
     
     if( this.geoList['pondWater_geo'] ){
       let curObj = this.geoList['pondWater_geo'];

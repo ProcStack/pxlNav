@@ -70,7 +70,7 @@ import {
 
 import { pxlBase } from './pxlNav/pxlBase.js';
 import { pxlEnums } from './pxlNav/core/Enums.js';
-import { pxlOptions } from './pxlNav/core/Options.js';
+import { pxlOptions, pxlUserSettings } from './pxlNav/core/Options.js';
 import { pxlShaders } from './pxlNav/shaders/shaders.js';
 import { pxlEffects } from './pxlNav/effects/effects.js';
 
@@ -161,6 +161,12 @@ class pxlNav{
         this.pxlOptions[k]=pxlOptions[k];
       }
     });
+
+    // Should there not be a default `userSettings` object, build one
+    //   Update these values from `pxlRoom.pxlCamera` set methods
+    if( !this.pxlOptions.hasOwnProperty("userSettings") ){
+      this.pxlOptions["userSettings"] = Object.assign({}, pxlUserSettings);
+    }
 
     // -- -- --
 
@@ -253,6 +259,8 @@ class pxlNav{
     if( this.pxlOptions["staticCamera"] ){
       this.pxlCamera.toggleMovement( false );
     }
+    // TODO : This will be moved to `User.js` in the future
+    this.pxlCamera.setUserSettings( this.pxlOptions["userSettings"] );
 
     this.pxlAnim = new pxlBase.Animation( this.folderDict["assetRoot"], this.pxlTimer );
 
@@ -533,7 +541,6 @@ class pxlNav{
     ///////////////////////////////////////////////////
     // -- FILE I/O & Shared Assets -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
-        
     if( this.pxlOptions["loadList"].includes("Cloud3d") ){
         this.pxlEnv.cloud3dTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Cloud3d.jpg", null, {"encoding":LinearSRGBColorSpace});
         this.pxlEnv.cloud3dTexture.wrapS=RepeatWrapping;
@@ -1096,6 +1103,7 @@ export {
   pxlNavVersion, 
   pxlNav, 
   pxlEnums, 
+  pxlUserSettings,
   pxlOptions,
   RoomEnvironment,
   pxlEffects,
