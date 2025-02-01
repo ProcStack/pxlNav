@@ -5,6 +5,11 @@ import { pxlEnums } from './Enums.js';
 
 export const pxlOptions = {
   'verbose' : pxlEnums.VERBOSE_LEVEL.NONE,
+  'fps' : {
+    'PC' : 60,
+    'Mobile' : 30
+  },
+  'subTickCalculations' : false,
   'pxlRoomRoot' : "./pxlRooms",
   'staticCamera' : false,
   'autoCamera' : false,

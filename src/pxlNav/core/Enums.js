@@ -30,7 +30,7 @@ export const RENDER_LAYER = {
 }
 
 
-// Sky Haze settings should be passed through the pxlNav.Options
+// Sky Haze settings should be passed through pxlNav.pxlOptions
 export const SKY_HAZE = {
   'OFF' : 0,
   'VAPOR' : 1
@@ -130,6 +130,56 @@ export const USER_SPEED = {
   'BOOST' : 3
 };
 
+// -- -- --
+
+// Device Options
+
+// Input-Device Types
+export const DEVICE_TYPE = {
+  'KEYBOARD' : 0,
+  'MOBILE' : 1,
+  'GAMEPAD' : 2,
+  'XR' : 3,
+  'VR' : 3, // Future Proofing - Alias for XR; VRs are XR devices
+  'AR' : 3, // Future Proofing - Alias for XR; ARs are XR devices
+  'HMD' : 3, // Future Proofing - Alias for XR; HMDs are XR devices
+  'OTHER' : 4
+};
+
+// Input-Device Events
+export const DEVICE_EVENT = {
+  'CONNECT' : 0,
+  'DISCONNECT' : 1,
+  'BUTTON_PRESS' : 2,
+  'AXIS_MOVE' : 3,
+  'AXIS_LOOK' : 4
+};
+
+// Input-Device Buttons
+//   Mapped to the GamePad API
+//    https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API
+//  `B_` - Your action buttons
+//     The right group of buttons; the 4 Lettered / Colored / Shaped buttons
+//      "ABXY" -- "Square, Triangle, Circle, X" -- "Red, Green, Blue, Yellow" -- etc.
+//  *They are ussually numbered-inputs clockwise starting from the left-top-left
+export const DEVICE_BUTTON = {
+  'B_L' : 0,
+  'B_U' : 1,
+  'B_R' : 2,
+  'B_D' : 3,
+  'L1' : 4,
+  'R1' : 5,
+  'L2' : 6,
+  'R2' : 7,
+  'SELECT' : 8,
+  'START' : 9,
+  'L3' : 10,
+  'R3' : 11,
+  'UP' : 12,
+  'DOWN' : 13,
+  'LEFT' : 14,
+  'RIGHT' : 15
+};
 
 // -- -- --
 

@@ -298,12 +298,12 @@ export function grassClusterVert(){
 
     
     varying vec3 vPos;
+    varying vec3 vCamPos;
     varying vec3 vWorldPos;
     varying vec2 vUv;
     varying vec3 vN;
     varying vec3 vLocalN;
     varying vec3 vCd;
-    varying vec3 vFogColor;
     
     /***********************************/
     /** Start of THREE Shader Includes **/
@@ -345,7 +345,6 @@ export function grassClusterVert(){
         vN = (modelViewMatrix * vec4(normal, 0.0)).xyz;
         vLocalN = (modelViewMatrix * vec4(normal, 0.0)).xyz;
         vCd=color;
-        vFogColor = fogColor;
         
         // -- -- --
 
@@ -384,6 +383,7 @@ export function grassClusterVert(){
         vPos = pos.xyz;
         vec4 mvPos=modelViewMatrix * pos;
         gl_Position = projectionMatrix*mvPos;
+        vCamPos = gl_Position.xyz;
         
         // -- -- --
 
@@ -402,7 +402,7 @@ export function grassClusterVert(){
   return ret;
 }
 
-export function grassClusterFrag(pointLightCount){
+export function grassClusterFrag( buildAlpha=false ){
   let ret=shaderHeader();
   ret=`
     uniform vec2 time;
@@ -411,15 +411,22 @@ export function grassClusterFrag(pointLightCount){
     uniform vec3 fogColor;
 
     uniform sampler2D diffuse;
+  `;
+  if( buildAlpha ){
+    ret+=`
+    uniform sampler2D alphaMap;
+    `;
+  }
+  ret+=`
     uniform sampler2D noiseTexture;
     
     varying vec3 vPos;
+    varying vec3 vCamPos;
     varying vec3 vWorldPos;
     varying vec2 vUv;
     varying vec3 vN;
     varying vec3 vLocalN;
     varying vec3 vCd;
-    varying vec3 vFogColor;
     
     
     struct PointLight {
@@ -446,7 +453,17 @@ export function grassClusterFrag(pointLightCount){
     void main(){
     
         vec4 Cd = texture2D(diffuse,vUv);
-        
+        `;
+        if( buildAlpha ){
+          ret+=`
+          float Alpha = texture2D(alphaMap,vUv).r;
+
+          if( Alpha < .5 ){
+            discard;
+          }
+          `;
+        }
+        ret+=`
         
         // -- -- --
         
@@ -454,19 +471,46 @@ export function grassClusterFrag(pointLightCount){
         // -- Depth Calculations - -- --
         // -- -- -- -- -- -- -- -- -- -- --
         
-        float depth = min(1.0, gl_FragCoord.z / gl_FragCoord.w * .00035 );
-        depth = pow( depth, 1.5+depth);
+        float screenSpaceX = abs((vCamPos.x / vCamPos.z))*.45;
+        float depth = min(1.0, max(0.0, gl_FragCoord.z) / gl_FragCoord.w  * .00008 );
+        depth = depth + ( screenSpaceX * screenSpaceX )*min(1.0, depth*5.0);
+        depth = pow( depth, 1.0-depth);
+        
         float depthFade = max(0.0, 1.0-depth);
         depthFade *= depthFade*depthFade;
         
         // -- -- --
 
-        // -- -- -- -- -- -- -- -- -- -- -- -- 
-        // -- Directional Light Influence - -- --
-        // -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        // -- -- -- -- -- -- -- -- -- -- 
+        // -- Point Light Influence - -- --
+        // -- -- -- -- -- -- -- -- -- -- -- --
         
         vec3 lights = vec3(0.0, 0.0, 0.0);
         float lightMag = 0.0;
+      /*
+      #if NUM_POINT_LIGHTS > 0
+        for(int i = 0; i < NUM_POINT_LIGHTS; i++) {
+            vec3 lightDelta = (vPos - pointLights[i].position);
+            vec3 lightVector = normalize(lightDelta);
+            float lightNormDot = clamp(dot(-lightVector, vN), 0.0, 1.0);
+            
+            // Calculate distance attenuation
+            float lightDistFit = max( 1.0, length(lightDelta) / pointLights[i].distance ) * .001;
+            float attenuation = 1.0 / (1.0 + pointLights[i].decay * lightDistFit * lightDistFit);
+            
+            // Calculate light intensity
+            float lightDist = max(0.0, (0.50 - lightDistFit )) * attenuation;
+            lights += pointLights[i].color * lightNormDot * lightDist;
+        }
+        Cd.rgb *=  lights;
+        lightMag = length( lights );
+      #endif
+      */
+        
+
+        // -- -- -- -- -- -- -- -- -- -- -- -- 
+        // -- Directional Light Influence - -- --
+        // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
         #if NUM_DIR_LIGHTS > 0
           vec3 pos = vPos;
@@ -495,12 +539,20 @@ export function grassClusterFrag(pointLightCount){
         // -- Match Scene Tone  -- -- --
         // -- -- -- -- -- -- -- -- -- -- --
 
-        Cd.rgb=  mix( Cd.rgb * (vCd.y*.55+.25), vFogColor, depth );
+        float fogMix =  clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
+        Cd.rgb=  mix( Cd.rgb * (vCd.y*.5+.5), fogColor, fogMix );
 
-        float fogMix = clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
-        Cd.rgb =  mix( Cd.rgb, fogColor, fogMix );
-
-        Cd.a=1.0;
+        `;
+        if( buildAlpha ){
+          ret+=`
+          Cd.a = Alpha;
+          `;
+        }else{
+          ret+=`
+          Cd.a = 1.0;
+          `;
+        }
+        ret+=`
         
         // -- -- --
         
@@ -704,15 +756,6 @@ export function pondDockVert(){
     varying vec3 vBitangent;
     varying float vAlpha;
     
-    /***********************************/
-    /** Start of THREE Shader Includes **/
-    /***********************************/
-    ${ShaderChunk[ "common" ]}
-    ${ShaderChunk[ "shadowmap_pars_vertex" ]}
-    /*********************************/
-    /** End of THREE Shader Includes **/
-    /*********************************/
-
     void main(){
         vUv=uv;
         vN = normalize( normalMatrix * normal );
@@ -728,16 +771,6 @@ export function pondDockVert(){
         gl_Position = projectionMatrix*mvPos;
 
 
-        /***********************************/
-        /** Start of THREE Shader Includes **/
-        /***********************************/
-          ${ShaderChunk[ "worldpos_vertex" ]}
-          ${ShaderChunk[ "shadowmap_vertex" ]}
-        /*********************************/
-        /** End of THREE Shader Includes **/
-        /*********************************/
-
-
     }`;
 	return ret;
 }
@@ -747,7 +780,6 @@ export function pondDockFrag(){
 	ret+=`
     uniform sampler2D diffuse;
     uniform sampler2D normalMap;
-    uniform sampler2D aoTexture;
     uniform vec3 fogColor;
     
     struct PointLight {

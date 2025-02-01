@@ -29,6 +29,13 @@ const startingRoom = bootRoomList[0];
 
 // -- -- --
 
+// Target FPS (Frames Per Second)
+//   Default is - PC = 30  -&-  Movile = 30
+const targetFPS = {
+  'PC' : 60,
+  'Mobile' : 30
+};
+
 // Set a list of phrases to display during the loading process
 //   The loader with randomly pick a phrase from the list
 const loaderPhrases = [
@@ -79,6 +86,7 @@ const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
 
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
+pxlNavOptions.fps = targetFPS;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
 pxlNavOptions.staticCamera = enableStaticCamera;

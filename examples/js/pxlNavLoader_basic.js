@@ -44,6 +44,13 @@ const loaderPhrases = [
 
 // -- -- --
 
+// Target FPS (Frames Per Second)
+//   Default is - PC = 30  -&-  Movile = 30
+const targetFPS = {
+  'PC' : 60,
+  'Mobile' : 30
+};
+
 // Anti-aliasing level
 //   Options are - NONE, LOW, MEDIUM, HIGH
 const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
@@ -88,6 +95,7 @@ const collisionScale = {
 
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
+pxlNavOptions.fps = targetFPS;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.collisionScale = collisionScale;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;

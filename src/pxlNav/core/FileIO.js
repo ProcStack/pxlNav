@@ -39,7 +39,7 @@ export class FileIO{
     this.pxlShaders=null;
     this.pxlColliders=null;
 
-    this.options={};
+    this.pxlOptions={};
     
     // Turn on Verbose Logging to Javascript Console
     this.runDebugger = false;
@@ -71,7 +71,7 @@ export class FileIO{
     this.pxlDevice=pxlNav.pxlDevice;
     this.pxlShaders=pxlNav.pxlShaders;
     this.pxlColliders=pxlNav.pxlColliders;
-    this.options=pxlNav.options;
+    this.pxlOptions=pxlNav.pxlOptions;
   }
 
   log(...logger){
@@ -417,9 +417,15 @@ export class FileIO{
               }
             }
             if( instanceMatricies.length > 0 ){
-              const instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
+              let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
               instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
               instancedMesh.name = name + "Geo";
+
+              if( instBase.material.hasOwnProperty("meshSettings") ){
+                if( instBase.material.meshSettings.hasOwnProperty("renderOrder") ){
+                  instancedMesh.renderOrder = instBase.material.meshSettings.renderOrder;
+                }
+              }
               
               for (let x = 0; x < instanceMatricies.length; ++x) {
                 instancedMesh.setMatrixAt( x, instanceMatricies[x] );
@@ -435,7 +441,7 @@ export class FileIO{
             mesh.parent.remove(mesh);
           }else{
             // Clone the base instance; single instance
-            const instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
+            let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
             instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
             instancedMesh.name = name+"Geo";
 
@@ -1252,7 +1258,7 @@ export class FileIO{
                 resUV: { value: this.pxlDevice.screenRes },
               },
               vertexShader:this.pxlShaders.scene.skyObjectVert(),
-              fragmentShader:this.pxlShaders.scene.skyObjectFrag( this.options.skyHaze )
+              fragmentShader:this.pxlShaders.scene.skyObjectFrag( this.pxlOptions.skyHaze )
             });
             //c.geometry.computeVertexNormals();
             c.material = curMat;

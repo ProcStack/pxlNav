@@ -148,23 +148,23 @@ class pxlNav{
     this.pxlEnums = pxlEnums;
 
     // Option Checks & Defaults
-    this.options = {
+    this.pxlOptions = {
       loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "WarpAnimTexture"],
       // TODO : Get these to be pxlNav options pre-boot
       //loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "ChromaticAberration", "WarpAnimTexture", "MathFuncs"],
     };
-    this.options = Object.assign( this.options, options );
-    let optionKeys=Object.keys( this.options );
+    this.pxlOptions = Object.assign( this.pxlOptions, options );
+    let optionKeys=Object.keys( this.pxlOptions );
     let defaultKeys=Object.keys( pxlOptions );
     defaultKeys.forEach( (k)=>{
       if( !optionKeys.includes( k ) ){
-        this.options[k]=pxlOptions[k];
+        this.pxlOptions[k]=pxlOptions[k];
       }
     });
 
     // -- -- --
 
-    this.verbose = this.options["verbose"];
+    this.verbose = this.pxlOptions["verbose"];
     this.projectTitle = projectTitle;
     this.startingRoom = startingRoom;
     if( !roomBootList.includes( startingRoom ) ){
@@ -218,12 +218,12 @@ class pxlNav{
     //   For further information of each item & object,
     //     See https://github.com/ProcStack/pxlNav/tree/main/docs
     // TODO : Turning this off breaks loading, fix that
-    this.loadEnvAssetFile = true; // this.options['LoadEnvAssetFile'];
+    this.loadEnvAssetFile = true; // this.pxlOptions['LoadEnvAssetFile'];
 
 
     this.pxlTimer = new pxlBase.Timer();
     this.pxlShaders = pxlShaders;
-    this.pxlCookie = new pxlBase.CookieManager( projectTitle, "/" );
+    this.pxlCookie = new pxlBase.CookieManager( this.verbose, projectTitle, "/" );
     if( this.pxlCookie.hasCookie("forceMobile") ){
         this.mobile = pxlCookie.parseCookie("forceMobile");
     }
@@ -239,18 +239,18 @@ class pxlNav{
 
     this.pxlUser = new pxlBase.User();
 
-    this.pxlEnv = new pxlBase.Environment( this.options, this.startingRoom, this.mobile );
+    this.pxlEnv = new pxlBase.Environment( this.pxlOptions, this.startingRoom, this.mobile );
     this.pxlDevice = new pxlBase.Device( projectTitle, pxlCore, this.mobile, this.autoCam );
     
     // Default Grid Size 50, Collider Bounds as reference 1000.0
     //  The reference bounds are used to scale down the grid size for smaller bbox colliders,
     //    Helping with higher poly counts for performance
-    this.pxlColliders = new pxlBase.Colliders( this.verbose, this.options["collisionScale"]["gridSize"], this.options["collisionScale"]["gridReference"] );
+    this.pxlColliders = new pxlBase.Colliders( this.verbose, this.pxlOptions["collisionScale"]["gridSize"], this.pxlOptions["collisionScale"]["gridReference"] );
 
 
     this.pxlCamera = new pxlBase.Camera();
     // Disable Free-Roam camera mode if static camera is enabled
-    if( this.options["staticCamera"] ){
+    if( this.pxlOptions["staticCamera"] ){
       this.pxlCamera.toggleMovement( false );
     }
 
@@ -274,10 +274,10 @@ class pxlNav{
     this.pxlGuiDraws.setDependencies( this );
 
     this.pxlGuiDraws.prepLoader();
-    if( !this.options.hasOwnProperty("loaderPhrases") ){
-      this.options["loaderPhrases"] = ['...loading the pixels...'];
+    if( !this.pxlOptions.hasOwnProperty("loaderPhrases") ){
+      this.pxlOptions["loaderPhrases"] = ['...loading the pixels...'];
     }
-    this.pxlGuiDraws.setLoaderPhrases( this.options["loaderPhrases"] );
+    this.pxlGuiDraws.setLoaderPhrases( this.pxlOptions["loaderPhrases"] );
 
     this.pxlQuality.init() // Load cookies and update settings
   }
@@ -464,7 +464,7 @@ class pxlNav{
         this.pxlEnv.engine.setSize(mapW/this.pxlQuality.screenResPerc, mapH/this.pxlQuality.screenResPerc);
         this.pxlEnv.engine.setPixelRatio(1);
 
-        if(this.options.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
+        if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
           this.pxlEnv.engine.shadowMap.enabled=false;
         }else{
           this.pxlEnv.engine.shadowMap.enabled=true;
@@ -534,33 +534,33 @@ class pxlNav{
     // -- FILE I/O & Shared Assets -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
         
-    if( this.options["loadList"].includes("Cloud3d") ){
+    if( this.pxlOptions["loadList"].includes("Cloud3d") ){
         this.pxlEnv.cloud3dTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Cloud3d.jpg", null, {"encoding":LinearSRGBColorSpace});
         this.pxlEnv.cloud3dTexture.wrapS=RepeatWrapping;
         this.pxlEnv.cloud3dTexture.wrapT=RepeatWrapping;
     }
-    if( this.options["loadList"].includes("SoftNoise") ){  
+    if( this.pxlOptions["loadList"].includes("SoftNoise") ){  
         this.pxlEnv.softNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Soft3d.jpg" );
         this.pxlEnv.softNoiseTexture.wrapS = RepeatWrapping;
         this.pxlEnv.softNoiseTexture.wrapT = RepeatWrapping;
     }
-    if( this.options["loadList"].includes("SmoothNoise") ){  
+    if( this.pxlOptions["loadList"].includes("SmoothNoise") ){  
         this.pxlEnv.detailNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_UniformSmooth.jpg" );
         this.pxlEnv.detailNoiseTexture.wrapS = RepeatWrapping;
         this.pxlEnv.detailNoiseTexture.wrapT = RepeatWrapping;
     }
-    if( this.options["loadList"].includes("ChromaticAberration") ){
+    if( this.pxlOptions["loadList"].includes("ChromaticAberration") ){
         let chroAberUVTexture = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration.png");
         chroAberUVTexture.minFilter=LinearFilter;
         chroAberUVTexture.magFilter=LinearFilter;
         this.pxlEnv.chroAberUVTexture=chroAberUVTexture;
     }
-    if( this.options["loadList"].includes("WarpAnimTexture") ){
+    if( this.pxlOptions["loadList"].includes("WarpAnimTexture") ){
         this.pxlEnv.blockAnimTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_blockPortalWarp.jpg");
         this.pxlEnv.blockAnimTexture.minFilter=LinearFilter;
         this.pxlEnv.blockAnimTexture.magFilter=LinearFilter;
     }
-    if( this.options["loadList"].includes("MathFuncs") ){
+    if( this.pxlOptions["loadList"].includes("MathFuncs") ){
         this.pxlEnv.mathFuncsTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"MathFuncs.jpg");
         this.pxlEnv.mathFuncsTexture.minFilter=LinearFilter;
         this.pxlEnv.mathFuncsTexture.magFilter=LinearFilter;
@@ -605,13 +605,13 @@ class pxlNav{
     // -- LIGHTS -- -- -- -- -- -- -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
         //Shadow Maps-
-        if(this.options.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
+        if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
           this.pxlEnv.engine.shadowMap.enabled=false;
         }else{
           this.pxlEnv.engine.shadowMap.enabled=true;
-          if(this.options.shadowMapBiasing == pxlEnums.SHADOW_MAP.BASIC || this.mobile){
+          if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.BASIC || this.mobile){
               this.pxlEnv.engine.shadowMap.type=BasicShadowMap;
-          }else if(this.options.shadowMapBiasing == pxlEnums.SHADOW_MAP.SOFT){
+          }else if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.SOFT){
               this.pxlEnv.engine.shadowMap.type=PCFSoftShadowMap;
               //this.pxlEnv.engine.shadowMap.type=VSMShadowMap;
           }

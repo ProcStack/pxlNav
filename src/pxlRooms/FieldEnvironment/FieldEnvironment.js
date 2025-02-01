@@ -12,7 +12,8 @@ import {
   ClampToEdgeWrapping,
   UniformsUtils,
   UniformsLib,
-  FrontSide
+  FrontSide,
+  DoubleSide
 } from "../../libs/three/three.module.min.js";
 /*ShaderMaterial*/
 
@@ -494,6 +495,43 @@ export class FieldEnvironment extends RoomEnvironment{
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
     
     
+        let grassCardsAUniforms = UniformsUtils.merge(
+            [
+            UniformsLib[ "lights" ],
+            /*UniformsLib[ "shadowmap" ],*/
+            {
+              'diffuse' : { type:'t', value: null },
+              'alphaMap' : { type:'t', value: null },
+              /*'normalMap' : { type:'t', value: null },*/
+              'noiseTexture' : { type:'t', value: null },
+              'fogColor' : { type: "c", value: this.fogColor }
+            }]
+        )
+        grassCardsAUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
+        grassCardsAUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_diffuse.jpg" );
+        grassCardsAUniforms.alphaMap.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_alpha.jpg" );
+        //grassCardsAUniforms.normalMap.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_normal.jpg" );
+    
+        let grassCardsMat=this.pxlFile.pxlShaderBuilder( grassCardsAUniforms, grassClusterVert(), grassClusterFrag( true ) );
+        grassCardsMat.side = DoubleSide;
+        grassCardsMat.lights = true;
+        grassCardsMat.transparent = false;
+        //grassCardsMat.alphaTest = .5;
+        //grassCardsMat.blending = ;
+
+        //grassCardsMat.meshSettings = {
+        //  renderOrder: 2,
+        //};
+        
+            
+        // -- -- --
+        
+    
+        // -- -- -- -- -- -- -- -- -- -- -- -- --
+        // -- Grass Cluster Instances Material -- --
+        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    
+    
         let grassClusterUniforms = UniformsUtils.merge(
             [
             UniformsLib[ "lights" ],
@@ -505,7 +543,7 @@ export class FieldEnvironment extends RoomEnvironment{
         )
         grassClusterUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
     
-        let grassMat=this.pxlFile.pxlShaderBuilder( grassClusterUniforms, grassClusterVert(), grassClusterFrag(1) );
+        let grassMat=this.pxlFile.pxlShaderBuilder( grassClusterUniforms, grassClusterVert(), grassClusterFrag() );
         grassMat.side = FrontSide;
         grassMat.lights = true;
         grassMat.transparent = false;
@@ -524,12 +562,10 @@ export class FieldEnvironment extends RoomEnvironment{
             UniformsLib[ "lights" ],
             {
               'noiseTexture' : { type:'t', value: null },
-              'aoTexture' : { type:'t', value: null },
               'fogColor' : { type: "c", value: this.fogColor },
             }]
         )
         pondDockUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
-        pondDockUniforms.aoTexture.value = this.pxlUtils.loadTexture( this.assetPath+"PondDeck_AO.jpg" );
 
         let pondDockMat=this.pxlFile.pxlShaderBuilder( pondDockUniforms, pondDockVert(), pondDockFrag() );
         pondDockMat.side = FrontSide;
@@ -602,6 +638,8 @@ export class FieldEnvironment extends RoomEnvironment{
         // -- -- --
         
         this.materialList[ "EnvGround_geo" ] = environmentGroundMat;
+
+        this.materialList[ "grassCardsA_geo" ] = grassCardsMat;
 
         this.materialList[ "grassClusterA_geo" ] = grassMat;
         this.materialList[ "swampGrassA_geo" ] = grassMat;

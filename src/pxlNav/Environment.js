@@ -56,7 +56,7 @@ export class Environment{
     this.parentGroupList={};
     this.parentGroupList[mainRoom]=[];
     this.parentNameList=[];
-    this.options=options;
+    this.pxlOptions=options;
 
 
 
@@ -65,13 +65,13 @@ export class Environment{
     this.prevRenderMS=0;
     this.nextRenderMS=0;
     // Max frame rate - 
-    this.fps = mobile ? 30 : 60;
+    this.fps = mobile ? this.pxlOptions.fps.Mobile : this.pxlOptions.fps.PC;
     this.renderInterval = 1.0 / this.fps;
     // -- -- -- --
 
     let pxlRoomName = "Default";
-    if( this.options.hasOwnProperty("pxlRoomName") ){
-      pxlRoomName = this.options.pxlRoomName;
+    if( this.pxlOptions.hasOwnProperty("pxlRoomName") ){
+      pxlRoomName = this.pxlOptions.pxlRoomName;
     }else{
       pxlRoomName = mainRoom;
     }
@@ -81,8 +81,8 @@ export class Environment{
     splitRoot.splice(0,1);
     splitRoot = splitRoot.join("/");
     this.pxlRoomLclRoot = pxlRoomName;
-    if( this.options.hasOwnProperty("pxlRoomRoot") ){
-      this.pxlRoomLclRoot = this.options.pxlRoomRoot;
+    if( this.pxlOptions.hasOwnProperty("pxlRoomRoot") ){
+      this.pxlRoomLclRoot = this.pxlOptions.pxlRoomRoot;
     }else{
       this.pxlRoomLclRoot = "./"+pxlRoomName.split("/").pop();
     }
@@ -283,7 +283,7 @@ export class Environment{
   }
   
   log( msg, level=VERBOSE_LEVEL.INFO ){
-    if( this.options.verbose > VERBOSE_LEVEL.INFO ){
+    if( this.pxlOptions.verbose > VERBOSE_LEVEL.INFO ){
       console.log( msg );
     }
   }
@@ -291,11 +291,11 @@ export class Environment{
   // Function required
   init(){
 
-    let optionKeys=Object.keys( this.options );
+    let optionKeys=Object.keys( this.pxlOptions );
     let defaultKeys=Object.keys( pxlOptions );
     defaultKeys.forEach( (k)=>{
       if( !optionKeys.includes( k ) ){
-        this.options[k]=pxlOptions[k];
+        this.pxlOptions[k]=pxlOptions[k];
       }
     });
 
@@ -968,13 +968,13 @@ export class Environment{
     
       
     // Set Anti-Aliasing Quality
-    if( this.options.antiAliasing == ANTI_ALIASING.LOW){
+    if( this.pxlOptions.antiAliasing == ANTI_ALIASING.LOW){
       this.shaderPasses.scatterMixShaderPass.enabled=true;
-    }else if( this.options.antiAliasing == ANTI_ALIASING.MEDIUM){
+    }else if( this.pxlOptions.antiAliasing == ANTI_ALIASING.MEDIUM){
       this.shaderPasses.blurXShaderPass.enabled=true;
       this.shaderPasses.dirBlurCopyPass.enabled=true;
       this.shaderPasses.blurYShaderPass.enabled=true;
-    }else if( this.options.antiAliasing == ANTI_ALIASING.HIGH ){
+    }else if( this.pxlOptions.antiAliasing == ANTI_ALIASING.HIGH ){
       this.shaderPasses.blurXShaderPass.enabled=true;
       this.shaderPasses.dirBlurCopyPass.enabled=true;
       this.shaderPasses.blurYShaderPass.enabled=true;
@@ -1597,7 +1597,7 @@ export class Environment{
       if( this.pxlUser.iZoom ){
         this.delayComposer.render();
       }
-    }else{
+    }else if( this.pxlOptions.subTickCalculations ){
       // Step room calculations for render-independent user input and collision calculations
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){

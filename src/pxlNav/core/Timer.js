@@ -89,6 +89,10 @@ export class Timer{
   set prevMS( val ){
       this._prevMS=val;
   }
+
+  get runtime(){
+    return this._curMS-this._bootMS;
+  }
   
   // -- -- --
   
