@@ -423,6 +423,7 @@ export class FieldEnvironment extends RoomEnvironment{
                 'dirtDiffuse' : { type:'t', value: null },
                 'crackedDirtDiffuse' : { type:'t', value: null },
                 'hillDiffuse' : { type:'t', value: null },
+                'grassDiffuse' : { type:'t', value: null },
                 'mossDiffuse' : { type:'t', value: null },
                 'dataTexture' : { type:'t', value: null },
                 'mult': { type:'f', value:1 },
@@ -443,6 +444,7 @@ export class FieldEnvironment extends RoomEnvironment{
     envGroundUniforms.dirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"Dirt_Diffuse.jpg", null, {'encoding':SRGBColorSpace} );
     envGroundUniforms.crackedDirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"CrackedDirtGround_diffuse.jpg", null, {'encoding':SRGBColorSpace} );
     envGroundUniforms.hillDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"RockLayerDirtHill_diffuse.jpg", null, {'encoding':SRGBColorSpace} );
+    envGroundUniforms.grassDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"GrassA_diffuse.jpg", null, {'encoding':SRGBColorSpace} );
     envGroundUniforms.mossDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"MossyGround_diffuse.jpg", null, {'encoding':SRGBColorSpace} );
     envGroundUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Data.jpg" );
 
@@ -465,6 +467,9 @@ export class FieldEnvironment extends RoomEnvironment{
 
     envGroundUniforms.hillDiffuse.value.wrapS = RepeatWrapping;
     envGroundUniforms.hillDiffuse.value.wrapT = RepeatWrapping;
+
+    envGroundUniforms.grassDiffuse.value.wrapS = RepeatWrapping;
+    envGroundUniforms.grassDiffuse.value.wrapT = RepeatWrapping;
 
     envGroundUniforms.mossDiffuse.value.wrapS = RepeatWrapping;
     envGroundUniforms.mossDiffuse.value.wrapT = RepeatWrapping;

@@ -70,6 +70,7 @@ export function envGroundFrag( pointLightCount ){
   uniform sampler2D dirtDiffuse;
   uniform sampler2D crackedDirtDiffuse;
   uniform sampler2D hillDiffuse;
+  uniform sampler2D grassDiffuse;
   uniform sampler2D mossDiffuse;
   uniform sampler2D dataTexture;
   
@@ -166,8 +167,9 @@ export function envGroundFrag( pointLightCount ){
         vec2 subUv = ( pos.xz*.9 );
         
         // Read world-uv'ed textures
-        vec3 crackDirtCd = texture2D(crackedDirtDiffuse,subUv).rgb ;
-        vec3 mossCd = texture2D(mossDiffuse,( pos.xz*1.5 * nCd.rg )).rgb ;
+        vec3 crackDirtCd = texture2D( crackedDirtDiffuse, subUv ).rgb ;
+        vec3 mossCd = texture2D( mossDiffuse,( pos.xz*1.5 + (nCd.rg*.1) )).rgb ;
+        vec3 grassCd = texture2D( grassDiffuse, pos.xz*2.0 ).rgb ;
         
         // Shift the rocky hill texture so it reads it more horizontally
         vec2 hillLayerUv =  vec2( subUv.x+subUv.y*.35,  vLocalPos.y*.01 ) ;
@@ -203,8 +205,8 @@ export function envGroundFrag( pointLightCount ){
         // -- Texture Color Mixing -- --
         // -- -- -- -- -- -- -- -- -- -- --
         
-        float mossMix = clamp( dataCd.g - dataCd.r, 0.0, 1.0);
-        float rockyMix = clamp( dataCd.r - mossMix, 0.0, 1.0);
+        float mossMix = dataCd.g;
+        float rockyMix = dataCd.r;
         
         // Mix base Dirt color --
         float baseCdMix = clamp( dot( normalize(baseCd.rgb), normalize(vCd.rgb) ) * vCd.r * vCd.g * vCd.b * 10.0, 0.0, 1.0 );
@@ -214,8 +216,10 @@ export function envGroundFrag( pointLightCount ){
         // Add rocky hill sides, reduce region around campfire, remove pit itself
         Cd.rgb = mix( Cd.rgb, rockyHillCd, rockyMix);
         
-        // Add moss
-        Cd.rgb = mix( Cd.rgb, mossCd, mossMix);
+        // Mix'n'add Moss & Grass colors
+        float mossGrassMix = clamp( (mossMix-.5)*2.0, 0.0, 1.0 );
+        vec3 mossGrassCd = mix( mossCd, grassCd, mossGrassMix );
+        Cd.rgb = mix( Cd.rgb, mossGrassCd, mossMix);
         
         
         // Mix in under water colors
@@ -540,7 +544,7 @@ export function grassClusterFrag( buildAlpha=false ){
         // -- -- -- -- -- -- -- -- -- -- --
 
         float fogMix =  clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
-        Cd.rgb=  mix( Cd.rgb * (vCd.y*.5+.5), fogColor, fogMix );
+        Cd.rgb=  mix( Cd.rgb * (vCd.y*.5+.4), fogColor, fogMix );
 
         `;
         if( buildAlpha ){
