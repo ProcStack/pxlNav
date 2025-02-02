@@ -1,8 +1,13 @@
 # pxlNav Change Log :: 0.0.18 - 0.0.19
 ---------------------
 
- - `Options.js` has a max FPS target now, default - 
+ - `assets` default folder moved to `pxlAssets`
+ <br/>&nbsp;&nbsp; - Can be custom set on the `pxlOptions` object
+
+ - `Options.js` has a max FPS target, Asset Root, & Show Onboarding now, default - 
  `pxlOptions.fps = { 'PC':60, 'Mobile':30 }`
+ `pxlOptions.pxlAssetRoot = "./pxlAssets"`
+ `pxlOptions.showOnboarding = true`
  - `Options.js` has `subTickCalculations` for running `pxlRoom.step()` calculations between frame renders; `false` by default.  If you have a strong computer, sub-tick calculations can make a room more responsive, instead of locked to frame-rate.
 
  - `Options.js` now has a default User Setting object, `pxlUserSettings` -

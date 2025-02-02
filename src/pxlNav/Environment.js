@@ -80,11 +80,12 @@ export class Environment{
     let splitRoot = pxlRoomName.split("/");
     splitRoot.splice(0,1);
     splitRoot = splitRoot.join("/");
-    this.pxlRoomLclRoot = pxlRoomName;
+    pxlRoomName = pxlRoomName.startsWith('./') ? pxlRoomName.slice(1) : pxlRoomName;
+    
     if( this.pxlOptions.hasOwnProperty("pxlRoomRoot") ){
       this.pxlRoomLclRoot = this.pxlOptions.pxlRoomRoot;
     }else{
-      this.pxlRoomLclRoot = "./"+pxlRoomName.split("/").pop();
+      this.pxlRoomLclRoot = "./"+pxlRoomName.split("/").pop().join("/");
     }
     
     this.mainRoom=mainRoom; // Main environment room
@@ -327,12 +328,13 @@ export class Environment{
     //this.buildSnow();
 
     // Trigger Mobile or PC How-To 
-    if( this.pxlDevice.mobile || this.pxlAutoCam.enabled){
-      this.pxlGuiDraws.toggleMobileWelcome(true);
-    }else{
-      this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
+    if( this.pxlOptions.showOnboarding ){
+      if( this.pxlDevice.mobile || this.pxlAutoCam.enabled){
+        this.pxlGuiDraws.toggleMobileWelcome(true);
+      }else{
+        this.pxlGuiDraws.iconEvent( "click", this.pxlGuiDraws.hudIcons.helpIcon, "help" );
+      }
     }
-    
   }
     
   postHelpIntro(){
@@ -413,9 +415,7 @@ export class Environment{
       this.log("Loading Room - ", roomName);
       
       let curImportPath=`${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`;
-
-      // Webpack magic comment to prevent replacing the import function
-      /* webpackIgnore: true */
+      
       import( curImportPath )
         .then((module)=>{
           let roomObj=new module[roomName]( roomName, `${this.pxlRoomLclRoot}/${roomName}/`, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);

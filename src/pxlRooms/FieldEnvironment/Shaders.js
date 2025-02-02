@@ -119,7 +119,7 @@ export function envGroundFrag( pointLightCount ){
         vec2 uv = vUv;
 
         float screenSpaceX = abs((vCamPos.x / vCamPos.z))*.45;
-        float depth = min(1.0, max(0.0, gl_FragCoord.z) / gl_FragCoord.w  * .00015 );
+        float depth = min(1.0, max(0.0, gl_FragCoord.z / gl_FragCoord.w  * .00015 )) * step( .930, gl_FragCoord.z );
         depth = depth + ( screenSpaceX * screenSpaceX )*min(1.0, depth*2.0);
         depth = pow( depth, 1.0-depth);
 
@@ -205,8 +205,10 @@ export function envGroundFrag( pointLightCount ){
         // -- Texture Color Mixing -- --
         // -- -- -- -- -- -- -- -- -- -- --
         
-        float mossMix = dataCd.g;
-        float rockyMix = dataCd.r;
+        float waterMix = dataCd.b;
+        float waterLightInf = 1.0 - dataCd.b*.45;
+        float mossMix = max(0.0, dataCd.g-waterMix*.5 );
+        float rockyMix = max(0.0, dataCd.r-waterMix*.85 );
         
         // Mix base Dirt color --
         float baseCdMix = clamp( dot( normalize(baseCd.rgb), normalize(vCd.rgb) ) * vCd.r * vCd.g * vCd.b * 10.0, 0.0, 1.0 );
@@ -223,7 +225,6 @@ export function envGroundFrag( pointLightCount ){
         
         
         // Mix in under water colors
-        float waterMix = dataCd.b;
         vec3 waterTintCd = vec3( 0.7, 0.75, 0.85 );
         Cd.rgb = mix( Cd.rgb, Cd.rgb * waterTintCd, waterMix );
         
@@ -242,12 +243,12 @@ export function envGroundFrag( pointLightCount ){
             float attenuation = 1.0 / (1.0 + pointLights[i].decay * lightDistFit * lightDistFit);
             
             // Calculate light intensity
-            float lightDist = max(0.0, (0.50 - lightDistFit )) * attenuation;
-            lights += pointLights[i].color * lightNormDot * lightDist;
+            float lightDist = max(0.0, (0.50*waterLightInf - lightDistFit )) * attenuation;
+            lights += pointLights[i].color * lightNormDot * lightDist ;
         }
-        Cd.rgb *= max( ambientLightColor, lights);
+        Cd.rgb *= max( ambientLightColor * waterLightInf, lights);
       #else
-        Cd.rgb *= ambientLightColor;
+        Cd.rgb *= ambientLightColor * waterLightInf;
       #endif
 
         float lightMag = length( lights );
@@ -476,7 +477,7 @@ export function grassClusterFrag( buildAlpha=false ){
         // -- -- -- -- -- -- -- -- -- -- --
         
         float screenSpaceX = abs((vCamPos.x / vCamPos.z))*.45;
-        float depth = min(1.0, max(0.0, gl_FragCoord.z) / gl_FragCoord.w  * .00008 );
+        float depth = min(1.0, max(0.0, gl_FragCoord.z / gl_FragCoord.w  * .00008 )) * step( .930, gl_FragCoord.z );
         depth = depth + ( screenSpaceX * screenSpaceX )*min(1.0, depth*5.0);
         depth = pow( depth, 1.0-depth);
         
@@ -671,13 +672,15 @@ export function pondWaterVert(){
     varying vec2 vUv;
     varying vec3 vCd;
     varying vec3 vPos;
+    varying vec3 vWorldPos;
     varying vec3 vN;
+    varying vec3 vToCam;
     
     
     void main(){
         vUv=uv;
         vCd=color;
-        vN = (modelViewMatrix * vec4(normal, 0.0)).xyz;
+        vN = normal;
         
         float timer = time.x*.01;
         vec3 np = position*.001;
@@ -690,7 +693,9 @@ export function pondWaterVert(){
         vec4 mvPos=modelViewMatrix * pos;
         gl_Position = projectionMatrix*mvPos;
         
+        vToCam =   cameraPosition - position ;
         vPos = pos.xyz;
+        vWorldPos = mvPos.xyz;
     }`;
   return ret;
 }
@@ -702,6 +707,7 @@ export function pondWaterFrag(){
     uniform float intensity;
     uniform float rate;
     uniform sampler2D dataTexture;
+    uniform sampler2D coastLineTexture;
     uniform sampler2D rippleTexture;
     uniform sampler2D noiseTexture;
     uniform vec3 fogColor;
@@ -709,35 +715,77 @@ export function pondWaterFrag(){
     varying vec2 vUv;
     varying vec3 vCd;
     varying vec3 vPos;
+    varying vec3 vWorldPos;
     varying vec3 vN;
-    
+    varying vec3 vToCam;
     
     
     void main(){
         float timer = time.x*0.01;
         vec3 pos = vPos*0.001;
         vec2 uv = vUv;
-        vec3 dataCd=texture2D(dataTexture,vUv).rgb;
         
-        uv.x = fract( pos.x*(1.0) );
-        uv.y = fract( pos.z*1.4+timer ); 
-        //uv.x = fract( uv.x*1.0 );
-        //uv.y = fract( uv.y*1.4-timer ); 
+        vec3 dataCd = texture2D( dataTexture, vUv ).rgb;
+        
+        uv.x = ( pos.x*1.2-timer*.19 );
+        uv.y = ( pos.z*1.9+timer*.9 );  
         
         vec3 nCd=(texture2D(noiseTexture,uv).rgb-.5);
-        uv.x = fract( pos.x-timer*5.1 + nCd.x*dataCd.g + nCd.z + dataCd.b );
-        uv.y = fract( pos.z-timer*2.1  + nCd.y - nCd.x + dataCd.g ); 
-        nCd=(texture2D(noiseTexture,uv*.01).rgb);
-        vec3 vertCd= nCd;
         
-        float alpha = clamp(((nCd.x*nCd.y*nCd.z)*.15)* (dataCd.r*.8+.5)+.85, 0.0, 1.0) 
-             * min(1.0, vCd.g*.5+.75  ) + max(0.0, vCd.r-.5);
-        alpha =  min(1.0,alpha +  (dataCd.r*vCd.b)* max(0.0,vCd.r-.5)*2.0) ;
-        alpha *= min(1.0,vCd.r*2.0);
+        uv.x = ( pos.x*10.81-timer*17.1 + nCd.x*dataCd.r + nCd.z + dataCd.b );
+        uv.y = ( pos.z*7.51+timer*10.1  + nCd.y*1.50 - nCd.x + dataCd.g ); 
+        nCd = texture2D( noiseTexture, uv*.0135 ).rgb*.65+.35;
+        
+        // -- -- --
+        
+        // Sample Coast Line Distance texture
+        vec2 sampleOffset = vec2( .0015  );
+        float coastInf= ( texture2D( coastLineTexture, vUv ).r + 
+                        texture2D( coastLineTexture, vUv + sampleOffset + nCd.rg*.015 ).r + 
+                        texture2D( coastLineTexture, vUv - sampleOffset ).r ) * .3333333333;
+        
+        uv = vec2( pos.x*.1 - coastInf*.1, pos.z*.10-timer*.05-coastInf*.05 );
+        vec3 vertCd = ( texture2D(noiseTexture,uv).rgb*.5 +
+                      texture2D(noiseTexture,uv+sampleOffset).rgb*.25 +
+                      texture2D(noiseTexture,uv-sampleOffset).rgb*.15 );
+        
+        // -- -- --
+        
+        // Calculate Alpha
+        float alpha = clamp(((nCd.x*nCd.y*nCd.z)*.15)+.85, 0.0, 1.0) ;
+        alpha =  min(1.0,alpha +  (dataCd.r*vCd.b)* min(1.0,vCd.r*2.0)) ;
+        alpha *= min(1.0,vCd.r*3.7);
         vec4 Cd=vec4( .29,.35,.55, alpha );
-        Cd.rgb = Cd.rgb*(max(nCd.g*nCd.r,nCd.b*alpha)*.8+.1);
         
-        //vec4 rippleCd=texture2D(rippleTexture,vUv);
+        
+        // -- -- --
+        
+        // Generate coastal ripples
+        coastInf = max( 0.0, coastInf*coastInf*coastInf  - (vertCd.r+vertCd.g+vertCd.b)*coastInf*0.28 );
+        vec2 rippleUV = vec2( coastInf ) ;
+        rippleUV = fract( rippleUV + (-time.x*0.06 ) );
+        
+        
+        rippleUV = ( rippleUV * coastInf);
+        float rippleInf=texture2D( rippleTexture, rippleUV ).r * coastInf * coastInf *.5 ;
+        
+
+        // -- -- --
+        
+        // Color + Coastal Mix
+        
+        Cd.rgb *= mix(  max(nCd.g*(nCd.r*.5+1.0)*.7+.3,nCd.b*alpha)*.8+.1,
+                        rippleInf+0.50,
+                        min(1.0,(coastInf*.5+.5)+rippleInf) 
+                     ); 
+                     
+        float angleInf = clamp( (1.0-min(1.0, length( vToCam )*.00135 ))*1.85, 0.0, 1.0 );
+        angleInf *= angleInf;
+        float angleIncidence = 1.0 - clamp( dot( normalize( vToCam ), normalize(vN * nCd) )*3.50-.5, 0.0, 1.0)*(1.0-coastInf*.3-nCd.g*.3) * angleInf ;
+                     
+        Cd.a = mix(Cd.a*angleIncidence, Cd.a-min(1.0, (1.0-rippleInf)*.35), coastInf*.35  );
+        
+        
         gl_FragColor=Cd;
     }`;
   return ret;
@@ -838,7 +886,7 @@ export function pondDockFrag(){
         
         // -- -- --
 
-        float depth = min(1.0, gl_FragCoord.z / gl_FragCoord.w * .00035 );
+        float depth = min(1.0, gl_FragCoord.z / gl_FragCoord.w * .00035 ) * step( .930, gl_FragCoord.z );
         depth = pow( depth, 1.5+depth);
         float depthFade = max(0.0, 1.0-depth);
         depthFade *= depthFade*depthFade;

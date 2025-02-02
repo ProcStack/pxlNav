@@ -36,6 +36,8 @@ export class FieldEnvironment extends RoomEnvironment{
 
 		this.assetPath=assetPath+"Assets/";
     this.sceneFile = this.assetPath+"FieldEnvironment.fbx";
+
+    console.log(this.sceneFile);
 		
 		// Environment Shader 
 		this.spiralizerUniforms={};
@@ -575,6 +577,7 @@ export class FieldEnvironment extends RoomEnvironment{
             UniformsLib[ "lights" ],
             {
               'dataTexture' : { type:'t', value: null },
+              'coastLineTexture' : { type:'t', value: null },
               'rippleTexture' : { type:'t', value: null },
               'noiseTexture' : { type:'t', value: null },
               'fogColor' : { type: "c", value: this.fogColor },
@@ -583,8 +586,16 @@ export class FieldEnvironment extends RoomEnvironment{
             }]
         )
         pondWaterUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"PondWater_Data.jpg" );
-        pondWaterUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipplesA.jpg" );
+        pondWaterUniforms.coastLineTexture.value = this.pxlUtils.loadTexture( this.assetPath+"PondWater_CoastLine.jpg" );
+        pondWaterUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipples_CoastalB.jpg" );
         pondWaterUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
+
+
+        pondWaterUniforms.rippleTexture.value.wrapS = RepeatWrapping;
+        pondWaterUniforms.rippleTexture.value.wrapT = RepeatWrapping;
+
+        pondWaterUniforms.noiseTexture.value.wrapS = RepeatWrapping;
+        pondWaterUniforms.noiseTexture.value.wrapT = RepeatWrapping;
 
         let pondWaterMat=this.pxlFile.pxlShaderBuilder( pondWaterUniforms, pondWaterVert(), pondWaterFrag() );
         pondWaterMat.side = FrontSide;
@@ -644,7 +655,7 @@ export class FieldEnvironment extends RoomEnvironment{
   //
     // -- -- -- 
         
-		let fieldFbxLoader = this.pxlFile.loadRoomFBX( this ); // , null, null, true );
+		let fieldFbxLoader = this.pxlFile.loadRoomFBX( this , null, null, true );
 		
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- //
 		

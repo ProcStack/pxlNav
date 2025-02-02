@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.19-dev";
+const pxlNavVersion = "0.0.19";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -185,12 +185,12 @@ class pxlNav{
     this.loadPercent=0.0;
 
     this.folderDict = {
-      "assetRoot" : "assets/",
-      "guiRoot" : "assets/GUI/",
-      "roomRoot" : "assets/rooms/",
-      "vidRoot" : "assets/screenContent/"
+      "assetRoot" : this.pxlOptions.pxlAssetRoot + "/",
+      "guiRoot" : this.pxlOptions.pxlAssetRoot + "/GUI/",
+      "roomRoot" : this.pxlOptions.pxlAssetRoot + "/rooms/",
+      "vidRoot" : this.pxlOptions.pxlAssetRoot + "/screenContent/"
     };
-
+    
     this.validEvents = {
       "booted" : "Emitted after the engine has fully booted and is ready to be addressed.",
       "shaderEditorVis" : "Returns a [bool]; Emitted when the shader editor is toggled on or off.",

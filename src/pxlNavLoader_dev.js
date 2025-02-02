@@ -1,5 +1,5 @@
-// ProcStack.Git.io Javascript
-//  Written by Kevin Edzenga; 2024
+// pxlNav v0.0.18 -  Javascript Launcher
+//  Written by Kevin Edzenga; 2024,2025
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //
@@ -22,6 +22,12 @@ const projectTitle = "pxlNav : Field Env.";
 
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "../pxlRooms";
+
+// Asset root path
+const pxlAssetRoot = "./pxlAssets";
+
+// Show the onboarding screen after the loading bar completes
+const showOnboarding = true;
 
 // Current possible rooms - "CampfireEnvironment", "SaltFlatsEnvironment", "FieldEnvironment", "VoidEnvironment"
 const bootRoomList = ["FieldEnvironment"];
@@ -120,6 +126,8 @@ pxlNavOptions.userSettings = userSettings;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.collisionScale = collisionScale;
 pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
+pxlNavOptions.pxlAssetRoot = pxlAssetRoot;
+pxlNavOptions.showOnboarding = showOnboarding;
 pxlNavOptions.staticCamera = enableStaticCamera;
 pxlNavOptions.skyHaze = skyHaze;
 pxlNavOptions.shadowMapBiasing = shadowMapBiasing;

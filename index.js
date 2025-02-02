@@ -14,7 +14,7 @@ const http = require('http').Server(app);
 
 
 //Setup folders --
-let  = "index.htm";
+let indexFile = "index.htm";
 if(args.length > 0 && args[0] == "examples"){
   console.log("Booting in 'Live' mode")
   console.log("Serving from: ./examples");
@@ -26,6 +26,12 @@ if(args.length > 0 && args[0] == "examples"){
   app.use( express.static(path.join(__dirname, 'src')) );
 }
 
+app.use(function(req, res, next) {
+  if (req.url.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  }
+  next();
+});
 
 app.get("/", function(req,res){
   res.redirect( "/" + indexFile );
