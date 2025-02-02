@@ -290,7 +290,13 @@ const projectTitle = "pxlNav Loader";
 const loaderPhrases = [ "...loading the pixels..." ];
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "./pxlRooms";
+const pxlRoomRootPath = "../js/pxlRooms";
+
+// Asset root path
+const pxlAssetRoot = "./pxlAssets";
+
+// Show the onboarding screen after the loading bar completes
+const showOnboarding = true;
 
 // pxlRoom listing -
 const bootRoomList = ["FieldEnvironment"];

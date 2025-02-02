@@ -106,6 +106,8 @@ export const pxlOptions = {
   },
   'subTickCalculations' : false,
   'pxlRoomRoot' : "./pxlRooms",
+  'pxlAssetRoot' : "./pxlAssets",
+  'showOnboarding' : true,
   'staticCamera' : false,
   'autoCamera' : false,
   'userSettings' : Object.assign({}, pxlUserSettings),
