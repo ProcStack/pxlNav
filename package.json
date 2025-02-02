@@ -12,7 +12,8 @@
     "convertToCjs": "rollup --bundleConfigAsCjs -c ./packing/rollupConvert.config.js",
     "examples": "node index.js examples",
     "start": "npm run examples",
-    "dev": "node index.js dist"
+    "dev": "node index.js dist",
+    "tar": "npm pack"
   },
   "repository": {
     "type": "git",
