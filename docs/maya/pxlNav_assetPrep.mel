@@ -555,7 +555,7 @@ global proc pxlNav_saveAntibodyDesktopAndMobile_FBX( string $projectName ){
     print( "Desktop FBX Saved To - "+$token[0]+".fbx\n");
     print( "Mobile FBX Saved To - "+$token[0]+"_mobile.fbx");
 }
-//pxlNav_saveAntibodyDesktopAndMobile_FBX( "CampfireEnvironment" );
+//pxlNav_saveAntibodyDesktopAndMobile_FBX( "OutletEnvironment" );
 
 
 

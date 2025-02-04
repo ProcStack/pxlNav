@@ -51,5 +51,12 @@ export const pxlOptions = {
   'shadowMapBiasing' : pxlEnums.SHADOW_MAP.BASIC,
   'LoadEnvAssetFile' : false,
   'skyHaze' : pxlEnums.SKY_HAZE.OFF,
-  'loaderPhrases' : ['...loading the pixels...']
+  'loaderPhrases' : ['...loading the pixels...'],
+  'postProcessPasses' : { // Enabling loads needed ./pxlAssets
+    'mapComposerWarpPass' : false,
+    'chromaticAberrationPass' : false,
+    'lizardKingPass' : false,
+    'starFieldPass' :  false,
+    'crystallinePass' : false
+  }
 }

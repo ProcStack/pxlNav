@@ -47,13 +47,13 @@ import { pxlEffects, RoomEnvironment } from "../../pxlNav.esm.js";
 // See `buildDust()` below for more details
 const FloatingDust = pxlEffects.pxlParticles.FloatingDust;
 
-export class FieldEnvironment extends RoomEnvironment{
-  constructor( roomName='FieldEnvironment', assetPath=null, pxlFile=null, pxlAnim=null, pxlUtils=null, pxlDevice=null, pxlEnv=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+export class OutletEnvironment extends RoomEnvironment{
+  constructor( roomName='OutletEnvironment', assetPath=null, pxlFile=null, pxlAnim=null, pxlUtils=null, pxlDevice=null, pxlEnv=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     super( roomName, assetPath, pxlFile, pxlAnim, pxlUtils, pxlDevice, pxlEnv, msRunner, camera, scene, cloud3dTexture );
     
 		this.assetPath=assetPath+"Assets/";
     
-    this.sceneFile = this.assetPath+"FieldEnvironment.fbx";
+    this.sceneFile = this.assetPath+"OutletEnvironment.fbx";
 		
     // This is 
 		this.envObjName="CabinEnv";

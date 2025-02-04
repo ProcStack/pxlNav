@@ -194,7 +194,7 @@ export class Environment{
     this.mapComposerMotionBlur=null;
     this.mapComposerBloom=null;
     this.mapComposerGlow=null;
-    this.chroAberrationPass=null;
+    this.chromaticAberrationPass=null;
     this.chroAberrationRoomPass=null;
     this.lizardKingPass=null;
     this.lizardKingRoomPass=null;
@@ -596,10 +596,10 @@ export class Environment{
       return this.lizardKingPass.material;
     }else if( objShader=="script_majorTom" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
-      return this.pxlUser.sFieldPass.material;
+      return this.pxlUser.starFieldPass.material;
     }else if( objShader=="script_fractalSubstrate" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
-      return this.pxlUser.iZoomPass.material;
+      return this.pxlUser.crystallinePass.material;
     }else if( objShader=="script_fractalEcho" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.delayPass.material;
@@ -615,7 +615,7 @@ export class Environment{
     }
         
         
-    //return this.pxlUser.sFieldPass.material;
+    //return this.pxlUser.starFieldPass.material;
   }
   setShader( unis, vert, frag ){
         let setShaderMtl;
@@ -657,9 +657,9 @@ export class Environment{
         }else if( objShader=="script_lizardking" ){
                 setShaderMtl=this.lizardKingPass.material;
         }else if( objShader=="script_majorTom" ){
-                setShaderMtl=this.pxlUser.sFieldPass.material;
+                setShaderMtl=this.pxlUser.starFieldPass.material;
         }else if( objShader=="script_fractalSubstrate" ){
-                setShaderMtl=this.pxlUser.iZoomPass.material;
+                setShaderMtl=this.pxlUser.crystallinePass.material;
         }else if( objShader=="script_fractalEcho" ){
                 setShaderMtl=this.delayPass.material;
             
@@ -1206,12 +1206,12 @@ export class Environment{
         defines: {}
       } ), "tDiffuse"
     );
-        this.pxlUser.lKingPass=this.lizardKingPass;
+        this.pxlUser.lizardKingPass=this.lizardKingPass;
         this.lizardKingPass.enabled=false;
-        this.pxlUser.lKingPass.name = "lizardKingPass";
+        this.pxlUser.lizardKingPass.name = "lizardKingPass";
     
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.pxlUser.sFieldPass = new ShaderPass(
+    this.pxlUser.starFieldPass = new ShaderPass(
       new ShaderMaterial( {
         uniforms: {
           tDiffuse: { value: null },
@@ -1225,11 +1225,11 @@ export class Environment{
         defines: {}
       } ), "tDiffuse"
     );
-        this.pxlUser.sFieldPass.enabled=false;
-        this.pxlUser.sFieldPass.name = "sFieldPass";
+        this.pxlUser.starFieldPass.enabled=false;
+        this.pxlUser.starFieldPass.name = "starFieldPass";
     
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.pxlUser.iZoomPass = new ShaderPass(
+    this.pxlUser.crystallinePass = new ShaderPass(
       new ShaderMaterial( {
         uniforms: {
           tDiffuse: { value: null },
@@ -1243,55 +1243,66 @@ export class Environment{
         defines: {}
       } ), "tDiffuse"
     );
-        this.pxlUser.iZoomPass.enabled=false;
-        this.pxlUser.iZoomPass.name = "iZoomPass";
+        this.pxlUser.crystallinePass.enabled=false;
+        this.pxlUser.crystallinePass.name = "crystallinePass";
     
         
         
         // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.chroAberrationPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          ratio: { value: this.pxlDevice.screenRes },
-          warpMult: { value: this.chroAberMult },
-          chroAberUVTexture: { value: this.chroAberUVTexture },
-          lKing: { value: this.pxlUser.lKingWarp },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.chroAberPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.chroAberrationPass.enabled=false;
-    this.chroAberrationPass.name = "chroAberrationPass";
-    this.mapComposer.addPass( this.chroAberrationPass );
-    this.mapComposer.addPass( this.lizardKingPass );
-    //if( !this.mobile ) {
-    this.mapComposer.addPass( this.pxlUser.sFieldPass );
-    this.mapComposer.addPass( this.pxlUser.iZoomPass );
 
     
-    this.mapComposerWarpPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          fader:{ value:this.warpVisualFader },
-          tDiffuse: { value: null },
-          noiseTexture: { value: this.cloud3dTexture },
-          animTexture: { value: this.blockAnimTexture  },
-          //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
-        },
-        vertexShader: this.pxlShaders.core.camPosVert(),
-        fragmentShader: this.pxlShaders.rendering.warpPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapComposerWarpPass.needsSwap = true;
-    this.mapComposerWarpPass.enabled=false;
-    this.mapComposerWarpPass.name = "mapComposerWarpPass";
-    this.mapComposer.addPass( this.mapComposerWarpPass );
+    if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){
+      this.chromaticAberrationPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            tDiffuse: { value: null },
+            ratio: { value: this.pxlDevice.screenRes },
+            warpMult: { value: this.chroAberMult },
+            chroAberUVTexture: { value: this.chroAberUVTexture },
+            lKing: { value: this.pxlUser.lKingWarp },
+          },
+          vertexShader: this.pxlShaders.core.defaultVert(),
+          fragmentShader: this.pxlShaders.rendering.chroAberPostProcess(),
+          defines: {}
+        } ), "tDiffuse"
+      );
+      this.chromaticAberrationPass.enabled=false;
+      this.chromaticAberrationPass.name = "chromaticAberrationPass";
+      this.mapComposer.addPass( this.chromaticAberrationPass );
+    }
     
+    if( this.pxlOptions.postProcessPasses.lizardKingPass ){
+      this.mapComposer.addPass( this.lizardKingPass );
+    }
+    //if( !this.mobile ) {
+    if( this.pxlOptions.postProcessPasses.starFieldPass ){
+      this.mapComposer.addPass( this.pxlUser.starFieldPass );
+    }
+    if( this.pxlOptions.postProcessPasses.crystallinePass ){
+      this.mapComposer.addPass( this.pxlUser.crystallinePass );
+    }
+    
+    if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){
+      this.mapComposerWarpPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            time:{ value:this.pxlTimer.msRunner },
+            fader:{ value:this.warpVisualFader },
+            tDiffuse: { value: null },
+            noiseTexture: { value: this.cloud3dTexture },
+            animTexture: { value: this.blockAnimTexture  },
+            //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
+          },
+          vertexShader: this.pxlShaders.core.camPosVert(),
+          fragmentShader: this.pxlShaders.rendering.warpPostProcess(),
+          defines: {}
+        } ), "tDiffuse"
+      );
+      this.mapComposerWarpPass.needsSwap = true;
+      this.mapComposerWarpPass.enabled=false;
+      this.mapComposerWarpPass.name = "mapComposerWarpPass";
+      this.mapComposer.addPass( this.mapComposerWarpPass );
+    }
         // 8 Samples
     this.mapBoxAAPass = new ShaderPass(
       new ShaderMaterial( {
@@ -1384,13 +1395,29 @@ export class Environment{
     this.roomGlowPass.needsSwap = true;
     this.roomGlowPass.name = "roomGlowPass";
 
-    this.roomComposer.addPass( this.roomGlowPass );
+    if( this.pxlOptions.postProcessPasses.roomGlowPass ){
+      this.roomComposer.addPass( this.roomGlowPass );
+    }
     
-    this.roomComposer.addPass( this.chroAberrationPass );
-    this.roomComposer.addPass( this.lizardKingPass );
-    this.roomComposer.addPass( this.pxlUser.sFieldPass );
-    this.roomComposer.addPass( this.pxlUser.iZoomPass );
-    this.roomComposer.addPass( this.mapComposerWarpPass );
+    if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){
+      this.roomComposer.addPass( this.chromaticAberrationPass );
+    }
+    
+    if( this.pxlOptions.postProcessPasses.lizardKingPass ){
+      this.roomComposer.addPass( this.lizardKingPass );
+    }
+    
+    if( this.pxlOptions.postProcessPasses.starFieldPass ){
+      this.roomComposer.addPass( this.pxlUser.starFieldPass );
+    }
+
+    if( this.pxlOptions.postProcessPasses.crystallinePass ){
+      this.roomComposer.addPass( this.pxlUser.crystallinePass );
+    }
+
+    if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){
+      this.roomComposer.addPass( this.mapComposerWarpPass );
+    }
         
     this.roomComposer.addPass( this.mapCrossAAPass );
     this.roomComposer.addPass( this.mapBoxAAPass );
@@ -1428,7 +1455,7 @@ export class Environment{
     this.delayComposer.renderToScreen=false;
     this.delayComposer.autoClear=false;
         
-    this.pxlUser.iZoomPass.uniforms.tDiffusePrev.value = this.delayComposer.renderTarget2.texture;
+    this.pxlUser.crystallinePass.uniforms.tDiffusePrev.value = this.delayComposer.renderTarget2.texture;
   }
   
   setExposure(curExp){
@@ -1497,14 +1524,18 @@ export class Environment{
     this.warpVisualFader.y=1;
     this.warpVisualStartTime=this.pxlTimer.curMS;
     
-    this.mapComposerWarpPass.enabled=true;
+    if( this.mapComposerWarpPass ){
+      this.mapComposerWarpPass.enabled=true;
+    }
   }
   stopWarpVisual(){
     this.warpVisualActive=false;
     this.warpVisualFader.x=1;
     this.warpVisualFader.y=0;
     
-    this.mapComposerWarpPass.enabled= !!this.pxlUser.iZoom;
+    if( this.mapComposerWarpPass ){
+      this.mapComposerWarpPass.enabled= !!this.pxlUser.iZoom;
+    }
   }
   
 // Function required, but no prep needed

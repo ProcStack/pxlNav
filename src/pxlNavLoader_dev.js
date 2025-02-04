@@ -18,7 +18,7 @@ const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav : Field Env.";
+const projectTitle = "pxlNav :: The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "../pxlRooms";
@@ -29,8 +29,8 @@ const pxlAssetRoot = "./pxlAssets";
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
-// Current possible rooms - "CampfireEnvironment", "SaltFlatsEnvironment", "FieldEnvironment", "VoidEnvironment"
-const bootRoomList = ["FieldEnvironment"];
+// Current possible rooms - "OutletEnvironment", "VoidEnvironment"
+const bootRoomList = ["OutletEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

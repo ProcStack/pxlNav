@@ -299,7 +299,7 @@ const pxlAssetRoot = "./pxlAssets";
 const showOnboarding = true;
 
 // pxlRoom listing -
-const bootRoomList = ["FieldEnvironment"];
+const bootRoomList = ["OutletEnvironment"];
 const startingRoom = bootRoomList[0];
 
 

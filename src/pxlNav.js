@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.19";
+const pxlNavVersion = "0.0.20";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -102,7 +102,7 @@ var sH = window.innerHeight;
  * @param {string[]} roomBootList - A list of rooms to load
  * @example
  *  // Initialize the pxlNav environment
- *  const pxlNavEnv = new pxlNav( pxlEnums.VERBOSE_LEVEL.ERROR || 2, "My Crunkle Dunk Project", "./pxlRooms", "CampfireEnvironment", ["CampfireEnvironment", "SaltFlatsEnvironment"] );
+ *  const pxlNavEnv = new pxlNav( pxlEnums.VERBOSE_LEVEL.ERROR || 2, "My Crunkle Dunk Project", "./pxlRooms", "OutletEnvironment", ["OutletEnvironment", "SaltFlatsEnvironment"] );
  * @returns {pxlNav} - The pxlNav environment object
  * @example
  *  // Subscribe to events emitted from pxlNav for callback handling
@@ -148,12 +148,26 @@ class pxlNav{
     this.pxlEnums = pxlEnums;
 
     // Option Checks & Defaults
-    this.pxlOptions = {
-      loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "WarpAnimTexture"],
-      // TODO : Get these to be pxlNav options pre-boot
-      //loadList : ["Cloud3d", "SoftNoise", "SmoothNoise", "ChromaticAberration", "WarpAnimTexture", "MathFuncs"],
+    this.assetsToLoadDict = {
+      "Cloud3d" : true,
+      "SoftNoise" : true,
+      "SmoothNoise" : true,
+      "ChromaticAberration" : false,
+      "WarpAnimTexture" : false,
+      "MathFuncs" : false
     };
-    this.pxlOptions = Object.assign( this.pxlOptions, options );
+
+    this.knownPostProcessPasses = {
+      "mapComposerWarpPass" : [ 'cloud3dTexture' ],
+      "chromaticAberrationPass" : [ 'ChromaticAberration'], 
+      "lizardKingPass" : [], 
+      "starFieldPass" : [], 
+      "crystallinePass" : [] 
+    };
+
+    // -- -- --
+
+    this.pxlOptions = Object.assign( {}, options );
     let optionKeys=Object.keys( this.pxlOptions );
     let defaultKeys=Object.keys( pxlOptions );
     defaultKeys.forEach( (k)=>{
@@ -161,6 +175,8 @@ class pxlNav{
         this.pxlOptions[k]=pxlOptions[k];
       }
     });
+
+    
 
     // Should there not be a default `userSettings` object, build one
     //   Update these values from `pxlRoom.pxlCamera` set methods
@@ -320,6 +336,7 @@ class pxlNav{
     this.pxlEnv.boot(); // Environment Asset Prep
     this.pxlQuality.startBenchmark(); // Start benchmark timer
 
+    this.checkPxlOptions();
 
     this.buildGui()
       .then( ()=>{ 
@@ -357,6 +374,34 @@ class pxlNav{
     
   }
   
+  // -- -- --
+
+  checkPxlOptions(){
+    if( this.pxlOptions.hasOwnProperty("postProcessPasses") ){
+      let postProcessKeys = Object.keys( this.pxlOptions["postProcessPasses"] );
+      postProcessKeys.forEach( (key)=>{
+        if( this.pxlOptions["postProcessPasses"][key] ){
+          this.assetsToLoadDict[key] = true;
+        }
+      });
+
+
+
+    }
+
+
+  }
+  /*
+  
+  this.assetsToLoadDict = {
+    "Cloud3d" : true,
+    "SoftNoise" : true,
+    "SmoothNoise" : true,
+    "ChromaticAberration" : false,
+    "WarpAnimTexture" : false,
+    "MathFuncs" : false
+  };*/
+
   // -- -- --
   
   buildGui(){
@@ -541,33 +586,35 @@ class pxlNav{
     ///////////////////////////////////////////////////
     // -- FILE I/O & Shared Assets -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
-    if( this.pxlOptions["loadList"].includes("Cloud3d") ){
+
+    
+    if( this.assetsToLoadDict["Cloud3d"] ){
         this.pxlEnv.cloud3dTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Cloud3d.jpg", null, {"encoding":LinearSRGBColorSpace});
         this.pxlEnv.cloud3dTexture.wrapS=RepeatWrapping;
         this.pxlEnv.cloud3dTexture.wrapT=RepeatWrapping;
     }
-    if( this.pxlOptions["loadList"].includes("SoftNoise") ){  
+    if( this.assetsToLoadDict["SoftNoise"] ){  
         this.pxlEnv.softNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Soft3d.jpg" );
         this.pxlEnv.softNoiseTexture.wrapS = RepeatWrapping;
         this.pxlEnv.softNoiseTexture.wrapT = RepeatWrapping;
     }
-    if( this.pxlOptions["loadList"].includes("SmoothNoise") ){  
+    if( this.assetsToLoadDict["SmoothNoise"] ){  
         this.pxlEnv.detailNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_UniformSmooth.jpg" );
         this.pxlEnv.detailNoiseTexture.wrapS = RepeatWrapping;
         this.pxlEnv.detailNoiseTexture.wrapT = RepeatWrapping;
     }
-    if( this.pxlOptions["loadList"].includes("ChromaticAberration") ){
+    if( this.assetsToLoadDict["ChromaticAberration"] ){
         let chroAberUVTexture = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration.png");
         chroAberUVTexture.minFilter=LinearFilter;
         chroAberUVTexture.magFilter=LinearFilter;
         this.pxlEnv.chroAberUVTexture=chroAberUVTexture;
     }
-    if( this.pxlOptions["loadList"].includes("WarpAnimTexture") ){
+    if( this.assetsToLoadDict["WarpAnimTexture"] ){
         this.pxlEnv.blockAnimTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_blockPortalWarp.jpg");
         this.pxlEnv.blockAnimTexture.minFilter=LinearFilter;
         this.pxlEnv.blockAnimTexture.magFilter=LinearFilter;
     }
-    if( this.pxlOptions["loadList"].includes("MathFuncs") ){
+    if( this.assetsToLoadDict["MathFuncs"] ){
         this.pxlEnv.mathFuncsTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"MathFuncs.jpg");
         this.pxlEnv.mathFuncsTexture.minFilter=LinearFilter;
         this.pxlEnv.mathFuncsTexture.magFilter=LinearFilter;

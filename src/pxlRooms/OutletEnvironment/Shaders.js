@@ -1,6 +1,6 @@
 
 import { ShaderChunk } from "../../libs/three/three.module.min.js";
-import { pxlShaders }  from "../../pxlNav.esm.js";
+import { pxlShaders }  from "../../pxlNav.js";
 const shaderHeader = pxlShaders.core.shaderHeader;
 
 
@@ -172,7 +172,7 @@ export function envGroundFrag( pointLightCount ){
         vec3 grassCd = texture2D( grassDiffuse, pos.xz*2.0 ).rgb ;
         
         // Shift the rocky hill texture so it reads it more horizontally
-        vec2 hillLayerUv =  vec2( subUv.x+subUv.y*.35,  vLocalPos.y*.01 ) ;
+        vec2 hillLayerUv =  vec2( subUv.x+uv.y*.1,  vLocalPos.y*.007 ) ;
         vec3 rockyHillCd = texture2D(hillDiffuse,hillLayerUv).rgb ;
         
         // -- -- --
@@ -186,9 +186,9 @@ export function envGroundFrag( pointLightCount ){
         dirtNoise = min(1.0, texture2D(uniformNoise,dirtUv).r*.3+.7);
         
         dirtUv = fract(pos.xz*.2);
-        vec3 dirtCd = texture2D(dirtDiffuse,dirtUv).rgb;
+        vec3 dirtCdBase = texture2D(dirtDiffuse,dirtUv).rgb;
         
-        dirtCd *= detailMult*(1.0-depth) + depth*.65;
+        vec3 dirtCd = dirtCdBase * detailMult*(1.0-depth) + depth*.2;
         
         // Dirt Region Blending
         vec2 unUv = uv*2.10;
@@ -209,6 +209,7 @@ export function envGroundFrag( pointLightCount ){
         float waterLightInf = 1.0 - dataCd.b*.45;
         float mossMix = max(0.0, dataCd.g-waterMix*.5 );
         float rockyMix = max(0.0, dataCd.r-waterMix*.85 );
+        rockyMix = clamp( (rockyMix-.75)*3.0, 0.0, 1.0 );
         
         // Mix base Dirt color --
         float baseCdMix = clamp( dot( normalize(baseCd.rgb), normalize(vCd.rgb) ) * vCd.r * vCd.g * vCd.b * 10.0, 0.0, 1.0 );
@@ -216,6 +217,7 @@ export function envGroundFrag( pointLightCount ){
         vec4 Cd = vec4( mix( baseCd.rgb, dirtCd, cNoise*baseCdMix )*dirtNoise, 1.0);
         
         // Add rocky hill sides, reduce region around campfire, remove pit itself
+        rockyHillCd = mix( dirtCd, rockyHillCd, rockyMix );
         Cd.rgb = mix( Cd.rgb, rockyHillCd, rockyMix);
         
         // Mix'n'add Moss & Grass colors
@@ -275,6 +277,7 @@ export function envGroundFrag( pointLightCount ){
         
         float fogMix = clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
         Cd.rgb =  mix( Cd.rgb, fogColor, fogMix );
+        
         
         gl_FragColor=Cd;
     }`;
@@ -528,7 +531,7 @@ export function grassClusterFrag( buildAlpha=false ){
           // Add a fake bump map to the lighting
           lights = lights*(((1.0-vCd.g)));
           lightMag = length(lights);
-          //
+          //  
         #endif
         
         Cd.rgb += Cd.rgb*lights;
@@ -544,8 +547,8 @@ export function grassClusterFrag( buildAlpha=false ){
         // -- Match Scene Tone  -- -- --
         // -- -- -- -- -- -- -- -- -- -- --
 
-        float fogMix =  clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
-        Cd.rgb=  mix( Cd.rgb * (vCd.y*.5+.4), fogColor, fogMix );
+        float fogMix =  clamp( depth * (depth*.4+1.) - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
+        Cd.rgb=  mix( Cd.rgb * (vCd.y*.23+.53), fogColor, fogMix );
 
         `;
         if( buildAlpha ){
@@ -703,6 +706,8 @@ export function pondWaterVert(){
 export function pondWaterFrag(){
   let ret=shaderHeader();
   ret += `
+        
+        
     uniform vec2 time;
     uniform float intensity;
     uniform float rate;
@@ -739,51 +744,50 @@ export function pondWaterFrag(){
         // -- -- --
         
         // Sample Coast Line Distance texture
-        vec2 sampleOffset = vec2( .0015  );
-        float coastInf= ( texture2D( coastLineTexture, vUv ).r + 
-                        texture2D( coastLineTexture, vUv + sampleOffset + nCd.rg*.015 ).r + 
-                        texture2D( coastLineTexture, vUv - sampleOffset ).r ) * .3333333333;
+        vec2 sampleOffset = vec2( .001  );
+        uv = vUv + (nCd.rg-.5)*.001;
+        vec3 rippleUVs= texture2D( coastLineTexture, uv ).rgb *.5 +
+                        texture2D( coastLineTexture, uv + sampleOffset ).rgb * .25 + 
+                        texture2D( coastLineTexture, uv - sampleOffset ).rgb * .25 ;
+                        
+        rippleUVs.rg = abs(rippleUVs.rg-.5) * 1.5;
+        float coastInf= pow( clamp( (length( rippleUVs.rg )), 0.0, 1.0), 3.0);
+        float coastInfInv = (1.0-coastInf); 
         
-        uv = vec2( pos.x*.1 - coastInf*.1, pos.z*.10-timer*.05-coastInf*.05 );
-        vec3 vertCd = ( texture2D(noiseTexture,uv).rgb*.5 +
-                      texture2D(noiseTexture,uv+sampleOffset).rgb*.25 +
-                      texture2D(noiseTexture,uv-sampleOffset).rgb*.15 );
+        nCd *= (1.0-coastInf*.5);
         
         // -- -- --
         
         // Calculate Alpha
         float alpha = clamp(((nCd.x*nCd.y*nCd.z)*.15)+.85, 0.0, 1.0) ;
         alpha =  min(1.0,alpha +  (dataCd.r*vCd.b)* min(1.0,vCd.r*2.0)) ;
-        alpha *= min(1.0,vCd.r*3.7);
-        vec4 Cd=vec4( .29,.35,.55, alpha );
+        alpha *= min(1.0,vCd.r*8.0);
+        vec4 Cd=vec4( .226,.27,.43, alpha );
         
         
         // -- -- --
         
         // Generate coastal ripples
-        coastInf = max( 0.0, coastInf*coastInf*coastInf  - (vertCd.r+vertCd.g+vertCd.b)*coastInf*0.28 );
-        vec2 rippleUV = vec2( coastInf ) ;
-        rippleUV = fract( rippleUV + (-time.x*0.06 ) );
-        
-        
-        rippleUV = ( rippleUV * coastInf);
-        float rippleInf=texture2D( rippleTexture, rippleUV ).r * coastInf * coastInf *.5 ;
+        rippleUVs.xy = ( rippleUVs.xy*vec2(1.0,.65*(coastInf*.6+.65)) + vec2( rippleUVs.b * .3, -time*.02 ) ) ;
+        float rippleInf = texture2D( rippleTexture, rippleUVs.xy ).r * coastInf;
         
 
         // -- -- --
         
         // Color + Coastal Mix
         
-        Cd.rgb *= mix(  max(nCd.g*(nCd.r*.5+1.0)*.7+.3,nCd.b*alpha)*.8+.1,
-                        rippleInf+0.50,
-                        min(1.0,(coastInf*.5+.5)+rippleInf) 
+        Cd.rgb *= mix(  max(nCd.g*(nCd.r*.5+1.0)*.7*coastInfInv+.3,nCd.b*alpha)*.8*coastInfInv+.1,
+                        rippleInf*.2+0.7,
+                        min(1.0,(nCd.g*nCd.b)+coastInf+rippleInf*.3) 
                      ); 
                      
+        Cd.rgb += vec3( min( 1.0, max( 0.0, rippleInf-( 0.18 + nCd.x*.2 ) )*6.0 ));
+        
         float angleInf = clamp( (1.0-min(1.0, length( vToCam )*.00135 ))*1.85, 0.0, 1.0 );
         angleInf *= angleInf;
-        float angleIncidence = 1.0 - clamp( dot( normalize( vToCam ), normalize(vN * nCd) )*3.50-.5, 0.0, 1.0)*(1.0-coastInf*.3-nCd.g*.3) * angleInf ;
+        float angleIncidence = 1.0 - clamp( dot( normalize( vToCam ), normalize(vN * nCd) )*3.50-.5, 0.0, 1.0)*(1.0-coastInf-nCd.g*.4) * angleInf ;
                      
-        Cd.a = mix(Cd.a*angleIncidence, Cd.a-min(1.0, (1.0-rippleInf)*.35), coastInf*.35  );
+        Cd.a = mix(Cd.a*angleIncidence, Cd.a-min(1.0, (1.0-rippleInf)*.035), coastInf+rippleInf  );
         
         
         gl_FragColor=Cd;

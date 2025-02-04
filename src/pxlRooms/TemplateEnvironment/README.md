@@ -3,8 +3,7 @@
  
  
  ***This file is a Work-In-Progress***
- *Please see the `pxlRooms/CampfireEnvironment` for a complete `pxlNav` room example*
- 
+ *Please see the `pxlRooms/OutletEnvironment` for a complete `pxlNav` room example*
  
  
 ////////////////////////////////////////////////////

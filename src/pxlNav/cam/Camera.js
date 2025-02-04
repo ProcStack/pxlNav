@@ -1641,15 +1641,15 @@ export class Camera{
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
         }else if(curName=="LizardKing"){
             text="I am the Lizard King";
-            finCmd="this.lKing=0;this.lKingWarp.set(...this.lKingInactive);this.lKingPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
+            finCmd="this.lKing=0;this.lKingWarp.set(...this.lKingInactive);this.lizardKingPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
         }else if(curName=="StarField"){
             text="Major Tom";
-            finCmd="this.sField=0;this.sFieldPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
+            finCmd="this.sField=0;this.starFieldPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
         }else if(curName=="InfinityZoom"){
             text="Fractal Substrate";
-            finCmd="this.iZoom=0;this.iZoomPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;this.pxlEnv.mapComposerWarpPass.needsSwap=true;this.pxlEnv.mapComposerWarpPass.enabled=false;");
+            finCmd="this.iZoom=0;this.crystallinePass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;this.pxlEnv.mapComposerWarpPass.needsSwap=true;this.pxlEnv.mapComposerWarpPass.enabled=false;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
             //this.pxlEnv.mapComposerWarpPass.needsSwap=false;
             this.pxlEnv.mapComposerWarpPass.needsSwap=true;

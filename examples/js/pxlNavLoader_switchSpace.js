@@ -29,8 +29,8 @@ const pxlAssetRoot = "./pxlAssets";
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
-// Current possible rooms - "CampfireEnvironment", "SaltFlatsEnvironment", "FieldEnvironment", "VoidEnvironment"
-const bootRoomList = ["FieldEnvironment","VoidEnvironment"];
+// Current possible rooms - "OutletEnvironment", "VoidEnvironment"
+const bootRoomList = ["OutletEnvironment","VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -140,7 +140,7 @@ const pxlNavEnv = new pxlNav( pxlNavOptions, projectTitle, startingRoom, bootRoo
 
 // -- -- --
 
-// <div id="roomToggle" roomToggles="VoidEnvironment:Void Space;FieldEnvironment:Field">Void Space</div>
+// <div id="roomToggle" roomToggles="VoidEnvironment:Void Space;OutletEnvironment:Field">Void Space</div>
 
 let switchButton = document.getElementById("roomToggle");
 if( switchButton && switchButton.hasAttribute("roomToggles") ){

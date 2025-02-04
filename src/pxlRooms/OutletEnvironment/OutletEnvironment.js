@@ -24,18 +24,18 @@ import {
         pondWaterVert, pondWaterFrag,
         pondDockVert, pondDockFrag,
       } from "./Shaders.js";
-import { RoomEnvironment, pxlShaders, pxlEffects } from "../../pxlNav.esm.js";
+import { RoomEnvironment, pxlShaders, pxlEffects } from "../../pxlNav.js";
 
 const pxlPrincipledVert = pxlShaders.objects.pxlPrincipledVert;
 const pxlPrincipledFrag = pxlShaders.objects.pxlPrincipledFrag;
 const FloatingDust = pxlEffects.pxlParticles.FloatingDust;
 
-export class FieldEnvironment extends RoomEnvironment{
-  constructor( roomName='FieldEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+export class OutletEnvironment extends RoomEnvironment{
+  constructor( roomName='OutletEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     super( roomName, assetPath, msRunner, camera, scene, cloud3dTexture );
 
 		this.assetPath= assetPath + "Assets/";
-    this.sceneFile = this.assetPath+"FieldEnvironment.fbx";
+    this.sceneFile = this.assetPath+"OutletEnvironment.fbx";
 		
 		// Environment Shader 
 		this.spiralizerUniforms={};
@@ -623,7 +623,7 @@ export class FieldEnvironment extends RoomEnvironment{
             }]
         )
         creekWaterUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"CreekWater_Data.jpg" );
-        creekWaterUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipplesA.jpg" );
+        creekWaterUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipples_CoastalB.jpg" );
         creekWaterUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
 
         let creekWaterMat=this.pxlFile.pxlShaderBuilder( creekWaterUniforms, creekWaterVert(), creekWaterFrag() );

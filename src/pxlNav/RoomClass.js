@@ -35,7 +35,7 @@ import { pxlPrincipledVert, pxlPrincipledFrag } from "./shaders/objects/PxlPrinc
 import { RENDER_LAYER, COLLIDER_TYPE } from "./core/Enums.js";
 
 class RoomEnvironment{
-  constructor( roomName='CampfireEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+  constructor( roomName='pxlRoomEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     this.roomName=roomName;
     this.pxlFile=null;
     this.pxlUtils=null;
@@ -50,8 +50,8 @@ class RoomEnvironment{
     this.assetPath=assetPath+"Assets/";
     this.mobile=false;
     
-    this.sceneFile = this.assetPath+"CampfireEnvironment.fbx";
-    this.animFile = this.assetPath+"Campfire_RabbitDruidA_anim.fbx";
+    this.sceneFile = null;
+    this.animFile = null;
     this.animClips = {};
     this.animMixer = null;
     

@@ -16,7 +16,7 @@ export class FieldEnvironment extends RoomEnvironment{
  - `FileIO.js` - Instances -to- Mesh Vertices now supports User Detail / Parameters `MinScale` & `MaxScale` (case insensitive)
  <br/>&nbsp;&nbsp; _When settings a Mesh/Geometry to have a string `Instance` parameter, it will read `color.r` from the individual verticies to get a 0-1 scale value for the instance for that point.  If there is a `MinScale` and/or `MaxScale` it will use them to fit the 0-1 color to the range provided -
 ```
-  let instanceScale = ( color.r - MinScale ) / ( MaxScale - MinScale );
+  let instanceScale = MinScale + (MaxScale - MinScale) * color.r;
 ```
  <br/>&nbsp;&nbsp; _I went with this method since it seems exceedingly difficult to export non-color vertex attributes from Blender and some Maya versions. Yet no issue for Houdini.  Then there is the issue that Three.js doesn't support reading those custom vertex attributes upon importing the FBX file.
 

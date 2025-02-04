@@ -55,21 +55,29 @@ export class User{
     
     this.lowGrav=0;
         
+    // -- -- --
+
+    // TODO : Awaiting the much needed Item Manager vv
+
     this.lKing=0;
     this.lKingInactive=[.025, .018];
     this.lKingActive=[.35,.25];
     this.lKingWarp=0;
-    this.lKingPass=null;
+    this.lizardKingPass=null;
         
     this.sField=0;
     this.sFieldWarp=0;
-    this.sFieldPass=null;
+    this.starFieldPass=null;
         
     this.iZoom=0;
     this.iZoomWarp=0;
-    this.iZoomPass=null;
+    this.crystallinePass=null;
+
+    // -- -- --
         
   }
+
+
 
   // -- -- --
 
@@ -143,7 +151,7 @@ export class User{
       if(this.lKing==0){
         this.lKing=1;
                 this.lKingWarp.set( ...this.lKingActive );
-                this.lKingPass.enabled=true;
+                this.lizardKingPass.enabled=true;
                 //this.lKingRoomPass.enabled=true;
         return true;
       }else{
@@ -152,7 +160,7 @@ export class User{
     }else if( itemName=="StarField" ){
       if(this.sField==0){
         this.sField=1;
-                this.sFieldPass.enabled=true;
+                this.starFieldPass.enabled=true;
                 //this.lKingRoomPass.enabled=true;
         return true;
       }else{
@@ -161,7 +169,7 @@ export class User{
     }else if( itemName=="InfinityZoom" ){
       if(this.iZoom==0){
         this.iZoom=1;
-                this.iZoomPass.enabled=true;
+                this.crystallinePass.enabled=true;
         return true;
       }else{
         return false;
