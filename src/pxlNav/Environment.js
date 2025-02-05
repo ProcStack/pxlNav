@@ -1371,31 +1371,31 @@ export class Environment{
     this.roomComposer.addPass( this.roomBloomPass );
     
     
-    this.roomGlowPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          ratio:{ type:'f',value: 1 },
-          tDiffuse: { value: null },
-          gDiffuse: { value: null },
-          rDiffuse: { value: null },
-          sceneDepth: { value: null },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.glowPassPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    
-    //gDiffuse: { value: this.scene.renderGlowTarget.texture },
-    //gDiffuse: { value: this.blurComposer.renderTarget1.texture },
-    this.roomGlowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
-    this.roomGlowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
-    this.roomGlowPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-    this.roomGlowPass.needsSwap = true;
-    this.roomGlowPass.name = "roomGlowPass";
-
     if( this.pxlOptions.postProcessPasses.roomGlowPass ){
+      this.roomGlowPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            time:{ value:this.pxlTimer.msRunner },
+            ratio:{ type:'f',value: 1 },
+            tDiffuse: { value: null },
+            gDiffuse: { value: null },
+            rDiffuse: { value: null },
+            sceneDepth: { value: null },
+          },
+          vertexShader: this.pxlShaders.core.defaultVert(),
+          fragmentShader: this.pxlShaders.rendering.glowPassPostProcess(),
+          defines: {}
+        } ), "tDiffuse"
+      );
+      
+      //gDiffuse: { value: this.scene.renderGlowTarget.texture },
+      //gDiffuse: { value: this.blurComposer.renderTarget1.texture },
+      this.roomGlowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
+      this.roomGlowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
+      this.roomGlowPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
+      this.roomGlowPass.needsSwap = true;
+      this.roomGlowPass.name = "roomGlowPass";
+
       this.roomComposer.addPass( this.roomGlowPass );
     }
     

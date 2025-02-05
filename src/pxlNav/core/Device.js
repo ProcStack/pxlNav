@@ -989,35 +989,53 @@ export class Device{
     if(!this.pxlEnv.mapGlowPass){
       return;
     }
+
+    // TODO : All of this should be set up through callbacks vv
     
     this.pxlEnv.scene.renderTarget.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
     this.pxlEnv.scene.renderWorldPos.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
     
-    
-    this.pxlEnv.mapComposer.setSize(this.mapW,this.mapH);
-    this.pxlEnv.mapComposerGlow.setSize(this.mapW,this.mapH);
+    if( this.pxlEnv.mapComposer ) this.pxlEnv.mapComposer.setSize(this.mapW,this.mapH);
+    if( this.pxlEnv.mapComposerGlow ) this.pxlEnv.mapComposerGlow.setSize(this.mapW,this.mapH);
     
     // For external rooms --
-    this.pxlEnv.roomComposer.setSize(this.mapW,this.mapH);
-    this.pxlEnv.roomGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
+    if( this.pxlEnv.roomComposer ){
+      this.pxlEnv.roomComposer.setSize(this.mapW,this.mapH);
+    }
+    
+    if( this.pxlEnv.roomGlowPass ){
+      this.pxlEnv.roomGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
+    }
+
     // -- -- -- -- -- -- --
         
     // For texture swapping --
-    this.pxlEnv.delayComposer.setSize(this.mapW,this.mapH);
+    if( this.pxlEnv.delayComposer ) this.pxlEnv.delayComposer.setSize(this.mapW,this.mapH);
+
     // -- -- -- -- -- -- --
         
-    this.pxlEnv.mapGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
-    this.pxlEnv.mapMotionBlurPass.setSize(this.mapW*this.pxlQuality.mBlurPercMult,this.mapH*this.pxlQuality.mBlurPercMult);
-    this.pxlEnv.mapOverlayHeavyPass.setSize(this.mapW,this.mapH);
-    this.pxlEnv.mapOverlayPass.setSize(this.mapW,this.mapH);
-    this.pxlEnv.mapOverlaySlimPass.setSize(this.mapW,this.mapH);
-        
-        // this.pxlEnv.mapOverlayHeavyPass.uniforms.ratio.value = this.mapW>this.mapH ? this.mapH  his.mapW : this.mapW  his.mapH;
-    // this.pxlEnv.mapOverlayPass.uniforms.ratio.value = this.mapW>this.mapH ? this.mapH  his.mapW : this.mapW  his.mapH;
-    // this.pxlEnv.mapOverlaySlimPass.uniforms.ratio.value = this.mapW>this.mapH ? this.mapH  his.mapW : this.mapW  his.mapH;
-        this.pxlEnv.mapOverlayHeavyPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
-    this.pxlEnv.mapOverlayPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
-    this.pxlEnv.mapOverlaySlimPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
+    if( this.pxlEnv.mapGlowPass ){
+      this.pxlEnv.mapGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
+    }
+    
+    if( this.pxlEnv.mapMotionBlurPass ){
+      this.pxlEnv.mapMotionBlurPass.setSize(this.mapW*this.pxlQuality.mBlurPercMult,this.mapH*this.pxlQuality.mBlurPercMult);
+    }
+    
+    if( this.pxlEnv.mapOverlayHeavyPass ){
+      this.pxlEnv.mapOverlayHeavyPass.setSize(this.mapW,this.mapH);
+      this.pxlEnv.mapOverlayHeavyPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
+    }
+    
+    if( this.pxlEnv.mapOverlayPass ){
+      this.pxlEnv.mapOverlayPass.setSize(this.mapW,this.mapH);
+      this.pxlEnv.mapOverlayPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
+    }
+
+    if( this.pxlEnv.mapOverlaySlimPass ){
+      this.pxlEnv.mapOverlaySlimPass.setSize(this.mapW,this.mapH);
+      this.pxlEnv.mapOverlaySlimPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
+    }
     
     this.pxlGuiDraws.pxlNavCanvas.width=this.sW;
     this.pxlGuiDraws.pxlNavCanvas.height=this.sH;

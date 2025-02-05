@@ -468,6 +468,7 @@ export class Utils{
     }else{
       //var texLoader=new ImageLoader(verboseLoading);
       var texture=new Texture();
+      let modKeys = Object.keys(mods);
       this.texLoader.load(imgPath,
         (tex)=>{
           if(channels!=null){
@@ -475,12 +476,10 @@ export class Utils{
           }
           texture.image=tex;
           texture.needsUpdate=true;
-          //texture.encoding=LinearSRGBColorSpace;
-          //texture.encoding=SRGBColorSpace;
-          //texture.mapping = CubeUVRefractionMapping;
-          if(mods.length>0){
-            let keys=Object.keys(mods);
-            keys.forEach((x)=>{
+
+          // Apply texture mods passed from the user
+          if(modKeys.length>0){
+            modKeys.forEach((x)=>{
               texture[x]=mods[x];
             });
           }

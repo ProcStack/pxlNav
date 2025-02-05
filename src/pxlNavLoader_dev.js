@@ -13,7 +13,7 @@ import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './
 
 
 // Console logging level
-//   Options are - NONE, ERROR, WARN, INFO
+//   Options are - NONE, ERROR, WARN, INFO, DEBUG
 const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
 
 // The Title of your Project

@@ -106,6 +106,7 @@ class RoomEnvironment{
     this.glassGroup=null;
     this.glassList=[]
     this.particleList={};
+    this.lodList=[];
     
 
     this.enableRaycast = false;
@@ -163,6 +164,14 @@ class RoomEnvironment{
     this.pxlDevice = pxlNav.pxlDevice;
     this.pxlColliders = pxlNav.pxlColliders;
     this.mobile = pxlNav.mobile;
+
+    this.cloud3dTexture=this.pxlEnv.cloud3dTexture;
+    this.cloud3dTexture.wrapS = RepeatWrapping;
+    this.cloud3dTexture.wrapT = RepeatWrapping;
+    
+    this.smoothNoiseTexture=this.pxlEnv.softNoiseTexture;
+    this.smoothNoiseTexture.wrapS = RepeatWrapping;
+    this.smoothNoiseTexture.wrapT = RepeatWrapping;
   }
   
   // -- -- --
@@ -185,24 +194,21 @@ class RoomEnvironment{
   }
   // -- -- --
 
-// Run after all needed pxlNav services are loaded/built
-//   So it's safe to access global assets at this point
+// Ran after core `pxlNav` modules have been loaded and initialized
+//   But before the render composers / post-processing
   init(){
     this.scene.fog=this.fog;
     this.scene.background = this.fogColor ;//pxlEnv.fogColor;
-    this.cloud3dTexture=this.pxlEnv.cloud3dTexture;
-    this.cloud3dTexture.wrapS = RepeatWrapping;
-    this.cloud3dTexture.wrapT = RepeatWrapping;
-    this.smoothNoiseTexture=this.pxlEnv.softNoiseTexture;
-    this.smoothNoiseTexture.wrapS = RepeatWrapping;
-    this.smoothNoiseTexture.wrapT = RepeatWrapping;
   }
 
 // Run on init room warp; reset room values
   start(){
-    if( this.booted ){
+    if( !this.booted ){
       this.resetCamera();
     }
+
+    this.pxlEnv.engine.setClearColor(this.fogColor, 0);
+
     /*this.spiralizerPass.enabled=true;
     this.bloomPreState=this.pxlEnv.roomBloomPass.enabled;  
     this.pxlEnv.roomBloomPass.enabled=false;  */
@@ -213,7 +219,16 @@ class RoomEnvironment{
     this.runTime.x=this.msRunner.x;
 
     // Update helper objects, if they exist
-    this.stepColliderHelper( COLLIDER_TYPE.FLOOR );
+    //this.stepColliderHelper( COLLIDER_TYPE.FLOOR );
+
+    // Update LODs manually with camera position
+    /*if( this.lodList.length > 0 ){
+      this.lodList.forEach( (lod)=>{
+        if( lod.getCurrentLevel()>0 ){
+        lod.update( this.camera );
+        }
+      });
+    }*/
     
     //this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
     
@@ -596,150 +611,155 @@ class RoomEnvironment{
   }
     
   fbxPostLoad(){
+    
+    // Let pxlNav know the room is ready
+    this.booted=true;
 
-        // Force Camera to init position with optional init look at
-        this.toCameraPos("Default");
+    // Force Camera to init position with optional init look at
+    this.toCameraPos("Default");
 
-        // Find Point light count for adjusted shadowing
-        let pointLightCount = 0;
-        if( this.lightList.hasOwnProperty("PointLight") ){
-          pointLightCount = this.lightList.PointLight.length;
-        }
-        
-        
-        
-        /*var ambientLight = new AmbientLight( 0x303030 ); // soft white light
-        //this.lightList.push( ambientLight );
-        this.scene.add( ambientLight );*/
-        
-        let lightTypeList = Object.keys( this.lightList );
-        if(lightTypeList.length>0){
-          lightTypeList.forEach( (type)=>{
-            this.lightList[type].forEach( (light)=>{
-              if( type == "DirectionalLight" ){ 
-                light.castShadow=false;
-              }else if( type == "PointLight" ){ 
-                light.shadow.radius = 5;
-                light.shadow.receiveShadow = true;
-                light.shadow.mapSize.width = 512; // default
-                light.shadow.mapSize.height = 512; // default
-                light.shadow.camera.near = 0.5; // default
-                light.shadow.camera.far = 35; // default
-                light.shadow.bias = .025; // default
-                light.shadow.radius = 5; // default
-              }
-            });
-          });
-        }
-        
-        
-        if( this.shaderGeoList ) {
-          for( const x in this.shaderGeoList){
-            let curObj = this.shaderGeoList[x];
-            if( curObj.userData && curObj.userData.Shader == "pxlPrincipled"){
-              
-              let shaderUniforms = UniformsUtils.merge(
-                  [
-                    UniformsLib[ "common" ],
-                    UniformsLib[ "lights" ],
-                    UniformsLib[ "shadowmap" ],
-                    {
-                      'dTexture' : { type:'t', value: null },
-                      'noiseTexture' : { type:'t', value: null },
-                      'detailTexture' : { type:'t', value: null },
-                      'cdMult' : { type:'f', value: 1 },
-                      'fogColor' : { type: "c", value: this.scene.fog.color },
-                    }
-                  ]
-              )
-              var defines = {};
-              defines[ "USE_MAP" ] = "";
-              
-              let ShaderParms = {};
-              let useLights = true
-              let useShadows = curObj.userData.castShadow == true || curObj.userData.receiveShadow == true
-              let useFog = true;
-              
-              let useColor = false;
-              if( !curObj.material.map ){
-                useColor = curObj.material.color.clone();
-              }
-              
-              // Add ShaderParms support
-              if( curObj.userData.ShaderParms && curObj.userData.ShaderParms != "" ){
-                ShaderParms = JSON.parse(curObj.userData.ShaderParms);
-              }
-              
-              let mat=this.pxlFile.pxlShaderBuilder(
-                  shaderUniforms,
-                  pxlPrincipledVert( useShadows ),
-                  pxlPrincipledFrag( ShaderParms, useColor, useFog, useLights, useShadows, pointLightCount ),
-                  defines
-                );
-              //mat.side=FrontSide;
-              mat.transparent= false;
-              mat.lights= true;
-              if(!useColor){
-                mat.uniforms.dTexture.value = curObj.material.map;
-              }
-              mat.uniforms.noiseTexture.value = this.cloud3dTexture;
-              mat.uniforms.detailTexture.value = this.pxlEnv.detailNoiseTexture;
-                  
-              curObj.material=mat;
-              this.materialList[ curObj.name ] = mat;
+    // Find Point light count for adjusted shadowing
+    let pointLightCount = 0;
+    if( this.lightList.hasOwnProperty("PointLight") ){
+      pointLightCount = this.lightList.PointLight.length;
+    }
+    
+    
+    
+    /*var ambientLight = new AmbientLight( 0x303030 ); // soft white light
+    //this.lightList.push( ambientLight );
+    this.scene.add( ambientLight );*/
+    
+    let lightTypeList = Object.keys( this.lightList );
+    if(lightTypeList.length>0){
+      lightTypeList.forEach( (type)=>{
+        this.lightList[type].forEach( (light)=>{
+          if( type == "DirectionalLight" ){ 
+            light.castShadow=false;
+          }else if( type == "PointLight" ){ 
+            if( light.castShadow){
+              light.shadow.radius = 5;
+              light.shadow.receiveShadow = true;
+              light.shadow.mapSize.width = 512; // default
+              light.shadow.mapSize.height = 512; // default
+              light.shadow.camera.near = 0.5; // default
+              light.shadow.camera.far = 35; // default
+              light.shadow.bias = .025; // default
+              light.shadow.radius = 5; // default
             }
           }
-        }
-        
-        
-        
-        
-        
-        
-        /*
-        let envGroundUniforms = UniformsUtils.merge(
-                [
-                  UniformsLib[ "common" ],
-                  UniformsLib[ "lights" ],
-                  UniformsLib[ "shadowmap" ],
-                  {
-                    'diffuse' : { type:'t', value: null },
-                    'dirtDiffuse' : { type:'t', value: null },
-                    'mult': { type:'f', value:1 },
-                    'fogColor': { type:'c', value: null },
-                    'noiseTexture' : { type:'t', value: null },
-                    'uniformNoise' : { type:'t', value: null },
-                    'crossNoise' : { type:'t', value: null },
-                  }
-                ]
-            );
-        let textureOptions = {
-            "wrapS" : RepeatWrapping,
-            "wrapT" : RepeatWrapping,
-        };
-        envGroundUniforms.fogColor.value = this.scene.fog.color;
-        envGroundUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Diffuse.jpg" );
-        envGroundUniforms.dirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"Dirt_Diffuse.jpg" );
-        envGroundUniforms.noiseTexture.value = this.cloud3dTexture;
-        envGroundUniforms.uniformNoise.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
-        envGroundUniforms.crossNoise.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_NCross.jpg" );
-        
-        let environmentGroundMat=this.pxlFile.pxlShaderBuilder( envGroundUniforms, envGroundVert(), envGroundFrag(1) );
-        environmentGroundMat.lights= true;
-        
-        envGroundUniforms.uniformNoise.value.wrapS = RepeatWrapping;
-        envGroundUniforms.uniformNoise.value.wrapT = RepeatWrapping;
-        envGroundUniforms.crossNoise.value.wrapS = RepeatWrapping;
-        envGroundUniforms.crossNoise.value.wrapT = RepeatWrapping;
-        envGroundUniforms.dirtDiffuse.value.wrapS = RepeatWrapping;
-        envGroundUniforms.dirtDiffuse.value.wrapT = RepeatWrapping;
-        
-        this.materialList[ "EnvironmentGround_Geo" ]=environmentGroundMat;
-        */
-        
-        
-        
+        });
+      });
     }
+    
+    
+    if( this.shaderGeoList ) {
+      for( const x in this.shaderGeoList){
+        let curObj = this.shaderGeoList[x];
+        if( curObj.userData && curObj.userData.Shader == "pxlPrincipled"){
+          
+          let shaderUniforms = UniformsUtils.merge(
+              [
+                UniformsLib[ "common" ],
+                UniformsLib[ "lights" ],
+                UniformsLib[ "shadowmap" ],
+                {
+                  'dTexture' : { type:'t', value: null },
+                  'noiseTexture' : { type:'t', value: null },
+                  'detailTexture' : { type:'t', value: null },
+                  'cdMult' : { type:'f', value: 1 },
+                  'fogColor' : { type: "c", value: this.scene.fog.color },
+                }
+              ]
+          )
+          var defines = {};
+          defines[ "USE_MAP" ] = "";
+          
+          let ShaderParms = {};
+          let useLights = true
+          let useShadows = curObj.userData.castShadow == true || curObj.userData.receiveShadow == true
+          let useFog = true;
+          
+          let useColor = false;
+          if( !curObj.material.map ){
+            useColor = curObj.material.color.clone();
+          }
+          
+          // Add ShaderParms support
+          if( curObj.userData.ShaderParms && curObj.userData.ShaderParms != "" ){
+            ShaderParms = JSON.parse(curObj.userData.ShaderParms);
+          }
+          
+          let mat=this.pxlFile.pxlShaderBuilder(
+              shaderUniforms,
+              pxlPrincipledVert( useShadows ),
+              pxlPrincipledFrag( ShaderParms, useColor, useFog, useLights, useShadows, pointLightCount ),
+              defines
+            );
+          //mat.side=FrontSide;
+          mat.transparent= false;
+          mat.lights= true;
+          if(!useColor){
+            mat.uniforms.dTexture.value = curObj.material.map;
+          }
+          mat.uniforms.noiseTexture.value = this.cloud3dTexture;
+          mat.uniforms.detailTexture.value = this.pxlEnv.detailNoiseTexture;
+              
+          curObj.material=mat;
+          this.materialList[ curObj.name ] = mat;
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    
+    /*
+    let envGroundUniforms = UniformsUtils.merge(
+            [
+              UniformsLib[ "common" ],
+              UniformsLib[ "lights" ],
+              UniformsLib[ "shadowmap" ],
+              {
+                'diffuse' : { type:'t', value: null },
+                'dirtDiffuse' : { type:'t', value: null },
+                'mult': { type:'f', value:1 },
+                'fogColor': { type:'c', value: null },
+                'noiseTexture' : { type:'t', value: null },
+                'uniformNoise' : { type:'t', value: null },
+                'crossNoise' : { type:'t', value: null },
+              }
+            ]
+        );
+    let textureOptions = {
+        "wrapS" : RepeatWrapping,
+        "wrapT" : RepeatWrapping,
+    };
+    envGroundUniforms.fogColor.value = this.scene.fog.color;
+    envGroundUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Diffuse.jpg" );
+    envGroundUniforms.dirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"Dirt_Diffuse.jpg" );
+    envGroundUniforms.noiseTexture.value = this.cloud3dTexture;
+    envGroundUniforms.uniformNoise.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
+    envGroundUniforms.crossNoise.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_NCross.jpg" );
+    
+    let environmentGroundMat=this.pxlFile.pxlShaderBuilder( envGroundUniforms, envGroundVert(), envGroundFrag(1) );
+    environmentGroundMat.lights= true;
+    
+    envGroundUniforms.uniformNoise.value.wrapS = RepeatWrapping;
+    envGroundUniforms.uniformNoise.value.wrapT = RepeatWrapping;
+    envGroundUniforms.crossNoise.value.wrapS = RepeatWrapping;
+    envGroundUniforms.crossNoise.value.wrapT = RepeatWrapping;
+    envGroundUniforms.dirtDiffuse.value.wrapS = RepeatWrapping;
+    envGroundUniforms.dirtDiffuse.value.wrapT = RepeatWrapping;
+    
+    this.materialList[ "EnvironmentGround_Geo" ]=environmentGroundMat;
+    */
+    
+    
+    
+  }
   
   animPostLoad( animKey, animMixers ){
     if( this.pxlAnim.hasClip( animKey, this.animInitCycle ) ){
@@ -756,8 +776,12 @@ class RoomEnvironment{
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 // Build Scene and Assets
-
   build(){
+    // Attempt to build the FBX if it exists
+    if( !this.sceneFile ){
+      return;
+    }
+    this.pxlFile.loadRoomFBX( this ) 
   }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //

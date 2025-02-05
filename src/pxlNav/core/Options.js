@@ -53,6 +53,7 @@ export const pxlOptions = {
   'skyHaze' : pxlEnums.SKY_HAZE.OFF,
   'loaderPhrases' : ['...loading the pixels...'],
   'postProcessPasses' : { // Enabling loads needed ./pxlAssets
+    'roomGlowPass' : false,
     'mapComposerWarpPass' : false,
     'chromaticAberrationPass' : false,
     'lizardKingPass' : false,

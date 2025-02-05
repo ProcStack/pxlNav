@@ -16,7 +16,7 @@ export function envGroundVert(){
     varying vec2 vUv;
     varying vec3 vPos;
     varying vec3 vCamPos;
-    varying vec3 vLocalPos;
+    varying vec3 vModelPos;
     varying vec3 vN;
     varying vec3 vLocalN;
     
@@ -39,7 +39,7 @@ export function envGroundVert(){
         vec3 transformedNormal = objectNormal;
         
         
-        vLocalPos = (modelMatrix * vec4(position,1.0)).xyz;
+        vModelPos = (modelMatrix * vec4(position,1.0)).xyz;
         vN = (modelViewMatrix * vec4(normal, 0.0)).xyz;
         vLocalN = ( modelMatrix * vec4(normal, 0.0)).xyz;
         vec4 mvPos=modelViewMatrix * vec4(position, 1.0);
@@ -76,7 +76,6 @@ export function envGroundFrag( pointLightCount ){
   
   uniform sampler2D noiseTexture;
   uniform sampler2D uniformNoise;
-  uniform sampler2D crossNoise;
       
   uniform vec2 time;
   uniform vec3 fogColor;
@@ -85,37 +84,55 @@ export function envGroundFrag( pointLightCount ){
   varying vec2 vUv;
   varying vec3 vPos;
   varying vec3 vCamPos;
-  varying vec3 vLocalPos;
+  varying vec3 vModelPos;
   varying vec3 vN;
   varying vec3 vLocalN;
   varying vec3 vShading;
   
   #define PI 3.1415926535897932384626
+  #define EPSILON 1e-6
     
-    struct PointLight {
-      vec3 color;
-      float decay;
-      float distance;
-      vec3 position;
+  // Three.js Light Structs
+  
+  #if NUM_POINT_LIGHTS > 0
+  struct PointLight {
+    vec3 color;
+    float decay;
+    float distance;
+    vec3 position;
     };
+
+    uniform PointLight pointLights[NUM_POINT_LIGHTS];
+  #endif
+
+  #if NUM_DIR_LIGHTS > 0
     struct DirLight {
       vec3 color;
       vec3 direction;
     };
-     
-    
-  #if NUM_POINT_LIGHTS > 0
-    uniform PointLight pointLights[NUM_POINT_LIGHTS];
-  #endif
-  #if NUM_DIR_LIGHTS > 0
     uniform DirLight directionalLights[NUM_DIR_LIGHTS];
   #endif
+  
+  #if NUM_SPOT_LIGHTS > 0
+    struct SpotLight {
+      vec3 position;
+      vec3 direction;
+      vec3 color;
+      float distance;
+      float decay;
+      float coneCos;
+      float penumbraCos;
+    };
+	uniform SpotLight spotLights[ NUM_SPOT_LIGHTS ];
+  #endif
+    
+    
     
     
         
     void main(){
         float timer = time.x*.3;
-        vec3 pos = vLocalPos*.0001;
+        vec3 pos = vModelPos*.0001;
         vec2 uv = vUv;
 
         float screenSpaceX = abs((vCamPos.x / vCamPos.z))*.45;
@@ -131,7 +148,7 @@ export function envGroundFrag( pointLightCount ){
         vec4 baseCd = texture2D(diffuse,vUv) ;
         vec3 dataCd = texture2D(dataTexture,vUv).rgb ;
 
-        pos = vLocalPos*.01;
+        pos = vModelPos*.01;
         uv.x = ( pos.x + pos.y*.05 + baseCd.r + baseCd.r*0.50);
         uv.y = ( pos.z + pos.y*.05 + baseCd.g + baseCd.g*0.65);
         
@@ -172,7 +189,7 @@ export function envGroundFrag( pointLightCount ){
         vec3 grassCd = texture2D( grassDiffuse, pos.xz*2.0 ).rgb ;
         
         // Shift the rocky hill texture so it reads it more horizontally
-        vec2 hillLayerUv =  vec2( subUv.x+uv.y*.1,  vLocalPos.y*.007 ) ;
+        vec2 hillLayerUv =  vec2( subUv.x+uv.y*.1,  vModelPos.y*.007 ) ;
         vec3 rockyHillCd = texture2D(hillDiffuse,hillLayerUv).rgb ;
         
         // -- -- --
@@ -234,19 +251,20 @@ export function envGroundFrag( pointLightCount ){
         
         
         vec3 lights = vec3(0.0, 0.0, 0.0);
+        float attenuation = 0.0;
       #if NUM_POINT_LIGHTS > 0
-        for(int i = 0; i < NUM_POINT_LIGHTS; i++) {
-            vec3 lightDelta = (vPos - pointLights[i].position);
+        for(int x = 0; x < NUM_POINT_LIGHTS; ++x) {
+            vec3 lightDelta = (vPos - pointLights[x].position);
             vec3 lightVector = normalize(lightDelta);
             float lightNormDot = clamp(dot(-lightVector, vN), 0.0, 1.0);
             
             // Calculate distance attenuation
-            float lightDistFit = max( 1.0, length(lightDelta) / pointLights[i].distance ) * .001;
-            float attenuation = 1.0 / (1.0 + pointLights[i].decay * lightDistFit * lightDistFit);
+            float lightDistFit =  min( 1.0, length(lightDelta) / pointLights[x].distance ) ;
+            attenuation = 1.0 / (1.0 + pointLights[x].decay * lightDistFit  );
             
             // Calculate light intensity
             float lightDist = max(0.0, (0.50*waterLightInf - lightDistFit )) * attenuation;
-            lights += pointLights[i].color * lightNormDot * lightDist ;
+            lights += pointLights[x].color * lightDist * attenuation ;
         }
         Cd.rgb *= max( ambientLightColor * waterLightInf, lights);
       #else
@@ -265,19 +283,63 @@ export function envGroundFrag( pointLightCount ){
         pos = vPos;
         lights = vec3(0.0, 0.0, 0.0);
       #if NUM_DIR_LIGHTS > 0
-        for(int i = 0; i < NUM_DIR_LIGHTS; i++) {
-            //float lDirN = dot( directionalLights[i].direction, vN );
-            //vec3 lightInf= ( max(0.0, dot(directionalLights[i].direction, reflect(vN, normalize(vPos-vCamPos ))))) * lDirN * directionalLights[i].color;
-            vec3 lightInf= ( max(0.0, dot(directionalLights[i].direction, vN))) * directionalLights[i].color;
+        for( int x = 0; x < NUM_DIR_LIGHTS; ++x ) {
+            vec3 lightInf= ( max(0.0, dot(directionalLights[x].direction, vN))) * directionalLights[x].color;
             lights += lightInf;
         }
         // 'baseDirtNoise' is acting as bump map here, sorta
         Cd.rgb += Cd.rgb * lights * baseDirtNoise;
       #endif
         
+
+
+      /*
+      #if NUM_SPOT_LIGHTS > 0
+        for( int x = 0; x < NUM_SPOT_LIGHTS; ++x ) {
+
+          lights = vec3(0.0, 0.0, 0.0);
+
+          //vec3 lVector = spotLights[x].position - vCamPos;
+          vec3 lVector = spotLights[x].position - vModelPos;
+          vec3 lightToPos = normalize( lVector );
+      
+          float angleCos = dot( normalize( lVector ), spotLights[x].direction );
+          float spotAttenuation = smoothstep( spotLights[x].coneCos, spotLights[x].penumbraCos, angleCos );
+      
+      
+          float lightDistance = length( lVector );
+
+          // -- -- -- -- -- -- -- -- -- -- --
+          // From Three.js ShaderChunk/lights_pars_begin.glsl.js --
+          // based upon Frostbite 3 Moving to Physically-based Rendering
+          // page 32, equation 26: E[window1]
+          // https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+          float distanceFalloff = 1.0 / max( pow( lightDistance, spotLights[x].decay ), 0.01 );
+
+          // Added epsilon for pxlNav
+          float cutoffDistance = spotLights[x].distance + EPSILON;
+
+          distanceFalloff *= pow( clamp( 1.0 - pow( lightDistance / cutoffDistance, 4.0 ), 0.0, 1.0 ), 2.0 );
+          //
+          // -- -- -- -- -- -- -- -- -- -- --
+          
+          vec3 curLight = spotLights[x].color * spotAttenuation;
+          curLight *= distanceFalloff;
+
+          lights += curLight;
+          lights = vec3(lightDistance * .0004);
+
+        }
+
+        Cd.rgb += Cd.rgb * lights ;
+
+      #endif
+      */
+
+
         float fogMix = clamp( depth - lightMag*(1.0-depth*1.5), 0.0, 1.0 );
         Cd.rgb =  mix( Cd.rgb, fogColor, fogMix );
-        
+
         
         gl_FragColor=Cd;
     }`;
@@ -799,7 +861,7 @@ export function pondWaterFrag(){
 // -- -- --
 
 
-export function pondDockVert(){
+export function woodenDockVert(){
 	let ret=shaderHeader();
 	ret+=`
     attribute vec3 color;
@@ -831,7 +893,7 @@ export function pondDockVert(){
 	return ret;
 }
 
-export function pondDockFrag(){
+export function woodenDockFrag(){
 	let ret=shaderHeader();
 	ret+=`
     uniform sampler2D diffuse;
@@ -883,52 +945,52 @@ export function pondDockFrag(){
     /*********************************/
 
     void main(){
-        vec3 nCd=normalize( texture2D( normalMap,vUv ).rgb * 2.0 - 1.0 );
-        vec3 Cd= texture2D( diffuse,vUv ).rgb * vCd;
-        
-        mat3 tbnMatrix = mat3( vTangent, vBitangent, vN );
-        
-        // -- -- --
+      vec3 nCd=normalize( texture2D( normalMap,vUv ).rgb * 2.0 - 1.0 );
+      vec3 Cd= texture2D( diffuse,vUv ).rgb * vCd;
+      
+      mat3 tbnMatrix = mat3( vTangent, vBitangent, vN );
+      
+      // -- -- --
 
-        float depth = min(1.0, gl_FragCoord.z / gl_FragCoord.w * .00035 ) * step( .930, gl_FragCoord.z );
-        depth = pow( depth, 1.5+depth);
-        float depthFade = max(0.0, 1.0-depth);
-        depthFade *= depthFade*depthFade;
+      float depth = min(1.0, gl_FragCoord.z / gl_FragCoord.w * .00035 ) * step( .930, gl_FragCoord.z );
+      depth = pow( depth, 1.5+depth);
+      float depthFade = max(0.0, 1.0-depth);
+      depthFade *= depthFade*depthFade;
 
-        // -- -- --
+      // -- -- --
+      
+      vec3 normal = normalize( tbnMatrix * vN );
+      Cd.rgb = Cd.rgb * (Cd.rgb*.3+.1); 
+      
+      // -- -- --
+      
+      vec3 lights = vec3(0.0, 0.0, 0.0);
         
-        vec3 normal = normalize( tbnMatrix * nCd );
-        Cd.rgb = Cd.rgb * (Cd.rgb*.3+.1); 
-        
-        // -- -- --
-        
-        vec3 lights = vec3(0.0, 0.0, 0.0);
-          
-        
-        float shadowInf = 0.0;
-        float detailInf = 0.0;
-        float lShadow = 0.0;
-        int i = 0;
-        float dp=0.0;
-        float shadowRadius=0.0;
-        
-      #if NUM_DIR_LIGHTS > 0
-        lights = vec3(0.0, 0.0, 0.0);
-        for(int i = 0; i < NUM_DIR_LIGHTS; i++) {
-            vec3 lightInf= directionalLights[i].color * dot(directionalLights[i].direction, vN );
-            lights += lightInf;
-        }
+      
+      float shadowInf = 0.0;
+      float detailInf = 0.0;
+      float lShadow = 0.0;
+      int i = 0;
+      float dp=0.0;
+      float shadowRadius=0.0;
+      
+    #if NUM_DIR_LIGHTS > 0
+      lights = vec3(0.0, 0.0, 0.0);
+      for(int i = 0; i < NUM_DIR_LIGHTS; i++) {
+          vec3 lightInf= directionalLights[i].color * dot(directionalLights[i].direction, normal );
+          lights += lightInf;
+      }
 
-        Cd.rgb += lights* min(vec3(1.0),(Cd.rgb)*9.0+.25) ;
-      #endif
-        
-        float fogMix = clamp( depth - length( lights )*(1.0-depth*1.5), 0.0, 1.0 );
-        Cd.rgb =  mix( Cd.rgb, fogColor, fogMix );
+      Cd.rgb += lights* min(vec3(1.0),(Cd.rgb)) ;
+    #endif
+      
+      float fogMix = clamp( depth - length( lights )*(1.0-depth*1.5), 0.0, 1.0 );
+      Cd.rgb =  mix( Cd.rgb, fogColor, fogMix );
 
-        // -- -- --
-        
-        vec4 outCd = vec4( Cd, 1.0 );
-        gl_FragColor = outCd;
+      // -- -- --
+      
+      vec4 outCd = vec4( Cd, 1.0 );
+      gl_FragColor = outCd;
     }`;
 	return ret;
 }

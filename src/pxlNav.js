@@ -160,9 +160,9 @@ class pxlNav{
     this.knownPostProcessPasses = {
       "mapComposerWarpPass" : [ 'cloud3dTexture' ],
       "chromaticAberrationPass" : [ 'ChromaticAberration'], 
-      "lizardKingPass" : [], 
-      "starFieldPass" : [], 
-      "crystallinePass" : [] 
+      "lizardKingPass" : [ 'cloud3dTexture' ], 
+      "starFieldPass" : [ 'cloud3dTexture' ], 
+      "crystallinePass" : [ 'cloud3dTexture' ] 
     };
 
     // -- -- --
@@ -303,6 +303,12 @@ class pxlNav{
     }
     this.pxlGuiDraws.setLoaderPhrases( this.pxlOptions["loaderPhrases"] );
 
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+      console.log("pxlNav v" + pxlNavVersion +" set to Verbose Info Mode");
+      console.log("  With Three.js v171");
+      console.log("Booting pxlNAv...");
+    }
+
     this.pxlQuality.init() // Load cookies and update settings
   }
   
@@ -376,31 +382,22 @@ class pxlNav{
   
   // -- -- --
 
+  // Check if any post process passes are enabled & toggle load status of their pxlAssets
   checkPxlOptions(){
     if( this.pxlOptions.hasOwnProperty("postProcessPasses") ){
       let postProcessKeys = Object.keys( this.pxlOptions["postProcessPasses"] );
+      let knownPassKeys = Object.keys( this.knownPostProcessPasses );
       postProcessKeys.forEach( (key)=>{
-        if( this.pxlOptions["postProcessPasses"][key] ){
-          this.assetsToLoadDict[key] = true;
+        if( knownPassKeys.includes( key ) && this.pxlOptions["postProcessPasses"][key] ){
+          let passAssets = this.knownPostProcessPasses[key];
+          passAssets.forEach( (assetKey)=>{
+            this.assetsToLoadDict[assetKey] = true;
+          });
         }
       });
-
-
-
     }
-
-
   }
-  /*
-  
-  this.assetsToLoadDict = {
-    "Cloud3d" : true,
-    "SoftNoise" : true,
-    "SmoothNoise" : true,
-    "ChromaticAberration" : false,
-    "WarpAnimTexture" : false,
-    "MathFuncs" : false
-  };*/
+
 
   // -- -- --
   

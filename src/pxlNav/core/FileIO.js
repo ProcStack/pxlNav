@@ -19,7 +19,9 @@ import {
   ShaderMaterial,
   LinearSRGBColorSpace,
   SRGBColorSpace,
-  NoColorSpace
+  NoColorSpace,
+  LOD,
+  SpotLight
 } from "../../libs/three/three.module.min.js";
 import { FBXLoader } from "../../libs/three/FBXLoader.js";
 
@@ -38,6 +40,8 @@ export class FileIO{
     this.pxlDevice=null;
     this.pxlShaders=null;
     this.pxlColliders=null;
+
+    this.verbose = false;
 
     this.pxlOptions={};
     
@@ -72,10 +76,14 @@ export class FileIO{
     this.pxlShaders=pxlNav.pxlShaders;
     this.pxlColliders=pxlNav.pxlColliders;
     this.pxlOptions=pxlNav.pxlOptions;
+
+    this.verbose = this.pxlOptions.verbose;
   }
 
   log(...logger){
-    if( this.runDebugger ){
+    if( this.runDebugger ||
+       this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG
+    ){
       console.log("---");
       logger.forEach( (l)=>{ console.log(l); } );
       //logger= logger.length<2 ? logger[0] : logger;
@@ -246,10 +254,10 @@ export class FileIO{
 
   // -- -- --
   
-  checkForMeshSettings( meshMaterial, baseMaterial ){
+  checkForMeshSettings( meshObject, baseMaterial ){
     if( baseMaterial.hasOwnProperty("meshSettings") ){
       if( baseMaterial.meshSettings.hasOwnProperty("renderOrder") ){
-        meshMaterial.renderOrder = baseMaterial.meshSettings.renderOrder;
+        meshObject.renderOrder = baseMaterial.meshSettings.renderOrder;
       }
     }
   }
@@ -374,122 +382,308 @@ export class FileIO{
             envObj.geoList['InstanceObjects']={};
           }
           
-          let curPos=mesh.position;
-          let curRot=mesh.rotation;
-          let curScale=mesh.scale;
-          let instBase= envObj.baseInstancesList[ mesh.userData.Instance ];
+          // -- -- --
 
-          if( mesh.type == "Mesh" ){
-            let matrix = new Matrix4();
-            let position = new Vector3();
-            let normal = new Vector3();
-            let quaternion = new Quaternion();
-            let scale = new Vector3(1, 1, 1);
-            const hasColor = mesh.geometry.attributes.hasOwnProperty("color");
-            let userDataKeys = Object.keys( mesh.userData );
-            let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
+          // Regex attribute checks --
+          
+          // Instance Geometry Object for LOD level N
+          let lodInstanceRegex = new RegExp( /(instlod)\d+/, "i" );
+          let lodNumberRegex = new RegExp( /\d+/, "i" );
 
-            let hasFitScale = false;
-            let minScale = 0;
-            let maxScale = 1;
-            if( userDataKeysLower.includes("minscale") ){
-              hasFitScale = true;
-              minScale = mesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
+          // Instance Switch Distance for LOD level N
+          let lodDistRegex = new RegExp( /(instlod)\d+(dist)/, "i" );
+
+          // Instance Mesh Point Skip Rate for LOD level N
+          //   If no child mesh with lod level found,
+          //     It will auto skip verts to spawn at to help with performance
+          let lodSkipRegex = new RegExp( /(instlod)\d+(skip)/, "i" );
+
+          // -- -- --
+
+          // LOD data objects
+
+          let lodMeshes = { 'lod0' : 
+            { 
+              'mesh': mesh, 
+              'dist': 1 
             }
-            if( userDataKeysLower.includes("maxscale") ){
-              hasFitScale = true;
-              maxScale = mesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
-            }
-
-            // Prevent dupelicate instances
-            //   Verts are split, so neighboring polygons have stacked vertices
-            //     'entry' checks those dupes
-            let pointRecorder = {};
-            let instanceMatricies = [];
-            for (let x = 0; x < mesh.geometry.attributes.position.count; ++x) {
-              position.fromBufferAttribute(mesh.geometry.attributes.position, x);
-              let entry = position.toArray();
-
-              // Flatten array elements to 0.01 precision joined by ","
-              entry = this.pxlUtils.flattenArrayToStr( entry );
-
-              if( !pointRecorder.hasOwnProperty(entry) ){
-                normal.fromBufferAttribute(mesh.geometry.attributes.normal, x);
-                let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
-                quaternion.setFromEuler(randomRot);
-                
-                curScale = scale;
-                if( hasColor ){
-                  let curScalar = mesh.geometry.attributes.color.getX(x);
-                  if( hasFitScale ){
-                    // Scale the object based on object parameter `minScale` & `maxScale`
-                    curScalar = minScale + (maxScale - minScale) * curScalar;
-                  }
-                  curScale = new Vector3(curScalar, curScalar, curScalar);
-                }
-                matrix.compose(position, quaternion, curScale);
-                instanceMatricies.push( matrix.clone() );
-                pointRecorder[entry]=true;
-              }
-            }
-            if( instanceMatricies.length > 0 ){
-              let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
-              instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-              instancedMesh.name = name + "Geo";
-
-              /*if( instBase.material.hasOwnProperty("meshSettings") ){
-                if( instBase.material.meshSettings.hasOwnProperty("renderOrder") ){
-                  instancedMesh.renderOrder = instBase.material.meshSettings.renderOrder;
-                }
-              }*/
-              this.checkForMeshSettings( instancedMesh, instBase.material );
-              
-              for (let x = 0; x < instanceMatricies.length; ++x) {
-                instancedMesh.setMatrixAt( x, instanceMatricies[x] );
-              }
-
-              instancedMesh.visible = true;
-              instancedMesh.updateMatrix();
-
-              envObj.geoList['InstanceObjects'][name] = instancedMesh;
-              mesh.parent.add(instancedMesh);
-            }
-            mesh.visible = false;
-            mesh.parent.remove(mesh);
-          }else{
-            // Clone the base instance; single instance
-            let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
-            instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-            instancedMesh.name = name+"Geo";
+          };
 
 
-            this.checkForMeshSettings( instancedMesh, instBase.material );
 
-
-            let altInstPlacement = false;
-            if( mesh.userData.hasOwnProperty("fixInstMatrix") ){
-              altInstPlacement = !!mesh.userData.fixInstMatrix;
-            }
-
-            if( altInstPlacement ){
-              instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
-              instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
-              instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
-            }else{
-              const matrix = new Matrix4();
-              matrix.compose(curPos, new Quaternion().setFromEuler(curRot), curScale);
-              instancedMesh.setMatrixAt(0, matrix);
-            }
-
-            instancedMesh.visible=true;
-            instancedMesh.updateMatrix();
-
-            envObj.geoList['InstanceObjects'][name] = instancedMesh;
-            mesh.parent.add(instancedMesh);
-            mesh.visible=false;
-            mesh.parent.remove(mesh);
+          let instObjectData = {
+            'mesh' : mesh,
+            'instMesh' : null,
+            'dist' : 1,
+            'skip' : 0
           }
-           
+
+          // -- -- --
+
+          // Base variables
+
+          let hasLods = false;
+          let hasInstSettings = {};
+          let instanceBaseObject = null;
+          let foundInstLODLevels = {};
+
+          // -- -- --
+
+          // Check for LOD
+
+          try{
+            let userDataKeys = Object.keys( mesh.userData );
+
+            userDataKeys.forEach( ( dataKey )=>{
+              let isInstanceLODLevel = lodInstanceRegex.test (dataKey );
+              if( isInstanceLODLevel ){
+                let curLevelNumber = lodNumberRegex.exec( dataKey );
+                if( !curLevelNumber || curLevelNumber.length < 1 ){
+                  return;
+                }
+                curLevelNumber = parseInt( curLevelNumber[0] );
+
+                let levelData = {};
+                if( foundInstLODLevels.hasOwnProperty( curLevelNumber ) ){
+                  levelData = foundInstLODLevels[ curLevelNumber ];
+                }else{
+                  foundInstLODLevels[ curLevelNumber ] = Object.assign( {}, instObjectData );
+                  levelData = foundInstLODLevels[ curLevelNumber ];
+                }
+
+                if( lodDistRegex.test( dataKey ) ){
+                  let curDist = mesh.userData[ dataKey ];
+                  levelData['dist'] = curDist;
+                }else if( lodSkipRegex.test( dataKey ) ){
+                  let curSkip = mesh.userData[ dataKey ];
+                  levelData['skip'] = curSkip;
+                }else{
+                  levelData['instMesh'] = mesh.userData[ dataKey ];
+                }
+              }
+            });
+          }catch(e){
+            console.log(e);
+          }
+
+
+          // -- -- --
+
+
+          // Check for Child LODs levels
+          let lodChildren = mesh.children;
+          
+          for( let x=0; x<lodChildren.length; ++x ){ 
+            if( !lodChildren[x].hasOwnProperty("userData") ){
+              continue;
+            }
+            let curUserData = lodChildren[x].userData;
+            for( let c=0; c<curUserData.length; ++c ){
+              let dataKey = curUserData[c];
+              let curKey = lodInstanceRegex.test( dataKey );
+              let curDataObj = Object.assign( {}, instObjectData );
+              if( curKey ){
+                let curLevelNumber = lodNumberRegex.exec( dataKey );
+                let onParent = foundInstLODLevels.hasOwnProperty( curLevelNumber );
+                if( onParent ){
+                  curDataObj = foundInstLODLevels[ curLevelNumber ];
+                }
+              }
+              if( lodDistRegex.test( dataKey ) ){
+                let curDist = curUserData[ dataKey ];
+                curDataObj['dist'] = curDist;
+              }else if( lodSkipRegex.test( dataKey ) ){
+                let curSkip = curUserData[ dataKey ];
+                curDataObj['skip'] = curSkip;
+              }else{
+                console.log( dataKey )
+                curDataObj['instMesh'] = curUserData[ dataKey ];
+              } 
+            }
+          }
+
+          // -- -- --
+
+          let lodKeysList = Object.keys( lodMeshes );
+
+          try{
+            if( hasLods ){
+              instanceBaseObject = new LOD();
+              instanceBaseObject.name = name + "_LOD_TOPLVL";
+              instanceBaseObject.userData = Object.assign( {},  mesh.userData );
+              instanceBaseObject.userData['pxlInstanceToMesh'] = true;
+              envObj.geoList['InstanceObjects'][name] = instanceBaseObject;
+              envObj.lodList.push( instanceBaseObject );
+              mesh.parent.add(instanceBaseObject);
+            }
+
+            for( let x=0; x<lodKeysList.length; ++x ){
+              let curMesh = lodMeshes[lodKeysList[x]].mesh;
+              let curPos = curMesh.position;
+              let curRot = curMesh.rotation;
+              let curScale = curMesh.scale;
+              let instBase = envObj.baseInstancesList[ curMesh.userData.Instance ];
+
+              if( curMesh.type == "Mesh" ){
+                let matrix = new Matrix4();
+                let position = new Vector3();
+                let normal = new Vector3();
+                let quaternion = new Quaternion();
+                let scale = new Vector3(1, 1, 1);
+                const hasColor = curMesh.geometry.attributes.hasOwnProperty("color");
+                let userDataKeys = Object.keys( curMesh.userData );
+                let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
+
+                let hasFitScale = false;
+                let minScale = 0;
+                let maxScale = 1;
+                if( userDataKeysLower.includes("minscale") ){
+                  hasFitScale = true;
+                  minScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
+                }
+                if( userDataKeysLower.includes("maxscale") ){
+                  hasFitScale = true;
+                  maxScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
+                }
+
+                // Prevent dupelicate instances
+                //   Verts are split, so neighboring polygons have stacked vertices
+                //     'entry' checks those dupes
+                let pointRecorder = {};
+                let instanceMatricies = [];
+                for (let x = 0; x < curMesh.geometry.attributes.position.count; ++x) {
+                  position.fromBufferAttribute(curMesh.geometry.attributes.position, x);
+                  let entry = position.toArray();
+
+                  // Flatten array elements to 0.01 precision joined by ","
+                  entry = this.pxlUtils.flattenArrayToStr( entry );
+
+                  if( !pointRecorder.hasOwnProperty(entry) ){
+                    normal.fromBufferAttribute(curMesh.geometry.attributes.normal, x);
+                    let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
+                    quaternion.setFromEuler(randomRot);
+                    
+                    curScale = scale;
+                    if( hasColor ){
+                      let curScalar = curMesh.geometry.attributes.color.getX(x);
+                      if( hasFitScale ){
+                        // Scale the object based on object parameter `minScale` & `maxScale`
+                        curScalar = minScale + (maxScale - minScale) * curScalar;
+                      }
+                      curScale = new Vector3(curScalar, curScalar, curScalar);
+                    }
+                    matrix.compose(position, quaternion, curScale);
+                    instanceMatricies.push( matrix.clone() );
+                    pointRecorder[entry]=true;
+                  }
+                }
+                if( instanceMatricies.length > 0 ){
+                  let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
+                  instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+                  instancedMesh.userData = Object.assign( {},  curMesh.userData );
+                  instancedMesh.userData['pxlInstanceToMesh'] = true;
+
+                  /*if( instBase.material.hasOwnProperty("curMeshSettings") ){
+                    if( instBase.material.curMeshSettings.hasOwnProperty("renderOrder") ){
+                      instancedMesh.renderOrder = instBase.material.curMeshSettings.renderOrder;
+                    }
+                  }*/
+                  this.checkForMeshSettings( instancedMesh, instBase.material );
+                  
+                  for (let x = 0; x < instanceMatricies.length; ++x) {
+                    instancedMesh.setMatrixAt( x, instanceMatricies[x] );
+                  }
+
+
+                  instancedMesh.visible = true;
+                  instancedMesh.updateMatrix();
+
+
+                  if( hasLods ){
+
+                    instancedMesh.name = name + "Geo_" + lodKeysList[x];
+                    let curDist = lodMeshes[lodKeysList[x]].dist;
+                    instanceBaseObject.addLevel(instancedMesh, curDist);
+
+                  }else{
+
+                    instancedMesh.name = name + "Geo";
+                    envObj.geoList['InstanceObjects'][name] = instancedMesh;
+                    curMesh.parent.add(instancedMesh);
+                  }
+                  curMesh.visible = false;
+                  curMesh.parent.remove(curMesh);
+                }
+              }else{
+                // Clone the base instance; single instance
+                let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
+                instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+                instancedMesh.userData = Object.assign( {},  curMesh.userData );
+                instancedMesh.userData['pxlInstanceToMesh'] = false;
+
+                this.checkForMeshSettings( instancedMesh, instBase.material );
+
+
+                let altInstPlacement = false;
+                if( curMesh.userData.hasOwnProperty("fixInstMatrix") ){
+                  altInstPlacement = !!curMesh.userData.fixInstMatrix;
+                }
+
+                if( altInstPlacement ){
+                  instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
+                  instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
+                  instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
+                }else{
+                  const matrix = new Matrix4();
+                  matrix.compose(curPos, new Quaternion().setFromEuler(curRot), curScale);
+                  instancedMesh.setMatrixAt(0, matrix);
+                }
+
+                instancedMesh.visible=true;
+                instancedMesh.updateMatrix();
+
+                if( hasLods ){
+
+                  instancedMesh.name = name + "Geo_" + lodKeysList[x];
+                  let curDist = lodMeshes[lodKeysList[x]].dist;
+                  instanceBaseObject.addLevel(instancedMesh, curDist);
+
+                }else{
+
+                  instancedMesh.name = name + "Geo";
+                  envObj.geoList['InstanceObjects'][name] = instancedMesh;
+                  curMesh.parent.add(instancedMesh);
+                }
+                
+                curMesh.visible=false;
+                curMesh.parent.remove(curMesh);
+
+              }
+            }
+          }catch(e){
+            console.log(e);
+          }
+
+          if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG && hasLods ){
+            let status = "Failed";
+            let createdLods = -1;
+            let lodKeys = [];
+            if( instanceBaseObject?.levels ){
+              status = "Created";
+              createdLods = instanceBaseObject.levels;
+              lodKeys = Object.keys( createdLods );
+            }
+
+            let printText = "Instance LODs " + status + " - " + name;
+            this.log( printText );
+            if( lodKeys.length > 0 ){
+              printText = "LOD Levels - " + createdLods;
+              this.log( printText );
+              this.log( instanceBaseObject );
+            }
+          }
 
           /*
           // Dupe the base object; single dupe
@@ -873,6 +1067,7 @@ export class FileIO{
                 curMap = c.material.map;
               }
               c.material= materialList[ c.name ];
+              this.checkForMeshSettings( c, c.material );
 
               if( curMap ){
                 if( c.material.uniforms.hasOwnProperty("diffuse") ){
@@ -921,10 +1116,67 @@ export class FileIO{
             if( !envObj.geoList.hasOwnProperty('lights') ){
                 envObj.geoList['lights']=[];
             }
+            
             if( c.type == "PointLight" ){
-              c.decay = 3;
-              c.distance = 20 * c.intensity;
-              c.intensity = 2;
+
+              let lightTypeSplit = c.name.split("_");
+              let lightType = lightTypeSplit[0];
+
+              /*
+              // Still working out the kinks for Spot Lights
+              //
+              if( lightType.toLowerCase() == "spot" ){
+                try{
+                // Spot Light --
+
+                let spotLightShape = {
+                  'color': 0xFFFFFF,
+                  'intensity': 1,
+                  'distance': 10,
+                  'angle': Math.PI/3,
+                  'penumbra': 0,
+                  'decay': 2
+                }
+                let newLightData = Object.assign( {}, spotLightShape );
+                let spotLight = new SpotLight( newLightData.color,
+                    newLightData.intensity,
+                    newLightData.distance, 
+                    newLightData.angle, 
+                    newLightData.penumbra, 
+                    newLightData.decay
+                  );
+                spotLight.name = c.name;
+                spotLight.userData = Object.assign( {}, c.userData );
+
+                spotLight.rotation.set( c.rotation.x, c.rotation.y, c.rotation.z );
+                spotLight.position.set( c.position.x, c.position.y, c.position.z );
+
+                spotLight.matrixAutoUpdate=false;
+
+                // -- -- --
+
+                if( !envObj.lightList.hasOwnProperty( c.type ) ){
+                  envObj.lightList[ c.type ] = [];
+                }
+
+                envObj.lightList[ c.type ].push( spotLight );
+                envObj.geoList['lights'].push( spotLight );
+                envScene.add( spotLight );
+
+                c.parent.remove( c );
+
+                }catch(e){
+                  console.log(e);
+                }
+              }else{
+              */
+                // Point Light --
+
+                c.decay = Math.max( 1.1, Math.min( 3.0, c.intensity ));
+                //c.decay = 2;
+                c.distance = c.distance == 0 ?  1000 * c.intensity : c.distance;
+              //}
+
             }
             
             if( !envObj.lightList.hasOwnProperty( c.type ) ){
@@ -975,6 +1227,7 @@ export class FileIO{
             if(c.userData.doubleSided){
               curSide=DoubleSide;
             }
+
             
             // Custom material shader was added to this object, apply it
             if( materialList.hasOwnProperty( c.name ) ){
@@ -983,6 +1236,8 @@ export class FileIO{
                 curMap = c.material.map;
               }
               c.material= materialList[ c.name ];
+
+              this.checkForMeshSettings( c, c.material );
 
               if( curMap ){
                 if( c.material.uniforms.hasOwnProperty("diffuse") ){
@@ -1269,6 +1524,7 @@ export class FileIO{
             let curMat = null;
             if( materialList.hasOwnProperty( c.name ) ){
               curMat = materialList[ c.name ];
+              this.checkForMeshSettings( c, curMat );
             }else{
               curMat=new ShaderMaterial({
                 uniforms:{
@@ -1723,6 +1979,7 @@ export class FileIO{
           
           if( materialList.hasOwnProperty( c.name ) ){
             c.material= materialList[ c.name ];
+            this.checkForMeshSettings( c, c.material );
             c.matrixAutoUpdate=false;
             continue;
           }
