@@ -42,6 +42,7 @@ export const pxlOptions = {
   'showOnboarding' : true,
   'staticCamera' : false,
   'autoCamera' : false,
+  'allowStaticRotation' : false,
   'userSettings' : Object.assign({}, pxlUserSettings),
   'antiAliasing' : pxlEnums.ANTI_ALIASING.LOW,
   'collisionScale' : {

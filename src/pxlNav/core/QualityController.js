@@ -335,42 +335,45 @@ export class QualityController{
         break;
         
       case "fog":
-        this.pxlEnv.mapOverlayHeavyPass.enabled = val==2;
-        this.pxlEnv.mapOverlayPass.enabled = val==1;
-        this.pxlEnv.mapOverlaySlimPass.enabled = val==0;
-                this.pxlEnv.mapBoxAAPass.enabled=val==2;
-                this.pxlEnv.mapCrossAAPass.enabled=val==1;
+        if( this.pxlEnv.mapOverlayHeavyPass ) this.pxlEnv.mapOverlayHeavyPass.enabled = val==2;
+        if( this.pxlEnv.mapOverlayPass ) this.pxlEnv.mapOverlayPass.enabled = val==1;
+        if( this.pxlEnv.mapOverlaySlimPass ) this.pxlEnv.mapOverlaySlimPass.enabled = val==0;
+        if( this.pxlEnv.mapBoxAAPass.enabled ) this.pxlEnv.mapBoxAAPass.enabled=val==2;
+        if( this.pxlEnv.mapCrossAAPass.enabled ) this.pxlEnv.mapCrossAAPass.enabled=val==1;
                 
-        this.pxlEnv.portaluserScreenIntensity.x=1;
+        if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=1;
         //this.pxlEnv.pxlRenderSettings.mult=1;
-        this.pxlEnv.userScreenIntensity.x = .65 ;
-        this.pxlEnv.userScreenIntensity.y =  0 ;
-                if(this.pxlEnv.geoList['HDRView']){
-                    this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
-                }
+        if( this.pxlEnv.userScreenIntensity ){
+          this.pxlEnv.userScreenIntensity.x = .65 ;
+          this.pxlEnv.userScreenIntensity.y =  0 ;
+        }
+        if(this.pxlEnv.geoList['HDRView']){
+            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
+        }
         this.settings[component]=val;
         break;
         
       case "bloom":
         this.pxlEnv.portaluserScreenIntensity.x = val ? .4 : 1;
+        if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled = val;
+        if( this.pxlEnv.roomBloomPass )  this.pxlEnv.roomBloomPass.enabled = val;
+        if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled = val;
         
-        this.pxlEnv.mapGlowPass.enabled = val;
-        this.pxlEnv.roomBloomPass.enabled = val;
-        this.pxlEnv.roomGlowPass.enabled = val;
+        if( this.pxlEnv.userScreenIntensity ){
+          this.pxlEnv.userScreenIntensity.x = val ? .65 : .8;
+          this.pxlEnv.userScreenIntensity.y = val ? 0 : .8;
+        }
+        if(this.pxlEnv.geoList['HDRView']){
+            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
+        }
         
-        this.pxlEnv.userScreenIntensity.x = val ? .65 : .8;
-        this.pxlEnv.userScreenIntensity.y = val ? 0 : .8;
-                if(this.pxlEnv.geoList['HDRView']){
-                    this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
-                }
-        
-        this.pxlEnv.mapMotionBlurPass.enabled=val;  
+        if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled=val;  
       
         this.settings[component]=val;
         break;
         
       case "motion":
-        this.pxlEnv.mapMotionBlurPass.enabled=val;  
+        if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled=val;  
       
         this.settings[component]=val;
         break;

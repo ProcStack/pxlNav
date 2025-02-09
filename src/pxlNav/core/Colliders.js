@@ -402,7 +402,7 @@ export class Colliders{
 
     let roomName = pxlRoomObj.getName();
     let curInteractables = pxlRoomObj.getColliders( colliderType );
-    console.log( curInteractables );
+    //console.log( curInteractables );
 
     if( curInteractables.length == 0 ) return; // No interactables found, user may have removed objects from the scene during runtime
 
@@ -728,7 +728,7 @@ export class Colliders{
         //   Return collision position on face
         let intersectionPoint = v0.clone().add(edge0.multiplyScalar(u)).add(edge1.multiplyScalar(v));
 
-        console.log( "--", intersectionPoint );
+        //console.log( "--", intersectionPoint );
 
         // Store distance for sorting
         let dist = origin.distanceTo(intersectionPoint);

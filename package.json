@@ -1,6 +1,6 @@
 {
   "name": "pxlnav",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Player Controller & Environment Framework for Three.js",
   "author": "Kevin Edzenga <kevin@metal-asylum.net>",
   "license": "GPL-3.0-or-later",
@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildTree": "node ./utils/fileTreeBuilder.js",
     "build": "cross-env NODE_ENV=production webpack --config ./packing/webpack.config.js",
+    "buildSingle": "cross-env NODE_ENV=production webpack --config ./packing/webpack-single.config.js",
     "lineCount": "python ./utils/recursiveFileLineCounter.py",
     "convertToCjs": "rollup --bundleConfigAsCjs -c ./packing/rollupConvert.config.js",
     "examples": "node index.js examples",

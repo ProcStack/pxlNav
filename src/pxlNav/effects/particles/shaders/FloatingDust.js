@@ -1,95 +1,77 @@
 // pxlNav Shader
 //  -- -- -- --
-// Written by Kevin Edzenga; 2020; 2024
+// Written by Kevin Edzenga; 2020; 2024-2025
 
 import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
  
 ///////////////////////////////////////////////////////////
-// Snow Shaders                                         //
+// Floating Dust Shaders                                //
 /////////////////////////////////////////////////////////
-/*
-export function dustVert( mobile=false ){
-    let colCalcs=!mobile;
-  let ret=shaderHeader();
-  ret+=`
-    uniform sampler2D noiseTexture;
-    uniform vec2 time;
-    uniform float rate;
-    uniform float pointScale;
-    
-    attribute vec4 seeds;
-    attribute vec2 atlas;
-    
-    varying vec2 vAtlas;
-    varying vec2 vRot;
-    varying float vScalar;
-    varying float vAlpha;
-    
-    #define PROX 400.0
-    #define LAND 50.0
-    
-    float colDetect( vec2 pos, vec2 pt, vec2 n1, vec2 n2 ){
-        vec2 ref=pos-pt;
-        float ret = step( dot( ref, n1 ), 0.0 );
-        ret *= step( dot( ref, n2 ), 0.0 );
-        
-        return ret;
-    }
-    
-    
-    void main(){
-        vAtlas=atlas;
-        
-        float rot=seeds.z+time.x*(seeds.z*2.);
-        vRot=vec2( sin(rot), cos(rot) );
-        
-        float t=time.x*rate;
-        
-        vec3 pOff=vec3( seeds.x, (seeds.y-.5)*.3, seeds.z)* vec3(PROX);
-        
-        // Loop point positions based on camera location
-        float yFract=fract(t+seeds.x);
-        //pOff.y+=cameraPosition.y; 
-        pOff.x+=-time.x; 
-        vec3 pos= pOff ;
-        
-        vec3 noiseCd=texture2D(noiseTexture, sin(pos.xz*.05+seeds.xz+time.x*.1)*.5+.5 ).rgb-.5;
-        
-        pos.y+=sin(seeds.x+seeds.z+noiseCd.r*noiseCd.g+noiseCd.b+time.x*.2)*2.;//+noiseCd.r*noiseCd.g*noiseCd.b*20.;
-        pos.xz+=(noiseCd.rg*noiseCd.b)*((seeds.w+.75)*4.);
-        vec2 camXZ=cameraPosition.xz;
-        pos.xz= mod( pos.xz-camXZ, PROX) + camXZ - PROX*.5;
-        
-        float pScalar = max( 0., (1.-length(pos-cameraPosition )*0.008)  );
-        vec3 lightPos=vec3( -61,20, 51 );
-        vAlpha = ( max( 0., (1.-length(pos-lightPos )*0.02) )+.1 )*5.;
 
-        
-        
-        vScalar = pScalar ;
-        float pScale = pointScale * ((seeds.w+.75)*.5) * pScalar;
-        gl_PointSize = pScale+ ( atlas.x>.5 ? 20.0 : 1.2 );
-        
-        vec4 mvPos=viewMatrix * vec4(pos, 1.0);
-        gl_Position = projectionMatrix*mvPos;
-    }`;
-  return ret;
-}
-*/
-export function dustVert( lightCount, proxDistance=120 ){
 
-  let ret=shaderHeader();
-  ret+=`
-                
+export function dustVert( userDustData = {} ){
+  
+
+  let dustData = {
+    "pOpacity" : 1.0,
+    "proxDist" : 200,
+    "hasLights" : false,
+    "fadeOutScalar" : 1.59 , 
+    "wanderInf" : 1.0 , 
+    "wanderRate" : 1.0 , 
+    "wanderFrequency" : 2.85 
+  }
+
+  if( userDustData && typeof userDustData == 'object' ){
+    let curSettingKeys = Object.keys( userDustData );
+    let dustKeys = Object.keys( dustData );
+    dustKeys.forEach( key => {
+      if( !curSettingKeys.includes( key ) ){
+        userDustData[key] = dustData[key];
+      }
+    });
+  }
+  
+  let toFloatStr = ( num ) => {
+    return (num+"").includes(".") ? num : num+".0";
+  }
+
+  let ret =`
+    // Fade-Out Influence multiplier
+        const float ParticleOpacity = ${ toFloatStr( userDustData.pOpacity ) };
+        const float FadeOutScalar = ${ toFloatStr( userDustData.fadeOutScalar ) };
+        const float WanderInf = ${ toFloatStr( userDustData.wanderInf ) };
+        const float WanderRate = ${ toFloatStr( userDustData.wanderRate ) };
+        const float WanderFrequency = ${ toFloatStr( userDustData.wanderFrequency ) };
+
+        #define PROX ${userDustData.proxDist.toFixed(3)}
+        #define PROX_INV 1.0/${(userDustData.proxDist * 0.80).toFixed(3)}
+
+    // -- -- --
+  `;
+  ret += shaderHeader();
+  ret +=`
+    // -- -- --
+
     uniform sampler2D noiseTexture;
     uniform vec2 time;
     uniform float rate;
     uniform vec2 pointScale;
     uniform vec3 positionOffset;
-    uniform vec2 windDir;
+    uniform vec3 windDir;
   `;
-  if(lightCount>0){
-    ret+=`uniform vec3[${lightCount}] lightPos;`;
+  if( !!userDustData.hasLights ){
+    ret+=`
+  #if NUM_POINT_LIGHTS > 0
+    struct PointLight {
+      vec3 color;
+      float decay;
+      float distance;
+      vec3 position;
+    };
+    uniform PointLight pointLights[NUM_POINT_LIGHTS];
+  #endif
+    `;
   }
   ret+=`
     
@@ -101,12 +83,9 @@ export function dustVert( lightCount, proxDistance=120 ){
     varying float vScalar;
     varying float vAlpha;
     
-    #define PROX ${proxDistance.toFixed(3)}
-    #define PROX_INV 1.0/${(proxDistance*1.80).toFixed(3)}
     
-    #define LIGHT_COUNT ${lightCount}
-    
-    
+    // -- -- --
+
     float colDetect( vec2 pos, vec2 pt, vec2 n1, vec2 n2 ){
         vec2 ref=pos-pt;
         float ret = step( dot( ref, n1 ), 0.0 );
@@ -115,6 +94,15 @@ export function dustVert( lightCount, proxDistance=120 ){
         return ret;
     }
     
+    vec3 randomVec( vec3 seed ) {
+      return vec3(
+        fract( dot(seed,vec3(12.9898, 78.233, 45.164)) * 43758.5453 ),
+        fract( dot(seed,vec3(93.9898, 67.345, 12.345)) * 43758.5453 ),
+        fract( dot(seed,vec3(54.123, 98.765, 32.123)) * 43758.5453 )
+      );
+    }
+
+    // -- -- --
     
     void main(){
         vAtlas=atlas;
@@ -122,70 +110,75 @@ export function dustVert( lightCount, proxDistance=120 ){
         float rot=seeds.z+time.x*(seeds.z*2.);
         vRot=vec2( sin(rot), cos(rot) );
         
-        float t=time.x*rate;
+        float t=time.x*rate*0.;
         
         vec3 pOff=seeds.xyz * vec3(PROX);
         
         // Loop point positions based on camera location
         float yFract=fract(t+seeds.x);
-        pOff.y+=cameraPosition.y ; 
-        pOff.x+=time.x*windDir.x; 
-        pOff.z+=time.x*windDir.y; 
+        pOff.xyz += time.x * windDir.xyz; 
         vec3 pos= pOff ;
         
-        vec3 noiseCd=texture2D(noiseTexture, sin(pos.xz*.05+seeds.xz+time.x*.1)*.5+.5 ).rgb-.5;
+        vec3 noiseCd=texture2D(noiseTexture, sin(pos.xz*.05+seeds.xz+time.x*2.1) ).rgb-.5;
+        vec3 noiseCdb=texture2D(noiseTexture, sin((1.0-pos.xz)*.05+seeds.yw+time.x*.1) ).rgb-.5;
         
-        pos.y = (pos.y-.1)*.45;
-        pos.y+=sin(seeds.x+seeds.z+noiseCd.r*noiseCd.g+noiseCd.b+time.x*.2)*2.;//+noiseCd.r*noiseCd.g*noiseCd.b*20.;
+        // -- -- --
+        
+        // Meandering points
+        
+        
+        vec3 randDirA = randomVec( seeds.xyz );
+        vec3 randDirB = randomVec( seeds.wyz );
+        vec3 randDirC = randomVec( seeds.zxy );
+        vec3 randDirBlend = mix( randDirA, randDirB, sin( randDirC * time.x * WanderFrequency ) ) * WanderInf;
+        
+        // -- -- --
+        
+        pos += randDirBlend * sin( seeds.x+seeds.z+noiseCd.r*noiseCd.g*seeds.y+noiseCdb.b + (time.x+seeds.y*10.) * WanderRate * seeds.w*noiseCdb.g ) * WanderRate * ( 5. + seeds.z );
 
-        pos.xz+=(noiseCd.rg*noiseCd.b)*((seeds.w+.75)*4.);
-        vec2 camXZ=cameraPosition.xz;
-        pos.xz= mod( pos.xz-camXZ, PROX) + camXZ - PROX*.5;
+        pos += (noiseCd * noiseCdb ) * 50. * ( (seeds.w+.75)*4.);
+        pos+=positionOffset;
+
+        pos = mod( pos-cameraPosition, PROX) + cameraPosition - PROX*.5;
         
-        float pScalar = clamp( (1.-length(pos-cameraPosition )*PROX_INV)*1.5, 0.0, 1.0  );
+        
+        float pScalar = clamp( (1.-length(pos-cameraPosition )*PROX_INV) * FadeOutScalar, 0.0, 1.0  );
         float aMult = min(1.0, pScalar*3.0);
         vAlpha = (seeds.x*.5+.7) * aMult;
 
   `;
 
-  if(lightCount>1){
+  if(  !!userDustData.hasLights ){
     ret+=`
-          float lightInf = 1.0;
-
-          for(int i = 0; i < LIGHT_COUNT; i++) {
-              vec3 lightVector = normalize(pos - lightPos[i]);
-              lightInf = min(lightInf, length(pos - lightPos[i]) *.05 );
-          }
-          vAlpha*=(1.0-lightInf)*.8+.2;
-    `;
-  }else if(lightCount == 1 ){
-    ret+=`
-        vec3 lightVector = normalize(pos - lightPos[0]);
-        float lightInf = length(pos - lightPos[0]) *.02;
+      #if NUM_POINT_LIGHTS > 0
+        float lightInf = 1.0;
+        for(int x = 0; x < NUM_POINT_LIGHTS; ++x ){
+            vec3 lightVector = normalize(pos - pointLights[i]);
+            lightInf = min(lightInf, length(pos - pointLights[i]) *.05 );
+        }
         vAlpha*=(1.0-lightInf)*.8+.2;
+      #endif
     `;
   }
 
   ret+=`
-        vScalar = pScalar ;
-        //float pScale = pointScale.x * ((seeds.w+.75)*.5) * pScalar + 1.0;
+        vScalar = pScalar * ParticleOpacity ;
         float pScale = pointScale.x * (seeds.w*.5+.5)*pScalar + 1.0;
         pScale *= step( .5, atlas.x )*.5+1.;
-        //pScale = 10.0;
-       
+
         gl_PointSize = pScale;
         
-        pos+=positionOffset;
         vec4 mvPos=viewMatrix * vec4(pos, 1.0);
         gl_Position = projectionMatrix*mvPos;
     }`;
   return ret;
 }
 
-export function dustFrag(){
+export function dustFrag( hasAlphaMap = false ){
   let ret=shaderHeader();
   ret+=`
     uniform sampler2D atlasTexture;
+    uniform sampler2D atlasAlphaTexture;
     uniform vec2 time;
     uniform float rate;
     
@@ -195,6 +188,12 @@ export function dustFrag(){
     varying float vAlpha;
     
     void main(){
+
+        if( vAlpha < .01 ){
+          discard;
+        }
+
+
         vec2 uv=gl_PointCoord;
 
         vec2 pos = (uv-.5)*.85;
@@ -203,9 +202,27 @@ export function dustFrag(){
         rotUV.x = vRot.y * pos.x - vRot.x * pos.y;
         rotUV.y = vRot.x * pos.x + vRot.y * pos.y;
         rotUV=(rotUV+.5)*.25+vAtlas;
-        
-        vec4 dustCd=texture2D(atlasTexture,rotUV);
-        float alpha=dustCd.a*vAlpha; // *vScalar;
+
+      `;
+  if( hasAlphaMap ){
+    // Split Color & Alpha maps
+    ret+=`
+        vec4 dustCd=vec4(
+                        texture2D(atlasTexture,rotUV).rgb, // rgb
+                        texture2D(atlasAlphaTexture,rotUV).r // alpha
+                      ); 
+
+    `;
+  }else{
+    // RGBA Texture Atlas; PNG
+    ret+=`
+        vec4 dustCd= texture2D(atlasTexture,rotUV);
+
+    `;
+  }
+
+  ret+=`
+        float alpha = dustCd.a * vAlpha * vScalar;
         vec4 Cd=vec4( dustCd.rgb, alpha );
 
         gl_FragColor=Cd;

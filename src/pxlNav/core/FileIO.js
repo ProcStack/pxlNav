@@ -24,6 +24,7 @@ import {
   SpotLight
 } from "../../libs/three/three.module.min.js";
 import { FBXLoader } from "../../libs/three/FBXLoader.js";
+import { VERBOSE_LEVEL } from "./Enums.js";
 
 export class FileIO{
   constructor( folderDict={}){
@@ -463,7 +464,9 @@ export class FileIO{
               }
             });
           }catch(e){
-            console.log(e);
+            if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
+              console.error(e);
+            }
           }
 
 
@@ -496,7 +499,7 @@ export class FileIO{
                 let curSkip = curUserData[ dataKey ];
                 curDataObj['skip'] = curSkip;
               }else{
-                console.log( dataKey )
+                //console.log( dataKey )
                 curDataObj['instMesh'] = curUserData[ dataKey ];
               } 
             }
@@ -663,7 +666,9 @@ export class FileIO{
               }
             }
           }catch(e){
-            console.log(e);
+            if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
+              console.error(e);
+            }
           }
 
           if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG && hasLods ){
@@ -966,9 +971,9 @@ export class FileIO{
         //envObj.geoList['camera']=groups[groupTypes['Camera']];
         ch.forEach( (c,x)=>{
           c.matrixAutoUpdate=false;
-          let parentName = c.parent.name;
+          let parentName = c.parent.name.toLowerCase();
           if( parentName == groups[groupTypes['Camera']].name ){
-            parentName = "Default";
+            parentName = "default";
           }
           if( !envObj.camLocation.hasOwnProperty(parentName) ){
             envObj.camLocation[parentName]={};
@@ -1116,7 +1121,7 @@ export class FileIO{
             if( !envObj.geoList.hasOwnProperty('lights') ){
                 envObj.geoList['lights']=[];
             }
-            
+
             if( c.type == "PointLight" ){
 
               let lightTypeSplit = c.name.split("_");
@@ -1176,9 +1181,11 @@ export class FileIO{
                 //c.decay = 2;
                 c.distance = c.distance == 0 ?  1000 * c.intensity : c.distance;
               //}
-
             }
+
             
+
+
             if( !envObj.lightList.hasOwnProperty( c.type ) ){
               envObj.lightList[ c.type ] = [];
             }
@@ -2100,10 +2107,12 @@ export class FileIO{
         mapBookHelper.update();
       }
     }catch(err){
-      console.log("- - - - - - - - ERROR - - - - - - - -");
-      console.log("     Object does not exist.\n           - Error Info -");
-      console.log(err);
-      console.log("- - - - - - - - - - - - - - - - - - -");
+      if(this.verbose >= VERBOSE_LEVEL.ERROR){
+        console.log("- - - - - - - - ERROR - - - - - - - -");
+        console.log("     Object does not exist.\n           - Error Info -");
+        console.log(err);
+        console.log("- - - - - - - - - - - - - - - - - - -");
+      }
     }
   }
   
@@ -2185,7 +2194,7 @@ export class FileIO{
             let xhrRequest= this.xmlHttp();
             xhrRequest.open('HEAD', url, true);
             xhrRequest.send();
-            console.log( xhrRequest ) ;
+            //console.log( xhrRequest ) ;
             xhrRequest.onreadystatechange=function(){
                 if( this.readyState == this.DONE ){
                     resolve( this.status<400 );

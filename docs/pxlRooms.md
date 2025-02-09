@@ -6,7 +6,9 @@ This is the rundown of your `pxlRoom` and loading your resources.
 
 ## <br/>**Index**
 * [Intro](#intro)
-* [pxlRoom Common Template](#pxlroom-common-template)
+* [Common Variable Rundown](#run-down-of-common-variables)
+* [pxlRoom Simple Template](#pxlroom-simple-template)
+* [pxlRoom Full Template](#pxlroom-full-template)
 <br/>
 
 ## Intro
@@ -34,10 +36,201 @@ If you have any hoverable or clickable objects in your scene,
 --------------------------------------------------------------------------------------------
 
 
+## Run down of common variables
+<br/>&nbsp;&nbsp; This is not all of the variables, just the ussual variables you'll be accessing.
+
+
+### Commonly Accessed Variables --
+<br/>- Set when your scene's FBX Loads -
+<br/>&nbsp;&nbsp; `this.startTime = 0;`
+<br/>&nbsp;&nbsp; `this.runTime = new Vector2(0, 0);`
+<br/>&nbsp;&nbsp; `this.msRunner = msRunner;`
+<br/>&nbsp;&nbsp; `this.camera = camera;`
+<br/>&nbsp;&nbsp; `this.scene = scene;`
+<br/>&nbsp;&nbsp; `this.geoList = {};`
+<br/>&nbsp;&nbsp; `this.autoCamPaths = {};`
+<br/>&nbsp;&nbsp; `this.lightList = {};`
+<br/>&nbsp;&nbsp; `this.glassList = [];`
+
+
+### pxlNav Noise Texture Assets --
+<br/>&nbsp;&nbsp;   Auto-assigned before `this.build()` is ran
+
+<br/>&nbsp;&nbsp; `this.cloud3dTexture = null;`
+<br/>&nbsp;&nbsp; `this.smoothNoiseTexture = null;`
+
+<br/>&nbsp;&nbsp; -- -- --
+
+### Less Common Variables--
+
+<br/>&nbsp;&nbsp; `this.portalList = {};`
+<br/>&nbsp;&nbsp; `this.hasHoverables = false;`
+<br/>&nbsp;&nbsp; `this.hoverableList = [];`
+<br/>&nbsp;&nbsp; `this.hoverableObj = null;`
+<br/>&nbsp;&nbsp; `this.hasClickables = false;`
+<br/>&nbsp;&nbsp; `this.clickableList = [];`
+<br/>&nbsp;&nbsp; `this.clickableObj = null;`
+
+<br/>&nbsp;&nbsp; `this.roomWarp = [];`
+<br/>&nbsp;&nbsp; `this.warpPortalTexture = null;`
+<br/>&nbsp;&nbsp; `this.warpZoneRenderTarget = null;`
+
+<br/>&nbsp;&nbsp; `this.worldPosMaterial = null;`
+<br/>&nbsp;&nbsp; `this.worldPosRenderTarget = null;`
+
+
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
+
+
+---
+
+## pxlRoom Simple Template
+
+```
+
+import {
+  Color,
+  Group,
+  AmbientLight,
+  FogExp2,
+} from "../../libs/three/three.module.min.js";
+
+import { RoomEnvironment, pxlEffects } from "../../pxlNav.js";
+
+// To add in some particle effects, you can use the `pxlEffects` module
+const FloatingDust = pxlEffects.pxlParticles.FloatingDust;
+
+export class OutletEnvironment extends RoomEnvironment{
+  constructor( roomName='OutletEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+    super( roomName, assetPath, msRunner, camera, scene, cloud3dTexture );
+
+    // Your `Assets` folder path
+    //   Defaults to " ./ pxlRooms / *YourRoomEnv* / Assets "
+		this.assetPath= assetPath + "Assets/";
+
+    // The FBX file to load for your room
+    //   Defaults to " ./ pxlRooms / *YourRoomEnv* / Assets / *YourSceneFile.fbx* "
+    this.sceneFile = this.assetPath+"OutletEnvironment.fbx";
+		
+		// Environment Shader 
+		this.spiralizerUniforms={};
+		this.materialList={};
+    
+		// Device Field-of-View
+    this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
+    
+    // Near-Far Clipping Planes for your room
+    this.pxlCamNearClipping = 3;
+    this.pxlCamFarClipping = 12000;
+
+    // Room Fog Settings
+    this.fogColor=new Color( 0x48415d );
+    this.fogExp=.0007;
+    this.fog=new FogExp2( this.fogColor, this.fogExp);
+        
+		// For more information on the `pxlRoom Environment` class, see the documentation -
+    //   './docs/pxlRooms.md'
+		
+	}
+
+// -- -- --
+
+// Ran after core `pxlNav` modules have been loaded and initialized
+//   But before the render composers / post-processing
+	init(){
+    super.init();
+    // -- Put your room initialization code here --
+  }
+
+// Run on init room warp; reset room values
+	start(){
+    super.start();
+    // -- Put your room starting code here --
+  }
+	
+// Per-Frame Render updates
+	step(){
+    super.step();
+    // -- Put your per-frame code here --
+	}
+
+// When leaving the room
+	stop(){
+    super.stop();
+    // -- Put your room stopping code here --
+  }
+	
+// Runs on window resize
+  resize( sW, sH ){
+    super.resize( sW, sH );
+    // -- Put your resize code here --
+  }
+	
+// -- -- --
+
+
+// -- -- -- -- -- -- -- -- --
+// -- Helper Functions  -- -- --
+// -- -- -- -- -- -- -- -- -- -- --
+
+
+buildDust(){
+  let vertexCount = 1200; // Point Count
+  let pScale = 11;  // Point Base Scale
+
+  let systemName = "floatingDust";
+  let dustSystem = new FloatingDust( this, systemName, 200 );
+
+  // Use a texture from the internal pxlNav asset folder
+  dustSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
+  
+  // Generate geometry and load texture resources
+  dustSystem.build( vertexCount, pScale );
+
+  this.particleList[systemName] = dustSystem;
+}
+    
+
+// -- -- -- -- -- -- -- -- -- --
+// -- Post FBX Load & Build - -- --
+// -- -- -- -- -- -- -- -- -- -- -- --
+    
+	fbxPostLoad(){
+    super.fbxPostLoad();
+
+    // Add a particle system of dust in the scene
+    // this.buildDust()
+    
+    // Adding a basic ambient light
+    //var ambientLight = new AmbientLight( 0x383838 ); // soft white light
+    //this.scene.add( ambientLight );
+    
+    // Created a ground collider helper to display the collision mesh in your scene
+    //this.addColliderHelper( this.geoList['colliderHelper'] );
+
+    this.setUserHeight( 22.5 );
+  }
+	
+
+// -- -- -- -- -- -- -- -- --
+// -- Build Scene & Assets -- --
+// -- -- -- -- -- -- -- -- -- -- --
+
+	build(){
+		this.pxlFile.loadRoomFBX( this ) ;;
+	}
+}
+
+```
+
+##### <p align="right">[^ Top](#index)</p>
+--------------------------------------------------------------------------------------------
 
 
 
-## pxlRoom Common Template
+
+## pxlRoom Full Template
 ```
 import * as THREE from "../../three.module.min.js";
 import { pxlEffects, RoomEnvironment } from "../../pxlNav.esm.js";
@@ -194,7 +387,7 @@ export class OutletEnvironment extends RoomEnvironment{
     let dustSystem = new FloatingDust( this, systemName );
 
     // Use a texture from the internal pxlNav asset folder
-    dustSystem.useInternalAsset( "sprite_dustAtlas.png" );
+    dustSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
     
     // Set Texture Picks from the Atlas
     let atlasPicks = [
@@ -299,11 +492,3 @@ applyRoomPass( roomComposer=null ){
 --------------------------------------------------------------------------------------------
 
 
-
-
-## pxlRoom Environment Example
-```
-```
-
-##### <p align="right">[^ Top](#index)</p>
---------------------------------------------------------------------------------------------

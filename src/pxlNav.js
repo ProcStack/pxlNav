@@ -297,6 +297,7 @@ class pxlNav{
     this.pxlCamera.setDependencies( this );
     this.pxlGuiDraws.setDependencies( this );
 
+    this.pxlDevice.init();
     this.pxlGuiDraws.prepLoader();
     if( !this.pxlOptions.hasOwnProperty("loaderPhrases") ){
       this.pxlOptions["loaderPhrases"] = ['...loading the pixels...'];
@@ -371,7 +372,7 @@ class pxlNav{
         }
       })
        .finally( ()=>{
-        if( this.verbose > pxlEnums.VERBOSE_LEVEL.ERROR ){
+        if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
           console.log("'pxlNavCore' Room Build Promise-Chain Completed; ", this.loadPercent);
           console.log("-- Starting pxlNav in Room `"+this.pxlEnv.bootRoom+"`");
         }
@@ -601,20 +602,20 @@ class pxlNav{
         this.pxlEnv.detailNoiseTexture.wrapT = RepeatWrapping;
     }
     if( this.assetsToLoadDict["ChromaticAberration"] ){
-        let chroAberUVTexture = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration.png");
+        let chroAberUVTexture = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration_rgb.jpg");
         chroAberUVTexture.minFilter=LinearFilter;
         chroAberUVTexture.magFilter=LinearFilter;
         this.pxlEnv.chroAberUVTexture=chroAberUVTexture;
+
+        let chroAberUVAlpha = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration_alpha.jpg");
+        chroAberUVAlpha.minFilter=LinearFilter;
+        chroAberUVAlpha.magFilter=LinearFilter;
+        this.pxlEnv.chroAberUVAlpha=chroAberUVAlpha;
     }
     if( this.assetsToLoadDict["WarpAnimTexture"] ){
         this.pxlEnv.blockAnimTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_blockPortalWarp.jpg");
         this.pxlEnv.blockAnimTexture.minFilter=LinearFilter;
         this.pxlEnv.blockAnimTexture.magFilter=LinearFilter;
-    }
-    if( this.assetsToLoadDict["MathFuncs"] ){
-        this.pxlEnv.mathFuncsTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"MathFuncs.jpg");
-        this.pxlEnv.mathFuncsTexture.minFilter=LinearFilter;
-        this.pxlEnv.mathFuncsTexture.magFilter=LinearFilter;
     }
         
 
@@ -986,7 +987,6 @@ class pxlNav{
   
   
   setBootRoom( bootRoom, bootLocation ){
-    console.log(bootRoom, bootLocation);
     this.pxlEnv.bootRoom = bootRoom;
     this.pxlEnv.bootLocation = bootLocation;
   }

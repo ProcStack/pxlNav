@@ -18,19 +18,19 @@ const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav :: The Outlet";
+const projectTitle = "pxlNav :: The Void";
 
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "../pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "./pxlAssets";
+const pxlAssetRoot = "../pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
-const showOnboarding = true;
+const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["OutletEnvironment"];
+const bootRoomList = ["VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

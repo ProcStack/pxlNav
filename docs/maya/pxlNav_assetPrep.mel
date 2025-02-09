@@ -102,6 +102,8 @@ global proc pxlNav_prepWarpPadAttribute_desc(){
 global proc pxlNav_prepWarpPadAttribute(){
     string $sel[]=`ls -sl -l`;
     for($x=0; $x<size($sel); ++$x){
+        addAttr -ln "warpToRoom"  -dt "string" $sel[$x];
+        setAttr -e-keyable true ($sel[$x]+".warpToCam");
         addAttr -ln "warpToCam"  -dt "string" $sel[$x];
         setAttr -e-keyable true ($sel[$x]+".warpToCam");
     }

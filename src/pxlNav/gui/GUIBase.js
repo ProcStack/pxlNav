@@ -856,7 +856,6 @@ export class GUIManager{
       this.hudMedalionBar=medalionBar;
       document.body.appendChild( this.hudMedalionBar );
       
-      //<object id="usersIcon" data='${this.guiRoot}icons/icon_user.svg' type='image/svg+xml'></object>
       
       let html=`
         <div id="medalionIconParent" class="hud_speakerIconStyle">
@@ -1034,7 +1033,7 @@ export class GUIManager{
       
       document.body.appendChild(artistInfoParent);
       
-      this.hudElements.artistInfo.closeSvg=SVGUtils.svgPromise( `${this.guiRoot}global/carrotCloseAnimate.svg`, "artistInfoCarrotX" );
+      this.hudElements.artistInfo.closeSvg=SVGUtils.svgPromise( `${this.guiRoot}global/carrotClose_animated.svg`, "artistInfoCarrotX" );
       this.hudElements.artistInfo.closeSvg.promise.finally(()=>{
         this.artistInfoButtonPrep();
       });
@@ -1611,23 +1610,18 @@ export class GUIManager{
     `;
     helpGuiDiv.innerHTML=html;
       
+    // SVG images to load into which divs
     let svgDivList=[
-      //[this.guiRoot+"keyboard/controlsKeyboard.svg", "gui_helpGui_controlsKeyboard","guiSectionHeaderText",false],
-      [this.guiRoot+"keyboard/asdw.svg", "gui_helpGui_asdw","guiKeyDispSVG",false],
-      //[this.guiRoot+"keyboard/or.svg", "gui_helpGui_or","guiKeyOrSVG",false],
-      [this.guiRoot+"keyboard/udlr.svg", "gui_helpGui_udlr","guiKeyDispSVG",false],
-      //[this.guiRoot+"keyboard/useKeys.svg", "gui_helpGui_useKeys","guiSectionHelpText",false],
-      
-      //[this.guiRoot+"mouse/MouseControls.svg", "gui_helpGui_MouseControls","guiSectionHeaderText",false],
-      [this.guiRoot+"mouse/MouseOutlined.svg", "gui_helpGui_MouseOutlined","guiMouseDispSVG",false],
-      //[this.guiRoot+"mouse/useMouse.svg", "gui_helpGui_useMouse","guiSectionHelpText",false],
-      
-      //[this.guiRoot+"global/close.svg", "guiHelpFooter",["buttonHover","guiHelpEnterButton"],true,"close"]
+      [this.guiRoot+"keyboard_asdw.svg", "gui_helpGui_asdw","guiKeyDispSVG",false],
+      [this.guiRoot+"keyboard_udlr.svg", "gui_helpGui_udlr","guiKeyDispSVG",false],
+      [this.guiRoot+"mouse_outline.svg", "gui_helpGui_MouseOutlined","guiMouseDispSVG",false],
     ];
     svgDivList.forEach( (s)=>{
       SVGUtils.svgButtonPromise( ...s );
     });
     
+    // -- -- --
+
     // Close Button
     let tmpThis=this;
     let guiClose=document.getElementById("guiHelpBackButton");
@@ -1773,11 +1767,11 @@ export class GUIManager{
 
   applyCookies(){
   if(this.controlSettings){
-    console.log(this.controlSettings);
+    //console.log(this.controlSettings);
     this.controlSettings=(this.controlSettings);
   }
   if(this.renderSettings){
-    console.log(this.renderSettings);
+    //console.log(this.renderSettings);
     this.renderSettings=(this.renderSettings);
   }
   }
@@ -1948,15 +1942,15 @@ export class GUIManager{
   
   
   let svgDivList=[
-    [this.guiRoot+"settingsIcons/settings_user.svg", "settings_user",["settings_icon_scale"],false],
+    [this.guiRoot+"settings_user.svg", "settings_user",["settings_icon_scale"],false],
     
-    [this.guiRoot+"settingsIcons/settings_left_right.svg", "settings_left_right",["settings_icon"],false],
-    [this.guiRoot+"settingsIcons/settings_mouse.svg", "settings_mouse",["settings_icon"],false],
+    [this.guiRoot+"settings_left_right.svg", "settings_left_right",["settings_icon"],false],
+    [this.guiRoot+"settings_mouse.svg", "settings_mouse",["settings_icon"],false],
     
-    [this.guiRoot+"settingsIcons/settings_graphics.svg", "settings_graphics",["settings_icon"],false],
-    [this.guiRoot+"settingsIcons/settings_render.svg", "settings_render",["settings_icon"],false],
-    [this.guiRoot+"settingsIcons/settings_fog.svg", "settings_fog",["settings_icon"],false],
-    [this.guiRoot+"settingsIcons/settings_bloom.svg", "settings_bloom",["settingsIconStyle"],false],
+    [this.guiRoot+"settings_graphics.svg", "settings_graphics",["settings_icon"],false],
+    [this.guiRoot+"settings_render.svg", "settings_render",["settings_icon"],false],
+    [this.guiRoot+"settings_fog.svg", "settings_fog",["settings_icon"],false],
+    [this.guiRoot+"settings_bloom.svg", "settings_bloom",["settingsIconStyle"],false],
   ];
   svgDivList.forEach( (s)=>{
     SVGUtils.svgButtonPromise( ...s );
@@ -2217,16 +2211,14 @@ export class GUIManager{
   document.body.appendChild( inviteUserGuiDiv );
   
     let urlDisplay=window.location+"";
-    console.log(urlDisplay);
     urlDisplay=urlDisplay.replace(/^https?:\/\//,"");
-    console.log(urlDisplay);
-  let html="";
-  html+=`
-      <div class="gui_inviteUserBody">
-        <div class="iu_urlStyle">${urlDisplay}</div>
-        <div id="iu_copy" class="iu_copyStyle">Copy</div>
-      </div>
-  `;
+    let html="";
+    html+=`
+        <div class="gui_inviteUserBody">
+          <div class="iu_urlStyle">${urlDisplay}</div>
+          <div id="iu_copy" class="iu_copyStyle">Copy</div>
+        </div>
+    `;
   inviteUserGuiDiv.innerHTML=html;
         
     let utils=this.pxlUtils;

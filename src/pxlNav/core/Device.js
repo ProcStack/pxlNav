@@ -22,6 +22,7 @@ export class Device{
     this.pxlAutoCam=null;
     this.pxlGuiDraws=null;
     this.pxlQuality=null;
+    this.pxlOptions=null;
 
 
     // If the cursor swaps between grabbing and grabable
@@ -142,7 +143,6 @@ export class Device{
       ];
     this.callbackList={};
     
-    this.init();
   }
 
   setDependencies( pxlNav ){
@@ -155,6 +155,7 @@ export class Device{
     this.pxlAutoCam=pxlNav.pxlAutoCam;
     this.pxlGuiDraws=pxlNav.pxlGuiDraws;
     this.pxlQuality=pxlNav.pxlQuality;
+    this.pxlOptions=pxlNav.pxlOptions;
   }
 
   init(){
@@ -162,15 +163,17 @@ export class Device{
     this.setGammaCorrection();
     
     let curObj=this;
-    document.addEventListener("mousedown", (e)=>{ curObj.onmousedown(curObj,e); }, false);
-    document.addEventListener("mousemove", (e)=>{ curObj.onmousemove(curObj,e); }, false);
-    document.addEventListener("mouseup", (e)=>{ curObj.onmouseup(curObj,e); }, false);
+    if( !this.pxlOptions.staticCamera || (this.pxlOptions.allowStaticRotation && this.pxlOptions.staticCamera) ){
+      document.addEventListener("mousedown", (e)=>{ curObj.onmousedown(curObj,e); }, false);
+      document.addEventListener("mousemove", (e)=>{ curObj.onmousemove(curObj,e); }, false);
+      document.addEventListener("mouseup", (e)=>{ curObj.onmouseup(curObj,e); }, false);
+      document.addEventListener('touchstart', function(e) {curObj.touchstart(curObj,e);}, {passive : true});
+      document.addEventListener('touchmove', function(e) {curObj.touchmove(curObj,e);}, {passive : true});
+      document.addEventListener('touchend', function(e) {curObj.touchend(curObj,e);}, {passive : true});
+    }
+
     document.addEventListener("contextmenu", (e)=>{ curObj.oncontextmenu(e); }, false);
     window.addEventListener("resize", (e)=>{ curObj.resizeRenderResolution(); }, false);
-    
-    document.addEventListener('touchstart', function(e) {curObj.touchstart(curObj,e);}, {passive : true});
-    document.addEventListener('touchmove', function(e) {curObj.touchmove(curObj,e);}, {passive : true});
-    document.addEventListener('touchend', function(e) {curObj.touchend(curObj,e);}, {passive : true});
     
     document.onkeydown=(e)=>{curObj.onkeydown(curObj,e)};
     document.onkeyup=(e)=>{curObj.onkeyup(curObj,e)};
@@ -392,8 +395,15 @@ export class Device{
       
       if(lock==true){
         this.pxlGuiDraws.pxlNavCanvas.focus();
-        this.pxlGuiDraws.pxlNavCanvas.requestPointerLock()
-          .catch((err)=>{}); // User likely hit ESC out of the cursor lock
+        let curCanvas = this.pxlGuiDraws.pxlNavCanvas;
+        curCanvas.requestPointerLock = curCanvas.requestPointerLock || 
+                                       curCanvas.mozRequestPointerLock ||
+                                       curCanvas.webkitRequestPointerLock;
+        try{
+          curCanvas.requestPointerLock()
+          //  Catch isn't working on firefox
+          //    .catch((err)=>{}); // User likely hit ESC out of the cursor lock
+        }catch(err){}
       }else{
         if( document.pointerLockElement ){
           document.exitPointerLock();
@@ -757,7 +767,7 @@ export class Device{
               
       // 220 \ | 
       if( keyHit == 220 ){
-        console.log( "Saving screenshot" );
+        //console.log( "Saving screenshot" );
         let tmpResSave=this.pxlQuality.screenResPerc;
         this.pxlQuality.screenResPerc=1;
         //this.resizeRenderResolution( 3840, 2160 );//3240, 3240 );

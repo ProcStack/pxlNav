@@ -22,7 +22,7 @@ export class SnowFall extends ParticleBase{
   
   // 'vertexCount' - Point Count
   // 'pScale' - Point Base Scale
-  build( vertexCount=1000, pScale=7, proxDist=120, pOffset=[0.0,0.0,0.0], wind=[0.0,1.0], atlasPicks=null, randomAtlas=true ){
+  build( vertexCount=1000, pScale=7, proxDist=120, wind=[0.0,1.0], pOffset=[0.0,0.0,0.0], atlasPicks=null, randomAtlas=true ){
     
     if( !atlasPicks ){
       atlasPicks = [...super.dupeArray([0.0,0.],4), ...super.dupeArray([0.25,0.],4),
@@ -34,8 +34,17 @@ export class SnowFall extends ParticleBase{
 
 
     let lightPosArr = super.findLightPositions();
-    wind = new Vector2( wind[0], wind[1] );
-    pOffset = new Vector3( pOffset[0], pOffset[1], pOffset[2] );
+
+    if( typeof wind !== Vector2 ){
+      wind = new Vector2( wind[0], wind[1] );
+    }
+
+    if( !pOffset ){
+      pOffset = new Vector3( 0, 0, 0 );
+    }else if( typeof pOffset !== Vector3 ){
+      pOffset = new Vector3( pOffset[0], pOffset[1], pOffset[2] );
+    }
+
     let dustUniforms={
       atlasTexture:{type:"t",value: null },
       noiseTexture:{type:"t",value: null },
@@ -54,16 +63,12 @@ export class SnowFall extends ParticleBase{
     mtl.transparent=true;
     // mtl.blending=AdditiveBlending;
       
-    if( this.isInternalTexture ){
-      mtl.uniforms.atlasTexture.value = this.room.pxlEnv.getAssetTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
-    }else{
-      mtl.uniforms.atlasTexture.value = this.room.pxlUtils.loadTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
-    }
+    mtl.uniforms.atlasTexture.value = this.room.pxlUtils.loadTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
 
-    //mtl.uniforms.atlasTexture.value = this.room.pxlUtils.loadTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
     mtl.uniforms.noiseTexture.value = this.room.softNoiseTexture;
     mtl.depthTest=true;
     mtl.depthWrite=false;
+    
     this.room.materialList[ this.name ]=mtl;
 
     super.addToScene( vertexCount, pScale, mtl, 4, atlasPicks, randomAtlas );
@@ -107,7 +112,7 @@ buildSnow(){
     intensity:{type:"f",value:1.0},
     rate:{type:"f",value:.035},
   };
-  console.log(this.pxlShaders.particles)
+  
   let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, this.pxlShaders.particles.snowFallVert( this.mobile ), this.pxlShaders.particles.snowFallFrag() );
   mtl.side=DoubleSide;
   mtl.transparent=true;

@@ -18,13 +18,13 @@ const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav : Field Env.";
+const projectTitle = "pxlNav : The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "../js/pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "./pxlAssets";
+const pxlAssetRoot = "../js/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
@@ -92,6 +92,10 @@ const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
 // Default is `false`
 const enableStaticCamera = false;
 
+// If using static cameras, allow the user to rotate the camera
+//  Default is `false`
+const allowStaticRotation = false;
+
 // Visual effect for the sky
 // Default is `OFF`
 //  Options are - OFF, VAPOR
@@ -129,6 +133,7 @@ pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
 pxlNavOptions.pxlAssetRoot = pxlAssetRoot;
 pxlNavOptions.showOnboarding = showOnboarding;
 pxlNavOptions.staticCamera = enableStaticCamera;
+pxlNavOptions.allowStaticRotation = allowStaticRotation;
 pxlNavOptions.skyHaze = skyHaze;
 pxlNavOptions.shadowMapBiasing = shadowMapBiasing;
 pxlNavOptions.loaderPhrases = loaderPhrases;

@@ -463,6 +463,12 @@ export class Utils{
   //this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, LuminanceFormat, DepthFormat ];
   loadTexture(imgPath,channels=null,mods={}){
     // ## Check how textLoaderArray textures are being handled after being disposed
+
+    // No path, default to the asset root
+    if( !imgPath.includes( "/") ){
+      imgPath = this.assetRoot + imgPath;
+    }
+
     if(typeof(this.textLoaderArray[imgPath]) != "undefined"){
       texture=this.textLoaderArray[imgPath];
     }else{
@@ -483,6 +489,11 @@ export class Utils{
               texture[x]=mods[x];
             });
           }
+        },
+        undefined,
+        (err)=>{
+          console.error(" TextureLoader :: Error loading texture :: "+imgPath);
+          console.error(err);
         }
       );
       this.textLoaderArray[imgPath]=texture;

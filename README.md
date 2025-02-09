@@ -1,4 +1,4 @@
-# pxlNav v0.0.19
+# pxlNav v0.0.20
 Javascript Player Controller & Environment Manager for Three.js
 
 
@@ -139,12 +139,12 @@ Javascript Player Controller & Environment Manager for Three.js
 --------------------------------------------------------------------------------------------
 
 ## Work-in-Progress Features
-&nbsp;\_ Third person control is not easily available, access it through `this.pxlCamera`
-<br/>&nbsp;\_ No movement controls on Mobile yet
+&nbsp;\_ **Third person control** is not easily available, access it through `this.pxlCamera`
+<br/>&nbsp;\_ No movement controls on **Mobile** yet
 <br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
 <br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
 
-<br/>&nbsp;\_ Networking as mostly been removed for safety concerns -
+<br/>&nbsp;\_ **Networking** as mostly been removed for safety concerns -
 <br/>&nbsp;&nbsp;&nbsp; Avatars, WebCam Video Streaming, & Mic Audio, but it can be implemented through pxlNav `Extensions`
 <br/>&nbsp;&nbsp;&nbsp; \*Enable specific extensions with `pxlNav.initExtension("Networking", *Your_Extension_Loaded_Callback*)`
 <br/>&nbsp;&nbsp;&nbsp; \*The default socket messages for `Stream Elements` is currently set up in `./src/pxlNav/extensions/Networking.js`

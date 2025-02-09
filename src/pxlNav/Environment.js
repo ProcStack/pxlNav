@@ -127,6 +127,7 @@ export class Environment{
     this.softNoiseTexture=null;
     this.detailNoiseTexture=null;
     this.chroAberUVTexture=null;
+    this.chroAberUVAlpha=null;
     this.blockAnimTexture=null;
     this.userScreenIntensity=new Vector2(0,.8); // User Screen Multi, x=Base Color Mult, y=Added Boost
     this.portaluserScreenIntensity=new Vector2(1,0);
@@ -312,7 +313,6 @@ export class Environment{
   }
     
   setBootRoom(bootRoom, bootLocation){
-    console.log(bootRoom, bootLocation);
       this.bootRoom=bootRoom;
       this.bootLocation=bootLocation;
   }
@@ -466,7 +466,9 @@ export class Environment{
           resolve(true);
         })
         .catch((err)=>{
-          console.log(err);
+          if(this.pxlOptions.verbose >= VERBOSE_LEVEL.ERROR){
+            console.log(err);
+          }
           reject(err);
         });
     });
@@ -1259,6 +1261,7 @@ export class Environment{
             ratio: { value: this.pxlDevice.screenRes },
             warpMult: { value: this.chroAberMult },
             chroAberUVTexture: { value: this.chroAberUVTexture },
+            chroAberUVAlpha: { value: this.chroAberUVAlpha },
             lKing: { value: this.pxlUser.lKingWarp },
           },
           vertexShader: this.pxlShaders.core.defaultVert(),

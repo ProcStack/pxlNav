@@ -6,11 +6,13 @@ import {
   Float32BufferAttribute,
   Vector2,
   Vector3,
-  DoubleSide,
   NearestFilter,
   NearestMipmapNearestFilter,
-  BufferGeometry
+  BufferGeometry,
+  AdditiveBlending
 } from "../../../libs/three/three.module.min.js";
+
+import { RENDER_LAYER } from "../../core/Enums.js";
 
 import { dustVert, dustFrag } from './shaders/FloatingDust.js';
 
@@ -28,8 +30,23 @@ export default class ParticleBase{
     this.position = new Vector3(0,0,0);
     
     // Default atlas texture file path
-    this.atlasPath = "sprite_dustLiquid.png";
-    this.atlasPath = "sprite_dustAtlas.png";
+    this.atlasPath = "sprite_dustAtlas_rgb.jpg";
+    this.atlasAlphaPath = "sprite_dustAtlas_alpha.jpg";
+    this.hasAlphaMap = true;
+
+    this.shaderSettings = {
+      "vertCount" : 1000,
+      "pScale" : 7,
+      "pOpacity" : 1.0,
+      "proxDist" : 200,
+      "atlasRes" : 4,
+      "atlasPicks" : [],
+      "randomAtlas" : true,
+      "additiveBlend" : false,
+      "hasLights" : false,
+      "fadeOutScalar" : 1.59 
+    }
+    this.knownKeys = Object.keys( this.shaderSettings );
   }
   
   // 'vertexCount' - Point Count
@@ -38,10 +55,21 @@ export default class ParticleBase{
   // 'atlasPicks' - Atlas Pick's Origin Array
   //                  Starting corners from upper left of image
   //                    Sprite texture size given - 1/atlasRes
-  build( vertexCount=30, pScale=6, atlasRes=4, atlasPicks=null ){
+  build( curShaderSettings={} ){
     
-    if( !atlasPicks ){
-      atlasPicks = this.elementDuplicator([ [0.0,0.75], [0.0,0.5], [0.25,0.75], [0.25,0.5] ],4);
+    if( curShaderSettings && typeof curShaderSettings === Object ){
+      let curSettingKeys = Object.keys( curShaderSettings );
+      this.knownKeys.forEach( key => {
+        if( curSettingKeys.includes( key ) ){
+          this.shaderSettings[key] = curShaderSettings[key];
+        }else{
+          curShaderSettings[key] = this.shaderSettings[key];
+        }
+      });
+    }
+
+    if( !this.shaderSettings["atlasPicks"] || this.shaderSettings["atlasPicks"].length < 1 ){
+      this.shaderSettings["atlasPicks"] = this.elementDuplicator([ [0.0,0.75], [0.0,0.5], [0.25,0.75], [0.25,0.5] ],4);
     }
     
     this.addToScene( vertexCount, pScale, atlasRes, atlasPicks );
@@ -58,19 +86,34 @@ export default class ParticleBase{
     }
   }
   
+  getSettings(){
+    return this.shaderSettings;
+  }
+
+
   // -- -- -- -- -- -- -- --
   // -- Add To Scene Function  -- --
   // -- -- -- -- -- -- -- -- -- --
   
   // 'vertexCount' - Point Count
   // 'pScale' - Point Base Scale
-  addToScene( vertexCount=30, pScale=6, atlasMtl=null, atlasRes=4, atlasPicks=[[0.0,0.0]], randomRanges=false ){
+  addToScene(){
     
+    if( !this.shaderSettings ){
+      console.error("No Shader Settings Found; Somehow deleted?");
+      return;
+    }
+
+    let vertexCount = this.shaderSettings.vertCount;
+    let pScale = this.shaderSettings.pScale;
+    let atlasMtl = this.material;
+    let atlasRes = this.shaderSettings.atlasRes;
+    let atlasPicks = this.shaderSettings.atlasPicks;
+    let randomRanges = this.shaderSettings.randomAtlas;
+
     
     this.count = vertexCount;
     this.pscale.x = pScale * this.room.pxlEnv.pxlQuality.screenResPerc ;
-    
-    this.isInternalTexture = false;
 
     let atlasPicker=null;
     // Set random/list atlas picking function as variable 
@@ -92,7 +135,7 @@ export default class ParticleBase{
 
     for( let x=0; x<vertexCount; ++x ){
       verts.push( 0,0,0 );
-      seeds.push( (Math.random()),(Math.random()),(Math.random()*2-1), (Math.random()*2-1) );
+      seeds.push( (Math.random()), (Math.random()*2-1), (Math.random()), (Math.random()*2-1) );
       atlasId.push( ...atlasPicker( atlasPicks ) );
     }
 
@@ -109,8 +152,12 @@ export default class ParticleBase{
     let psystem = new Points( geo, atlasMtl );
     psystem.sortParticles = false;
     psystem.frustumCulled = false;
+    
     this.room.scene.add( psystem );
+
     psystem.layers.set(1);
+    psystem.renderOrder = RENDER_LAYER.PARTICLES;
+
     psystem.pBaseScale=pScale;
     this.room.geoList[ this.name ]=psystem;
     
@@ -173,21 +220,27 @@ export default class ParticleBase{
     return lightPos;
   }
   
-  // Set image path
-  setAtlasPath( path ){
-    this.atlasPath = path;
-    this.isInternalTexture = false;
+  hasPointLights(){
+    return this.room.lightList.hasOwnProperty("PointLight");
   }
 
-  useInternalAsset( asset ){
-    this.atlasPath = asset;
-    this.isInternalTexture = true;
+  // -- -- --
+  
+  // Set image path
+  setAtlasPath( path, alphaPath=null ){
+    this.atlasPath = path;
+    if( alphaPath ){
+      this.atlasAlphaPath = alphaPath;
+      this.hasAlphaMap = true;
+    }else{
+      this.hasAlphaMap = false;
+    }
   }
   
   // -- -- --
   
   newMaterial(setSystemMtl=true){
-    let lightPosArr = this.findLightPositions();
+    let lightPosArr = this.hasPointLights();
     let dustUniforms={
       atlasTexture:{type:"t",value: null },
       noiseTexture:{type:"t",value: null },
@@ -197,16 +250,28 @@ export default class ParticleBase{
       rate:{type:"f",value:0.035},
       lightPos:{value:lightPosArr},
     };
-        //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallFrag() );
-    let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, dustVert( lightPosArr.length ), dustFrag() );
-    mtl.side=DoubleSide;
+
+    if( this.hasAlphaMap ){
+      dustUniforms['atlasAlphaTexture'] = {type:"t",value: null };
+    }
+
+
+    //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallFrag() );
+    let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, dustVert( this.shaderSettings ), dustFrag( this.hasAlphaMap ) );
+
     mtl.transparent=true;
     // mtl.blending=AdditiveBlending;
-    if( this.isInternalTexture ){
-      mtl.uniforms.atlasTexture.value = this.room.pxlEnv.getAssetTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
-    }else{
+    
+    if( this.hasAlphaMap ){
       mtl.uniforms.atlasTexture.value = this.room.pxlUtils.loadTexture( this.atlasPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
+      if( this.atlasAlphaPath ){
+        mtl.uniforms.atlasAlphaTexture.value = this.room.pxlUtils.loadTexture( this.atlasAlphaPath, 1, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
+      }
+    }else{
+      mtl.uniforms.atlasTexture.value = this.room.pxlUtils.loadTexture( this.atlasAlphaPath, 4, {"magFilter":NearestFilter, "minFilter":NearestMipmapNearestFilter} );
     }
+
+
     mtl.uniforms.noiseTexture.value = this.room.softNoiseTexture;
     mtl.depthTest=true;
     mtl.depthWrite=false;

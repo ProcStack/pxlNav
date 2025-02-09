@@ -10,14 +10,20 @@ export function chroAberPostProcess(){
   retFrag+=`
     uniform sampler2D tDiffuse;
     uniform sampler2D chroAberUVTexture;
+    uniform sampler2D chroAberUVAlpha;
     uniform vec2 ratio;
+
     uniform vec2 warpMult;
-        uniform vec2 lKing;
+    uniform vec2 lKing;
+    
     varying vec2 vUv;
 
     void main() {
       // I don't know, sRGB to Linear. Keeping it Linear doesn't work, PNG encoding to blame
-      vec4 caCd= texture2D( chroAberUVTexture, vUv )-vec4(vec3(0.7294118), 0.5019608);
+      vec4 caCd= vec4( 
+        texture2D( chroAberUVTexture, vUv ).rgb - 0.7294118,
+        texture2D( chroAberUVAlpha, vUv ).r - 0.5019608
+      );
       //caCd*=mix( .025, .018, length(caCd.rg)*4.0 );
       caCd*=mix( lKing.x, lKing.y, length(caCd.rg)*4.0 )+warpMult.x;
       

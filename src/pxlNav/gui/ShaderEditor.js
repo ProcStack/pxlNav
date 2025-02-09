@@ -297,9 +297,9 @@ export class ShaderEditor {
     };
     
     //shaderSliders.style.paddingBottom = "2px";
-    this.addSlider(shaderSliders, "sliders.x", 0,-1,1, .01, sliderSetShader, ['x'])
-    this.addSlider(shaderSliders, "sliders.y", 0,-5,5, .1, sliderSetShader, ['y'])
-    this.addSlider(shaderSliders, "sliders.z", 0,-10,10, .1, sliderSetShader, ['z'])
+    this.addSlider(shaderSliders, "sliders.x", 0,-1,1, .0001, sliderSetShader, ['x'])
+    this.addSlider(shaderSliders, "sliders.y", 0,-5,5, .001, sliderSetShader, ['y'])
+    this.addSlider(shaderSliders, "sliders.z", 0,-10,10, .001, sliderSetShader, ['z'])
     this.children.shaderSliders=shaderSliders;
       
       

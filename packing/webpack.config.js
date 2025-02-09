@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 /*const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;*/
 const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
+const webpack = require('webpack');
 
 
 var entryPath="src";
@@ -51,6 +52,10 @@ const baseConfig = {
           mangle: {
             reserved: ['pxlNav', 'pxlNavVersion', 'pxlEnums', 'pxlOptions']
           },
+          compress: {
+            dead_code: true,
+            unused: true
+          },
           output: {
             comments: false,
           }
@@ -62,6 +67,9 @@ const baseConfig = {
     runtimeChunk: false, // Disable runtime chunk
   },
   plugins: [
+    new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1
+    }),
     new MiniCssExtractPlugin({
       filename: 'style/pxlNavStyle.css'
     }),
@@ -105,14 +113,19 @@ const baseConfig = {
   },
 };
 
+
+// Parent Folder Path
+let parentFolderPath = path.resolve(__dirname, '../builds/');
+
 // CJS Configuration
 const cjsConfig = merge(baseConfig, {
   output: {
     filename: 'pxlNav.cjs.js',
-    path: path.resolve(__dirname, 'dist/cjs'),
-    chunkFilename: 'pxlNavChunkDir/[name].cjs.js',
+    //path: path.resolve( parentFolderPath, 'cjs'),
+    path: parentFolderPath,
     library: {
       type: 'commonjs2',
+      export: 'default',
     },
   },
 });
@@ -121,12 +134,12 @@ const cjsConfig = merge(baseConfig, {
 const umdConfig = merge(baseConfig, {
   output: {
     filename: 'pxlNav.umd.js',
-    path: path.resolve(__dirname, 'dist/umd'),
-    chunkFilename: 'pxlNavChunkDir/[name].umd.js',
+    //path: path.resolve( parentFolderPath, 'umd'),
+    path: parentFolderPath,
     publicPath: '/',
     library: {
-      name: 'pxlNav',
       type: 'umd',
+      export: 'default',
     },
   },
 });
@@ -135,8 +148,8 @@ const umdConfig = merge(baseConfig, {
 const esmConfig = merge(baseConfig, {
   output: {
     filename: 'pxlNav.esm.js',
-    path: path.resolve(__dirname, 'dist/esm'),
-    chunkFilename: 'pxlNavChunkDir/[name].esm.js',
+    //path: path.resolve( parentFolderPath, 'esm'),
+    path: parentFolderPath,
     library: {
       type: 'module',
     },

@@ -204,7 +204,7 @@ class RoomEnvironment{
 // Run on init room warp; reset room values
   start(){
     if( !this.booted ){
-      this.resetCamera();
+      //this.resetCamera();
     }
 
     this.pxlEnv.engine.setClearColor(this.fogColor, 0);
@@ -268,6 +268,11 @@ class RoomEnvironment{
 
   resetCamera(){
     this.pxlEnv.pxlCamera.setTransform( this.camInitPos, this.camInitLookAt );
+    /*if( !this.pxlEnv.pxlOptions["staticCamera"] ){
+      this.pxlEnv.pxlCamera.camUpdated = true;
+      this.pxlEnv.pxlCamera.hasMoved = true;
+      this.pxlEnv.pxlCamera.hasGravity = true;
+    }*/
   }
     
 // Warp Zone Portal Texture
@@ -593,7 +598,9 @@ class RoomEnvironment{
 
   // -- -- --
     
-  toCameraPos( positionName ){
+  toCameraPos( positionName = "default" ){
+    positionName = positionName.toLowerCase();
+
     if( this.cameraBooted && this.camLocation.hasOwnProperty( positionName ) ){
       
       let posName = this.mobile?"PositionMobile":"Position";

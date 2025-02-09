@@ -99,6 +99,7 @@ export class Camera{
     this.pxlDevice=null;
     this.pxlGuiDraws=null;
     this.pxlQuality=null;
+    this.pxlOptions=null;
     this.socket=null;
     
     this.camera=null;
@@ -282,6 +283,7 @@ export class Camera{
     this.pxlDevice=pxlNav.pxlDevice;
     this.pxlGuiDraws=pxlNav.pxlGuiDraws;
     this.pxlQuality=pxlNav.pxlQuality;
+    this.pxlOptions=pxlNav.pxlOptions;
     this.socket=pxlNav.socket;
   }
 
@@ -805,6 +807,7 @@ export class Camera{
     this.colliderCurObjHit=null; 
     this.colliderPrevObjHit=null;
     this.camUpdated=true; // Forces next frame update
+    this.hasMoved=true; // Forces next frame update
   }
 
   /**
@@ -847,7 +850,7 @@ export class Camera{
    */
   setTransform(pos, lookAt=null){ // Vector3, Vector3
     this.resetCameraCalculations(pos); // Reinitiates Camera; Forces collision detection, Kills user inputs
-    
+
     if(lookAt){
       this.cameraAimTarget.position.copy( lookAt );
       this.camera.lookAt(lookAt);
@@ -907,13 +910,24 @@ export class Camera{
    * @param {Object3D} [objTarget=null] - The target object in the room.
    */
   warpToRoom(roomName, start=false, objTarget=null){
-    this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].stop();
+
+    let roomKeys = Object.keys(this.pxlEnv.roomSceneList);
+    let roomEnv = this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom]
+
+    if( !roomKeys.includes(roomName) && roomEnv.camLocation.hasOwnProperty(roomName) ){
+      objTarget = roomName;
+      roomName = this.pxlEnv.currentRoom;
+    }else{
+      this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].stop();
+      roomEnv = this.pxlEnv.roomSceneList[roomName];
+    }
+    objTarget = objTarget || "default";
+    objTarget = objTarget.toLowerCase();
 
     let prevRoom=this.pxlEnv.currentRoom;
     let holdCamera=this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].camHoldWarpPos;
     this.pxlEnv.currentRoom=roomName;
     this.pxlAutoCam.curRoom=roomName;
-    let roomEnv=this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom];
     
     let isMainRoom=roomName==this.pxlEnv.mainRoom;
     //this.pxlEnv.delayPass.uniforms.roomComposer.value= isMainRoom ? 0 : 1;
@@ -944,6 +958,7 @@ export class Camera{
       }
 
       this.pxlEnv.roomRenderPass.scene=roomEnv.scene;
+
       if( roomEnv.camLocation.hasOwnProperty(objTarget) ){
           
         let posName = this.cameraPosLookAtNames["default"].pos;
@@ -1705,6 +1720,7 @@ export class Camera{
       canMoveVal=!this.canMove;
     }
     this.canMove = canMoveVal;
+    this.hasGravity = canMoveVal;
   }
 
   /**
@@ -1828,7 +1844,7 @@ export class Camera{
    * @returns {Vector3} - The updated camera position.
    */
   applyGravity( curCamPos ){
-    if( this.hasGravity ){
+    if( this.canMove && this.hasGravity ){
       //curCamPos=this.checkColliderFail( curCamPos );
       
       let validDist=this.maxStepHeight+this.gravityRate;
@@ -2249,9 +2265,20 @@ export class Camera{
       //this.camApplyMobileRotation();
 
       let cameraPos=this.initFrameCamPosition();
-      
+
       // Appy Gravity Height Offset
       let standingHeight=this.getUserHeight();
+      
+      if( this.pxlOptions.staticCamera ){// Static Camera Mode
+        this.hasGravity = false;
+        this.hasMoved = false;
+        if( this.pxlOptions.allowStaticRotation && this.hasRotated ){ // Static Camera Mode
+          this.updateStaticCameraRotation();
+          this.camera.updateMatrixWorld();
+        }
+        this.hasRotated = false;
+        return;
+      }
       
       // Movement checks
       if( this.hasMoved || this.hasGravity ){//&& this.canMove ){
@@ -2259,7 +2286,6 @@ export class Camera{
         // Check if the camera is in a valid position
         cameraPos=this.colliderCheck( cameraPos );
         
-
         // If in air, gravity grows 
         //   This only updates gravity prior to jump calculations
         // User vertical based calculations are ran in `applyGravity()`

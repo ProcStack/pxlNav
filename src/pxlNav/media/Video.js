@@ -735,7 +735,7 @@ export class Video{
                 this.videoStreams[ streamId ]['prevFrameCount']+=1;
                 if( this.videoStreams[ streamId ]['prevFrameCount'] > 50){
                     //%=
-                    console.log("trigger level drop");
+                    //console.log("trigger level drop");
                     //%
                     this.videoStreams[ streamId ]['prevFrameCount']=0;
                     this.videoStreams[ streamId ]['player'].recoverMediaError();

@@ -149,13 +149,13 @@ export class TemplateEnvironment extends RoomEnvironment{
     let vertexCount = 1200; // Point Count
     let pScale = 11;  // Point Base Scale
     let proxDist = 120; // Proximity the particles pass by the camera
-    let windDirection = [0.0,1.0]; // Wind Direction in [x, z]
+    let windDirection = [ 0.0, 0.0, 1.0 ]; // Wind Direction in [x, z]
 
     let systemName = "floatingDust";
-    let dustSystem = new FloatingDust( this, systemName );
+    let dustSystem = new FloatingDust( this, systemName, false );
 
     // Use a texture from the internal pxlNav asset folder
-    dustSystem.useInternalAsset( "sprite_dustAtlas.png" );
+    dustSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
     
     // Set Texture Picks from the Atlas
     let atlasPicks = [
@@ -207,9 +207,9 @@ resize( sW, sH ){}
 //  `mButton` is the mouse button that is down, 0 for left, 1 for middle, 2 for right
   castRay( isClick, mButton ){
     super.castRay( isClick, mButton ); // Required
-    if( this.mouseRayHits.length > 0 ){
+    //if( this.mouseRayHits.length > 0 ){
       //console.log( this.mouseRayHits );
-    }
+    //}
   }
   
 // -- -- --

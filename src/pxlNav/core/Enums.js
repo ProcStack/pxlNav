@@ -26,9 +26,9 @@ export const ANTI_ALIASING = {
 export const RENDER_LAYER = {
   'SKY': 0,
   'SCENE': 1,
-  'PARTICLES': 2,
-  'GLOW': 3,
-  'GLOW_MASK' : 4
+  'PARTICLES': 5,
+  'GLOW': 6,
+  'GLOW_MASK' : 7
 }
 
 

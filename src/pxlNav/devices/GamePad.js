@@ -68,7 +68,7 @@ export default class Controller {
   connectHandler( event ){
     let gamepad = event.gamepad;
     this.controllers[ gamepad.index ] = gamepad;
-    console.log( gamepad );
+    //console.log( gamepad );
     this.emit( "connect", { 'id': gamepad.id, 'index': gamepad.index } );
   }
 
