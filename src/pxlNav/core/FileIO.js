@@ -499,7 +499,6 @@ export class FileIO{
                 let curSkip = curUserData[ dataKey ];
                 curDataObj['skip'] = curSkip;
               }else{
-                //console.log( dataKey )
                 curDataObj['instMesh'] = curUserData[ dataKey ];
               } 
             }
@@ -741,13 +740,19 @@ export class FileIO{
       let groups=curFbx.children;
       let groupTypes={};
       let groupNames=[];
-      groups.forEach( (c,x) =>{ groupNames.push(c.name); groupTypes[c.name]=x; } );
+
+      groups.forEach( (c,x) =>{ 
+        let curName = c.name.toLowerCase();
+        groupNames.push( curName ); 
+        groupTypes[ curName ]=x; 
+      });
+
       groupNames.forEach( (curName) =>{
-        if(curName.includes('Camera')){
+        if(curName.includes('camera')){
           let ch=groups[groupTypes[curName]].children;
           ch.forEach( (c,x)=>{
             c.matrixAutoUpdate=false;
-            if(c.name.includes("Position")){
+            if(c.name.includes("position")){
               let toPos=c.position.clone();
               this.pxlCamera.cameraPrevPos=toPos.clone();
               this.pxlCamera.camera.position.copy(toPos);
@@ -756,7 +761,7 @@ export class FileIO{
               this.pxlCamera.cameraBooted=true;
               this.pxlEnv.camInitPos=toPos;
               this.pxlEnv.camThumbPos=this.pxlEnv.camThumbPos.clone().add( toPos.clone() );
-            }else if(c.name.includes("LookAt")){
+            }else if(c.name.includes("lookat")){
               let toLookAt=c.position.clone();
               this.pxlCamera.cameraAimTarget.position.copy( toLookAt );
               this.pxlCamera.camera.lookAt(toLookAt);
@@ -764,10 +769,10 @@ export class FileIO{
               this.pxlCamera.cameraPrevLookAt=new Vector3();
               this.pxlEnv.camInitLookAt=toLookAt;
               this.pxlEnv.camThumbLookAt=this.pxlEnv.camThumbLookAt.clone().add( toLookAt.clone() );
-            }else if(c.name.includes("ReturnPosition")){
+            }else if(c.name.includes("returnposition")){
               let toPos=c.position.clone();
               this.pxlEnv.camReturnPos=toPos;
-            }else if(c.name.includes("ReturnLookAt")){
+            }else if(c.name.includes("returnlookat")){
               let toPos=c.position.clone();
               this.pxlEnv.camReturnLookAt=toPos;
             }
@@ -938,7 +943,7 @@ export class FileIO{
       let groupNames=[];
       
       groups.forEach( (c,x)=>{
-        let curName=c.name.split("_")[0];
+        let curName=c.name.split("_")[0].toLowerCase();
         groupNames.push(curName);
         groupTypes[curName]=x;
       });
@@ -950,15 +955,16 @@ export class FileIO{
         this.log("Step Count - ",count);
       */
       
-      // @ Loaded Scene File - Environment Group; 'Camera'
-      if(groupNames.indexOf('Camera')>-1){
+      // @ Loaded Scene File - Environment Group; 'camera'
+      if(groupNames.indexOf('camera')>-1){
         let ch=[];
-        this.log("Camera - ",groups[groupTypes['Camera']]);
+        this.log("Camera - ",groups[groupTypes['camera']]);
         
         let rootCamObjects = false;
-        let checkGroups = groups[groupTypes['Camera']].children;
+        let checkGroups = groups[groupTypes['camera']].children;
         checkGroups.forEach( (c,x)=>{
-          if( c.name.includes("Position") || c.name.includes("LookAt") || c.name.includes("ReturnPosition") || c.name.includes("ReturnLookAt") ){
+          let curName = c.name.toLowerCase();
+          if( curName.includes("position") || curName.includes("lookat") || curName.includes("returnposition") || curName.includes("returnlookat") ){
             ch.push(c);
             rootCamObjects=true;
           }else{
@@ -968,60 +974,60 @@ export class FileIO{
           }
         });
 
-        //envObj.geoList['camera']=groups[groupTypes['Camera']];
+        //envObj.geoList['camera']=groups[groupTypes['camera']];
         ch.forEach( (c,x)=>{
           c.matrixAutoUpdate=false;
           let parentName = c.parent.name.toLowerCase();
-          if( parentName == groups[groupTypes['Camera']].name ){
+          if( parentName == groups[groupTypes['camera']].name.toLowerCase() ){
             parentName = "default";
           }
           if( !envObj.camLocation.hasOwnProperty(parentName) ){
             envObj.camLocation[parentName]={};
-            envObj.camLocation[parentName]["Position"]=new Vector3( 0, 0, -10 );
-            envObj.camLocation[parentName]["LookAt"]=new Vector3( 0, 0, 0 );
+            envObj.camLocation[parentName]["position"]=new Vector3( 0, 0, -10 );
+            envObj.camLocation[parentName]["lookat"]=new Vector3( 0, 0, 0 );
           }
-          if(c.name.includes("PositionMobile")){
+          let curName = c.name.toLowerCase();
+          if(curName.includes("positionmobile")){
             let toPos=c.position.clone();
             envObj.cameraBooted=true;
             envObj.camInitPos=toPos;
-            envObj.camLocation[parentName]["PositionMobile"]=toPos;
-          }else if(c.name.includes("LookAtMobile")){
+            envObj.camLocation[parentName]["positionmobile"]=toPos;
+          }else if(curName.includes("lookatmobile")){
             let toPos=c.position.clone();
             envObj.camInitLookAt=toPos;
-            envObj.camLocation[parentName]["LookAtMobile"]=toPos;
-          }else if(c.name.includes("Position")){
+            envObj.camLocation[parentName]["lookatmobile"]=toPos;
+          }else if(curName.includes("position")){
             let toPos=c.position.clone();
             envObj.cameraBooted=true;
             envObj.camInitPos=toPos;
-            envObj.camLocation[parentName]["Position"]=toPos;
-          }else if(c.name.includes("LookAt")){
+            envObj.camLocation[parentName]["position"]=toPos;
+          }else if(curName.includes("lookat")){
             let toPos=c.position.clone();
             envObj.camInitLookAt=toPos;
-            envObj.camLocation[parentName]["LookAt"]=toPos;
-          }else if(c.name.includes("ReturnPosition")){
+            envObj.camLocation[parentName]["lookat"]=toPos;
+          }else if(curName.includes("returnposition")){
             let toPos=c.position.clone();
             envObj.camReturnPos=toPos;
-            envObj.camLocation[parentName]["ReturnPosition"]=toPos;
-          }else if(c.name.includes("ReturnLookAt")){
+            envObj.camLocation[parentName]["returnposition"]=toPos;
+          }else if(curName.includes("returnlookat")){
             let toPos=c.position.clone();
             envObj.camReturnLookAt=toPos;
-            envObj.camLocation[parentName]["ReturnLookAt"]=toPos;
+            envObj.camLocation[parentName]["returnlookat"]=toPos;
           }
         });
 
 
-        // Check for missing Mobile Camera Position/LookAt
+        // Check for missing Mobile Camera Position/lookat
         let locationList = Object.keys( envObj.camLocation );
         locationList.forEach( (c)=>{
           let curLoc = envObj.camLocation[c];
-          if( !curLoc.hasOwnProperty("PositionMobile") ){
-            curLoc["PositionMobile"] = curLoc["Position"];
+          if( !curLoc.hasOwnProperty("positionmobile") ){
+            curLoc["positionmobile"] = curLoc["position"];
           }
-          if( !curLoc.hasOwnProperty("LookAtMobile") ){
-            curLoc["LookAtMobile"] = curLoc["LookAt"];
+          if( !curLoc.hasOwnProperty("lookatmobile") ){
+            curLoc["lookatmobile"] = curLoc["lookat"];
           }
         });
-
 
         //this.pxlDevice.touchMouseData.initialQuat=envObj.camera.quaternion.clone();
       }
@@ -1049,11 +1055,11 @@ export class FileIO{
           }
         }
       }
-      
+
       // @ Loaded Scene File - Environment Group; 'Instances'
-      if(groupNames.indexOf('Instances')>-1 && this.pxlQuality.detailLimit == 0){
-        let ch=[...groups[groupTypes['Instances']].children];
-        this.log("Instances - ",groups[groupTypes['Instances']]);
+      if(groupNames.indexOf('instances')>-1 && this.pxlQuality.detailLimit == 0){
+        let ch=[...groups[groupTypes['instances']].children];
+        this.log("Instances - ",groups[groupTypes['instances']]);
         
         if( ch.length > 0 ){
           if( !envObj.hasOwnProperty("baseInstancesNames") ){
@@ -1106,9 +1112,9 @@ export class FileIO{
       
       
       // @ Loaded Scene File - Environment Group; 'Lights'
-      if(groupNames.indexOf('Lights')>-1){
-        let ch=groups[groupTypes['Lights']].children;
-        this.log("Lights - ",groups[groupTypes['Lights']]);
+      if(groupNames.indexOf('lights')>-1){
+        let ch=groups[groupTypes['lights']].children;
+        this.log("Lights - ",groups[groupTypes['lights']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1202,8 +1208,8 @@ export class FileIO{
 
       // Merged Geo, faster but more polies
       // @ Loaded Scene File - Environment Group; 'MainScene'
-      if(groupNames.includes('Scene') || groupNames.includes('MainScene')){
-        let groupId = groupTypes['Scene'] || groupTypes['MainScene'];
+      if(groupNames.includes('scene') || groupNames.includes('mainscene')){
+        let groupId = groupTypes['scene'] || groupTypes['mainscene'];
         let ch = [...groups[groupId].children];
         this.log("MainScene - ",groups[groupId]);
 
@@ -1219,7 +1225,6 @@ export class FileIO{
           
           this.log( "Cur Object - ", c.name );
           this.checkForUserData( envObj, envScene, c );
-          //console.log(c)
 
           if(c.isMesh){
             if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show == 0) ){
@@ -1297,7 +1302,6 @@ export class FileIO{
                 let scriptedList = Object.keys(envObj.geoList['Scripted']);
                 //addChildren = false;
               }
-              //console.log("Group - ", c.name, c.children.length, addChildren);
               if( addChildren ){
                 ch.push( ...c.children );
               }
@@ -1310,9 +1314,9 @@ export class FileIO{
       
       // ## Restricted to only pxlNav's build
       // @ Loaded Scene File - Environment Group; 'Glass'
-      if(groupNames.indexOf('Glass')>-1){
-        let ch=groups[groupTypes['Glass']].children;
-        this.log("Glass - ",groups[groupTypes['Glass']]);
+      if(groupNames.indexOf('glass')>-1){
+        let ch=groups[groupTypes['glass']].children;
+        this.log("Glass - ",groups[groupTypes['glass']]);
         
         if( ch.length > 0 ){
             if(!envObj.glassGroup){
@@ -1375,15 +1379,15 @@ export class FileIO{
       
 
       // @ Loaded Scene File - Environment Group; 'Colliders'
-      if(groupNames.indexOf('Colliders')>-1){
-        let colliderParent=groups[groupTypes['Colliders']];
-        this.log("Colliders - ",groups[groupTypes['Colliders']]);
+      if(groupNames.indexOf('colliders')>-1){
+        let colliderParent=groups[groupTypes['colliders']];
+        this.log("Colliders - ",groups[groupTypes['colliders']]);
         
         let colliderGroups=colliderParent.children;
         envObj.collidersExist=colliderGroups.length>0;
 
         for(let x=0; x<colliderGroups.length; ++x){
-          let pName=colliderGroups[x].name;
+          let pName=colliderGroups[x].name.toLowerCase();
 
           let curChildren=colliderGroups[x].children;
           while(curChildren.length>0){
@@ -1392,19 +1396,19 @@ export class FileIO{
             if(child.isMesh){
               child.visible=false;
 
-              if( pName == "ColliderWalls"){ // Movement limiting walls
+              if( pName == "colliderwalls"){ // Movement limiting walls
                 envObj.antiColliderActive=true;
                 envObj.antiColliderList.push( child );
 
               // TODO : ColliderTops are implemented in `Ground` colliders to a degree.
               //          Full removal of the `ColliderTops` collider group is pending
-              }else if( pName == "ColliderTops"){ // Top surface of wall, standable top
+              }else if( pName == "collidertops"){ // Top surface of wall, standable top
                 envObj.antiColliderTopActive=true;
                 envObj.antiColliderTopList.push( child );
 
               }else{ // `Ground`, `RoomWarp`, & All Other Colliders
 
-                if( pName == "RoomWarpZone"){
+                if( pName == "roomwarpzone"){
                   envObj.hasRoomWarp=true;
                   envObj.roomWarp.push(child);
                 }
@@ -1438,9 +1442,9 @@ export class FileIO{
       
       
       // @ Loaded Scene File - Environment Group; 'PortalExit'
-      if(groupNames.indexOf('PortalExit')>-1){
-        let ch=groups[groupTypes['PortalExit']].children;
-        this.log("PortalExit - ",groups[groupTypes['PortalExit']]);
+      if(groupNames.indexOf('portalexit')>-1){
+        let ch=groups[groupTypes['portalexit']].children;
+        this.log("PortalExit - ",groups[groupTypes['portalexit']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1451,9 +1455,9 @@ export class FileIO{
       }  
       
       // @ Loaded Scene File - Environment Group; 'FlatColor'
-      if(groupNames.indexOf('FlatColor')>-1){
-        let ch=groups[groupTypes['FlatColor']].children;
-        this.log("FlatColor - ",groups[groupTypes['FlatColor']]);
+      if(groupNames.indexOf('flatcolor')>-1){
+        let ch=groups[groupTypes['flatcolor']].children;
+        this.log("FlatColor - ",groups[groupTypes['flatcolor']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1482,9 +1486,9 @@ export class FileIO{
 
 
       // @ Loaded Scene File - Environment Group; 'LambertColor'
-      if(groupNames.indexOf('LambertColor')>-1){
-        let ch=groups[groupTypes['LambertColor']].children;
-        this.log("LambertColor - ",groups[groupTypes['LambertColor']]);
+      if(groupNames.indexOf('lambertcolor')>-1){
+        let ch=groups[groupTypes['lambertcolor']].children;
+        this.log("LambertColor - ",groups[groupTypes['lambertcolor']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1520,9 +1524,9 @@ export class FileIO{
        
             
       // @ Loaded Scene File - Environment Group; 'Sky'
-      if(groupNames.indexOf('Sky')>-1){
-        let ch=groups[groupTypes['Sky']].children;
-        this.log("Sky - ",groups[groupTypes['Sky']]);
+      if(groupNames.indexOf('sky')>-1){
+        let ch=groups[groupTypes['sky']].children;
+        this.log("Sky - ",groups[groupTypes['sky']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1579,9 +1583,9 @@ export class FileIO{
 
       // Shader Overrides
       // @ Loaded Scene File - Environment Group; 'AnimatedTextures'
-      if(groupNames.indexOf('AnimatedTextures')>-1){
-        let ch=groups[groupTypes['AnimatedTextures']].children;
-        this.log("AnimatedTextures - ",groups[groupTypes['AnimatedTextures']]);
+      if(groupNames.indexOf('animatedtextures')>-1){
+        let ch=groups[groupTypes['animatedtextures']].children;
+        this.log("AnimatedTextures - ",groups[groupTypes['animatedtextures']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1625,9 +1629,9 @@ export class FileIO{
       
       
       // @ Loaded Scene File - Environment Group; 'ScrollingTextures'
-      if(groupNames.indexOf('ScrollingTextures')>-1){
-        let ch=groups[groupTypes['ScrollingTextures']].children;
-        this.log("ScrollingTextures - ",groups[groupTypes['ScrollingTextures']]);
+      if(groupNames.indexOf('scrollingtextures')>-1){
+        let ch=groups[groupTypes['scrollingtextures']].children;
+        this.log("ScrollingTextures - ",groups[groupTypes['scrollingtextures']]);
         
         let scrollScreenSeed=1;
         while(ch.length>0){
@@ -1676,9 +1680,9 @@ export class FileIO{
       // @ Loaded Scene File - Environment Group; 'UserScreens'
       // TODO : Update to read mask from material
       //          Less magic number reliance
-      if(groupNames.indexOf('UserScreens')>-1){
-        let ch=groups[groupTypes['UserScreens']].children;
-        this.log("UserScreens - ",groups[groupTypes['UserScreens']]);
+      if(groupNames.indexOf('userscreens')>-1){
+        let ch=groups[groupTypes['userscreens']].children;
+        this.log("UserScreens - ",groups[groupTypes['userscreens']]);
         
         let userScreenSeed=0;
         // Run the mask layers outside shader calculations
@@ -1733,9 +1737,9 @@ export class FileIO{
       
       
       // @ Loaded Scene File - Environment Group; 'Items'
-      if(groupNames.indexOf('Items')>-1){
-        let ch=groups[groupTypes['Items']].children;
-        this.log("Items - ",groups[groupTypes['Items']]);
+      if(groupNames.indexOf('items')>-1){
+        let ch=groups[groupTypes['items']].children;
+        this.log("Items - ",groups[groupTypes['items']]);
         
         while(ch.length>0){
           let g=ch.pop();
@@ -1764,7 +1768,7 @@ export class FileIO{
                   });
                   c.material=curMat;
                   this.pxlUser.itemList[g.name]=c;
-                }else if(c.name.includes("Base")){
+                }else if(c.name.toLowerCase().includes("base")){
                   let curMat=new ShaderMaterial({
                       uniforms:{
                           color:{value : c.material.emissive.clone() },
@@ -1796,9 +1800,9 @@ export class FileIO{
       
       
       // @ Loaded Scene File - Environment Group; 'Scripted'
-      if(groupNames.includes('Scripted')){
-        let ch=groups[groupTypes['Scripted']].children;
-        this.log("Scripted - ",groups[groupTypes['Scripted']]);
+      if(groupNames.includes('scripted')){
+        let ch=groups[groupTypes['scripted']].children;
+        this.log("Scripted - ",groups[groupTypes['scripted']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -1811,9 +1815,9 @@ export class FileIO{
       
 
       // @ Loaded Scene File - Environment Group; 'Clickable'
-      if(groupNames.includes('Clickable')){
-        let colliderParent=groups[groupTypes['Clickable']];
-        this.log("Clickable - ",groups[groupTypes['Clickable']]);
+      if(groupNames.includes('clickable')){
+        let colliderParent=groups[groupTypes['clickable']];
+        this.log("Clickable - ",groups[groupTypes['clickable']]);
         
         let colliderGroups=colliderParent.children;
         for(let x=0; x<colliderGroups.length; ++x){
@@ -1847,9 +1851,9 @@ export class FileIO{
       }
       
       // @ Loaded Scene File - Environment Group; 'Markers'
-      if(groupNames.includes('Markers')){
-        let ch=groups[groupTypes['Markers']].children;
-        this.log("Markers - ",groups[groupTypes['Markers']]);
+      if(groupNames.includes('markers')){
+        let ch=groups[groupTypes['markers']].children;
+        this.log("Markers - ",groups[groupTypes['markers']]);
         
         while(ch.length>0){
           let c=ch.pop();
@@ -2192,9 +2196,10 @@ export class FileIO{
     urlExistsFallback( url ){
         return new Promise( (resolve, reject)=>{
             let xhrRequest= this.xmlHttp();
+
             xhrRequest.open('HEAD', url, true);
             xhrRequest.send();
-            //console.log( xhrRequest ) ;
+
             xhrRequest.onreadystatechange=function(){
                 if( this.readyState == this.DONE ){
                     resolve( this.status<400 );

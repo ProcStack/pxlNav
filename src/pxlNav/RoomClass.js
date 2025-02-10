@@ -603,8 +603,8 @@ class RoomEnvironment{
 
     if( this.cameraBooted && this.camLocation.hasOwnProperty( positionName ) ){
       
-      let posName = this.mobile?"PositionMobile":"Position";
-      let lookAtName = this.mobile?"LookAtMobile":"LookAt";
+      let posName = this.mobile?"positionmobile":"position";
+      let lookAtName = this.mobile?"lookatmobile":"lookat";
       let pos=this.camLocation[ positionName ][ posName ];
       let lookAt=this.camLocation[ positionName ][ lookAtName ];
       if( !lookAt ){

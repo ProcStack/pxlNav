@@ -29,7 +29,7 @@ const pxlAssetRoot = "./pxlAssets";
 const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["CampfireEnvironment"];
+const bootRoomList = ["CampfireEnvironment"];//, "SaltFlatsEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -91,6 +91,10 @@ const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
 // Default is `false`
 const enableStaticCamera = true;
 
+// If using static cameras, allow the user to rotate the camera
+//  Default is `false`
+const allowStaticRotation = false;
+
 // Visual effect for the sky
 // Default is `OFF`
 //  Options are - OFF, VAPOR
@@ -127,6 +131,7 @@ pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
 pxlNavOptions.pxlAssetRoot = pxlAssetRoot;
 pxlNavOptions.showOnboarding = showOnboarding;
 pxlNavOptions.staticCamera = enableStaticCamera;
+pxlNavOptions.allowStaticRotation = allowStaticRotation;
 pxlNavOptions.skyHaze = skyHaze;
 pxlNavOptions.shadowMapBiasing = shadowMapBiasing;
 pxlNavOptions.loaderPhrases = loaderPhrases;

@@ -1,4 +1,4 @@
-# pxlNav v0.0.20
+# pxlNav v0.0.21
 Javascript Player Controller & Environment Manager for Three.js
 
 

@@ -17,7 +17,7 @@ import {
 } from "../../libs/three/three.module.min.js";
 
 import { pxlUserSettings } from "../core/Options.js";
-import { COLLIDER_TYPE, CAMERA_EVENT } from "../core/Enums.js";
+import { VERBOSE_LEVEL, COLLIDER_TYPE, CAMERA_EVENT } from "../core/Enums.js";
 
 // TODO : Extend this damn monolith of a chunky boy
 //          Camera, Player Controller, Force Influence / Collision
@@ -230,16 +230,16 @@ export class Camera{
     // TODO : This needs to be moved and integrated into fileIO and RoomClass
     this.cameraPosLookAtNames = {
       "default":{
-        pos:"Position",
-        lookAt:"LookAt",
+        pos:"position",
+        lookAt:"lookat",
       },
       "mobile":{
-        pos:"PositionMobile",
-        lookAt:"LookAtMobile",
+        pos:"positionmobile",
+        lookAt:"lookatmobile",
       },
       "vr":{
-        pos:"PositionVR",
-        lookAt:"LookAtVR",
+        pos:"positionvr",
+        lookAt:"lookatvr",
       }
     };
 
@@ -913,19 +913,29 @@ export class Camera{
 
     let roomKeys = Object.keys(this.pxlEnv.roomSceneList);
     let roomEnv = this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom]
+    
+    objTarget = objTarget || "default";
+    objTarget = objTarget.toLowerCase()
+    let camLocName = roomName.toLowerCase();
 
-    if( !roomKeys.includes(roomName) && roomEnv.camLocation.hasOwnProperty(roomName) ){
-      objTarget = roomName;
+    let hasCurrentRoom = this.pxlEnv.roomSceneList.hasOwnProperty( this.pxlEnv.currentRoom );
+    
+    if( roomEnv && !roomKeys.includes(roomName) && roomEnv.camLocation.hasOwnProperty(camLocName) ){
+      objTarget = camLocName;
       roomName = this.pxlEnv.currentRoom;
     }else{
-      this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].stop();
+      if( hasCurrentRoom){
+        this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].stop();
+      }
       roomEnv = this.pxlEnv.roomSceneList[roomName];
-    }
-    objTarget = objTarget || "default";
-    objTarget = objTarget.toLowerCase();
+    };
 
     let prevRoom=this.pxlEnv.currentRoom;
-    let holdCamera=this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].camHoldWarpPos;
+    let holdCamera=false;
+    if( hasCurrentRoom && this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].hasOwnProperty( "camHoldWarpPos" )){
+      holdCamera = this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].camHoldWarpPos;
+    }
+
     this.pxlEnv.currentRoom=roomName;
     this.pxlAutoCam.curRoom=roomName;
     
@@ -953,27 +963,33 @@ export class Camera{
         
     //if(roomName!=this.pxlEnv.mainRoom || start){
     if( start ){
+      if( !roomEnv ){
+        this.warn("pxlCamera.warpToRoom(); pxlRoom not found - "+this.pxlEnv.currentRoom);
+        return;
+      }
+
       if( roomName != prevRoom ){
         roomEnv.start();
       }
 
       this.pxlEnv.roomRenderPass.scene=roomEnv.scene;
 
-      if( roomEnv.camLocation.hasOwnProperty(objTarget) ){
+      let camLocName = objTarget.toLowerCase();
+      if( roomEnv.camLocation.hasOwnProperty( camLocName ) ){
           
         let posName = this.cameraPosLookAtNames["default"].pos;
         let lookAtName = this.cameraPosLookAtNames["default"].lookAt;
 
         if( this.pxlDevice.mobile ){
-          if( roomEnv.camLocation[objTarget].hasOwnProperty( this.cameraPosLookAtNames["mobile"].pos ) ){
+          if( roomEnv.camLocation[ camLocName ].hasOwnProperty( this.cameraPosLookAtNames["mobile"].pos ) ){
             posName=this.cameraPosLookAtNames["mobile"].pos;
           }
-          if( roomEnv.camLocation[objTarget].hasOwnProperty( this.cameraPosLookAtNames["mobile"].lookAt ) ){
+          if( roomEnv.camLocation[ camLocName ].hasOwnProperty( this.cameraPosLookAtNames["mobile"].lookAt ) ){
             lookAtName=this.cameraPosLookAtNames["mobile"].lookAt;
           }
         }
-        let toPos = roomEnv.camLocation[objTarget][ posName ];
-        let toLookAt = roomEnv.camLocation[objTarget][ lookAtName ];
+        let toPos = roomEnv.camLocation[ camLocName ][ posName ];
+        let toLookAt = roomEnv.camLocation[ camLocName ][ lookAtName ];
         this.setTransform( toPos, toLookAt );
       }else if( roomEnv.camInitPos && roomEnv.camInitLookAt && ( !holdCamera || !this.pxlEnv.postIntro || this.hotKeyTriggered ) ){
         this.setTransform( roomEnv.camInitPos, roomEnv.camInitLookAt );
@@ -1514,7 +1530,7 @@ export class Camera{
     // -- Within Room Environment position/rotation updates -- //
     if(this.portalList[checkObject]){
       this.warpEventTriggered( 0, this.portalList[checkObject]);
-            this.eventCheckStatus=false;
+      this.eventCheckStatus=false;
       return true;
     }
     
