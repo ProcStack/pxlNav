@@ -27,7 +27,7 @@ import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions, pxlEffect
 
 List of exports from `pxlNav` -
 <br/> _`pxlNav` - Main pxlNav object to manage your environments
-<br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.21`
+<br/> _`pxlNavVersion` - The version number for pxlNav; `0.0.22`
 <br/> _`pxlEnums` - Available enums in a single object
 <br/> _`pxlUserSettings` - Available User Settings which define `pxlCamera` values
 <br/> _`pxlOptions` - Options Objects with Default settings

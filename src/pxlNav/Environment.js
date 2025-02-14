@@ -25,6 +25,7 @@ import {
   DepthFormat,
   UnsignedShortType,
   FloatType,
+  HalfFloatType,
   Scene,
   Group,
   Color,
@@ -73,7 +74,7 @@ export class Environment{
     if( this.pxlOptions.hasOwnProperty("pxlRoomName") ){
       pxlRoomName = this.pxlOptions.pxlRoomName;
     }else{
-      pxlRoomName = mainRoom;
+      pxlRoomName = mainRoom || "Default";
     }
 
     this.pxlRoomAbsRoot = pxlRoomName;
