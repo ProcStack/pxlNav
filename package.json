@@ -1,6 +1,6 @@
 {
   "name": "pxlnav",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Player Controller & Environment Framework for Three.js",
   "author": "Kevin Edzenga <kevin@metal-asylum.net>",
   "license": "GPL-3.0-or-later",

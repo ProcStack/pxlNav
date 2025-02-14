@@ -1,4 +1,4 @@
-# pxlNav v0.0.22 Documentation
+# pxlNav v0.0.23 Documentation
 
  - **[`pxlNav` Loader Documentation](pxlNav_loader.md)**
 
