@@ -137,9 +137,9 @@ export function dustVert( userDustData = {} ){
         pos += randDirBlend * sin( seeds.x+seeds.z+noiseCd.r*noiseCd.g*seeds.y+noiseCdb.b + (time.x+seeds.y*10.) * WanderRate * seeds.w*noiseCdb.g ) * WanderRate * ( 5. + seeds.z );
 
         pos += (noiseCd * noiseCdb ) * 50. * ( (seeds.w+.75)*4.);
-        pos+=positionOffset;
 
         pos = mod( pos-cameraPosition, PROX) + cameraPosition - PROX*.5;
+        pos+=positionOffset;
         
         
         float pScalar = clamp( (1.-length(pos-cameraPosition )*PROX_INV) * FadeOutScalar, 0.0, 1.0  );

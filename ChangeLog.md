@@ -1,10 +1,8 @@
-# pxlNav Change Log :: 0.0.21 - 0.0.22 & 0.0.23
+# pxlNav Change Log :: 0.0.23 - 0.0.24
 ---------------------
 
-### Hotfix & Change
-  - `Environment.js` hotfix, `HalfFloatType` wasn't being imported, so ios devices weren't running pxlnav
-<br/>&nbsp;&nbsp; - Screens were showing up black
-
-  - I need to figure out npm publishing restrictions
+### All Changes
+  - `FloatingDust.js` moved where the `offsetPos` uniform is applied in `FloatingDust()` so it acts as a world space offset rather than a 'seed' in space
+<br/>&nbsp;&nbsp; - 
 
 ---
