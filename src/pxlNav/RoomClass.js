@@ -56,57 +56,58 @@ class RoomEnvironment{
     this.animMixer = null;
     
     // Environment Shader 
-    this.spiralizerUniforms={};
-    this.materialList={};
+    this.spiralizerUniforms = {};
+    this.materialList = {};
     
     // Room warp data
-    this.camInitPos=null;
-    this.camInitLookAt=null;
-    this.camThumbPos=new Vector3(0,0,-30);
-    this.camThumbLookAt=new Vector3(0,35,-1000);
-    this.cameraBooted=false;
-    this.cameraPrevPos=new Vector3(0,0,0);
-    this.cameraAimTarget=new Object3D(0,0,0);
-    this.camHoldWarpPos=true;
-    this.camLocation = {};
+    this.camInitPos = null;
+    this.camInitLookAt = null;
+    this.camThumbPos = new Vector3(0,0,-30);
+    this.camThumbLookAt = new Vector3(0,35,-1000);
+    this.cameraBooted = false;
+    this.cameraPrevPos = new Vector3(0,0,0);
+    this.cameraAimTarget = new Object3D(0,0,0);
+    this.camHoldWarpPos = true;
+    this.defaultCamLocation = "default";
+    this.camLocation  =  {};
     
-    this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
-    this.pxlCamZoom=1;
-    this.pxlCamAspect=1;
+    this.pxlCamFOV = { 'PC':60, 'MOBILE':80 };
+    this.pxlCamZoom = 1;
+    this.pxlCamAspect = 1;
     this.pxlCamNearClipping = 5;
     this.pxlCamFarClipping = 10000;
 
     // this.fogColor=new Color(.3,.3,.3);
-    this.fogColor=new Color(.01,.02,.05);
-    this.fogExp=.0007;
-    this.fog=new FogExp2( this.fogColor, this.fogExp);
+    this.fogColor = new Color(.01,.02,.05);
+    this.fogExp = .0007;
+    this.fog = new FogExp2( this.fogColor, this.fogExp);
         
-    this.userAvatarGroup=new Group();
-    this.packedTextureMaterial=null;
-    this.coreTextureMaterial=null;
-    this.projectedMaterial=null;
-    this.voidMaterial=null;
-    this.holoMaterial=null;
-    this.aspectRatio=null;
-    this.flag=null;
+    this.userAvatarGroup = new Group();
+    this.packedTextureMaterial = null;
+    this.coreTextureMaterial = null;
+    this.projectedMaterial = null;
+    this.voidMaterial = null;
+    this.holoMaterial = null;
+    this.aspectRatio = null;
+    this.flag = null;
     this.initPos = [];
     this.finalPos = [];
     this.midPos = new Vector3(0,30,-50);
 
     this.perspectiveInstances = 160;
     
-    this.startTime=0;
-    this.runTime=new Vector2(0, 0);
-    this.msRunner=msRunner;
-    this.camera=camera;
-    this.autoCamPaths={};
-    this.scene=scene;
-    this.lightList={}
-    this.geoList={}
-    this.glassGroup=null;
-    this.glassList=[]
-    this.particleList={};
-    this.lodList=[];
+    this.startTime = 0;
+    this.runTime = new Vector2(0, 0);
+    this.msRunner = msRunner;
+    this.camera = camera;
+    this.autoCamPaths = {};
+    this.scene = scene;
+    this.lightList = {}
+    this.geoList = {}
+    this.glassGroup = null;
+    this.glassList = []
+    this.particleList = {};
+    this.lodList = [];
     
 
     this.enableRaycast = false;
@@ -598,7 +599,10 @@ class RoomEnvironment{
 
   // -- -- --
     
-  toCameraPos( positionName = "default" ){
+  toCameraPos( positionName = null ){
+    if( positionName == null ){
+      positionName = this.defaultCamLocation;
+    }
     positionName = positionName.toLowerCase();
 
     if( this.cameraBooted && this.camLocation.hasOwnProperty( positionName ) ){
@@ -623,7 +627,7 @@ class RoomEnvironment{
     this.booted=true;
 
     // Force Camera to init position with optional init look at
-    this.toCameraPos("Default");
+    this.toCameraPos( this.defaultCamLocation );
 
     // Find Point light count for adjusted shadowing
     let pointLightCount = 0;

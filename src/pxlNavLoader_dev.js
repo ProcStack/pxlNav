@@ -30,7 +30,7 @@ const pxlAssetRoot = "../pxlAssets";
 const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["SaltFlatsEnvironment",];//"VoidEnvironment"];
+const bootRoomList = ["CampfireEnvironment",];//"OutletEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -90,7 +90,7 @@ const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
 // Set camera to static Camera Positions
 //   Locations pulled from the 'Camera' group in the pxlRoom's FBX file
 // Default is `false`
-const enableStaticCamera = true;
+const enableStaticCamera = false;
 
 // If using static cameras, allow the user to rotate the camera
 //  Default is `false`

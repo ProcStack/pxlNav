@@ -41,7 +41,7 @@ export default class ParticleBase{
       "proxDist" : 200,
       "atlasRes" : 4,
       "atlasPicks" : [],
-      "randomAtlas" : true,
+      "randomAtlas" : false,
       "additiveBlend" : false,
       "hasLights" : false,
       "fadeOutScalar" : 1.59 
@@ -104,6 +104,7 @@ export default class ParticleBase{
       return;
     }
 
+
     let vertexCount = this.shaderSettings.vertCount;
     let pScale = this.shaderSettings.pScale;
     let atlasMtl = this.material;
@@ -138,7 +139,7 @@ export default class ParticleBase{
       seeds.push( (Math.random()), (Math.random()*2-1), (Math.random()), (Math.random()*2-1) );
       atlasId.push( ...atlasPicker( atlasPicks ) );
     }
-
+    
     let posAttribute = new Float32BufferAttribute( verts, 3 );
     let seedAttribute = new Float32BufferAttribute( seeds, 4 );
     let atlasAttribute = new Float32BufferAttribute( atlasId, 2 );

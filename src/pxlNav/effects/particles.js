@@ -9,4 +9,6 @@ import { EmberWisps } from './particles/EmberWisps.js';
 
 import { FloatingDust } from './particles/FloatingDust.js';
 
-export { BillowSmoke, EmberWisps, FloatingDust };
+import { HeightMap } from './particles/HeightMap.js';
+
+export { BillowSmoke, EmberWisps, FloatingDust, HeightMap };

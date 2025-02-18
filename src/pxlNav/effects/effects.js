@@ -7,10 +7,10 @@
 //     The particle system is the Manager and the particles themselves are Shaders
 
 
-import { BillowSmoke, EmberWisps, FloatingDust } from './particles.js';
+import { BillowSmoke, EmberWisps, FloatingDust, HeightMap } from './particles.js';
 
 const pxlEffects = { 
-  "pxlParticles" : { BillowSmoke, EmberWisps, FloatingDust },
+  "pxlParticles" : { BillowSmoke, EmberWisps, FloatingDust, HeightMap },
 };
 
 export { pxlEffects };

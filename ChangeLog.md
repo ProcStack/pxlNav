@@ -3,6 +3,7 @@
 
 ### All Changes
   - `FloatingDust.js` moved where the `offsetPos` uniform is applied in `FloatingDust()` so it acts as a world space offset rather than a 'seed' in space
+  - `FileIO.js` added object position, rotation, & scale to instance-to-mesh
 <br/>&nbsp;&nbsp; - 
 
 ---

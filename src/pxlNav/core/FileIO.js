@@ -410,8 +410,6 @@ export class FileIO{
             }
           };
 
-
-
           let instObjectData = {
             'mesh' : mesh,
             'instMesh' : null,
@@ -524,6 +522,7 @@ export class FileIO{
               let curPos = curMesh.position;
               let curRot = curMesh.rotation;
               let curScale = curMesh.scale;
+              
               let instBase = envObj.baseInstancesList[ curMesh.userData.Instance ];
 
               if( curMesh.type == "Mesh" ){
@@ -565,16 +564,16 @@ export class FileIO{
                     let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
                     quaternion.setFromEuler(randomRot);
                     
-                    curScale = scale;
+                    let curInstScale = scale;
                     if( hasColor ){
                       let curScalar = curMesh.geometry.attributes.color.getX(x);
                       if( hasFitScale ){
                         // Scale the object based on object parameter `minScale` & `maxScale`
                         curScalar = minScale + (maxScale - minScale) * curScalar;
                       }
-                      curScale = new Vector3(curScalar, curScalar, curScalar);
+                      curInstScale = new Vector3(curScalar, curScalar, curScalar);
                     }
-                    matrix.compose(position, quaternion, curScale);
+                    matrix.compose(position, quaternion, curInstScale);
                     instanceMatricies.push( matrix.clone() );
                     pointRecorder[entry]=true;
                   }
@@ -599,6 +598,10 @@ export class FileIO{
 
 
                   instancedMesh.visible = true;
+                  instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
+                  instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
+                  instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
+
                   instancedMesh.updateMatrix();
 
 
@@ -960,6 +963,12 @@ export class FileIO{
         let ch=[];
         this.log("Camera - ",groups[groupTypes['camera']]);
         
+        let defaultCamLocation = envObj.defaultCamLocation;
+        if( groups[groupTypes['camera']].userData.hasOwnProperty("DefaultCam") ){
+          defaultCamLocation = groups[groupTypes['camera']].userData.DefaultCam;
+          envObj.defaultCamLocation = defaultCamLocation;
+        }
+
         let rootCamObjects = false;
         let checkGroups = groups[groupTypes['camera']].children;
         checkGroups.forEach( (c,x)=>{
@@ -981,6 +990,7 @@ export class FileIO{
           if( parentName == groups[groupTypes['camera']].name.toLowerCase() ){
             parentName = "default";
           }
+          
           if( !envObj.camLocation.hasOwnProperty(parentName) ){
             envObj.camLocation[parentName]={};
             envObj.camLocation[parentName]["position"]=new Vector3( 0, 0, -10 );
