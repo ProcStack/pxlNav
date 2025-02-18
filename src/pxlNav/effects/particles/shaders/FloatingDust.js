@@ -164,6 +164,7 @@ export function dustVert( userDustData = {} ){
   ret+=`
         vScalar = pScalar * ParticleOpacity ;
         float pScale = pointScale.x * (seeds.w*.5+.5)*pScalar + 1.0;
+        pScale *= 1.0 - clamp( ((1.0-pScalar)-.5)*10.0 * FadeOutScalar, 0.0, 1.0 );
         pScale *= step( .5, atlas.x )*.5+1.;
 
         gl_PointSize = pScale;

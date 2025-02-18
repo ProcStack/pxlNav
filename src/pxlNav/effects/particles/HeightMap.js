@@ -36,7 +36,9 @@ export class HeightMap extends ParticleBase{
       "randomAtlas" : false,
       "additiveBlend" : false,
 
+      "jumpHeightMult" : 0,
       "offsetPos" : new Vector3( 0, 0, 0 ),
+      "windDir" : new Vector3( 0, 0, 0 ),
 
       "hasLights" : false,
       "fadeOutScalar" : 1.59 , 
@@ -130,7 +132,8 @@ export class HeightMap extends ParticleBase{
       pointScale:{ type:"f", value: this.pscale },
       intensity:{ type:"f", value:1.0 },
       rate:{ type:"f", value:.035 },
-      positionOffset:{ type:"v", value:this.shaderSettings["offsetPos"] }
+      positionOffset:{ type:"v", value:this.shaderSettings["offsetPos"] },
+      windDir:{ type:"v", value:this.shaderSettings["windDir"] }
     };
     //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallVert() );
 

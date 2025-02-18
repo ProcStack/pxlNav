@@ -87,7 +87,6 @@ export function heightMapVert( userDustData = {} ){
     varying vec3 vCd;
     varying vec2 vAtlas;
     varying vec2 vRot;
-    varying float vScalar;
     varying float vAlpha;
     
     
@@ -138,7 +137,7 @@ export function heightMapVert( userDustData = {} ){
       
       // Loop point positions based on camera location
       float yFract=fract(t+seeds.x);
-      //pOff.xyz += time.x * windDir.xyz; 
+      pOff.xyz += time.x * windDir.xyz; 
       vec3 pos= pOff ;
       
       vec3 noiseCd=texture2D(noiseTexture, sin(pos.xz*.05+seeds.xz+(time.x + seeds.y)*2.1) ).rgb-.5;
@@ -163,7 +162,7 @@ export function heightMapVert( userDustData = {} ){
       pos += (noiseCd * noiseCdb ) * 50. * ( (seeds.w+.75)*4.);
 
       vec3 mPos = modelMatrix[3].xyz;
-      pos.xz = mod( pos.xz - cameraPosition.xz , PROX) + cameraPosition.xz - PROX*.5;
+      pos.xz = mod( pos.xz - cameraPosition.xz , PROX) + cameraPosition.xz - PROX*.5 + positionOffset.xz;
       
       
       vec2 fitPos = clamp( ( pos.xz - mPos.xz  ) * scaleXZ + .5, vec2(0.0), vec2(1.0));
@@ -178,12 +177,12 @@ export function heightMapVert( userDustData = {} ){
       float heightVal = heightCd[0] * oneThird + heightCd[1] * oneThird + heightCd[2] * oneThird;
 
       pos.y = tankSize.y * heightVal + mPos.y;
-      pos.y += max(1.0, jumpHeight * JumpHeightMult * WanderInf);
+      pos.y += max(1.0, (jumpHeight + positionOffset.y) * JumpHeightMult * WanderInf);
       
       
       float pScalar = clamp( (1.-length(pos-cameraPosition )*PROX_INV) * FadeOutScalar, 0.0, 1.0  );
       float aMult = min(1.0, pScalar*3.0);
-      vAlpha = min(1.0, (seeds.x*.5+.75) * aMult * spawnInf * 2.5);
+      vAlpha = min( 1.0, (seeds.x*.5+.75) * aMult * spawnInf * 2.5 * ParticleOpacity );
 
   `;
 
@@ -202,9 +201,9 @@ export function heightMapVert( userDustData = {} ){
   }
 
   ret+=`
-        vScalar = pScalar * ParticleOpacity ;
-        float pScale = pointScale.x * (seeds.w*.5+.5)*pScalar + 1.0;
-        pScale *= step( .5, atlas.x )*.5+1.;
+        float pScale = pointScale.x * seeds.z * pScalar;
+        pScale *= 1.0 - clamp( ((1.0-pScalar)-.5)*10.0 * FadeOutScalar, 0.0, 1.0 );
+        pScale *= step( .5, atlas.x ) ;
 
         gl_PointSize = pScale;
         
@@ -225,7 +224,6 @@ export function heightMapFrag( hasAlphaMap = false ){
     varying vec3 vCd;
     varying vec2 vAtlas;
     varying vec2 vRot;
-    varying float vScalar;
     varying float vAlpha;
     
     void main(){
@@ -264,7 +262,7 @@ export function heightMapFrag( hasAlphaMap = false ){
   }
 
   ret+=`
-        float alpha = min(1.0, dustCd.a*1.5) * vAlpha * vScalar * vis;
+        float alpha = min(1.0, dustCd.a*1.5) * vAlpha * vis;
         vec4 Cd=vec4( dustCd.rgb, alpha );
 
         gl_FragColor=Cd;
