@@ -5,11 +5,8 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp; **CJS & UMD versions needs testing, see `./builds` for these versions.**
 <br/>&nbsp;&nbsp; **Please bare with me while I work out any NPM packaging issues.**
 <br/><br/>**Visit [procstack.github.io site](https://procstack.github.io/) to see static-camera pxlNav action.**
-<br/>**For an Environment to roam around in FPV, visit [procstack.github.io/Outlet.htm](https://procstack.github.io/Outlet.htm)**
+<br/>&nbsp;&nbsp; **For an Environment to roam around in FPV, visit [procstack.github.io/Outlet.htm](https://procstack.github.io/Outlet.htm)**
 <p align='center'><img src='./docs/assets/pxlNav_TheOutlet_2025-2-8_Coastline_sm.jpg' alt="pxlNav Example The Outlet" /></p>
-<br/>
-
---------------------------------------------------------------------------------------------
 
 ## <br/>**Index**
 * [Install Files](#install-files)
