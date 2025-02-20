@@ -914,7 +914,7 @@ export class Camera{
     let roomKeys = Object.keys(this.pxlEnv.roomSceneList);
     let roomEnv = this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom]
     
-    objTarget = objTarget || roomEnv.defaultCamLocation;
+    objTarget = objTarget || roomEnv.defaultCamLocation || "";
     objTarget = objTarget.toLowerCase()
     let camLocName = roomName.toLowerCase();
 

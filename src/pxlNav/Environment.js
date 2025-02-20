@@ -745,7 +745,7 @@ export class Environment{
     
     // Get clickable objects under mouse
     let rayHits={};
-    if( curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) ){
+    if( curRoomObj?.hasColliderType && curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) ){
       let curObjList = curRoomObj.getColliders( COLLIDER_TYPE.CLICKABLE );
       rayHits = this.pxlColliders.castInteractRay( this.currentRoom, curObjList, this.pxlCamera.camera, mouseScreenSpace );
     }
@@ -799,7 +799,7 @@ export class Environment{
     
     // Get hoverable objects under mouse
     let rayHits={};
-    if( curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) || curRoomObj.hasColliderType( COLLIDER_TYPE.HOVERABLE ) ){
+    if( curRoomObj?.hasColliderType && (curRoomObj.hasColliderType( COLLIDER_TYPE.CLICKABLE ) || curRoomObj.hasColliderType( COLLIDER_TYPE.HOVERABLE )) ){
       // Combine objectClickable with objectHoverable This may change
       let curObjList = [ ...curRoomObj.getColliders( COLLIDER_TYPE.CLICKABLE ), ...curRoomObj.getColliders( COLLIDER_TYPE.HOVERABLE ) ];
       rayHits = this.pxlColliders.castInteractRay( this.currentRoom, curObjList, this.pxlCamera.camera, mouseScreenSpace );

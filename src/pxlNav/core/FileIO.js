@@ -968,6 +968,7 @@ export class FileIO{
           defaultCamLocation = groups[groupTypes['camera']].userData.DefaultCam;
           envObj.defaultCamLocation = defaultCamLocation;
         }
+        console.log("Default Cam Location - ",defaultCamLocation);
 
         let rootCamObjects = false;
         let checkGroups = groups[groupTypes['camera']].children;
