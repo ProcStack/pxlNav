@@ -22,6 +22,7 @@ export class ShaderEditor {
     this.fragObj = null;
     
     this.currentShader = null;
+    this.clickThroughListener = this.clickThroughCheck.bind(this);
     
     this.shaderSliderValues=new Vector3();
 
@@ -331,9 +332,9 @@ export class ShaderEditor {
 
     let tmpThis=this;
       
-      this.children.shaderSelect.onchange=(s)=>{
-        tmpThis.updateShaderTextFields( this.children.shaderSelect.value );
-      };
+    this.children.shaderSelect.onchange=(s)=>{
+      tmpThis.updateShaderTextFields( this.children.shaderSelect.value );
+    };
       
       
     let fontSizeSmallerObj=document.getElementById("gui_shaderEditorFontSmaller");
@@ -957,6 +958,8 @@ export class ShaderEditor {
     }
 
 
+    this.disconnectFocusListener();
+
     this.updateHeaderBar( );
 
     setTimeout( ()=>{
@@ -993,10 +996,40 @@ export class ShaderEditor {
       helpDiv.style.left = this.editorWidthMinMax['max']+"vw";
     }
 
+    this.connectFocusListener();
+
     this.updateHeaderBar();
 
-    // -- -- --
+    
+  }
+  
+  // -- -- --
 
+  clickThroughCheck( e ){
+    let clickX = e.x;
+    let clickY = e.y;
+
+    let clickTargetStack = document.elementsFromPoint( clickX, clickY );
+    
+    // Check if the user clicked on the shader editor
+    //   But with DOM elements over the top of it in z-index
+    for( let x=0; x<clickTargetStack.length; ++x ){
+      let curObj = clickTargetStack[x];
+      if( curObj.id == "gui_shaderEditorParent" ){
+        return;
+      }
+    }
+
+    // User didn't click on the shader editor
+    this.blurShaderEditor();
+
+  }
+
+  connectFocusListener(){
+    document.addEventListener("mousedown", this.clickThroughListener);
+  }
+  disconnectFocusListener(){
+    document.removeEventListener("mousedown", this.clickThroughListener);
   }
 
 }
