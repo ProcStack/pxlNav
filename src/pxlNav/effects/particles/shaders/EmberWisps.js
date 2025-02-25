@@ -1,6 +1,6 @@
 // pxlNav Shader
 //  -- -- -- --
-// Written by Kevin Edzenga; 2020; 2024
+// Written by Kevin Edzenga; 2020; 2024, 2025
 
 import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
  
@@ -10,8 +10,7 @@ export function emberWispsVert( shaderSettings ){
   const vec3 EmberEarlyCd = vec3( 0.8, 0.5, .1 );
   const vec3 EmberOldCd = vec3( 0.634, 0.20, 0.20 );
   const float BaseSpeed = 0.77;
-  const float SpeadInf = 0.7;
-  const float EmberSpread = 5.0;
+  const float EmberSpread = 4.0;
   const float EmberFadeDistance = 0.04;
 
 // -- -- --
@@ -26,7 +25,6 @@ uniform vec3 windDir;
 uniform vec3 offsetPos;
 uniform float rate;
 uniform float pointScale;
-uniform vec3 sliders;  
 
 attribute vec4 seeds;
 attribute vec2 atlas;
@@ -37,8 +35,6 @@ varying vec2 vRot;
 varying float vAlpha;
 varying float vBrightness;
 
-
-
 float colDetect( vec2 pos, vec2 pt, vec2 n1, vec2 n2 ){
     vec2 ref=pos-pt;
     float ret = step( dot( ref, n1 ), 0.0 );
@@ -46,7 +42,6 @@ float colDetect( vec2 pos, vec2 pt, vec2 n1, vec2 n2 ){
     
     return ret;
 }
-
 
 void main(){
     vAtlas=atlas;
@@ -63,11 +58,15 @@ void main(){
     float t=time.x*rate*rateShift;
     
     // Random shift to a cycle y movement
-    float shiftY= mod( t+t*seeds.x+seeds.z*8.0+noiseCd.r*10.20*(seeds.y*2.0-1.0)+noiseCd.b+(-seeds.x+seeds.y)*4.0, 10.0);
+    //float shiftY= mod( t+t*seeds.x+seeds.z*8.0+noiseCd.r*10.20*(seeds.y*2.0-1.0)+noiseCd.b+(-seeds.x+seeds.y)*4.0, 10.0);
+    
+    float shiftY = (t+t*seeds.x+seeds.z*8.0+noiseCd.r*10.20*(seeds.y*2.0-1.0)+noiseCd.b+(-seeds.x+seeds.y)*4.0) * 0.1;
+    float lifePerc = fract( shiftY );
+    float loopSeed = floor( shiftY ) * seeds.w * 20.0;
+    shiftY = lifePerc * 10.0;
     
     // Change up ages of embers
-    float lifeFade = shiftY*.1;
-    float fadeDrop = min(1.0, lifeFade*lifeFade*4. ); 
+    float fadeDrop = min(1.0, lifePerc*lifePerc*4. ); 
     //
     float life = 1.0-max(0.0,abs(shiftY-seeds.x*.1)*(1.0-(seeds.x*1.0)) );
     life = 1.0-((shiftY*.001-seeds.x*.2) );
@@ -78,14 +77,13 @@ void main(){
     vec3 pos= pOff ;
     
 
-    float spreadPerc = SpeadInf  * min(1.0, life*1.);
-    pos.xz=(noiseCd.rg*noiseCd.r)*(seeds.x)*(life*seeds.zy*(seeds.w*4.0+1.)) * spreadPerc;
-    pos.xz = mix( pos.xz, normalize( pos.xz ), step(1.0, length(pos.xz)) ) * EmberSpread;
+    float spreadPerc = min(1.0, life*2.) * EmberSpread;
+    pos.xz=fract(noiseCd.rg*noiseCd.r + loopSeed)*(seeds.x)*(life*seeds.zy*(seeds.w*3.0 )) * spreadPerc ;
     
     
     // Directional push
-    float yPush = ( life * (life*.5+.5))  * min(1.0,pos.y*.12) * 2.8;
-    pos.xz += windDir.xz * yPush * pos.y*(.5+life*.5);
+    float yPush = ( life * (life*.5+.5))  * min(1.0,pos.y*.03) * 3.2;
+    pos.xz += windDir.xz * yPush * max(0.0,pos.y-.5)*(.5+life*.5);
     pos.y += yPush;
     
     float pToCamLen = length(pos-cameraPosition);
@@ -106,10 +104,10 @@ void main(){
     gl_PointSize =  pScale*fadeDrop ;
     
     
-    float tightenBase = min( 1.0, pos.y*.2 );
+    float tightenBase = min( 1.0, pos.y* 0.12 + .2 );
     pos.xz *= tightenBase*tightenBase;
     
-    pos += modelMatrix[3].xyz + vec3( -1.76, -0.2269, -0.25);
+    pos += modelMatrix[3].xyz + vec3( -.5, -0.2269, 0.0);
     vec4 mvPos=viewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix*mvPos;
     
