@@ -90,12 +90,13 @@ var sH = window.innerHeight;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-
 /**
  * pxlNav - Core Engine
  *   The primary entry point for the pxlNav engine.
  * Initialize
+ * @alias pxlNav
+ * @module pxlNav
+ * @description Primary pxlNav engine module
  * @param {object} options - The options object for the pxlNav environment
  * @param {string} projectTitle - The title of the project
  * @param {string} startingRoom - The initial room to load
@@ -314,7 +315,7 @@ class pxlNav{
     if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
       console.log("pxlNav v" + pxlNavVersion +" set to Verbose Info Mode");
       console.log("  With Three.js v171");
-      console.log("Booting pxlNAv...");
+      console.log("Booting pxlNav...");
     }
 
     this.pxlQuality.init() // Load cookies and update settings

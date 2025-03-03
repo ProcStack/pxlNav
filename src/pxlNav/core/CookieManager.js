@@ -10,6 +10,11 @@
 //      This would be your "per room" user data
 //    If not used in pxlNav, just provide a unique prefix to the constructor
 
+/**
+ * @namespace pxlCookie
+ * @description Cookie management
+ */
+
 // This is only used for `CookieManager.log()`
 //   Alter the verbose check in `log()` to make this file standalone
 import { VERBOSE_LEVEL } from "./Enums.js";

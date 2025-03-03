@@ -10,6 +10,11 @@ import { InfoGui } from './pxlGui/InfoGui.js';
 import { SettingsGui } from './pxlGui/SettingsGui.js';*/
 
 
+/**
+ * @namespace pxlGuiDraws
+ * @description GUI drawing and management
+ */
+
 export class GUI extends GUIManager{
   constructor(verbose, projectTitle="Metal-Asylum", assetRoot="images/assets/", guiRoot="images/GUI/" ){
     super(verbose, projectTitle, assetRoot, guiRoot );

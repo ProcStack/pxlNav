@@ -8,6 +8,8 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp;&nbsp; **For an Environment to roam around in FPV, visit [procstack.github.io/Outlet.htm](https://procstack.github.io/Outlet.htm)**
 <p align='center'><img src='./docs/assets/pxlNav_TheOutlet_2025-2-8_Coastline_sm.jpg' alt="pxlNav Example The Outlet" /></p>
 
+<br/>Click here to go to the [pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)
+
 <br/>Since the pxlNav Docs are still being created,
 <br/>&nbsp;&nbsp; If you need help, feel free to ask on [pxlNav Support](https://discord.gg/D8kMgtBsmp) discord group.
 

@@ -3,6 +3,7 @@
 // Currently, any mobile devices default to autocam because of apability issues for web cam / audio support
 //   This limits any projects which don't require network support
 
+
 import {
   Vector2,
   Vector3,
@@ -10,6 +11,10 @@ import {
   Euler
 } from "../../libs/three/three.module.min.js";
 
+/**
+ * @namespace pxlAutoCam
+ * @description Auto camera movement
+ */
 export class AutoCamera{
   constructor( enabled=false ){
     this.enabled=enabled;

@@ -3,7 +3,8 @@
 const fs = require('fs');
 
 const fileList = {
-  './packing/jsdoc.css' : './docs/jsdoc/styles/jsdoc.css'
+  './packing/jsdoc.css' : './docs/jsdoc/styles/jsdoc.css',
+  './packing/docs-init.js' : './docs/jsdoc/docs-init.js',
 }
 
 const fileKeys = Object.keys(fileList);

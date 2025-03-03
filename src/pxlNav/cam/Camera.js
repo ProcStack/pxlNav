@@ -23,23 +23,12 @@ import { VERBOSE_LEVEL, COLLIDER_TYPE, CAMERA_EVENT } from "../core/Enums.js";
 //          Camera, Player Controller, Force Influence / Collision
 
 
+ 
 /**
  * Camera or pxlCamera class
- *   Handles the camera movement, rotation, jumping, collision detection, and interaction with the environment.
- * Measurements are assumed to be in Meters, Seconds, and Radians
- *   But it's all just numbers in the end.
- * `standingHeight` is the height (Meters) of the user when standing. Default is 1.75 meters.
- * `movementScalar` is the scalar for movement speed. Default is 1.0.
- * `jumpScalar` is the scalar for jump height. Default is 1.0.
- * `userScale` determines the overall scale of the user's height, jump height, and movement speed.
- *   Generally, only edit `userScale` if the gross settings seem incorrect. Default is 1.0.
- * 
- * For Camera Rotation, please note that Roam Camera and Static Camera are using different math.
- *   Free Roam expects the camera to always be oriented "up" to the gravity source.
- *     (Note, Gravity Source is WIP and not fully implemented, gravity is assumed -Y for now)
- *   To prevent rortaional issues, use the correct rotation function when needed-
- *     Free Roam Camera Rotation : `this.updateRoamCameraRotation();`
- *     Static Camera Rotation : `this.updateStaticCameraRotation();`
+ * @alias pxlCamera
+ * @class
+ * @description Camera or pxlCamera class
  */
 export class Camera{
   constructor(){
@@ -276,6 +265,7 @@ export class Camera{
   /**
    * Sets dependencies for the Camera class.
    * @param {Object} pxlNav - The navigation object containing dependencies.
+   * @private
    */
   setDependencies( pxlNav ){
     this.pxlAudio=pxlNav.pxlAudio;
@@ -364,6 +354,7 @@ export class Camera{
    * Updates main values from worker data.
    * UNUSED CURRENTLY
    * @param {Object} data - The data from the worker.
+   * @private
    */
   updateMainValues( data ){
       let {gravityRate, standingHeightGravInfluence, cameraJumpImpulse}=data;
@@ -391,6 +382,16 @@ export class Camera{
   
 
   // Default is 1.75
+  /**
+   * Sets the user's standing height.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's standing height.
+   * @param {string} [roomName='default'] - The name of the room.
+   * @example
+   * // Set the user's standing height to 1.75 meters.
+   * this.pxlCamera.setUserHeight( 1.75 );
+   */
   setUserHeight( val, roomName="default" ){
     val = Math.max( val, 0.01 );
     if( !this.roomStandingHeight.hasOwnProperty(roomName) ){
@@ -405,39 +406,102 @@ export class Camera{
   }
 
   // Default is 5
+  /**
+   * Sets the user's maximum step height.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's maximum step height.
+   * @example
+   * // Set the user's maximum step height to 5 meters.
+   * this.pxlCamera.setMaxStepHeight( 5 );
+   */
   setMaxStepHeight( val ){
     val = Math.max( val, 0.01 );
     this.maxStepHeight=val;
   }
 
   // Default is 1
+  /**
+   * Sets the user's scale.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's scale.
+   * @example
+   * // Set the user's scale to 1.
+   * this.pxlCamera.setUserScale( 1 );
+   */
   setUserScale( val ){
     val = Math.max( val, 0.01 );
     this.userScale=val;
   }
   // Default is 1
+  /**
+   * Sets the user's movement scalar.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's movement scalar.
+   * @example
+   * // Set the user's movement scalar to 1.
+   * this.pxlCamera.setMovementScalar( 1 );
+   */
   setMovementScalar( val ){
     val = Math.max( val, 0.01 );
     this.movementScalar=val;
   }
   // Default is 10
+  /**
+   * Sets the user's maximum movement speed.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's maximum movement speed.
+   * @example
+   * // Set the user's maximum movement speed to 10 meters per second.
+   * this.pxlCamera.setMovementMax( 10 );
+   */
   setMovementMax( val ){
     val = Math.max( val, 0.01 );
     this.movementMax=val;
   }
   // Default is 0.85
+  /**
+   * Sets the user's movement easing rate.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's movement easing rate.
+   * @example
+   * // Set the user's movement easing rate to 0.85.
+   * this.pxlCamera.setMovementEase( 0.85 );
+   */
   setMovementEase( val ){
     val = Math.min( 1, Math.max( val, 0.01 ) );
     this.cameraMovementEase=val;
   }
 
   // Default is 0.75
+  /**
+   * Sets the jump scalar.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The jump scalar.
+   * @example
+   * // Set the jump scalar to 0.75.
+   * this.pxlCamera.setJumpScalar( 0.75 );
+   */
   setPositionBlend( val ){
     val = Math.min( 1, Math.max( val, 0.01 ) );
     this.camPosBlend=val;
   }
 
   // Default is 0.1
+  /**
+   * Sets the user's movement multiplier.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's movement multiplier.
+   * @example
+   * // Set the user's movement multiplier to 0.1.
+   * this.pxlCamera.setInputMovementMult( 0.1 );
+   */
   setInputMovementMult( val ){
     val = Math.max( val, 0.01 );
     this.cameraMoveLengthMult=val;
@@ -446,21 +510,57 @@ export class Camera{
   // -- -- --
 
   // Default is 1
+  /**
+   * Sets the user's jump scalar.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's jump scalar.
+   * @example
+   * // Set the user's jump scalar to 1.
+   * this.pxlCamera.setJumpScalar( 1 );
+   */
   setJumpScalar( val ){
     val = Math.max( val, 0.01 );
     this.jumpScalar=val;
   }
   // Default is 0.75
+  /**
+   * Sets the user's jump impulse.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's jump impulse.
+   * @example
+   * // Set the user's jump impulse to 0.75.
+   * this.pxlCamera.setJumpImpulse( 0.75 );
+   */
   setJumpImpulse( val ){
     val = Math.max( val, 0.01 );
     this.cameraJumpImpulse[0]=val;
   }
   // Default is 2.85
+  /**
+   * Sets the user's maximum jump hold.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's maximum jump hold.
+   * @example
+   * // Set the user's maximum jump hold to 2.85.
+   * this.pxlCamera.setJumpHoldMax( 2.85 );
+   */
   setJumpHoldMax( val ){
     val = Math.max( val, 0.01 );
     this.cameraMaxJumpHold[0]=val;
   }
   // Default is 0.08
+  /**
+   * Sets the user's jump repeat delay.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's jump repeat delay.
+   * @example
+   * // Set the user's jump repeat delay to 0.08.
+   * this.pxlCamera.setJumpRepeatDelay( 0.08 );
+   */
   setJumpRepeatDelay( val ){
     val = Math.max( val, 0.01 );
     this.releaseJumpLockDelay=val;
@@ -469,6 +569,15 @@ export class Camera{
   // -- -- --
 
   // Default is 0.85
+  /**
+   * Sets the user's camera movement easing.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's camera movement easing.
+   * @example
+   * // Set the user's camera movement easing to 0.85.
+   * this.pxlCamera.setCameraMoveEasing( 0.85 );
+   */
   setCameraRotateEasing( val ){
     if( !Array.isArray(val) ){
       if( typeof val == "number" ){
@@ -483,6 +592,15 @@ export class Camera{
   
   // Touch Sensitivity should be a pixel-to-device reasonable value
   //   Default is 500, being 500 pixels dragging range to look around
+  /**
+   * Sets the user's touch sensitivity.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's touch sensitivity.
+   * @example
+   * // Set the user's touch sensitivity to 500.
+   * this.pxlCamera.setTouchSensitivity( 500 );
+   */
   setTouchSensitivity( val ){
     if(val<=0){
       val=1;
@@ -491,6 +609,15 @@ export class Camera{
     this.touchSensitivityLimits = this.touchMaxSensitivity * this.pi;
   }
   
+  /**
+   * Sets the user's gravity rate.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's gravity rate.
+   * @example
+   * // Set the user's gravity rate to 0.3
+   * this.pxlCamera.setGravityRate( 0.3 );
+   */
   setGravityRate( val ){
     if(val<=0){
       val=1;
@@ -500,6 +627,15 @@ export class Camera{
 
   // Assume 1 unit is 1 meter/second^2
   //  But default is 2.5, so it's a bit lighter than Earth's gravity
+  /**
+   * Sets the user's gravity rate.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's gravity rate.
+   * @example
+   * // Set the user's gravity rate to 2.5
+   * this.pxlCamera.setGravityRate( 2.5 );
+   */
   setGravityMax( val ){
     if(val<=0){
       val=1;
@@ -509,6 +645,15 @@ export class Camera{
 
   // Set walking bounce settings
   // Default is 230
+  /**
+   * Sets the user's walk bounce seed.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's walk bounce seed.
+   * @example
+   * // Set the user's walk bounce seed to 230.
+   * this.pxlCamera.setWalkBounceSeed( 230 );
+   */
   setWalkBounceHeight( val ){
     if(val<=0){
       val=0;
@@ -516,6 +661,15 @@ export class Camera{
     this.walkBounceHeight=val;
   }
   // Default is 0.025
+  /**
+   * Sets the user's walk bounce rate.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's walk bounce rate.
+   * @example
+   * // Set the user's walk bounce rate to 0.025.
+   * this.pxlCamera.setWalkBounceRate( 0.025 );
+   */
   setWalkBounceRate( val ){
     if(val<=0){
       val=0.0001;
@@ -523,11 +677,29 @@ export class Camera{
     this.walkBounceRate=val;
   }
   // Default is 0.03
+  /**
+   * Sets the user's walk bounce ease in.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's walk bounce ease in.
+   * @example
+   * // Set the user's walk bounce ease in to 0.03
+   * this.pxlCamera.setWalkBounceEaseIn( 0.03 );
+   */
   setWalkBounceEaseIn( val ){
     val = Math.min( 1, Math.max( val, 0.0001 ) );
     this.walkBounceEaseIn=val;
   }
   // Default is 0.95
+  /**
+   * Sets the user's walk bounce ease out.
+   * @method
+   * @memberof pxlCamera
+   * @param {number} val - The user's walk bounce ease out.
+   * @example
+   * // Set the user's walk bounce ease out to 0.95
+   * this.pxlCamera.setWalkBounceEaseOut( 0.95 );
+   */
   setWalkBounceEaseOut( val ){
     val = Math.min( 1, Math.max( val, 0.01 ) );
     this.walkBounceEaseOut=val;
@@ -540,6 +712,17 @@ export class Camera{
   // TODO : This is a bit messy at the moment
   // TODO : Add a per-room userSettings with lookup into the `pxlUserSettings` structure
   //          Since with this set structure, it doesn't need to be individual variables
+  /**
+   * Sets the user's settings.
+   * @method
+   * @memberof pxlCamera
+   * @param {Object} userSettingsObject - The user's settings object.
+   * @example
+   * // Set the user's settings.
+   * import { pxlUserSettings } from "../core/Options.js";
+   * let userSettingsObject = Object.assign({}, pxlUserSettings);
+   * this.pxlCamera.setUserSettings( userSettingsObject );
+   */
   setUserSettings( userSettingsObject ){
     // User & collider step height settings
     if( userSettingsObject.hasOwnProperty("height") ){
@@ -611,6 +794,7 @@ export class Camera{
 ///////////////////////
   /**
    * Main step function to update camera state.
+   * @private
    */
   step(){
     // Update camera position with out gravity, jump, or collider influences.
@@ -629,7 +813,7 @@ export class Camera{
       if( this.hasGravity && this.cameraJumpActive ){
           this.camJump(this.pxlTimer.prevMS);
       }else if(this.cameraJumpVelocity>0 ){
-          this.killJumpImpulse( this.pxlTimer.deltaTime );
+          this.killJumpImpulse();
       }
     }
     
@@ -649,6 +833,7 @@ export class Camera{
   /**
    * Checks for events based on environment triggers.
    * Currently only checking for Ground Collider, Room Warps, and Portals
+   * @private
    */
   eventCheck(){
       if( this.colliderValid && this.eventCheckStatus){
@@ -663,6 +848,7 @@ export class Camera{
   /**
    * Updates device values based on velocity easing magnitude.
    * @param {number} velEaseMag - The current velocity magnitude.
+   * @private
    */
   updateDeviceValues( velEaseMag ){
     if(!this.pxlQuality.settings.leftRight){
@@ -696,6 +882,7 @@ export class Camera{
    * Builds device-pose monitors for gyroscope-enabled devices.
    * CURRENTLY UNWORKING
    * NOTE : Development in-progress through 'Device.js'
+   * @private
    */
   buildDeviceMonitors(){
     let camObject=this;
@@ -786,6 +973,16 @@ export class Camera{
   /**
    * Updates camera matrices.
    * Updates - Projection Matrix, Matrix World, & World Matrix
+   * @example
+   * import { Object3D } from "three";
+   * let emptyObject=new Object3D();
+   * 
+   * emptyObject.position.set(10,10,0);
+   * 
+   * this.pxlCamera.setTransform(emptyObject.position);
+   * 
+   * // Update camera matrices.
+   * this.pxlCamera.updateCameraMatrices();
    */
   updateCameraMatrices(){
     this.camera.updateProjectionMatrix();
@@ -795,6 +992,10 @@ export class Camera{
   /**
    * Resets camera calculations to a Vector3.
    * @param {Vector3} newPosition - The new position for the camera.
+   * @example
+   * import { Vector3 } from "three";
+   * let newPos=new Vector3(20,5,15);
+   * this.pxlCamera.resetCameraCalculations(newPos);
    */
   resetCameraCalculations( newPosition ){
     this.cameraMovement[0] = 0;
@@ -819,6 +1020,9 @@ export class Camera{
   /**
    * Sets the field-of-view for the camera.
    * @param {number} fov - The field-of-view.
+   * @example
+   * // Set the field-of-view to 75.
+   * this.pxlCamera.setFOV( 75 );
    */
   setFOV( fov ){
     this.camera.fov=fov;
@@ -833,6 +1037,10 @@ export class Camera{
    * @param {number} aspect - The aspect ratio.
    * @param {number} near - The near clipping plane.
    * @param {number} far - The far clipping plane.
+   * @example
+   * // Set the camera stats.
+   * //   FOV: 75, Aspect: 1.33, Near: 0.1, Far: 1000
+   * this.pxlCamera.setStats( 75, 1.33, 0.1, 1000 );
    */
   setStats( fov, aspect, near, far ){
     // TODO : Aspect is weird, I need to work out better calculations for this
@@ -853,6 +1061,12 @@ export class Camera{
    * For camera position changes, portals, and room warps
    * @param {Vector3} pos - The position to set the camera.
    * @param {Vector3} [lookAt=null] - The lookAt target.
+   * @example
+   * import { Vector3 } from "three";
+   * let pos=new Vector3(10,15,15);
+   * let lookAt=new Vector3(0,5,0);
+   * 
+   * this.pxlCamera.setTransform(pos, lookAt);
    */
   setTransform(pos, lookAt=null){ // Vector3, Vector3
     this.resetCameraCalculations(pos); // Reinitiates Camera; Forces collision detection, Kills user inputs
@@ -879,6 +1093,12 @@ export class Camera{
   * @param {Object3D|string} [lookAt=null] - The lookAt Camera Position Name or target object.
   * If a string is provided, it checks for the camera position if it exists in the Room,
   *   Ussuall set in your FBX file.
+  * @example
+  * import { Object3D } from "three";
+  * let obj=new Object3D();
+  * obj.position.set(10,15,15);
+  * 
+  * this.pxlCamera.setToObj(obj);
   */
   setToObj(obj, lookAt=null){ // Object3D, Object3D
     this.resetCameraCalculations( obj.position ); // Reinitiates Camera; Forces collision detection, Kills user inputs
@@ -914,6 +1134,13 @@ export class Camera{
    * @param {string} roomName - The name of the room to warp to.
    * @param {boolean} [start=false] - Whether to run the room's `start()` function.
    * @param {Object3D} [objTarget=null] - The target object in the room.
+   * @example
+   * // Warp the camera to the default location in "OutletEnvironment" room.
+   * this.pxlCamera.warpToRoom( "OutletEnvironment", true );
+   * 
+   * // Warp to the 'aboutMe' camera position in "CampfireEnvironment" room.
+   * //   Note, camera positions are set in your FBX by the camera's group name.
+   * this.pxlCamera.warpToRoom( "CampfireEnvironment", true, "aboutMe" );
    */
   warpToRoom(roomName, start=false, objTarget=null){
 
@@ -1041,6 +1268,12 @@ export class Camera{
     
     this.pxlAutoCam.checkStatus();
   }
+
+  /**
+   * Get a snapshot of the room to use as the diffuse texture for the warp effect.
+   * @private
+   *  
+   */
   warpToRoomSnapshot(roomName){
     this.pxlEnv.currentRoom=roomName;
     let roomEnv=this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom];
@@ -1064,7 +1297,11 @@ export class Camera{
    * Initiates fast travel to a specific location.
    * This begins the warp effect process,
    *   It doesn't affect camera upon triggering, just queuing the warp event
+   * 
+   * *Implementation has been disabled until further development*
+   * 
    * @param {number} [hotkey=0] - The hotkey for the fast travel location.
+   * 
    */
   fastTravel(hotkey=0){
         if( this.pxlAutoCam.enabled ){
@@ -1099,6 +1336,13 @@ export class Camera{
   /**
    * Handles the camera jump key press or release.
    * @param {boolean} [jumpKeyIsDown=false] - Whether the jump (Default : Space) key is pressed.
+   * @example
+   * // Handle the camera jump key press or release.
+   * //   Player has pressed the jump key
+   * this.pxlCamera.camJumpKey( true );
+   * 
+   * //   Player has released the jump key
+   * this.pxlCamera.camJumpKey( false );
    */
   camJumpKey( jumpKeyIsDown=false ){
     if( jumpKeyIsDown ){ // Space is down
@@ -1114,6 +1358,7 @@ export class Camera{
 
   /**
    * Initializes the jump values for the camera.
+   * @private
    */
   camInitJump(){
     // Link static camera to prevent jumping as well
@@ -1142,6 +1387,7 @@ export class Camera{
    * Handles the camera jump step.
    * Step the jump while impulse isn't 0.
    * @param {number} curTime - The current time.
+   * @private
    */
   camJump(curTime){
     let timeDelta= (curTime-this.pxlDevice.keyDownCount[2]) ;
@@ -1168,9 +1414,12 @@ export class Camera{
   /**
    * Kills the jump impulse.
    * Space released before max jump
+   * @example
+   * // Kill the jump impulse.
+   * this.pxlCamera.killJumpImpulse();
    */
-  killJumpImpulse(deltaTime){
-    let toImpulse=this.cameraJumpVelocity * (this.cameraJumpVelocityEaseOut);
+  killJumpImpulse( scalar=1){
+    let toImpulse=this.cameraJumpVelocity * scalar * this.cameraJumpVelocityEaseOut;
 
     this.cameraJumpVelocity= toImpulse>.1 ? toImpulse : 0;
     this.workerFunc( "killJumpImpulse" );
@@ -1182,6 +1431,11 @@ export class Camera{
   /**
    * Updates the gravity for the camera.
    * Gravity is updated and offset landing height with an ease back to standing upright
+   * Ran internally during the main loop, but revealed for external access
+   * @param {number} deltaTime - The time since the last frame.
+   * @example
+   * // Update the gravity for the camera.
+   * this.pxlCamera.updateGravity( this.pxlTimer.deltaTime );
    */
   updateGravity( deltaTime ){
     if( this.runMain ){
@@ -1217,6 +1471,9 @@ export class Camera{
   /**
    * Resets the gravity for the camera.
    * Ran during Jump Landing, Room & Portal Warps currently
+   * @example
+   * // Reset the gravity for the camera.
+   * this.pxlCamera.resetGravity();
    */
   resetGravity(){
     this.gravityCount=0;
@@ -1227,6 +1484,10 @@ export class Camera{
   /**
    * Handles the jump landing, stopping the camera jump.
    * @param {boolean} [send=true] - Whether to send the landing event.
+   * @example
+   * // Force the camera to "land" from a jump
+   * //   Player will still be in the air, but gravity will be active
+   * this.pxlCamera.jumpLanding();
    */
   jumpLanding( send=true ){
     // Is space held down?
@@ -1256,6 +1517,11 @@ export class Camera{
    * Ground plane, obstacles, and no terrain (If there are colliders in scene)
    * @param {Vector3} curCamPos - The current camera position.
    * @returns {Vector3} - The updated camera position.
+   * @example
+   * // Check for main collider interactions.
+   * let curPos=this.pxlCamera.colliderCheck( this.camera.position );
+   * // Update the camera position.
+   * this.setTransform( curPos );
    */
   // TODO : gravitySource should probably originate from Room's object list, but for now...
   // TODO : Collision check shouldn't run if no cam movement length aside from gravity, store floor name and collision position from prior run
@@ -1501,6 +1767,10 @@ export class Camera{
    * For GravitySource, make sure to get vector delta magnitude, not just Y delta
    * @param {Vector3} curCamPos - The current camera position.
    * @returns {number} - The distance to the collider.
+   * @example
+   * // Check if the collider is valid, within the max step height.
+   * let dist=this.pxlCamera.checkColliderValid( this.camera.position );
+   * // Update the camera position.
    */
   checkColliderValid( curCamPos ){
     this.colliderValidityChecked=true;
@@ -1523,6 +1793,11 @@ export class Camera{
    *   For any custom Collider Events, use the `castray()`
    * @param {string} [checkObject=null] - The collider object to check.
    * @returns {boolean} - Whether an event was triggered.
+   * @example
+   * // Trigger an event based on the collider object.
+   * this.pxlCamera.eventTrigger( "AudioTrigger_1" );
+   * // Update the camera position.
+   * this.setTransform( curPos );
    */
   eventTrigger( checkObject=null ){
     // Check if camera is in Roam or Static mode
@@ -1628,6 +1903,7 @@ export class Camera{
    * @param {string} curNameBase - The base name of the item.
    * @param {boolean} validHit - Whether the hit was valid.
    * @returns {boolean} - Whether the item was triggered.
+   * @private
    */
   itemCheck(curNameBase, validHit){
     if(!validHit){ return false; }
@@ -1737,6 +2013,16 @@ export class Camera{
   //     pxlNav.trigger("Camera","Roam")
   //      -or-
   //     pxlNav.trigger("Camera","Static")
+  /**
+   * Toggles the camera movement.
+   * @param {boolean} [canMoveVal=null] - Whether the camera can move.
+   * @example
+   * // Toggle the camera to `Static` mode.
+   * this.pxlCamera.toggleMovement( false );
+   * 
+   * // Toggle the camera to `Roam` mode.
+   * this.pxlCamera.toggleMovement( true );
+   */
   toggleMovement( canMoveVal=null ){
     if(canMoveVal == null){
       canMoveVal=!this.canMove;
@@ -1748,7 +2034,16 @@ export class Camera{
   /**
    * Updates the movement based on the current time.
    * Appling down directional key values to camera movement array
+   * 
+   * Ran internally during the main loop, but revealed for external access
+   * 
    * @param {number} curTime - The current time.
+   * @example
+   * // Update the movement based on the current time.
+   * this.pxlCamera.updateMovement( this.pxlTimer.deltaTime );
+   * 
+   * // Log the current camera movement direction in X and Z.
+   * console.log( this.pxlCamera.cameraMovement );
    */
   updateMovement(curTime){
 
@@ -1808,6 +2103,7 @@ export class Camera{
    * Initializes the starting camera position per-frame.
    *   This is ran in `updateCamera()` 
    * @returns {Vector3} - The initial camera position.
+   * @private
    */
   initFrameCamPosition(){
     let curCamPos=this.cameraPos.clone();
@@ -1862,8 +2158,23 @@ export class Camera{
   /**
    * Updates the camera position based on gravity and collisions.
    *      Delta ( camPos + gravity direction * gravity rate ) > ( Distance camPos to Collider Hit )
+   * 
+   * Handled internally during the main loop, but revealed for external access
+   * 
    * @param {Vector3} curCamPos - The current camera position.
    * @returns {Vector3} - The updated camera position.
+   * @example
+   * // Update the camera position based on gravity and collisions.
+   * let curPos=this.pxlCamera.updateCamera( this.camera.position );
+   * curPos = this.pxlCamera.applyGravity( curPos );
+   * 
+   * // Check if the collider is valid, within the max step height.
+   * let dist=this.pxlCamera.checkColliderValid( curPos );
+   * 
+   * if( this.colliderValid ){
+   *   // Update the camera position.
+   *   this.setTransform( curPos );
+   * }
    */
   applyGravity( curCamPos ){
     if( this.canMove && this.hasGravity ){
@@ -1921,6 +2232,10 @@ export class Camera{
    * Gets the standing height of the user.
    * Head to Foot only - No landing, gravity, or walk-bounce
    * @returns {number} - The standing height.
+   * @example
+   * // Get the standing height of the user.
+   * let standingHeight=this.pxlCamera.getStandingHeight();
+   * console.log( "getStandingHeight()", standingHeight );
    */
   getStandingHeight(){
     let retHeight = this.standingHeight;
@@ -1933,6 +2248,10 @@ export class Camera{
   /**
    * Gets the user height including jump and walking-bounce offsets.
    * @returns {number} - The user height.
+   * @example
+   * // Get the user height including jump and walking-bounce offsets.
+   * let userHeight=this.pxlCamera.getUserHeight();
+   * console.log( "getUserHeight()", userHeight );
    */
   getUserHeight(){
     // Add bob to movement to appear as taking steps
@@ -2005,7 +2324,7 @@ export class Camera{
    * Note: Known bug, static camera rotation is based on the current camera rotation
    *         This causes an inate rotation when the camera is moved to a new position
    */  
-  updateRoamCameraRotation(){
+  updateRoamRotation(){
     if(this.cameraPose.alpha==null){ // ## Should gyro exist, don't run.  But need to allow controlled look around on mobile
       let xGrav=this.pxlDevice.gyroGravity[2];//*this.gravityRate;//*PI;
       
@@ -2049,7 +2368,7 @@ export class Camera{
     }
   }
   
-  updateStaticCameraRotation(){
+  updateStaticRotation(){
       // this.pxlDevice.touchMouseData.startPos;
       // this.pxlDevice.touchMouseData.endPos;
       // this.pxlDevice.touchMouseData.netDistance;
@@ -2093,6 +2412,13 @@ export class Camera{
 
   /**
    * Locks the camera to look at a target.
+   * @example
+   * // Lock the camera to look at a target.
+   * let targetObj = new Object3D();
+   * targetObj.position.set( 10, 15, 5 );
+   * 
+   * this.lookAtLockPerc=1;
+   * this.pxlCamera.lookAtTarget( targetObj );
    */
   lookAtTargetLock(){
     if(!this.lookAtTargetActive){ return; }
@@ -2135,6 +2461,9 @@ export class Camera{
    * @param {number} [visualType=0] - The type of visual effect.
    * @param {Object} [warpObj=null] - The warp object.
    * @param {string} [target='init'] - The target of the warp.
+   * @example
+   * // Trigger a Room Warp / Portal Screen Effect event.
+   * this.pxlCamera.warpEventTriggered( 1, warpObj, 'init' );
    */
   warpEventTriggered( visualType=0, warpObj=null, target='init' ){
     if( !this.warpActive ){
@@ -2165,6 +2494,7 @@ export class Camera{
 
   /**
    * Updates low-quality render events.
+   * @private
    */
   lowQualityUpdates(){
     if(this.HDRView){
@@ -2181,6 +2511,7 @@ export class Camera{
 
   /**
    * Updates mid-quality render events.
+   * @private
    */
   midQualityUpdates(){
     // Trailing Effects; Fake Motion Blur
@@ -2234,8 +2565,15 @@ export class Camera{
    * @param {Vector3} cameraPos - The camera position.
    * @param {number} standingHeight - The standing height.
    * @param {boolean} [force=false] - Whether to force the emission.
+   * @private
    */
   emitCameraTransforms( cameraPos, standingHeight, force=false ){
+    this.emit("cameraTransforms",{
+      cameraPos:cameraPos,
+      standingHeight:standingHeight,
+      force:force
+    });
+
     // Networking scripting removed
   }
   /**
@@ -2244,6 +2582,7 @@ export class Camera{
    *   Also as a server-side sanity check that the user is in the correct "chat" room and other data that may have gone stale.
    * You'll need to implement your own usage of this function with server-side logic.
    * CURRENTLY UNUSED
+   * @private
    */
   jogServerMemory(){
     let curCamPos=this.cameraPos.clone();
@@ -2258,7 +2597,7 @@ export class Camera{
    * Main update function for the camera.
    */
   updateCamera(){
-    //this.updateStaticCameraRotation();
+    //this.updateStaticRotation();
     //let velEaseMag=this.pxlDevice.touchMouseData.velocityEase.length();
     let velEaseMag = this.pxlDevice.touchMouseData.velocity.length();
     this.hasRotated = this.hasRotated || velEaseMag > 0;
@@ -2295,7 +2634,7 @@ export class Camera{
         this.hasGravity = false;
         this.hasMoved = false;
         if( this.pxlOptions.allowStaticRotation && this.hasRotated ){ // Static Camera Mode
-          this.updateStaticCameraRotation();
+          this.updateStaticRotation();
           this.camera.updateMatrixWorld();
         }
         this.hasRotated = false;
@@ -2343,10 +2682,10 @@ export class Camera{
       //   Static keeps the camera oriented with Camera Position -to- LookAt cross product
       //    `cross( cross( normalized(LookAt-Pos), Up), Up )`
       if( this.hasRotated && this.canMove ){ // Roam Camera Mode
-        this.updateRoamCameraRotation();
+        this.updateRoamRotation();
         didUpdate = didUpdate || this.hasRotated;
       }else if( this.hasRotated ){ // Static Camera Mode
-        this.updateStaticCameraRotation();
+        this.updateStaticRotation();
         didUpdate = didUpdate || this.hasRotated;
       }
       //this.lookAtTargetLock(); // Camera lookAt target locking
@@ -2375,6 +2714,16 @@ export class Camera{
 
   // pxlNav Callbacks
   //   `event` should be of `pxlEnum.CAMERA_EVENT` type
+  /**
+   * Subscribes to a camera event.
+   * @param {string} event - The camera event.
+   * @param {function} callback - The callback function.
+   * @example
+   * // Subscribe to a camera event.
+   * this.pxlCamera.subscribe( "cameraTransforms", (data) => {
+   *  console.log( data );
+   * }
+   */
   subscribe( event, callback ){
     if( !this.callbacks.hasOwnProperty(event) ){
       this.callbacks[event] = [];
@@ -2382,6 +2731,10 @@ export class Camera{
     this.callbacks[event].push( callback );
   }
 
+  /**
+   * Emits a camera event.
+   * @private
+   */
   emit( event, data ){
     if( this.callbacks.hasOwnProperty(event) ){
       this.callbacks[event].forEach( (callback) => {

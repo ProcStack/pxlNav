@@ -31,6 +31,11 @@
 //  `Colliders.castGravityRay()` and `Colliders.castInteractRay()`
 //     Are the primary functions for collision detection.
 
+/**
+ * @namespace pxlColliders
+ * @description Collider handling
+ */
+
 import {
   Vector2,
   Vector3,

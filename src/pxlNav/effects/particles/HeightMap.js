@@ -1,3 +1,5 @@
+// Height-Map based, Bound Box fit, Particle System for pxlNav
+//   Written by Kevin Edzenga; 2025
 
 import {
   Vector3,
@@ -11,10 +13,30 @@ import {
 import ParticleBase from './ParticleBase.js';
 import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
 
-// Free floaties in the environment
-//   Dust balls & flakes
 
+/**
+ * Class representing a HeightMap particle system.
+ * Extends the ParticleBase class.
+ * @alias HeightMap
+ * @class
+ * @extends ParticleBase
+ * @memberof pxlNav.pxlEffects.pxlParticles
+ */
 export class HeightMap extends ParticleBase{
+  /**
+   * Creates an instance of HeightMap.
+   * 
+   * @param {Object} room - The room object.
+   * @param {string} [systemName='heightMap'] - The name of the particle system.
+   * @property {Object} room - The room object.
+   * @property {string} name - The name of the particle system.
+   * @property {Object} heightMapPath - The path to the height map texture.
+   * @property {Object} spawnMapPath - The path to the spawn map texture.
+   * @property {number} spawnMapMode - The number of channels in the spawn map texture.
+   * @property {Object} material - The material for the particle system.
+   * @property {Object} shaderSettings - The shader settings for the particle system.
+   * @property {Array<string>} knownKeys - Known keys for shader settings.
+   */
   constructor( room=null, systemName='heightMap'){
     super( room, systemName );
     this.name=systemName;
@@ -26,6 +48,26 @@ export class HeightMap extends ParticleBase{
 
     this.material = null;
 
+    /**
+     * Shader settings for the height map particles.
+     * @type {Object}
+     * @property {number} vertCount - Number of vertices.
+     * @property {number} pScale - Scale of the particles.
+     * @property {number} pOpacity - Opacity of the particles.
+     * @property {number} proxDist - Proximity distance.
+     * @property {number} atlasRes - Atlas resolution.
+     * @property {Array} atlasPicks - Atlas picks.
+     * @property {boolean} randomAtlas - Random atlas flag.
+     * @property {boolean} additiveBlend - Additive blending flag.
+     * @property {number} jumpHeightMult - Jump height multiplier
+     * @property {Vector3} offsetPos - Offset position.
+     * @property {Vector3} windDir - Wind direction.
+     * @property {boolean} hasLights - Lights flag.
+     * @property {number} fadeOutScalar - Fade out scalar.
+     * @property {number} wanderInf - Wander influence.
+     * @property {number} wanderRate - Wander rate.
+     * @property {number} wanderFrequency - Wander frequency.
+     */
     this.shaderSettings = {
       "vertCount" : 1000,
       "pScale" : 7,
@@ -46,13 +88,26 @@ export class HeightMap extends ParticleBase{
       "wanderRate" : 1.0 , 
       "wanderFrequency" : 2.85 
     }
+    /**
+     * Known keys for shader settings.
+     * @type {Array<string>}
+     */
     this.knownKeys = Object.keys( this.shaderSettings );
   }
   
+  /**
+   * Sets the path for the height map texture.
+   * @param {string} path - The path to the height map texture.
+   */
   setHeightMapPath( path ){
     this.heightMapPath = path;
   }
 
+  /**
+   * Sets the path for the spawn map texture and its mode.
+   * @param {string} path - The path to the spawn map texture.
+   * @param {number} [channels=1] - The number of channels in the spawn map texture.
+   */
   setSpawnMapPath( path, channels=1 ){
     this.spawnMapPath = path;
 
@@ -63,8 +118,12 @@ export class HeightMap extends ParticleBase{
     this.spawnMapMode = channels;
   }
 
-  // 'vertexCount' - Point Count
-  // 'pScale' - Point Base Scale
+  /**
+   * Builds the particle system with the given shader settings and object reference.
+   * @param {Object} [curShaderSettings={}] - The current shader settings.
+   * @param {Object} [objectRef=null] - The reference object for positioning and sizing.
+   * @returns {Object} The particle system added to the scene.
+   */
   build( curShaderSettings={}, objectRef=null ){
     
     if( curShaderSettings && typeof curShaderSettings === Object ){

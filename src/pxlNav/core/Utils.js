@@ -1,4 +1,9 @@
 
+/**
+ * @namespace pxlUtils
+ * @description Utility functions
+ */
+
 import {
   Vector2,
   Vector3,

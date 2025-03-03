@@ -10,6 +10,7 @@
 //     (EventManager class isn't fully integrated yet)
 //
 
+
 import { DEVICE_ACTION, HUD_DRAW, HUD_ELEMENT } from "../core/Enums.js";
 
 import { ElementBase } from "./elements/elementBase.js";
@@ -20,23 +21,26 @@ import { Thumbstick } from "./elements/thumbstick.js";
 /**
  * Class to handle a Heads-Up Display (HUD) management for pxlNav.
  *   Examples should be ran from your `pxlRoom.build()` function --
+ * @alias pxlHUD
+ * @class
+ * @description HUD drawing and management
  * @example
- * // Add a button to the HUD
+ * // Add a button to the HUD from your room
  * let buttonData = { 'style': ['my-button-style'] };
- * hud.addItem('myButton', HUD_ELEMENT.BUTTON, buttonData, () => {
+ * this.pxlHUD.addItem('myButton', HUD_ELEMENT.BUTTON, buttonData, () => {
  *   console.log('Button clicked!');
  * });
  * @example
- * // Add a draggable region to the HUD
+ * // Add a draggable region to the HUD from your room
  * let dragData = { 'style': ['my-drag-style'] };
- * hud.addItem('myDragRegion', HUD_ELEMENT.DRAG_REGION, dragData, ( data ) => {
+ * this.pxlHUD.addItem('myDragRegion', HUD_ELEMENT.DRAG_REGION, dragData, ( data ) => {
  *   // data = { type = pxlEnum, name='myDragRegion', value={ x: number, y: number } };
  *   console.log('Drag delta / relative offset : ', data.value );
  * });
  * @example
- * // Add a thumbstick to the HUD
+ * // Add a thumbstick to the HUD from your room
  * let thumbData = { 'style': ['my-thumbstick-style'] };
- * hud.addItem('myThumbstick', HUD_ELEMENT.THUMBSTICK, thumbData, ( data ) => {
+ * this.pxlHUD.addItem('myThumbstick', HUD_ELEMENT.THUMBSTICK, thumbData, ( data ) => {
  *   // data = { type = pxlEnum, name='myThumbstick', value={ x: number (-1 to 1), y: number (-1 to 1) } };
  *   console.log('Thumbstick value : ', data.value );
  * });
@@ -81,6 +85,7 @@ export class HUD{
   /**
    * Set dependencies for the HUD.
    * @param {Object} pxlNav - The pxlNav instance containing dependencies.
+   * @private
    */
   setDependencies( pxlNav ){
     this.pxlOptions = pxlNav.pxlOptions;
@@ -92,6 +97,7 @@ export class HUD{
 
   /**
    * Initialize the HUD.
+   * @private
    */
   init(){
 
@@ -110,7 +116,16 @@ export class HUD{
 
   /**
    * Add an element to the HUD DOM Object.
+   * @method
+   * @memberof pxlHUD
    * @param {HTMLElement|Object} hudElement - The HUD element to add.
+   * @example
+   * //Add an created element to the managed HUD or specific parent
+   * let newButton = this.pxlHUD.createButton('myButton', buttonData, ( data )=>{
+   *   console.log('Button clicked!');
+   * });
+   * 
+   * this.pxlHUD.addToHUD( newButton );
    */
   addToHUD( hudElement ){
     console.log( hudElement )
@@ -125,12 +140,32 @@ export class HUD{
 
   /**
    * Add an item to the HUD.
+   * @method
+   * @memberof pxlHUD
    * @param {string} [label='default'] - The label for the HUD item.
    * @param {string} type - The type of HUD element.
    * @param {Object} data - The data for the HUD element.
    * @param {Function|null} [callbackFn=null] - The callback function for the HUD element.
    * @param {Object|null} [parentObj=null] - The parent object for the HUD element.
    * @returns {Object|null} The created HUD element.
+   * @example
+   * // Add a button to the HUD
+   * //   Subscription passed through the `addItem()` function
+   * //   Its preferer you use this function over directly creating HUD elements
+   * //     As pxlHUD can manage the HUD elements and their subscriptions
+   * let buttonData = { 'style': ['my-button-style'] };
+   * this.pxlHUD.addItem('myButton', HUD_ELEMENT.BUTTON, buttonData, () => {
+   *   console.log('Button clicked!');
+   * });
+   * 
+   * // Add a draggable region to the HUD
+   * //   Subscription called after hud element creation
+   * let dragData = { 'style': ['my-drag-style'] };
+   * this.pxlHUD.addItem('myDragRegion', HUD_ELEMENT.DRAG_REGION, dragData);
+   *  // [...] // Later in your code
+   * this.pxlHUD.subscribe('myDragRegion', ( data ) => {
+   *   console.log('Drag delta / relative offset : ', data.value );
+   * });
    */
   addItem( label='default', type, data, callbackFn = null, parentObj = null ){
     if( !this.huds.hasOwnProperty( label ) ){
@@ -189,10 +224,20 @@ export class HUD{
 
   /**
    * Create a region element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the region.
    * @param {Object} data - The data for the region.
    * @param {Function|null} [callbackFn=null] - The callback function for the region.
    * @returns {Object} The created region element.
+   * @example
+   * // Create a region element
+   * let regionData = { 'style': ['my-region-style'] };
+   * let newRegion = this.pxlHUD.createRegion('myRegion', regionData, ( data )=>{
+   *   console.log( 'Region clicked!' );
+   *   console.log( data );
+   * });
+   * this.pxlHUD.addToHUD( newRegion );
    */
   createRegion( label, data, callbackFn=null ){
     let region = new ElementBase( label, data );
@@ -203,10 +248,20 @@ export class HUD{
 
   /**
    * Create a draggable region element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the draggable region.
    * @param {Object} data - The data for the draggable region.
    * @param {Function|null} [callbackFn=null] - The callback function for the draggable region.
    * @returns {Object} The created draggable region element.
+   * @example
+   * // Create a draggable region element
+   * let dragData = { 'style': ['my-drag-style'] };
+   * let newDragRegion = this.pxlHUD.createDragRegion('myDragRegion', dragData, ( data )=>{
+   *  console.log( 'Drag delta / relative offset {X,Y} :' );
+   *  console.log( data.value );
+   * });
+   * this.pxlHUD.addToHUD( newDragRegion );
    */
   createDragRegion( label, data, callbackFn=null ){
     let dragRegion = new DragRegion( label, data );
@@ -216,10 +271,19 @@ export class HUD{
 
   /**
    * Create a button element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the button.
    * @param {Object} data - The data for the button.
    * @param {Function|null} [callbackFn=null] - The callback function for the button.
    * @returns {Object} The created button element.
+   * @example
+   * // Create a button element
+   * let buttonData = { 'style': ['my-button-style'] };
+   * let newButton = this.pxlHUD.createButton('myButton', buttonData, ( data )=>{
+   *   console.log( 'Button clicked!' );
+   * });
+   * this.pxlHUD.addToHUD( newButton );
    */
   createButton( label, data, callbackFn=null ){
     let button = new ElementBase( label, data );
@@ -230,10 +294,20 @@ export class HUD{
 
   /**
    * Create a thumbstick element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the thumbstick.
    * @param {Object} data - The data for the thumbstick.
    * @param {Function|null} [callbackFn=null] - The callback function for the thumbstick.
    * @returns {Object} The created thumbstick element.
+   * @example
+   * // Create a thumbstick element
+   * let thumbstickData = { 'style': ['my-thumbstick-style'] };
+   * let newThumbstick = this.pxlHUD.createThumbstick('myThumbstick', thumbstickData, ( data )=>{
+   *   console.log( 'Thumbstick value changed!' );
+   *   console.log( data );
+   * });
+   * this.pxlHUD.addToHUD( newThumbstick );
    */
   createThumbstick( label, data, callbackFn=null ){
 
@@ -250,10 +324,20 @@ export class HUD{
 
   /**
    * Create a slider element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the slider.
    * @param {Object} data - The data for the slider.
    * @param {Function|null} [callbackFn=null] - The callback function for the slider.
    * @returns {Object} The created slider element.
+   * @example
+   * // Create a slider element
+   * let sliderData = { 'min': 0, 'max': 100, 'value': 50, 'style': ['my-slider-style'] };
+   * let newSlider = this.pxlHUD.createSlider('mySlider', sliderData, ( data )=>{
+   *   console.log( 'Slider value changed!' );
+   *   console.log( data );
+   * });
+   * this.pxlHUD.addToHUD( newSlider );
    */
   createSlider( label, data, callbackFn=null ){
     let slider = new ElementBase( label, data );
@@ -264,10 +348,19 @@ export class HUD{
 
   /**
    * Create an image element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the image.
    * @param {Object} data - The data for the image.
    * @param {Function|null} [callbackFn=null] - The callback function for the image.
    * @returns {Object} The created image element.
+   * @example
+   * // Create an image element
+   * let imageData = { 'src': 'path/to/image.png', 'style': ['my-image-style'] };
+   * let newImage = this.pxlHUD.createImage('myImage', imageData, ( data )=>{
+   *   console.log( 'Image clicked!' );
+   * });
+   * this.pxlHUD.addToHUD( newImage );
    */
   createImage( label, data, callbackFn=null ){
     let image = new ElementBase( label, data );
@@ -278,10 +371,19 @@ export class HUD{
 
   /**
    * Create a text element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label for the text.
    * @param {Object} data - The data for the text.
    * @param {Function|null} [callbackFn=null] - The callback function for the text.
    * @returns {Object} The created text element.
+   * @example
+   * // Create a text element
+   * let textData = { 'text': 'Hello, world!', 'style': ['my-text-style'] };
+   * let newText = this.pxlHUD.createText('myText', textData, ( data )=>{
+   *   console.log( 'Text clicked!' );
+   * });
+   * this.pxlHUD.addToHUD( newText );
    */
   createText( label, data, callbackFn=null ){
     let text = new ElementBase( label, data );
@@ -294,6 +396,7 @@ export class HUD{
 
   /**
    * Create mobile HUD elements.
+   * @private
    */
   createMobileHUD(){
     let curId = '';
@@ -366,6 +469,7 @@ export class HUD{
    * Handle mobile HUD interactions to the device.
    * @param {pxlEnum} eventType - The type of event.
    * @param {Object} data - The data for the event.
+   * @private
    */
   mobileDeligate( eventType, data ){
     console.log( eventType, data );
@@ -377,8 +481,16 @@ export class HUD{
 
   /**
    * Subscribe to a HUD element's events.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label of the HUD element.
    * @param {Function} callbackFn - The callback function to subscribe.
+   * @example
+   * // Subscribe to a HUD element
+   * let newButton = this.pxlHUD.addItem( 'myButton', HUD_ELEMENT.BUTTON );
+   * this.pxlHUD.subscribe( 'myButton', ( data )=>{
+   *   console.log( 'Button clicked!' );
+   * });
    */
   subscribe( label, callbackFn ){
     if( this.huds.hasOwnProperty( label ) ){
@@ -388,6 +500,8 @@ export class HUD{
 
   /**
    * Emit an event for a HUD element.
+   * @method
+   * @memberof pxlHUD
    * @param {string} label - The label of the HUD element.
    * @param {Object} data - The data for the event.
    */

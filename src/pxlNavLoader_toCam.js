@@ -171,7 +171,7 @@ if( navBarObj ){
 
 
 function pxlNav_init(){
-  // Start the timer and initilize pxlNAv
+  // Start the timer and initilize pxlNav
   pxlNavEnv.bootTimer();
   pxlNavEnv.init();
 

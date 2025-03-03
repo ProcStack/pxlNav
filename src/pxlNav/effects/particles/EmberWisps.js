@@ -1,3 +1,6 @@
+// Ember Wisp Particle System for pxlNav
+//   Written by Kevin Edzenga; 2024,2025
+
 
 import {
   Vector3,
@@ -10,14 +13,43 @@ import {
 import ParticleBase from './ParticleBase.js';
 import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
 
-// The fire embers wisping into the air from a fire
 
+/**
+ * Class representing EmberWisps, a type of particle effect that simulates fire embers wisping into the air.
+ * @alias EmberWisps
+ * @class
+ * @extends ParticleBase
+ * @memberof pxlNav.pxlEffects.pxlParticles
+ */
 export class EmberWisps extends ParticleBase{
+  /**
+   * Create an EmberWisps instance.
+   * @param {Object} room - The room object where the particle system will be added.
+   * @param {string} [systemName='emberWisps'] - The name of the particle system.
+   * @property {Object} room - The room object.
+   * @property {string} name - The name of the particle system.
+   * @property {Object} shaderSettings - The shader settings for the particle system.
+   * @property {Array<string>} knownKeys - Known keys for shader
+   */
   constructor( room=null, systemName='emberWisps' ){
     super( room, systemName );
     this.name=systemName;
     this.room=room;
     
+    /**
+     * Shader settings for the EmberWisps particle effect.
+     * @type {Object}
+     * @property {number} vertCount - Point Count
+     * @property {number} pScale - Point Base Scale
+     * @property {number} pOpacity - Point Opacity
+     * @property {number} proxDist - Proximity Distance
+     * @property {number} atlasRes - Sprite Texture Width Count (Square atlas' only)
+     * @property {Array} atlasPicks - Atlas Pick's Origin Array
+     * @property {boolean} randomAtlas - Random Atlas Flag
+     * @property {boolean} additiveBlend - Additive Blend Flag
+     * @property {Vector3} windDir - Wind Direction
+     * @property {Vector3} offsetPos - Offset Position
+     */
     this.shaderSettings = {
       "vertCount" : 600,
       "pScale" : 7,
@@ -31,6 +63,10 @@ export class EmberWisps extends ParticleBase{
       "windDir" : new Vector3( 0, 0, 1 ),
       "offsetPos" : new Vector3( 0, 0, 0 ),
     }
+    /**
+     * Known keys for shader settings.
+     * @type {Array<string>}
+     */
     this.knownKeys = Object.keys( this.shaderSettings );
   }
   
@@ -40,6 +76,10 @@ export class EmberWisps extends ParticleBase{
   // 'atlasPicks' - Atlas Pick's Origin Array
   //                  Starting corners from upper left of image
   //                    Sprite texture size given - 1/atlasRes
+  /**
+   * Build the EmberWisps particle effect with the given shader settings.
+   * @param {Object} [curShaderSettings={}] - Current shader settings to override the default settings.
+   */
   build( curShaderSettings={} ){
     
     if( curShaderSettings && typeof curShaderSettings === Object ){

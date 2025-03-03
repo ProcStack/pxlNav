@@ -3,7 +3,17 @@
 
 
 ### Major Changes
-  - `JSDoc` added in `./docs/jsdoc`
+  - `JSDoc` added at `./docs/jsdoc/index.html` - `https://procstack.github.io/pxlNav-docs`
+    - pxlNav
+    - Camera
+    - HUD
+    - RoomEnvironment (pxlRoom)
+    - pxlEffects.pxlParticles
+      - BillowSmoke
+      - EmberWisps
+      - FloatingDust
+      - HeightMap
+      - ParticleBase
   - `HUD.js` support added for different displays & button/click/tap'able regions of the screen.
   - `HUD.js` automatically builds + adds 2 joysticks for move & look controls; and jump & run tap'able regions
 
@@ -15,6 +25,9 @@
 ```
 npm run jsdoc
 ```
+  - `JSDoc` + `./packing/docs-init.js` adds Class Methods List at the top of each page and adds a `^Top` link to each Method header on page
+
+---
 
   - `HUD.js` added to support an array of HUD element types, found through the `HUD_ELEMENT` enum
 <br/>&nbsp;&nbsp; - `Region`; A transparent clickable region

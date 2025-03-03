@@ -15,6 +15,11 @@ const SoundLibrary = [
 	"./sounds/the-award-2.ogg"
 ];
 
+/**
+ * @namespace pxlAudio
+ * @description Audio handling
+ */
+
 // Audio
 import { Vector3, Vector4 } from "../../libs/three/three.module.min.js";
 

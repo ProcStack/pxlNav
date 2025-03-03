@@ -33,6 +33,11 @@
 //    `1.0 - Math.pow( 0.5, deltaTime * rate )`
 //      Providing a scalled rate better for blending operations
 
+/**
+ * @namespace pxlTimer
+ * @description Timer and time management
+ */
+
 
 import { Vector2 } from "../../libs/three/three.module.min.js";
 

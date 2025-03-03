@@ -1,6 +1,11 @@
 // Core File IO Helper Utilities
 // -- -- -- --
 
+/**
+ * @namespace pxlFile
+ * @description File handling and asset loading
+ */
+
 import {
   Vector2,
   Vector3,

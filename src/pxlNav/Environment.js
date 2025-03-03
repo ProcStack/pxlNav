@@ -15,6 +15,8 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 
+
+
 import {
   Vector2,
   Vector3,
@@ -48,8 +50,11 @@ import { UnrealBloomPass } from '../libs/three/UnrealBloomPass.js';
 
 // TODO : This class needs breaking up into BaseEnvironment & MainEnvironment expand
 
-
-
+/**
+ * @alias pxlEnv
+ * @class
+ * @description pxlNav Environment
+ */
 export class Environment{
   constructor( options, mainRoom='Default', mobile ){
     this.engine=null;

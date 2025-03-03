@@ -11,10 +11,38 @@ body {
   color: #f5f5f5;
   background-color: #202024;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 10px;
   font-family: 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 16px;
 }
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #202024;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(63 114 182);
+  border-radius: 10px;
+  border: 3px solid #202024;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  cursor: pointer;
+  background-color: rgb(150 202 255);
+}
+
+::-webkit-scrollbar-thumb:active {
+  cursor: grabbing;
+  background-color: rgb(28 85 161);
+}
+
+
 
 img {
   max-width: 100%;
@@ -22,7 +50,7 @@ img {
 
 a,
 a:active {
-  color: rgb(31, 117, 203);
+  color: rgb(82 161 255);
   text-decoration: none;
 }
 
@@ -30,12 +58,24 @@ a:hover {
   text-decoration: none;
 }
 
+.method-links a {
+  color: #8fb3ff;
+  font-size: 1.2em;
+}
+.method-links a:hover {
+  color: #c5e2fb;
+}
+.method-links a:active {
+  color: #8a9bc0;
+}
+
 article a {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #3673e5;
 }
 
 article a:hover, article a:active {
-  border-bottom-color: #bdbdbd;
+  color: #b1ccfd;
+  border-bottom: 1px solid #81adff;
 }
 
 article .description a {
@@ -94,10 +134,16 @@ h4.name {
   border-bottom: 1px solid #111c34;
   margin: 1.5em 0 0.5em;
   padding: .75em 0 .75em 10px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content max-content max-content auto max-content;
 }
 
 h4.name a {
   color: #589be7;
+  border-width: 0px;
+  padding-right: 10px;
+  justify-self: end;
 }
 
 h4.name a:hover {
@@ -188,7 +234,7 @@ pre {
 
 #main {
   float: right;
-  width: calc(100% - 240px);
+  width: calc(100% - 300px);
 }
 
 header {
@@ -215,7 +261,7 @@ section {
 nav {
   float: left;
   display: block;
-  width: 250px;
+  width: 300px;
   background: #202024;
   overflow: auto;
   position: fixed;
@@ -281,14 +327,14 @@ nav > ul {
 }
 
 nav > ul > li > a {
-  color: #5f82e4;
+  color: #6fabff;
   font-size: 1.05em;
   font-weight: 600;
   margin-top: 10px;
 }
 
 nav ul ul a {
-  color: #5f82e4;
+  color: #5d9aef;
   font-size: 1.03em;
   border-left: 1px solid hsl(0, 0%, 31%);
 }
@@ -305,15 +351,19 @@ nav h2 {
 }
 
 nav > h2 > a {
-   margin: 10px 0 -10px;
-   color: #7b96e2 !important;
-   font-size: 1.1em;
-   font-weight: 600;
+  margin: 10px 0 -10px;
+  color: #7ac0ff  !important;
+  font-size: 1.25em;
+  font-weight: 600;
+}
+nav > h2 > a:hover {
+  color: #c5e2fb !important;
+  font-size: 1.3em !important;
 }
 
 footer {
   color: hsl(0, 0%, 77%);
-  margin-left: 250px;
+  margin-left: 300px;
   display: block;
   padding: 15px;
   font-style: italic;
@@ -343,10 +393,6 @@ footer {
 
 .type-signature {
   color: #7fa7fe
-}
-
-.type-signature:last-child {
-  color: #eee;
 }
 
 .name, .signature {

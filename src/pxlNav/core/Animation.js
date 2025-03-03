@@ -2,6 +2,11 @@
 // -- -- -- -- -- -- -- -- --
 // Written by Kevin Edzenga; 2024
 
+/**
+ * @namespace pxlAnim
+ * @description Animation handling
+ */
+
 import {
   Clock,
   AnimationMixer,

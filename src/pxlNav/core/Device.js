@@ -1,4 +1,9 @@
 
+/**
+ * @namespace pxlDevice
+ * @description Device and input handling
+ */
+
 import { 
   Vector2,
   Vector3,

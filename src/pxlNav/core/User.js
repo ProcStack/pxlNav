@@ -1,4 +1,9 @@
 
+/**
+ * @namespace pxlUser
+ * @description User Object
+ */
+
 export class User{
   constructor(id=null){
 

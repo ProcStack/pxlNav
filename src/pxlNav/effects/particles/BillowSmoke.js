@@ -1,3 +1,5 @@
+// Billow Smoke Particle System for pxlNav
+//   Written by Kevin Edzenga; 2024,2025
 
 import {
   Vector3,
@@ -12,12 +14,39 @@ import { smokeVert, smokeFrag } from './shaders/Smoke.js';
 
 // Campfire's spiralling smoke sprites
 
+
+/**
+ * Class representing billowing smoke particles for a campfire effect.
+ * @alias BillowSmoke
+ * @class
+ * @extends ParticleBase
+ * @memberof pxlNav.pxlEffects.pxlParticles
+ */
 export class BillowSmoke extends ParticleBase{
+  /**
+   * Create a BillowSmoke instance.
+   * @param {Object} room - The room object where the particles will be added.
+   * @param {string} [systemName='billowSmoke'] - The name of the particle system.
+   */
   constructor( room=null, systemName='billowSmoke' ){
     super( room, systemName );
     this.name=systemName;
     this.room=room;
 
+    /**
+     * Shader settings for the smoke particles.
+     * @type {Object}
+     * @property {number} vertCount - Point Count
+     * @property {number} pScale - Point Base Scale
+     * @property {number} pOpacity - Point Opacity
+     * @property {number} proxDist - Proximity Distance
+     * @property {number} atlasRes - Sprite Texture Width Count (Square atlas' only)
+     * @property {Array} atlasPicks - Atlas Pick's Origin Array
+     * @property {boolean} randomAtlas - Random Atlas Flag
+     * @property {boolean} additiveBlend - Additive Blend Flag
+     * @property {Vector3} windDir - Wind Direction
+     * @property {Vector3} offsetPos - Offset Position
+     */
     this.shaderSettings = {
       "vertCount" : 600,
       "pScale" : 56,
@@ -31,6 +60,10 @@ export class BillowSmoke extends ParticleBase{
       "windDir" : new Vector3( 0, 0, 1 ),
       "offsetPos" : new Vector3( 0, 0, 0 ),
     }
+    /**
+     * Known keys for shader settings.
+     * @type {Array<string>}
+     */
     this.knownKeys = Object.keys( this.shaderSettings );
   }
   
@@ -40,6 +73,11 @@ export class BillowSmoke extends ParticleBase{
   // 'atlasPicks' - Atlas Pick's Origin Array
   //                  Starting corners from upper left of image
   //                    Sprite texture size given - 1/atlasRes
+/**
+ * Build the smoke particle system with the given shader settings.
+ * @param {Object} [curShaderSettings={}] - Current shader settings to override the default settings.
+ * @returns {void}
+ */
   build( curShaderSettings={} ){
 
 

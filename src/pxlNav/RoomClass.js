@@ -34,7 +34,22 @@ import { pxlPrincipledVert, pxlPrincipledFrag } from "./shaders/objects/PxlPrinc
 
 import { RENDER_LAYER, COLLIDER_TYPE } from "./core/Enums.js";
 
+/**
+ * Class representing a Room Environment.
+ * @alias pxlRoom RoomEnvironment
+ * @class
+ * @description Core functionality and base classes
+ */
 class RoomEnvironment{
+  /**
+   * Create a Room Environment.
+   * @param {string} roomName - The name of the room.
+   * @param {string|null} assetPath - The path to the assets.
+   * @param {Object|null} msRunner - The millisecond runner.
+   * @param {Object|null} camera - The camera object.
+   * @param {Object|null} scene - The scene object.
+   * @param {Object|null} cloud3dTexture - The 3D cloud texture.
+   */
   constructor( roomName='pxlRoomEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     this.roomName=roomName;
     this.pxlFile=null;
@@ -156,7 +171,10 @@ class RoomEnvironment{
     //%
   }
 
-// Set pxlNav dependencies
+  /**
+   * Set pxlNav dependencies.
+   * @param {Object} pxlNav - The pxlNav object.
+   */
   setDependencies( pxlNav ){
     this.pxlEnv = pxlNav;
     this.pxlFile = pxlNav.pxlFile;
@@ -179,32 +197,55 @@ class RoomEnvironment{
   
   // -- -- --
   
-// Obfuscate pxlTimer for easier deltaTime access
+  /**
+   * Get the delta time.
+   * @returns {number} The delta time.
+   */
   get deltaTime(){
     return this.pxlTimer.deltaTime;
   }
 
+  /**
+   * Get the average delta time.
+   * @returns {number} The average delta time.
+   */
   get avgDeltaTime(){
     return this.pxlTimer.avgDeltaTime;
   }
 
+  /**
+   * Get the lerp rate.
+   * @param {number} rate - The rate.
+   * @returns {number} The lerp rate.
+   */
   getLerpRate( rate ){
     return this.pxlTimer.getLerpRate( rate );
   }
 
+  /**
+   * Get the average lerp rate.
+   * @param {number} rate - The rate.
+   * @returns {number} The average lerp rate.
+   */
   getLerpAvgRate( rate ){
     return this.pxlTimer.getLerpAvgRate( rate );
   }
   // -- -- --
 
-// Ran after core `pxlNav` modules have been loaded and initialized
-//   But before the render composers / post-processing
+  /**
+   * Initialize the room environment.
+   * Ran after core `pxlNav` modules have been loaded and initialized
+   *   But before the render composers / post-processing
+   */
   init(){
     this.scene.fog=this.fog;
     this.scene.background = this.fogColor ;//pxlEnv.fogColor;
   }
 
-// Run on init room warp; reset room values
+  /**
+   * Start the room environment.
+   * Run on init room warp; reset room values
+   */
   start(){
     if( !this.booted ){
       //this.resetCamera();
@@ -217,7 +258,9 @@ class RoomEnvironment{
     this.pxlEnv.roomBloomPass.enabled=false;  */
   }
   
-// Per-Frame Render updates
+  /**
+   * Per-frame render updates.
+   */
   step(){
     this.runTime.x=this.msRunner.x;
 
@@ -247,7 +290,10 @@ class RoomEnvironment{
         
   }
 
-// When leaving the room
+  /**
+   * Stop the room environment.
+   * Ran When leaving the room
+   */
   stop(){
     //this.spiralizerPass.enabled=false;
     //this.pxlEnv.roomBloomPass.enabled=this.bloomPreState;
@@ -255,7 +301,11 @@ class RoomEnvironment{
   
   // -- -- --
 
-// Runs on window resize
+  /**
+   * Handle window resize.
+   * @param {number} sW - The width of the window.
+   * @param {number} sH - The height of the window.
+   */
   resize( sW, sH ){
     /*if(this.worldPosRenderTarget){
       this.worldPosRenderTarget.setSize( sW, sH );
@@ -265,10 +315,17 @@ class RoomEnvironment{
     }*/
   }
   
+  /**
+   * Set the user height.
+   * @param {number} [toHeight=1] - The height to set.
+   */
   setUserHeight( toHeight=1 ){
     this.pxlEnv.pxlCamera.setUserHeight( toHeight, this.roomName );
   }
 
+  /**
+   * Reset the camera.
+   */
   resetCamera(){
     this.pxlEnv.pxlCamera.setTransform( this.camInitPos, this.camInitLookAt );
     /*if( !this.pxlEnv.pxlOptions["staticCamera"] ){
@@ -278,20 +335,35 @@ class RoomEnvironment{
     }*/
   }
     
-// Warp Zone Portal Texture
+  /**
+   * Prepare Warp Zone Portal Texture
+   */
   prepPortalRender(){
     this.geoList['intro'].visible=false;
     this.geoList['MainRoomWarp'].visible=false;
   }
+  /**
+   * Cleanup portal render.
+   */
   cleanupPortalRender(){
     this.geoList['intro'].visible=true;
     this.geoList['MainRoomWarp'].visible=true;
   }
-// Set the Room Warp Portal plane to display the render from the main room
+  /**
+   * Set the portal texture.
+   * Set the Room Warp Portal plane to display the render from the main room
+   * @param {Object} texture - The texture.
+   * @param {string|null} [toRoom=null] - The room to set.
+   */
   setPortalTexture(texture, toRoom=null){
     this.geoList['MainRoomWarp'].material.map=texture;
   }
     
+  /**
+   * Apply composer's room pass.
+   * @param {Object|null} [roomComposer=null] - The room composer.
+   * @returns {Object|null} The shader pass.
+   */
   applyRoomPass( roomComposer=null ){
     /*if(roomComposer){
       this.worldPosMaterial=new ShaderMaterial({
@@ -328,14 +400,26 @@ class RoomEnvironment{
     }*/
   }
   
+  /**
+   * Get the room name.
+   * @returns {string} The room name.
+   */
   getName(){
     return this.roomName;
   }
 
+  /**
+   * Get artist information.
+   * @returns {Object|null} The artist information.
+   */
   getArtistInfo(){
     return null;
   }
   
+  /**
+   * Set the fog color.
+   * @param {Object} color - The color.
+   */
   setFog( color ){
     // this.geoList["skySemiSphere"].material.uniforms.skyColor.value.x= this.fog.color.r*10.0 ;
     // this.geoList["skySemiSphere"].material.uniforms.skyColor.value.y= this.fog.color.g*10.0 ;
@@ -346,7 +430,10 @@ class RoomEnvironment{
   }
       
   //%=
-  // Return Primary Shader Material
+  /**
+   * Get the geometry shader list.
+   * @returns {Object} The shader list.
+   */
   getShaderList(){
     let retList={}
     let objList=Object.keys( this.materialList );
@@ -355,9 +442,19 @@ class RoomEnvironment{
     });
     return retList;
   }
+  /**
+   * Get the currently editing shader.
+   * @returns {string} The current shader.
+   */
   getCurrentShader(){
     return this.currentShader || Object.keys( this.materialList )[0];
   }
+  /**
+   * Read the shader from the object.
+   * @param {string} [objShader=""] - The shader object.
+   * @param {Object|null} [sliderVectorObj=null] - The slider vector object.
+   * @returns {Object} The shader material.
+   */
   readShader( objShader="", sliderVectorObj=null ){
     if( this.currentShader!=null && this.materialList[ this.currentShader ].hasOwnProperty('uniforms')){
       if( !sliderVectorObj ){
@@ -369,6 +466,12 @@ class RoomEnvironment{
     this.currentShader=objShader;
     return this.materialList[ this.currentShader ];
   }
+  /**
+   * Set the geometry's material vertex & fragment shaders.
+   * @param {Object} unis - The uniforms.
+   * @param {string} vert - The vertex shader.
+   * @param {string} frag - The fragment shader.
+   */
   setShader( unis, vert, frag ){
     if( this.emitterList && this.emitterList[ this.currentShader ] ){
       if( this.emitterList[ this.currentShader ].Particles.length > 0 ){
@@ -388,6 +491,14 @@ class RoomEnvironment{
   //%
   
     
+  /**
+   * Cast a ray using pxlNav's raycaster.
+   * For Three.js' raycaster, please use the Three.js raycaster directly
+   * Note - pxlNav's raycaster requires object's are registered,
+   *   All object's are pre-processes for faster raycasting
+   * @param {boolean} isClick - Whether it is a click.
+   * @param {number} mButton - The mouse button.
+   */
   castRay( isClick, mButton ){
     if(!this.enableRaycast){
       return;
@@ -419,6 +530,11 @@ class RoomEnvironment{
 
   // -- -- --
 
+  /**
+   * Handle pxlColliders collider hits.
+   * @param {Array} colliderList - The list of colliders.
+   * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
+   */
   hitColliders( colliderList=[], colliderType=COLLIDER_TYPE.FLOOR ){
     if( colliderList.length == 0 ){
       return;
@@ -452,10 +568,19 @@ class RoomEnvironment{
 
   // -- -- --
 
+  /**
+   * Check if colliders exist.
+   * @returns {boolean} Whether colliders exist.
+   */
   hasColliders(){
     return this.collidersExist
   }
 
+  /**
+   * Check if a specific type of collider exists.
+   * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
+   * @returns {boolean} Whether the specific type of collider exists.
+   */
   hasColliderType( colliderType=COLLIDER_TYPE.FLOOR ){
     let hasCollidersOfType = false;
     if( !this.hasColliders() ){
@@ -500,6 +625,11 @@ class RoomEnvironment{
 
   // -- -- --
 
+  /**
+   * Get the colliders of a specific type.
+   * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
+   * @returns {Array} The list of colliders.
+   */
   getColliders( colliderType=COLLIDER_TYPE.FLOOR ){
     let forHashing = [];
     if( !this.hasColliders() ){
@@ -565,7 +695,21 @@ class RoomEnvironment{
 
   // -- -- --
 
-  // Collider helper functions
+  /**
+   * Add a visual collider helper.
+   * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
+   * @example
+   * // To add a floor collider helper
+   * //   To visualize collider triangles in blue & green
+   * // Run these helper functions in your rooms `build()` & `step()`-
+   * build(){
+   *  this.addColliderHelper( COLLIDER_TYPE.FLOOR );
+   * }
+   * 
+   * step(){
+   *  this.stepColliderHelper( COLLIDER_TYPE.FLOOR );
+   * }
+   */
   addColliderHelper( colliderType=COLLIDER_TYPE.FLOOR ){
     if( !this.hasColliders() ){
       return;
@@ -587,6 +731,21 @@ class RoomEnvironment{
     }
   }
 
+  /**
+   * Step the collider helper.
+   * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
+   * @example
+   * // To add a floor collider helper
+   * //   To visualize collider triangles in blue & green
+   * // Run these helper functions in your rooms `build()` & `step()`-
+   * build(){
+   *  this.addColliderHelper( COLLIDER_TYPE.FLOOR );
+   * }
+   * 
+   * step(){
+   *  this.stepColliderHelper( COLLIDER_TYPE.FLOOR );
+   * }
+   */
   stepColliderHelper( colliderType=COLLIDER_TYPE.FLOOR ){
     if( !this.hasHelpers ||
         !this.hasColliders() ||
@@ -601,6 +760,10 @@ class RoomEnvironment{
 
   // -- -- --
     
+  /**
+   * Move the camera to a specific position.
+   * @param {string|null} [positionName=null] - The name of the position.
+   */
   toCameraPos( positionName = null ){
     if( positionName == null ){
       positionName = this.defaultCamLocation;
@@ -623,6 +786,9 @@ class RoomEnvironment{
     }
   }
     
+  /**
+   * Ran after the room's FBX loads & processes.
+   */
   fbxPostLoad(){
     
     // Let pxlNav know the room is ready
@@ -774,6 +940,11 @@ class RoomEnvironment{
     
   }
   
+  /**
+   * Ran after the room's animation FBX files load & process.
+   * @param {string} animKey - The animation key.
+   * @param {Object} animMixers - The animation mixers.
+   */
   animPostLoad( animKey, animMixers ){
     if( this.pxlAnim.hasClip( animKey, this.animInitCycle ) ){
       let animMixer = this.pxlAnim.getMixer( animKey );
@@ -788,7 +959,9 @@ class RoomEnvironment{
   
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-// Build Scene and Assets
+  /**
+   * Build the scene and assets.
+   */
   build(){
     // Attempt to build the FBX if it exists
     if( !this.sceneFile ){
@@ -799,7 +972,11 @@ class RoomEnvironment{
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-// Recive outside message
+  /**
+   * Handle incoming messages.
+   * @param {string} msgType - The type of message.
+   * @param {Object} msgValue - The value of the message.
+   */
 //   Custom implementation of HTML/GUI in conjunction with pxlNav
 //     Lets get some incoming messages to trigger some stuffs!
   onMessage( msgType, msgValue ){

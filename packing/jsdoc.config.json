@@ -1,9 +1,10 @@
 {
   "source": {
-    "include": ["./src/pxlNav"],
+    "include": ["./src/pxlNav.js", "./src/pxlNav"],
     "includePattern": ".+\\.js(doc|x)?$",
     "excludePattern": "(^|\\/|\\\\)_"
   },
+  "plugins": ["plugins/markdown"],
   "tags": {
     "allowUnknownTags": true,
     "dictionaries": ["jsdoc", "closure"]
@@ -13,9 +14,22 @@
     "recurse": true,
     "template": "./node_modules/docdash"
   },
+  "readme": "./packing/jsdoc.readme.md",
+  "categoryfile" : "./packing/jsdoc.categories.json",
   "docdash": {
     "search": true,
     "private": false,
+    "sectionOrder": [
+      "Modules",
+      "Classes",
+      "Namespaces",
+      "Interfaces",
+      "Events",
+      "Mixins",
+      "Tutorials",
+      "Externals",
+      "Global"
+    ],
     "menu": {
       "pxlNav Example : The Outlet": {
         "href":"https://procstack.github.io/Outlet.htm",
