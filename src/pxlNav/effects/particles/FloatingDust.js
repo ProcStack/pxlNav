@@ -8,7 +8,7 @@ import {
   AdditiveBlending
 } from "../../../libs/three/three.module.min.js";
 
-import ParticleBase from './ParticleBase.js';
+import { ParticleBase } from './ParticleBase.js';
 import { dustVert, dustFrag } from './shaders/FloatingDust.js';
 
 /**

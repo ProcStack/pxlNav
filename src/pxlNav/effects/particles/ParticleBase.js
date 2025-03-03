@@ -24,7 +24,7 @@ import { dustVert, dustFrag } from './shaders/FloatingDust.js';
  * @class
  * @memberof pxlNav.pxlEffects.pxlParticles
  */
-export default class ParticleBase{
+export class ParticleBase{
   /**
    * Create a ParticleBase instance.
    * @constructor

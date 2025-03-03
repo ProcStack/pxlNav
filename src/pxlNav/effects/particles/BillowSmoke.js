@@ -9,7 +9,7 @@ import {
   NearestMipmapNearestFilter
 } from "../../../libs/three/three.module.min.js";
 
-import ParticleBase from './ParticleBase.js';
+import { ParticleBase } from './ParticleBase.js';
 import { smokeVert, smokeFrag } from './shaders/Smoke.js';
 
 // Campfire's spiralling smoke sprites

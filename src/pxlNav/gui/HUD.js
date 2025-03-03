@@ -105,7 +105,6 @@ export class HUD{
     hudParent.classList.add('pxlNav-hud-parent');
     this.pxlGuiDraws.addToContainer( hudParent );
     this.hudParent = hudParent;
-    console.log( this.hudParent );
 
     // Add mobile hud elements
     //   Thumbsticks, jump + run empty regions
@@ -128,7 +127,6 @@ export class HUD{
    * this.pxlHUD.addToHUD( newButton );
    */
   addToHUD( hudElement ){
-    console.log( hudElement )
     if( hudElement?.object !== null ){
       this.hudParent.appendChild( hudElement.object );
     }else{
@@ -208,8 +206,12 @@ export class HUD{
 
     if( curRegion !== null ){
 
-      // Add new HUD element to the DOM
-      this.addToHUD( curRegion );
+      if( parentObj !== null ){
+        parentObj.appendChild( curRegion.object );
+      }else{
+        // Add new HUD element to the DOM
+        this.addToHUD( curRegion );
+      }
 
       // Subscribe to the HUD element if callbackFn provided
       if( callbackFn !== null ){
@@ -459,7 +461,7 @@ export class HUD{
 
     this.mobileHUD[ 'run' ] = curElement;
 
-    console.log( this.mobileHUD );
+
 
   }
 

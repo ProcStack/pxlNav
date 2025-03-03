@@ -10,7 +10,7 @@ import {
   AdditiveBlending
 } from "../../../libs/three/three.module.min.js";
 
-import ParticleBase from './ParticleBase.js';
+import { ParticleBase } from './ParticleBase.js';
 import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
 
 
@@ -81,6 +81,8 @@ export class HeightMap extends ParticleBase{
       "jumpHeightMult" : 0,
       "offsetPos" : new Vector3( 0, 0, 0 ),
       "windDir" : new Vector3( 0, 0, 0 ),
+
+      "size" : new Vector3( 0, 0, 0 ),
 
       "hasLights" : false,
       "fadeOutScalar" : 1.59 , 
@@ -171,6 +173,17 @@ export class HeightMap extends ParticleBase{
       }
       if( objectRef.userData.hasOwnProperty("SizeZ") ){
         sizeZ = objectRef.userData.SizeZ;
+      }
+    }
+    if( curShaderSettings.hasOwnProperty("size") ){
+      if( curShaderSettings["size"].x > 0 ){
+        sizeX = curShaderSettings["size"].x;
+      }
+      if( curShaderSettings["size"].y > 0 ){
+        sizeY = curShaderSettings["size"].y;
+      }
+      if( curShaderSettings["size"].z > 0 ){
+        sizeZ = curShaderSettings["size"].z;
       }
     }
     let tankSize = new Vector3( sizeX, sizeY, sizeZ );

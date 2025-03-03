@@ -257,7 +257,7 @@ export class Camera{
     this.touchSensitivityLimits = this.touchMaxSensitivity * this.pi;
 
     // Event callbacks
-    this.eventCallbacks={};
+    this.callbacks={};
 
     this.init();
   }

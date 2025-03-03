@@ -10,7 +10,7 @@ import {
   NearestMipmapNearestFilter
 } from "../../../libs/three/three.module.min.js";
 
-import ParticleBase from './ParticleBase.js';
+import { ParticleBase } from './ParticleBase.js';
 import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
 
 

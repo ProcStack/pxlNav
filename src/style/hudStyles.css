@@ -20,9 +20,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
-  grid-gap: 1px;
-  width: 100%;
-  height: 100%;
+  grid-gap: 0px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -66,10 +67,17 @@
     "pnmrJump pnmrJump"
     "pnmjsLeft pnmjsRight"
     "pnmActionRegion pnmActionRegion";
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  bottom: 0px;
+  left: 0px;
+  z-index: 100;
 }
 
 .pxlNav-hudMobile-region-jump{
   grid-area: pnmrJump;
+  height: 45vh;
 }
 .pxlNav-hudMobile-region-run{
   grid-area: pnmrRun;

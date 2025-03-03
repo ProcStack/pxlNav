@@ -399,10 +399,10 @@ export class Environment{
       }
     }
     
-    if( this.pxlDevice.mobile && this.exposureShiftActive ){
+    //if( this.pxlDevice.mobile && this.exposureShiftActive ){
       //this.pxlCamera.colliderShiftActive=!(this.pxlCamera.colliderAdjustPerc==1 || this.pxlCamera.colliderAdjustPerc==0);
       //this.updateCompUniforms(curExp);
-    }
+    //}
   }
   
   // Function required, stoping functions
