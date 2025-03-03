@@ -1,0 +1,29 @@
+{
+  "source": {
+    "include": ["./src/pxlNav"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "opts": {
+    "destination": "./docs/jsdoc",
+    "recurse": true,
+    "template": "./node_modules/docdash"
+  },
+  "docdash": {
+    "search": true,
+    "private": false,
+    "menu": {
+      "pxlNav Example : The Outlet": {
+        "href":"https://procstack.github.io/Outlet.htm",
+        "target":"_blank",
+        "class":"menu-item",
+        "id":"pxlNav_Example"
+      }
+    },
+    "scripts": ["https://unpkg.com/mermaid/dist/mermaid.js", "docs-init.js"]
+  }
+}

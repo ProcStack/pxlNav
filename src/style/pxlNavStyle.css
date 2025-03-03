@@ -1,6 +1,7 @@
 @import "envPopupStyle.css";
 @import "guiRangeSliderStyle.css";
 @import "guiHudDisplayStyle.css";
+@import "hudStyles.css";
 @import "settingsGuiStyle.css";
 @import "helpGuiStyle.css";
 @import "howToStyle.css";
@@ -10,7 +11,7 @@
 @import "example.css";
 
 
-.pxlNavCoreCanvasStyle{
+.pxlNav-coreCanvasStyle{
 	touch-action:none;
 	position:fixed;
 	top:0px;
@@ -18,6 +19,26 @@
 	z-index:100;
 	background-color:#000000;
   }
+
+/*  -- -- --  */
+
+.pxlNav-mainContainerStyle{
+  position:fixed;
+  top:0px;
+  left:0px;
+  z-index:101;
+  background: transparent;
+  user-select: none;
+}
+
+.pxlNav-failStateStyle{
+  position:fixed;
+  top:0px;
+  left:0px;
+  z-index:0;
+  background: transparent;
+  user-select: none;
+}
 
 /*  -- -- --  */
 

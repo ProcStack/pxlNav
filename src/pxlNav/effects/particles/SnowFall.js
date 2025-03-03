@@ -77,7 +77,7 @@ export class SnowFall extends ParticleBase{
 
 
 
-
+/*
 buildSnow(){
   //sprite = ImageUtils.loadTexture( "textures/sprites/disc.png" );
 
@@ -128,3 +128,4 @@ buildSnow(){
   snow.pBaseScale=pScale;
   this.geoList['snow']=snow;
 }
+  */

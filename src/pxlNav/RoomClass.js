@@ -43,6 +43,7 @@ class RoomEnvironment{
     this.pxlAnim=null;
     this.pxlColliders=null;
     this.pxlDevice=null;
+    this.pxlHUD=null;
     this.pxlEnv=null;
     this.booted=false;
     this.initScene=true;
@@ -163,6 +164,7 @@ class RoomEnvironment{
     this.pxlTimer = pxlNav.pxlTimer;
     this.pxlUtils = pxlNav.pxlUtils;
     this.pxlDevice = pxlNav.pxlDevice;
+    this.pxlHUD = pxlNav.pxlHUD;
     this.pxlColliders = pxlNav.pxlColliders;
     this.mobile = pxlNav.mobile;
 

@@ -183,6 +183,50 @@ export const DEVICE_BUTTON = {
   'RIGHT' : 15
 };
 
+
+export const DEVICE_ACTION = {
+  'MOVE' : 0,
+  'MOVE_X' : 1,
+  'MOVE_Y' : 2,
+  'LOOK' : 3,
+  'LOOK_X' : 4,
+  'LOOK_Y' : 5,
+  'JUMP' : 6,
+  'RUN' : 7,
+  'ACTION' : 8,
+  'ACTION_ALT' : 9,
+  'ITEM' : 10,
+  'MENU' : 11,
+  'PAUSE' : 12,
+  'MAP' : 13
+}
+
+// -- -- --
+
+// GUI & HUD Enum Options
+export const HUD_ELEMENT = {
+  'REGION' : 0,
+  'DRAG_REGION' : 1,
+  'BUTTON' : 2,
+  'THUMBSTICK' : 3,
+  'SLIDER' : 4,
+  'IMAGE' : 5,
+  'TEXT' : 6
+};
+
+export const HUD_ACTION = {
+  'NONE' : 0,
+  'CLICK' : 1,
+  'HOVER' : 2,
+  'DRAG' : 3,
+  'DROP' : 4
+};
+
+export const HUD_DRAW = {
+  'DEFAULT' : 0,
+  'BLENDED' : 1
+};
+
 // -- -- --
 
 // Easy access to the enums
@@ -197,5 +241,11 @@ export const pxlEnums = {
   'COLLIDER_TYPE' : COLLIDER_TYPE,
   'GEOMETRY_SIDE' : GEOMETRY_SIDE,
   'COLOR_SHIFT' : COLOR_SHIFT,
-  'USER_SPEED' : USER_SPEED
+  'USER_SPEED' : USER_SPEED,
+  'DEVICE_TYPE' : DEVICE_TYPE,
+  'DEVICE_EVENT' : DEVICE_EVENT,
+  'DEVICE_BUTTON' : DEVICE_BUTTON,
+  'DEVICE_ACTION' : DEVICE_ACTION,
+  'HUD_ELEMENT' : HUD_ELEMENT,
+  'HUD_DRAW' : HUD_DRAW
 };

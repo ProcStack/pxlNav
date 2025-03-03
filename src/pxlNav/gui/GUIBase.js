@@ -13,7 +13,7 @@ import { SettingsGui } from './pxlGui/SettingsGui.js';*/
 // TODO : Remove Antib0dy.Club specific code
 // TODO : Remove hard coded html/css, promote to div generator class
 
-import { SVGUtils } from './guiUtils/svgUtils.js';
+import { SVGUtils } from './utils/svgUtils.js';
 import {VERBOSE_LEVEL} from '../core/Enums.js';
 
 
@@ -225,13 +225,57 @@ export class GUIManager{
   
   init(){
     this.cssBuildClasses();
+    this.createContainer();
+    this.createFailState();
     this.buildConsole();
   }
+
+  // -- -- --
+
+  // Primary container for all pxlNav DOM elements
+  //   This is the parent container for all GUI elements
+  createContainer(){
+    let container=document.createElement("div");
+    container.id="pxlNav-container";
+    container.classList.add("pxlNav-mainContainerStyle");
+
+    document.body.appendChild(container);
+
+    this.guiWindows.container={ active:true, gui:container };
+  }
+
+  // Add object to the document body
+  //   Contain all GUI elements in a single container
+  addToContainer( obj ){
+    if( !this.guiWindows.container ){
+      this.createContainer();
+    }
+    this.guiWindows.container.gui.appendChild( obj );
+  }
+
+  // -- -- --
+
+  createFailState(){
+    let failState=document.createElement("div");
+    failState.id="pxlNav-failState";
+    failState.classList.add("pxlNav-failStateStyle");
+    document.body.appendChild(failState);
+    this.guiWindows.failState={ active:true, gui:failState };
+  }
+
+  addToFailState( obj ){
+    if( !this.guiWindows.failState ){
+      this.createFailState();
+    }
+    this.guiWindows.failState.gui.appendChild( obj );
+  }
+
+  // -- -- --
   
   prepLoader(){
 		this.mapPromptBG=document.createElement("div");
 		this.mapPromptBG.classList.add("mapPromptBackgroundStyle");
-		document.body.appendChild(this.mapPromptBG);
+		this.addToContainer(this.mapPromptBG);
 
 		this.mapPrompt=document.createElement("div");
 		this.mapPrompt.setAttribute("id","mapPrompt");
@@ -247,7 +291,7 @@ export class GUIManager{
             <div id="loaderBranding" class='pxlLoaderTitle'>${this.projectTitle}</div>
             <div id="loaderMessage" class='pxlLoaderMessage'></div>
           `;
-		document.body.appendChild(this.mapPrompt);
+		this.addToContainer(this.mapPrompt);
 
     let loaderMsgObj=document.getElementById("loaderMessage");
     if(loaderMsgObj){
@@ -266,30 +310,27 @@ export class GUIManager{
 		this.pxlLoader.style.width= "2%";
 			
 		let canvasCrashBG=document.createElement("div");
-		canvasCrashBG.classList.add("canvasCrashPromptBackgroundStyle");
-		document.body.appendChild(canvasCrashBG);
+		canvasCrashBG.classList.add("pxlNav-crashPromptBackgroundStyle");
+		this.addToFailState(canvasCrashBG);
 
 		let canvasCrash=document.createElement("div");
-		canvasCrash.classList.add("canvasCrashPromptStyle");
+		canvasCrash.classList.add("pxlNav-canvasCrashPromptStyle");
 		canvasCrashBG.appendChild(canvasCrash);
 		
 		let inner;
     if(this.pxlQuality){
       if(parseInt(this.pxlQuality.detailLimit)==0){
         inner=`Looks like your computer is having a hard time, but we’ve got your fix.
-          <br>Please click <a id="crashLink" class="crashLink">HERE</a> to reload ${this.projectTitle}.
-          <br>If you’re still having issues, drop us a line in the chat.`;
+          <br>Please click <a id="pxlNav-crashLink" class="pxlNav-crashLink">HERE</a> to reload ${this.projectTitle}.`;
       }else{
         inner=`Looks like your computer is still having trouble, but we’ve got another fix for ya.
-          <br>Please click <a id="crashLink" class="crashLink">HERE</a> to reload ${this.projectTitle} again.
-          <br>Again, if you’re still having issues, drop us a line in the chat.`;
+          <br>Please click <a id="pxlNav-crashLink" class="pxlNav-crashLink">HERE</a> to reload ${this.projectTitle} again.`;
       }
     }
 		canvasCrash.innerHTML=inner;
-		let crashLink=document.getElementById("crashLink");
-		let tmpThis=this;
+		let crashLink=document.getElementById("pxlNav-crashLink");
 		if(crashLink){
-			crashLink.onclick=(e)=>{tmpThis.crashLinkTrigger(e,tmpThis)};
+			crashLink.onclick= this.crashLinkTrigger.bind(this);
 		}
   }
 	
@@ -462,18 +503,22 @@ export class GUIManager{
 		});
   }
   
-  crashLinkTrigger(e,tmpThis){
+  crashLinkTrigger(e){
     let search=location.search.match(/[a-zA-Z0-9=]+/g)
-    let retSearch="?";
-    search.forEach( (s)=>{
-      let splitter=s.split("=");
-      if( splitter[0]=="dlimit" ){
-        retSearch+=splitter[0]+"="+(parseInt(splitter[1])+1)+"&";
-      }else{
-        retSearch+=s+"&"
-      }
-    });
-    location.search=retSearch
+    if(search){
+      let retSearch="?";
+      search.forEach( (s)=>{
+        let splitter=s.split("=");
+        if( splitter[0]=="dlimit" ){
+          retSearch+=splitter[0]+"="+(parseInt(splitter[1])+1)+"&";
+        }else{
+          retSearch+=s+"&"
+        }
+      });
+      location.search=retSearch;
+    }else{
+      location.search="?dlimit=1";
+    }
   }
    
   guiToggleVisibility( active=null ){
@@ -610,7 +655,7 @@ export class GUIManager{
     let consoleBlock=document.createElement("div");
     consoleBlock.id="consoleBlock";
     consoleBlock.classList.add("consoleBlockStyle");
-    document.body.appendChild(consoleBlock);
+    this.addToContainer(consoleBlock);
     this.guiWindows.consoleBlock={ active:false, gui:consoleBlock };
   }
 
@@ -676,7 +721,7 @@ export class GUIManager{
   hudBlock.id="hudBlock";
   hudBlock.classList.add("hudBlockStyle");
   this.hudBlock.obj=hudBlock;
-  document.body.appendChild( this.hudBlock.obj );
+  this.addToContainer( this.hudBlock.obj );
   this.hudBlock.obj.style.display="none";
   
   let tmpThis=this;
@@ -762,7 +807,7 @@ export class GUIManager{
 		topBar.id="hud_topBar";
 		topBar.classList.add("hud_topBarBlockStyle");
 		this.hudTopBar=topBar;
-		document.body.appendChild( this.hudTopBar );
+		this.addToContainer( this.hudTopBar );
 		
 		let subHtml="";
 		//%=
@@ -826,7 +871,7 @@ export class GUIManager{
     
 		let userControlsBlock=document.createElement( "div" );
     userControlsBlock.classList.add( "userControlBlockStyle" );
-		document.body.appendChild( userControlsBlock );
+		this.addToContainer( userControlsBlock );
     this.userControlBlock.gui=userControlsBlock;
     
     this.userControlBlock.speakerIcon = null;//SVGUtils.svgRawPromise( `${this.guiRoot}icons/icon_userSpeaker.svg` );
@@ -854,7 +899,7 @@ export class GUIManager{
       medalionBar.id="hud_medalionBar";
       medalionBar.classList.add("hud_medalionIconBlockStyle");
       this.hudMedalionBar=medalionBar;
-      document.body.appendChild( this.hudMedalionBar );
+      this.addToContainer( this.hudMedalionBar );
       
       
       let html=`
@@ -888,7 +933,7 @@ export class GUIManager{
   bottomBar.id="hud_bottomBar";
   bottomBar.classList.add("hud_bottomBarStyle");
   this.hudBottomBar=bottomBar;
-  document.body.appendChild( this.hudBottomBar );
+  this.addToContainer( this.hudBottomBar );
   
   //<object id="usersIcon" data='${this.guiRoot}icons/icon_user.svg' type='image/svg+xml'></object>
   
@@ -1031,7 +1076,7 @@ export class GUIManager{
       artistInfoParent.appendChild( artistInfoInner );
       this.hudElements.artistInfo.inner=artistInfoInner;
       
-      document.body.appendChild(artistInfoParent);
+      this.addToContainer(artistInfoParent);
       
       this.hudElements.artistInfo.closeSvg=SVGUtils.svgPromise( `${this.guiRoot}global/carrotClose_animated.svg`, "artistInfoCarrotX" );
       this.hudElements.artistInfo.closeSvg.promise.finally(()=>{
@@ -1162,7 +1207,7 @@ export class GUIManager{
       artistInfoParent.appendChild( artistInfoInner );
       this.hudElements.artistInfo.inner=artistInfoInner;
       
-      document.body.appendChild(artistInfoParent);
+      this.addToContainer(artistInfoParent);
       
 		}
     this.togglePageDisplay(false);
@@ -1420,7 +1465,7 @@ export class GUIManager{
   mapPrepPrompts(){
     this.activeItem=document.createElement("div");
     this.activeItem.classList.add("activeItemStyle");
-    document.body.appendChild(this.activeItem);
+    this.addToContainer(this.activeItem);
   }
   
   updateGuiPositions(){
@@ -1542,7 +1587,7 @@ export class GUIManager{
     tmpThis.toggleGuiWindowContainer(e, false, true );
   }
   this.guiWindowBG=bgDiv;
-  document.body.appendChild( bgDiv );
+  this.addToContainer( bgDiv );
   }
   toggleGuiWindowContainer(e, active, closeWindows=false ){
   if(e){
@@ -2208,7 +2253,7 @@ export class GUIManager{
   inviteUserGuiDiv.id="gui_inviteUserWindow";
   inviteUserGuiDiv.classList.add("gui_inviteUserParentStyle");
   this.prepPromptFader( inviteUserGuiDiv );
-  document.body.appendChild( inviteUserGuiDiv );
+  this.addToContainer( inviteUserGuiDiv );
   
     let urlDisplay=window.location+"";
     urlDisplay=urlDisplay.replace(/^https?:\/\//,"");
@@ -2372,7 +2417,7 @@ export class GUIManager{
   apuInner.setAttribute("id","ctaPopupInner");
   //apuInner.classList.add("innerGoogleLinkDoc");
   this.actionPopUp.appendChild( apuInner );
-  document.body.appendChild(this.actionPopUp);
+  this.addToContainer(this.actionPopUp);
   
   let iframe=null;
   if(bodyOnly == '' || !bodyOnly){

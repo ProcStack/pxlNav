@@ -282,7 +282,6 @@ export class Environment{
     this.pxlCamera=pxlNav.pxlCamera;
     this.pxlGuiDraws=pxlNav.pxlGuiDraws;
     this.emit=pxlNav.emit.bind(pxlNav);
-
   }
   
   log( msg, level=VERBOSE_LEVEL.INFO ){

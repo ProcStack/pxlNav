@@ -120,6 +120,11 @@ export class Camera{
 
     // -- -- --
 
+    // User-Input Movement & Look Scalars
+    //   Only set when there is analog / float input; like gamepad thumbstick or touch 'joysticks'
+    this.userInputMoveScalar = 1;
+    this.userInputLookScalar = 1;
+
     this.roomStandingHeight = { 'default' : this.standingHeight };
     this.standingHeightGravInfluence=0;
     this.standingMaxGravityOffset=.5; // Usage -  ( standingHeight / standingHeightGravInfluence ) * standingMaxGravityOffset
@@ -690,6 +695,7 @@ export class Camera{
   /**
    * Builds device-pose monitors for gyroscope-enabled devices.
    * CURRENTLY UNWORKING
+   * NOTE : Development in-progress through 'Device.js'
    */
   buildDeviceMonitors(){
     let camObject=this;
@@ -1770,7 +1776,7 @@ export class Camera{
       // Subtract forward/back from strafing movement to reduce diagonal super-speed
       let turnRate=this.pxlQuality.settings.leftRight ?  this.cameraEasing[ easingMode ] : ( 1 - Math.min(1, Math.abs(this.cameraMovement[1]*.3)) ) *.5 ;
       rate[0]=( (this.pxlQuality.settings.leftRight ? 1.0 : 6.0) + (deltas[0]*(deltas[0])) * .1 ) * turnRate;
-      rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar;
+      rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar * this.userInputMoveScalar;
     }else{
       // Bother Left AND Right direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[0]=curTime;
@@ -1783,7 +1789,7 @@ export class Camera{
       // Subtract strafing movement from dolly movement to reduce diagonal super-speed
       let dollyRate=(1- Math.min(1, Math.abs(this.cameraMovement[0]*.07))) * this.cameraEasing[ easingMode ]; 
       rate[1]=( ((deltas[1]*(deltas[1]*3+2+this.pxlUser.moveSpeed))*.5) ) * dollyRate; 
-      rate[1]= Math.min( this.pxlUser.moveSpeed, rate[1] ) * this.movementScalar;
+      rate[1]= Math.min( this.pxlUser.moveSpeed, rate[1] ) * this.movementScalar * this.userInputMoveScalar;
     }else{
       // Both Up AND Down direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[1]=curTime;

@@ -717,12 +717,10 @@ export class Device{
           this.pxlCamera.deviceKey(3, true);
         }
         if(keyHit==16 || keyHit==224){ // Shift
-          this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BOOST );
-          this.pxlCamera.deviceKey("shift", true);
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, true );
         }
         if(keyHit==32){
-          this.pxlCamera.camJumpKey(true);
-          this.pxlCamera.deviceKey("space", true);
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, true ); 
         }
       }
     }//else{
@@ -731,6 +729,7 @@ export class Device{
     //}
   }
     
+
   async keyUpCall(e){
 
     this.emit("keyup", e);
@@ -837,38 +836,21 @@ export class Device{
         }
         // Shift
         if(keyHit==16 || keyHit==224){ // Shift
-          this.pxlUser.setSpeed( this.pxlEnums.USER_SPEED.BASE );
-          this.pxlCamera.deviceKey("shift", false);
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, false );
           return;
         }
         // Space
         if(keyHit==32){
-          this.pxlCamera.camJumpKey(false);
-          this.pxlCamera.deviceKey("space", false);
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, false );
           return;
         }
         
         if( !this.directionKeyDown ){
           // 1 / Numpad 1 - Warp to Lobby
-          if(keyHit == 49 || keyHit == 97){
+          /*if(keyHit == 49 || keyHit == 97){
             this.pxlCamera.fastTravel(0);
             return;
-          }
-          // 2 / Numpad 2 - Warp to Canyon
-          if(keyHit == 50 || keyHit == 98){
-            this.pxlCamera.fastTravel(1);
-            return;
-          }
-          // 3 / Numpad 3 - Dance Hall
-          if(keyHit == 51 || keyHit == 99){
-            this.pxlCamera.fastTravel(2);
-            return;
-          }
-          // 4 / Numpad 4 - Sunflower Room
-          if(keyHit == 52 || keyHit == 100){
-            this.pxlCamera.fastTravel(3);
-            return;
-          }
+          }*/
           // 5 / Numpad 5 - Drone Cam
           if(keyHit == 53 || keyHit == 101){
             this.pxlAutoCam.preAutoCamToggle();
@@ -961,19 +943,75 @@ export class Device{
       
       // P 
       if(keyHit == 80){ // Pause pxlNav Environment
-        this.directionKeysPressed=[0,0,0,0];
-        this.directionKeyDown=false;
-        this.pxlTimer.pause();
-        if( this.pxlTimer.active ){ 
-          this.pxlEnv.mapRender();
-        }
-        this.pxlCamera.workerFunc("activeToggle",this.pxlTimer.active);
+        this.deviceAction( this.pxlEnums.DEVICE_ACTION.PAUSE );
         return;
       }
     }
   }
 
-    // -- -- -- -- -- -- //
+  // -- -- -- -- -- -- //
+
+
+  deviceAction( action, state=null ){
+    switch( action ){
+      case DEVICE_ACTION.MOVE:
+        //this.directionKeysPressed[2]=0;
+        console.log('move',state);
+        //this.pxlCamera.deviceKey(1, state);
+        break;
+      case DEVICE_ACTION.LOOK:
+        console.log('look',state);
+        //this.pxlCamera.deviceKey(2, state);
+        break;
+      case DEVICE_ACTION.JUMP:
+        this.pxlCamera.camJumpKey( state);
+        //this.pxlCamera.deviceKey("space", state);
+        break;
+      case DEVICE_ACTION.RUN:
+        let speed = state ? this.pxlEnums.USER_SPEED.BOOST : this.pxlEnums.USER_SPEED.BASE;
+        this.pxlUser.setSpeed( speed );
+        //this.pxlCamera.deviceKey("shift", true);
+        break;
+      case DEVICE_ACTION.ACTION:
+        //this.pxlCamera.deviceKey("action", state);
+        break;
+      case DEVICE_ACTION.ACTION_ALT:
+        //this.pxlCamera.deviceKey("actionAlt", state);
+        break;
+      case DEVICE_ACTION.ITEM:
+        //this.pxlCamera.deviceKey("item", state);
+        break;
+      case DEVICE_ACTION.MENU:
+        //this.pxlCamera.deviceKey("menu", state);
+        break;
+      case DEVICE_ACTION.PAUSE:
+        this.togglePause( state );
+        //this.pxlCamera.deviceKey("pause", state);
+        break;
+      case DEVICE_ACTION.MAP:
+        //this.pxlCamera.deviceKey("map", state);
+        break;
+    }
+  }
+
+
+  // -- -- -- -- -- -- //
+
+  togglePause( state=null ){
+    if( state === null ){
+      state = !this.pxlTimer.active;
+    }
+    this.directionKeysPressed=[0,0,0,0];
+    this.directionKeyDown=false;
+    this.pxlTimer.pause( state );
+    if( this.pxlTimer.active ){ 
+      this.pxlEnv.mapRender();
+    }
+    this.pxlCamera.workerFunc("activeToggle",this.pxlTimer.active);
+  }
+
+
+  // -- -- -- -- -- -- //
 
   // ## Have it run a pxlEnv class function instead of all this mess
   resizeRenderResolution( iWidth=null, iHeight=null ){

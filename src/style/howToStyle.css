@@ -104,7 +104,7 @@
 	width:100%;
 	z-index:150;
 }
-.canvasCrashPromptBackgroundStyle{
+.pxlNav-crashPromptBackgroundStyle{
   display: grid;
   position: absolute;
   text-align: center;
@@ -120,7 +120,7 @@
     justify-items: center;
 	z-index:-1; /* Error console currently out of date, leave behind for now */
 }
-.canvasCrashPromptStyle{
+.pxlNav-canvasCrashPromptStyle{
     cursor:default;
 	color:#ffffff;
 	font-size:1.2em;
@@ -128,15 +128,15 @@
 	font-weight:400;
 	text-align:left;
 }
-.crashLink{
+.pxlNav-crashLink{
     cursor:pointer;
     text-decoration:none;
 	font-weight:700;
 }
-.crashLink:hover{
+.pxlNav-crashLink:hover{
     text-decoration:underline;
 }
-.crashLink:active{
+.pxlNav-crashLink:active{
     color:#ff0000;
 }
 

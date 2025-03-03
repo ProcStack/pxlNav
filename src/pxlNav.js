@@ -197,6 +197,9 @@ class pxlNav{
 
     this.uriHashParms = this.findHashParms();
     this.mobile = this.isMobile();
+
+    this.pxlOptions["mobile"] = this.mobile;
+
     this.autoCam = this.getHashParm("autoCam", false);
     this.loadPercent=0.0;
 
@@ -282,6 +285,8 @@ class pxlNav{
 
     this.pxlGuiDraws = new pxlBase.GUI( this.verbose, projectTitle, this.folderDict["assetRoot"], this.folderDict["guiRoot"] );
     
+    this.pxlHUD = new pxlBase.HUD();
+
     // TODO : These should really be requested via pxlEnv methods, but for now...
     //          Too many dependencies still to refactor, but it's cleaner than its ever been, so I'll take it!
     this.pxlQuality.setDependencies( this );
@@ -296,9 +301,11 @@ class pxlNav{
     this.pxlColliders.setDependencies( this );
     this.pxlCamera.setDependencies( this );
     this.pxlGuiDraws.setDependencies( this );
+    this.pxlHUD.setDependencies( this );
 
     this.pxlDevice.init();
     this.pxlGuiDraws.prepLoader();
+
     if( !this.pxlOptions.hasOwnProperty("loaderPhrases") ){
       this.pxlOptions["loaderPhrases"] = ['...loading the pixels...'];
     }
@@ -357,7 +364,12 @@ class pxlNav{
       .then( ()=>{ 
         this.tickLoader();
 
+        // Create post-process passes
         this.pxlEnv.buildComposers();
+
+        // Prep the HUD
+        //   Post room boot to allow for room specific HUD elements
+        this.pxlHUD.init();
 
         //this.pxlDevice.resizeRenderResolution();
         this.cameraRunAnimatorMobile( this );

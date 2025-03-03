@@ -108,8 +108,12 @@ export class Timer{
     this.play();
   }
     
-  pause(){
-    this.active=!this.active;
+  pause( state=null){
+    if( state === null ){
+      this.active=!this.active;
+    }else{
+      this.active=!!state;
+    }
     return this.active;
   }
   

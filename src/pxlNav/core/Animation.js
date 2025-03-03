@@ -99,6 +99,8 @@ export class Animation{
     }
 
 
+    console.log( animFbx)
+
     if( !this.objNames.includes( animName ) ){
       this.objNames.push( animName );
       let outDict = Object.assign({}, this.animInitEntry);

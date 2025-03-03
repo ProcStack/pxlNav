@@ -1,0 +1,100 @@
+.pxlNav-hudElement-thumbstick {
+  width: 35vmin;
+  height: 35vmin;
+  border: solid 15px rgba(186, 186, 186, 0.749);
+  padding: 5vmin;
+  border-radius: 30vmin;
+}
+
+.pxlNav-hudElement-thumbstick-inner {
+  width: 100%;
+  height: 100%;
+  border: solid 4px rgba(186, 186, 186, 0.749);
+  background: rgba(153, 153, 153, 0.161);
+  border-radius: 30vmin;
+}
+
+/* -- -- -- */
+
+.pxlNav-hud-parent{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  grid-gap: 1px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+
+.pxlNav-hudElement-region{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-dragRegion{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-button{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-slider{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-image{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-text{
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+.pxlNav-hudMobile-parent{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-areas: 
+    "pnmrJump pnmrJump"
+    "pnmjsLeft pnmjsRight"
+    "pnmActionRegion pnmActionRegion";
+}
+
+.pxlNav-hudMobile-region-jump{
+  grid-area: pnmrJump;
+}
+.pxlNav-hudMobile-region-run{
+  grid-area: pnmrRun;
+}
+.pxlNav-hudMobile-region-attack{
+  grid-area: pnmrAttack;
+}
+.pxlNav-hudMobile-region-item{
+  grid-area: pnmrItem;
+}
+
+.pxlNav-hudMobile-region-action{
+  grid-area: pnmActionRegion;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas: "pnmrRun pnmrAttack pnmrItem";
+}
+
+.pxlNav-hudMobile-joystick-left{
+  grid-area: pnmjsLeft;
+  justify-self: center;
+  align-self: center;
+}
+.pxlNav-hudMobile-joystick-right{
+  grid-area: pnmjsRight;
+  justify-self: center;
+  align-self: center;
+}

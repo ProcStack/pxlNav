@@ -1246,7 +1246,7 @@ export class FileIO{
               
             let curSide = FrontSide;
             // @ FBX - User Data; boolean, 'doubleSided'
-            if(c.userData.doubleSided){
+            if(c.userData.hasOwnProperty("doubleSided") || c.userData.hasOwnProperty("DoubleSided") ){
               curSide=DoubleSide;
             }
 

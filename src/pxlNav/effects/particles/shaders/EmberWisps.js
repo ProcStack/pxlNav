@@ -78,11 +78,11 @@ void main(){
     
 
     float spreadPerc = min(1.0, life*2.) * EmberSpread;
-    pos.xz=fract(noiseCd.rg*noiseCd.r + loopSeed)*(seeds.x)*(life*seeds.zy*(seeds.w*3.0 )) * spreadPerc ;
+    pos.xz=fract(noiseCd.rg*noiseCd.r + loopSeed)*(seeds.x)*(life*seeds.zy*fract(seeds.w*30.0 )) * spreadPerc ;
     
     
     // Directional push
-    float yPush = ( life * (life*.5+.5))  * min(1.0,pos.y*.03) * 3.2;
+    float yPush = ( life * (life*.5+.5))  * min(1.0,pos.y*.03) * 4.2;
     pos.xz += windDir.xz * yPush * max(0.0,pos.y-.5)*(.5+life*.5);
     pos.y += yPush;
     
@@ -104,10 +104,10 @@ void main(){
     gl_PointSize =  pScale*fadeDrop ;
     
     
-    float tightenBase = min( 1.0, pos.y* 0.12 + .2 );
+    float tightenBase = min( 1.0, pos.y* 0.12 + .32 );
     pos.xz *= tightenBase*tightenBase;
     
-    pos += modelMatrix[3].xyz + vec3( -.5, -0.2269, 0.0);
+    pos += modelMatrix[3].xyz + vec3( -0.85, 0.0269, -0.150);
     vec4 mvPos=viewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix*mvPos;
     
