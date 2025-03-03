@@ -5,15 +5,16 @@
 ### Major Changes
   - `JSDoc` added at `./docs/jsdoc/index.html` - `https://procstack.github.io/pxlNav-docs`
     - pxlNav
+    - Animation
     - Camera
     - HUD
     - RoomEnvironment (pxlRoom)
     - pxlEffects.pxlParticles
+      - ParticleBase
       - BillowSmoke
       - EmberWisps
       - FloatingDust
       - HeightMap
-      - ParticleBase
   - `HUD.js` support added for different displays & button/click/tap'able regions of the screen.
   - `HUD.js` automatically builds + adds 2 joysticks for move & look controls; and jump & run tap'able regions
 

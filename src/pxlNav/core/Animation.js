@@ -2,10 +2,6 @@
 // -- -- -- -- -- -- -- -- --
 // Written by Kevin Edzenga; 2024
 
-/**
- * @namespace pxlAnim
- * @description Animation handling
- */
 
 import {
   Clock,
@@ -13,6 +9,11 @@ import {
   MeshStandardMaterial,
 } from "../../libs/three/three.module.min.js";
 
+/**
+ * @alias pxlAnim
+ * @class
+ * @description Animation handling
+ */
 export class Animation{
   constructor( assetPath=null, msRunner=null ){
     this.pxlEnv = null;
@@ -46,6 +47,14 @@ export class Animation{
       console.log( msg );
     }
   }
+
+  /**
+   * Initialize an object for animation
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {Object} animFbx - The FBX object to animate
+   */
   initObject( animName, animFbx ){
     
     let animRoot = null;
@@ -122,6 +131,18 @@ export class Animation{
     }
   }
   
+  /**
+   * Add a clip to an object
+   *   Use `pxlFile.loadAnimFBX() to load your animation clips`
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {string} clipName - The name of the clip to add
+   * @param {Object} animFbx - The FBX object to animate
+   * @example
+   * // Add a clip to an object
+   * pxlAnim.addClips( "myAnim", "myClip", fbxLoader_animationCycleRoot );
+   */
   addClips( animName, clipName, animFbx ){
     if( !this.objNames.includes( animName ) ){
       this.log("Error, '"+animName+"' not found in Animation Manager");
@@ -141,6 +162,19 @@ export class Animation{
 
   }
 
+
+  /**
+   * Check if an object has a clip
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {string} clipName - The name of the clip to check for
+   * @returns {boolean} - True if the object has the clip
+   * @example
+   * // Check if an object has a clip
+   * let hasClip = this.pxlAnim.hasClip( this.animRigName, "myClipName" );
+   * console.log( hasClip );
+   */
   hasClip( animName, clipName ){
     if( this.objNames.includes( animName ) ){
       let clipNames = Object.keys( this.objects[ animName ][ 'clips' ] );
@@ -149,6 +183,17 @@ export class Animation{
     return false;
   }
 
+  /**
+   * Get the current state of an object
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @returns {string} - The current state of the object
+   * @example
+   * // Get the current state of an object
+   * let curState = this.pxlAnim.getMixer( this.animRigName );
+   * console.log( curState );
+   */
   getMixer( animName ){
     if( this.objNames.includes( animName ) ){
       return this.animMixer[ animName ];
@@ -156,6 +201,17 @@ export class Animation{
     return null;
   }
 
+  /**
+   * Get animation rig of an object
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @returns {Object} - The rig object of the animation object
+   * @example
+   * // Get animation rig of an object
+   * let rig = this.pxlAnim.getRig( this.animRigName );
+   * console.log( rig );
+   */
   getRig( animName ){
     if( this.objNames.includes( animName ) ){
       return this.objects[ animName ][ 'rig' ];
@@ -163,6 +219,17 @@ export class Animation{
     return null;
   }
 
+  /**
+   * Get mesh of the rigged object
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @returns {Object} - The mesh object of the animation object
+   * @example
+   * // Get mesh of the rigged object
+   * let mesh = this.pxlAnim.getMesh( this.animRigName );
+   * console.log( mesh );
+   */
   getMesh( animName ){
     if( this.objNames.includes( animName ) ){
       return this.objects[ animName ][ 'mesh' ];
@@ -170,6 +237,16 @@ export class Animation{
     return null;
   }
 
+  /**
+   * Play a clip on an object
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {string} clipName - The name of the clip to play
+   * @example
+   * // Play a clip on an object
+   * this.pxlAnim.playClip( this.animRigName, "myClipName" );
+   */
   playClip( animName, clipName ){
     if( this.objNames.includes( animName ) ){
       let clipNames = Object.keys( this.objects[ animName ][ 'clips' ] );
@@ -186,6 +263,20 @@ export class Animation{
       }
     }
   }
+  /**
+   * Set blend weights of animation cycle in the mixer
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {string} clipName - The name of the clip to set weight for
+   * @param {number} weight - The weight to set
+   * @param {boolean} disableOthers - Disable other clips in the mixer
+   * @example
+   * // Set blend weights of animation cycle in the mixer
+   * //this.pxlAnim.setWeight( this.animRigName, "myClipName", 1, true );
+   * this.pxlAnim.setWeight( this.animRigName, "myClipName", 0.5, false );
+   * //this.pxlAnim.setWeight( this.animRigName, "myClipName", 0.25, true );
+   */
   setWeight( animName, clipName, weight, disableOthers=false ){
     if( this.objNames.includes( animName ) ){
       let clipNames = Object.keys( this.objects[ animName ][ 'clips' ] );
@@ -208,6 +299,36 @@ export class Animation{
     }
   }
 
+  /**
+   * Set animation cycle speed in the mixer
+   * 
+   * This is handled when the FBX is loaded, this is visible for the example
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @param {string} clipName - The name of the clip to set speed for
+   * @param {number} speed - The speed to set
+   * @example
+   * // Set animation cycle speed in the mixer
+   * constructor(){
+   *     this.animSource = {
+   *       "RabbitDruidA" : {
+   *         "rig" : this.assetPath+"RabbitDruidA/RabbitDruidA_rig.fbx",
+   *         "anim" : {
+   *           "Sit_Idle" : this.assetPath+"RabbitDruidA/RabbidDruidA_anim_sit_idle.fbx",
+   *           "Sit_Stoke" : this.assetPath+"RabbitDruidA/RabbidDruidA_anim_sit_stoke.fbx",
+   *           "Sit_Look" : this.assetPath+"RabbitDruidA/RabbidDruidA_anim_sit_look.fbx"
+   *         },
+   *         "stateConnections"  : {
+   *           // Non existing states will be ignored and loop'ed, ie "Walk"
+   *           "Sit_Idle" : [ ...Array(6).fill("Sit_Idle"), ...Array(6).fill("Sit_Stoke"), ...Array(5).fill("Sit_Look")],
+   *           "Sit_Stoke" : ["Sit_Idle"],
+   *           "Sit_Look" : ["Sit_Idle"]
+   *         }
+   *       }
+   *     };
+   *   }
+   */
   setStateConnections( animName, stateConnections ){
     if( this.objNames.includes( animName ) ){
       let stateKeys = Object.keys( stateConnections );
@@ -253,6 +374,15 @@ export class Animation{
 
   // -- -- -- 
 
+  /**
+   * Destroy a rig + animation objects of the provided animation name
+   * @method
+   * @memberof pxlAnim
+   * @param {string} animName - The name of the animation object
+   * @example
+   * // Destroy a rig + animation objects of the provided animation name
+   * this.pxlAnim.destroy( "myAnim" );
+   */
   destroy( animName ){
     if( this.objNames.includes( animName ) ){
       this.animMixer[ animName ].stopAllAction();
