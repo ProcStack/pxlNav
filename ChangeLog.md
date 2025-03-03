@@ -17,6 +17,7 @@
       - HeightMap
   - `HUD.js` support added for different displays & button/click/tap'able regions of the screen.
   - `HUD.js` automatically builds + adds 2 joysticks for move & look controls; and jump & run tap'able regions
+  - `./docs/assets` converted to `webp`
 
 ---
 
