@@ -162,7 +162,7 @@ pageListenEvents.forEach( (e)=>{
 
 
 function pxlNav_init(){
-  // Start the timer and initilize pxlNav
+  // Start the timer and initilize pxlNAv
   pxlNavEnv.bootTimer();
   pxlNavEnv.init();
 

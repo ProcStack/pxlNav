@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.26-dev";
+const pxlNavVersion = "0.0.26";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -81,9 +81,12 @@ var cloud3dTexture = null;
 
 
 var mapW,mapH;
-var sW = window.innerWidth;
-var sH = window.innerHeight;
+let sW = window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+let sH =  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
 
+
+sW = window.innerWidth;
+sH = window.innerHeight;
 
 
 
@@ -420,10 +423,22 @@ class pxlNav{
       this.pxlGuiDraws.booted();
         
       this.pxlGuiDraws.pxlNavCanvas=document.getElementById(pxlCore);
-      mapW=window.innerWidth*this.pxlQuality.screenResPerc;
-      this.pxlGuiDraws.pxlNavCanvas.width=window.innerWidth;
-      mapH=window.innerHeight*this.pxlQuality.screenResPerc;
-      this.pxlGuiDraws.pxlNavCanvas.height=window.innerHeight;
+
+      let screenWidth = window?.screen?.width ? window.screen.width : window.innerWidth;
+      
+      let screenHeight =  window?.screen?.height ? window.screen.height : window.innerHeight;
+      
+      screenWidth = window.innerWidth;
+      screenHeight = window.innerHeight;
+
+      this.pxlGuiDraws.pxlNavCanvas.width=screenWidth*this.pxlQuality.screenResPerc;
+      this.pxlGuiDraws.pxlNavCanvas.height=screenHeight*this.pxlQuality.screenResPerc;
+      
+      //mapW=window.innerWidth*this.pxlQuality.screenResPerc;
+      //this.pxlGuiDraws.pxlNavCanvas.width=window.innerWidth;
+      //mapH=window.innerHeight*this.pxlQuality.screenResPerc;
+      //this.pxlGuiDraws.pxlNavCanvas.height=window.innerHeight;
+
       if(this.pxlDevice.canCursorLock){
         this.pxlGuiDraws.pxlNavCanvas.requestPointerLock=
             this.pxlGuiDraws.pxlNavCanvas.requestPointerLock ||
@@ -526,6 +541,11 @@ class pxlNav{
         this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
         //this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio);
         this.pxlEnv.engine.setSize(mapW/this.pxlQuality.screenResPerc, mapH/this.pxlQuality.screenResPerc);
+        
+        let screenWidth = window?.screen?.width ? window.screen.width : window.innerWidth;
+        let screenHeight =  window?.screen?.height ? window.screen.height : window.innerHeight;
+        this.pxlEnv.engine.setSize( screenWidth, screenHeight );
+        
         this.pxlEnv.engine.setPixelRatio(1);
 
         if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){

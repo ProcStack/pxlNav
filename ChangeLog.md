@@ -50,7 +50,7 @@ pxlHUD.subscribe( "HUD_Element_Name", *Your_Callback_Func* )
 ```
 export const HUD_ELEMENT = {
   'REGION' : 0,
-  'DRAG_REGION' : 1,
+  'DRAG_REGION' : 1, // Not setup yet
   'BUTTON' : 2,
   'THUMBSTICK' : 3,
   'SLIDER' : 4, // Not setup yet
@@ -87,6 +87,25 @@ export const HUD_DRAW = {
   - `EventManager.js` has further development, not integrated, but nearly ready for implementation.
 <br/>&nbsp;&nbsp; - Added checks for failed callbacks execuded through Promises
 
+
+---
+
+  `pxlOptions.userSettings` + `pxlUserSettings` now have `deadZone` for a base line to catch controller / touch drift.
+<br/>&nbsp;&nbsp; - 'Touch drift' just being how sensitive screens are with high resolutions, the slightest finger wiggle registers.
+<br/>&nbsp;&nbsp; - Defaults - `controller` and `xr` not implemented yet
+```
+pxlOptions = {
+  [...]
+  userSettings : {
+    [...]
+    'deadZone' : {
+        'controller' : 0.10, // Dead zone for controller input, in stick tilt
+        'touch' : 15, // Dead zone for touch input, in pixels
+        'xr' : 0.10 // Dead zone for XR input, in hand detection precision
+      }
+    }
+  }
+```
 
 ---
 

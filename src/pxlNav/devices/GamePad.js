@@ -13,7 +13,7 @@ export default class Controller {
     // Gamepad Deadzone
     //   Allows for some drift in the controller's thumbsticks
     //     Drift is a common issue, make sure this is set above 0
-    this.deadZone = 0.15;
+    this.deadZone = 0.15; // Now in `this.pxlOptions.userSettings.deadZone.controller`
 
     // -- -- --
 

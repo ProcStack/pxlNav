@@ -9,6 +9,7 @@
     "buildTree": "node ./utils/fileTreeBuilder.js",
     "build": "cross-env NODE_ENV=production webpack --config ./packing/webpack.config.js",
     "buildSingle": "cross-env NODE_ENV=production webpack --config ./packing/webpack-single.config.js",
+    "bundleCss": "node ./packing/bundle_css.js",
     "lineCount": "python ./utils/recursiveFileLineCounter.py",
     "convertToCjs": "rollup --bundleConfigAsCjs -c ./packing/rollupConvert.config.js",
     "examples": "node index.js examples",

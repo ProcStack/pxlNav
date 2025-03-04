@@ -13,7 +13,6 @@ import {
 // TODO : So much dependency on outside data and classes
 //          Promote as much as possible to callback subscriptions
 
-
 export class Device{
   constructor(projectTitle, pxlCore, mobile){
     this.projectTitle=projectTitle;
@@ -38,8 +37,11 @@ export class Device{
     this.longTouchLength = .75; // Seconds to hold a tap, without moving, for long touch
     
     //this.bootTime=new Date().getTime();
-    let sW=window.innerWidth;
-    let sH=window.innerHeight;
+
+    let sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+    let sH= window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
+    sW = window.innerWidth;
+    sH = window.innerHeight;
     this.sW=sW;
     this.sH=sH;
     this.touchScreen=false;
@@ -211,6 +213,12 @@ export class Device{
     });
   }
     
+  // -- -- -- -- -- -- -- -- -- -- //
+
+  step(){
+    this.addMoveDelta();
+  }
+
   // -- -- -- -- -- -- -- -- -- -- //
   
   // Post Process Gamma Correction; Set from Value / Detect based on OS
@@ -652,17 +660,17 @@ export class Device{
       this.pxlAutoCam.setNextTrigger();
         
     //let target= e.path ? e.path[0] : e.target; // Chrome or Firefox
-    let target= e.target; // Chrome or Firefox
-        //let dragLength=this.touchMouseData.startPos.clone().sub( this.touchMouseData.endPos ).length();
-        if( this.touchMouseData.dragCount < 10 && target.getAttribute && target.getAttribute("id")==this.pxlCore ){
-            // this.pxlAutoCam.prevNextAutoCam(1, true);
-            this.pxlAutoCam.getNextPath(false, 0);
-        }
-        
-        this.objectPerc.active=false;
-        if( this.pxlAudio.djVolumeParentObj ){
-            this.pxlAudio.djVolumeParentObj.down=false;
-    }
+    /*let target= e.target; // Chrome or Firefox
+      //let dragLength=this.touchMouseData.startPos.clone().sub( this.touchMouseData.endPos ).length();
+      if( this.touchMouseData.dragCount < 10 && target.getAttribute && target.getAttribute("id")==this.pxlCore ){
+          // this.pxlAutoCam.prevNextAutoCam(1, true);
+          this.pxlAutoCam.getNextPath(false, 0);
+      }
+      
+      this.objectPerc.active=false;
+      if( this.pxlAudio.djVolumeParentObj ){
+          this.pxlAudio.djVolumeParentObj.down=false;
+      }*/
   }
     
     // -- -- -- -- -- -- //
@@ -722,10 +730,10 @@ export class Device{
           this.pxlCamera.deviceKey(3, true);
         }
         if(keyHit==16 || keyHit==224){ // Shift
-          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, true );
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, {}, true );
         }
         if(keyHit==32){
-          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, true ); 
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, {}, true ); 
         }
       }
     }//else{
@@ -841,12 +849,12 @@ export class Device{
         }
         // Shift
         if(keyHit==16 || keyHit==224){ // Shift
-          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, false );
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, {}, false );
           return;
         }
         // Space
         if(keyHit==32){
-          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, false );
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.JUMP, {}, false );
           return;
         }
         
@@ -957,48 +965,176 @@ export class Device{
   // -- -- -- -- -- -- //
 
 
-  deviceAction( action, state=null ){
+  deviceAction( action, data, state=null ){
     switch( action ){
-      case DEVICE_ACTION.MOVE:
+      case this.pxlEnums.DEVICE_ACTION.MOVE:
         //this.directionKeysPressed[2]=0;
-        console.log('move',state);
+        this.addMoveDelta( data );
         //this.pxlCamera.deviceKey(1, state);
         break;
-      case DEVICE_ACTION.LOOK:
-        console.log('look',state);
+      case this.pxlEnums.DEVICE_ACTION.LOOK:
+        this.addLookDelta( data );
         //this.pxlCamera.deviceKey(2, state);
         break;
-      case DEVICE_ACTION.JUMP:
-        this.pxlCamera.camJumpKey( state);
+      case this.pxlEnums.DEVICE_ACTION.JUMP:
+        this.pxlCamera.camJumpKey( state );
         //this.pxlCamera.deviceKey("space", state);
         break;
-      case DEVICE_ACTION.RUN:
+      case this.pxlEnums.DEVICE_ACTION.RUN:
         let speed = state ? this.pxlEnums.USER_SPEED.BOOST : this.pxlEnums.USER_SPEED.BASE;
         this.pxlUser.setSpeed( speed );
         //this.pxlCamera.deviceKey("shift", true);
         break;
-      case DEVICE_ACTION.ACTION:
+      case this.pxlEnums.DEVICE_ACTION.ACTION:
         //this.pxlCamera.deviceKey("action", state);
         break;
-      case DEVICE_ACTION.ACTION_ALT:
+      case this.pxlEnums.DEVICE_ACTION.ACTION_ALT:
         //this.pxlCamera.deviceKey("actionAlt", state);
         break;
-      case DEVICE_ACTION.ITEM:
+      case this.pxlEnums.DEVICE_ACTION.ITEM:
         //this.pxlCamera.deviceKey("item", state);
         break;
-      case DEVICE_ACTION.MENU:
+      case this.pxlEnums.DEVICE_ACTION.MENU:
         //this.pxlCamera.deviceKey("menu", state);
         break;
-      case DEVICE_ACTION.PAUSE:
+      case this.pxlEnums.DEVICE_ACTION.PAUSE:
         this.togglePause( state );
         //this.pxlCamera.deviceKey("pause", state);
         break;
-      case DEVICE_ACTION.MAP:
+      case this.pxlEnums.DEVICE_ACTION.MAP:
         //this.pxlCamera.deviceKey("map", state);
         break;
     }
   }
 
+
+  // -- -- -- -- -- -- //
+
+  addMoveDelta( data=null ){
+    let status = false;
+    if( !this.pxlOptions.mobile || this.pxlOptions.staticCamera || (data === null && !this.directionKeyDown)){
+      return;
+    }
+    
+    if( data !== null ){
+      if( data.hasOwnProperty("status") ){
+        status = data.status;
+      }
+
+      if( status ){
+        let absDeltaX = Math.abs(data.startDelta.x);
+        let absDeltaY = Math.abs(data.startDelta.y);
+
+        let deadZone = this.pxlOptions.userSettings.deadZone.touch;
+        let startDeltaX = absDeltaX > deadZone ? data.startDelta.x - deadZone*Math.sign(data.startDelta.x) : 0;
+        let startDeltaY = absDeltaY > deadZone ? data.startDelta.y - deadZone*Math.sign(data.startDelta.y) : 0;
+
+        //this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + Math.min( Math.max( startDeltaX * 0.01, -1), 1) ) * .5; // x / 50
+        //this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] + Math.min( Math.max( startDeltaY * 0.01, -1), 1) ) * .5; // x / 50 
+
+        this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + startDeltaX * 0.01 ) * .5; // x / 50
+        this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] +  startDeltaY * 0.01 ) * .5; // x / 50 
+        this.userInputMoveScalar = Math.max(this.pxlCamera.cameraMovement[0]**2, this.pxlCamera.cameraMovement[1]**2) ** .5;
+        this.userInputMoveScalar = this.userInputMoveScalar*this.userInputMoveScalar*this.userInputMoveScalar * 1.5;
+        this.userInputMoveScalar += this.userInputMoveScalar>1.0 ? (this.userInputMoveScalar-1.0)*20. : 0;
+        if( this.userInputMoveScalar > 1.0 ){
+          // Trigger Run automatically on mobile
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, {}, true );
+        }else{
+          this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, {}, false );
+        }
+      }
+    }else{
+      status = this.directionKeyDown;
+    }
+
+    this.directionKeyDown = status;
+    if( status ){
+      this.directionKeysPressed[0]= this.pxlCamera.cameraMovement[0] < 0 ? 1 : 0;
+      this.directionKeysPressed[1]= this.pxlCamera.cameraMovement[1] < 0 ? 1 : 0;
+      this.directionKeysPressed[2]= this.pxlCamera.cameraMovement[0] > 0 ? 1 : 0;
+      this.directionKeysPressed[3]= this.pxlCamera.cameraMovement[1] > 0 ? 1 : 0;
+      this.pxlCamera.userInputMoveScalar.x = this.pxlCamera.cameraMovement[0];
+      this.pxlCamera.userInputMoveScalar.y = this.pxlCamera.cameraMovement[1];
+      this.pxlCamera.cameraMovementEase = 1;
+      this.pxlUser.setSpeed( this.userInputMoveScalar * this.pxlEnums.USER_SPEED.BASE );
+    }else{
+      this.directionKeysPressed[0]=0;
+      this.directionKeysPressed[1]=0;
+      this.directionKeysPressed[2]=0;
+      this.directionKeysPressed[3]=0;
+      this.pxlCamera.cameraMovementEase = .85;
+    }
+  }
+
+  addLookDelta( data ){
+    let status = false;
+    if( data.hasOwnProperty("status") ){
+      status = data.status;
+    }
+
+    this.mouseX = data.currentPos.x;
+    this.mouseY = data.currentPos.y;
+
+    if( status ){
+
+      if( data.dragCount == 0 ){
+        this.touchScreen=true;
+        this.touchMouseData.active=true;
+        this.touchMouseData.mode=this.touchMouseData.button;
+        this.touchMouseData.startPos=new Vector2(this.mouseX,this.mouseY);
+        this.touchMouseData.endPos=new Vector2(this.mouseX,this.mouseY);
+        this.touchMouseData.curDistance=new Vector2(0,0);
+        this.touchMouseData.curStepDistance=new Vector2(0,0);
+        this.touchMouseData.dragCount=0;
+        this.pxlAutoCam.touchBlender=false;
+        this.touchMouseData.releaseTime=this.pxlTimer.curMS;
+      }else{
+        this.touchMouseData.endPos=new Vector2(this.mouseX,this.mouseY);
+        this.touchMouseData.curDistance= new Vector2( data.startDelta.x, data.startDelta.y );
+        this.touchMouseData.curStepDistance = new Vector2( data.stepDelta.x, data.stepDelta.y );
+        this.touchMouseData.netDistance.add( this.touchMouseData.curStepDistance.clone() );
+        this.touchMouseData.velocity.add(this.touchMouseData.curStepDistance).multiplyScalar(.5);
+        //this.touchMouseData.velocityEase.add(this.touchMouseData.curStepDistance).multiplyScalar(.5);
+              
+        this.touchMouseData.netDistYPerc =  (this.touchMouseData.netDistance.y+this.touchMouseData.curDistance.y+250)/1250;
+        
+        this.touchMouseData.curFadeOut.add( (new Vector2( data.previousPos.x, data.previousPos.y )).sub(this.touchMouseData.endPos)  );
+  
+          
+        if( this.objectPerc.active ){
+          this.objectPerc.percX = ( this.mouseX - this.objectPerc.left ) / this.objectPerc.width ;
+          this.objectPerc.percY = ( this.mouseY - this.objectPerc.top ) / this.objectPerc.height ;
+          this.objectPerc.offsetX = this.mouseX - this.objectPerc.startX ;
+          this.objectPerc.offsetY = this.mouseY - this.objectPerc.startY ;
+          this.objectPerc.offsetPercX = this.objectPerc.offsetX / this.objectPerc.width ;
+          this.objectPerc.offsetPercY = this.objectPerc.offsetY / this.objectPerc.height ;
+        }
+      }
+
+    }else{
+        
+      this.touchScreen=false;
+      this.touchMouseData.dragTotal+=data.dragCount;
+      this.touchMouseData.active=false;
+      this.touchMouseData.endPos=new Vector2(this.mouseX,this.mouseY);
+      //this.touchMouseData.netDistance.add( this.touchMouseData.curDistance.clone() );
+      //this.touchMouseData.netDistance.y = Math.max(-1000, Math.min(1500, this.touchMouseData.netDistance.y ));
+      this.touchMouseData.netDistYPerc =  (this.touchMouseData.netDistance.y+250)/1250;
+      this.touchMouseData.curDistance.multiplyScalar(0);
+      this.touchMouseData.curStepDistance.multiplyScalar(0);
+
+      this.touchMouseData.releaseTime=this.pxlTimer.curMS;
+      
+      if( this.touchMouseData.lock ){
+          this.touchMouseData.lock=false;
+          return;
+      }
+      
+      this.pxlAutoCam.touchBlender=true;
+      //this.pxlAutoCam.setNextTrigger();
+    }
+  }
 
   // -- -- -- -- -- -- //
 
@@ -1019,13 +1155,27 @@ export class Device{
   // -- -- -- -- -- -- //
 
   // ## Have it run a pxlEnv class function instead of all this mess
-  resizeRenderResolution( iWidth=null, iHeight=null ){
-    iWidth=!iWidth ? window.innerWidth : iWidth;
-    iHeight=!iHeight ? window.innerHeight : iHeight;
+  resizeRenderResolution( iWidthBase=null, iHeightBase=null ){
+
+    let iWidth= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+    let iHeight= window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
+
+    iWidth = window.innerWidth;
+    iHeight = window.innerHeight;
+    
+    // -- -- -- 
+
+    iWidth=!iWidthBase ? iWidth : iWidthBase;
+    iHeight=!iHeightBase ? iHeight : iHeightBase;
         
     this.mapW=(this.sW=iWidth)*this.pxlQuality.screenResPerc;
     this.mapH=(this.sH=iHeight)*this.pxlQuality.screenResPerc;
         
+    let screenWidth = window?.screen?.width ? window.screen.width : this.mapW;
+    let screenHeight = window?.screen?.height ? window.screen.height : this.mapH;
+    this.mapW=screenWidth;
+    this.mapH=screenHeight;
+
     this.screenRes.x=1/this.mapW;
     this.screenRes.y=1/this.mapH;
     this.screenRatio.x=this.sW/this.sH;
@@ -1044,18 +1194,20 @@ export class Device{
     }
 
     // TODO : All of this should be set up through callbacks vv
+    //this.pxlEnv.scene.renderTarget.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
+    //this.pxlEnv.scene.renderWorldPos.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
     
-    this.pxlEnv.scene.renderTarget.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
-    this.pxlEnv.scene.renderWorldPos.setSize(this.mapW*this.pxlQuality.bufferPercMult,this.mapH*this.pxlQuality.bufferPercMult);
+    this.pxlEnv.scene.renderTarget.setSize(this.mapW,this.mapH);
+    this.pxlEnv.scene.renderWorldPos.setSize(this.mapW,this.mapH);
     
     if( this.pxlEnv.mapComposer ) this.pxlEnv.mapComposer.setSize(this.mapW,this.mapH);
     if( this.pxlEnv.mapComposerGlow ) this.pxlEnv.mapComposerGlow.setSize(this.mapW,this.mapH);
     
     // For external rooms --
     if( this.pxlEnv.roomComposer ){
-      this.pxlEnv.roomComposer.setSize(this.mapW,this.mapH);
+      this.pxlEnv.roomComposer.setSize( this.mapW,this.mapH);
     }
-    
+  
     if( this.pxlEnv.roomGlowPass ){
       this.pxlEnv.roomGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
     }

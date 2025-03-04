@@ -218,8 +218,9 @@ export const HUD_ACTION = {
   'NONE' : 0,
   'CLICK' : 1,
   'HOVER' : 2,
-  'DRAG' : 3,
-  'DROP' : 4
+  'ACTIVE' : 3,
+  'DRAG' : 4,
+  'DROP' : 5
 };
 
 export const HUD_DRAW = {
@@ -247,5 +248,6 @@ export const pxlEnums = {
   'DEVICE_BUTTON' : DEVICE_BUTTON,
   'DEVICE_ACTION' : DEVICE_ACTION,
   'HUD_ELEMENT' : HUD_ELEMENT,
+  'HUD_ACTION' : HUD_ACTION,
   'HUD_DRAW' : HUD_DRAW
 };

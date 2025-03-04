@@ -24,8 +24,11 @@ export class GUIManager{
   this.verbose = verbose;
 
   //this.bootTime=new Date().getTime();
-  this.sW=window.innerWidth;
-  this.sH=window.innerHeight;
+
+  this.sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+  this.sH=  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
+  this.sW = window.innerWidth;
+  this.sH = window.innerHeight;
   this.mobile=false;
   this.pxlFile=null;
   this.pxlCookie=null;
@@ -401,9 +404,12 @@ export class GUIManager{
   }
   
   resize(){
-		this.sW=window.innerWidth;
-		this.sH=window.innerHeight;
+
+    this.sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+    this.sH=  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
 		
+    this.sW = window.innerWidth;
+    this.sH = window.innerHeight;
 		// Linked to icons, run for any parenting
 		this.resetHelpTextPlacement();
 		
@@ -2337,7 +2343,7 @@ export class GUIManager{
           <br>${this.projectTitle}
   </div>
   <div id="guiHelpFooter" class="gui_footer" style="margin-bottom: 4vh;">
-    <div class="guiButton" style="font-weight: 700; font-size: 5vw;" id="guiMobileWelcomeButton">enter</div>
+    <div class="guiButton" style="font-weight: 700; font-size: 5em;" id="guiMobileWelcomeButton">enter</div>
   </div>
   <div class="gui_spacer"></div>
     </div>

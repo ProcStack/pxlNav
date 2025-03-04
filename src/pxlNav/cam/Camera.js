@@ -45,7 +45,7 @@ export class Camera{
 
     // Max Movement Settings
     this.hasMovementLimit=true;
-    this.movementMax = 10.0; // Meters per second
+    this.movementMax = 100.0; // Meters per second
 
     // Jump Height Scalar
     this.jumpScalar=1.0;
@@ -62,7 +62,7 @@ export class Camera{
     this.cameraEasing = [ .55, .45 ]; // [ PC, Mobile ]
 
     // Touch screen sensitivity settings
-    this.touchMaxSensitivity = 500;
+    this.touchMaxSensitivity = 800;
     
     // The jumping impulse per frame
     //this.cameraJumpImpulse= [ 0.045, 0.085 ];// [.035,.075]; // [ Grav, Low Grav ]
@@ -111,7 +111,7 @@ export class Camera{
 
     // User-Input Movement & Look Scalars
     //   Only set when there is analog / float input; like gamepad thumbstick or touch 'joysticks'
-    this.userInputMoveScalar = 1;
+    this.userInputMoveScalar = {x:1,y:1};
     this.userInputLookScalar = 1;
 
     this.roomStandingHeight = { 'default' : this.standingHeight };
@@ -2050,6 +2050,11 @@ export class Camera{
     // Check if camera is in Roam or Static mode
     if( !this.canMove ){ return; }
 
+    
+    if( this.pxlDevice.mobile ){
+      return;
+    }
+
 
     let rate=[0,0];//
     let dir=[...this.pxlDevice.directionKeysPressed];
@@ -2058,6 +2063,7 @@ export class Camera{
     // Get millisecond time differences so camera movement is independant of FPS
     let deltas=[ (curTime-this.pxlDevice.keyDownCount[0]), (curTime-this.pxlDevice.keyDownCount[1]) ]; // 1.000 seconds
 
+    //console.log( dir );
     // Array entry
     let easingMode = this.mobile ? 1 : 0;
 
@@ -2071,7 +2077,7 @@ export class Camera{
       // Subtract forward/back from strafing movement to reduce diagonal super-speed
       let turnRate=this.pxlQuality.settings.leftRight ?  this.cameraEasing[ easingMode ] : ( 1 - Math.min(1, Math.abs(this.cameraMovement[1]*.3)) ) *.5 ;
       rate[0]=( (this.pxlQuality.settings.leftRight ? 1.0 : 6.0) + (deltas[0]*(deltas[0])) * .1 ) * turnRate;
-      rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar * this.userInputMoveScalar;
+      rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar * this.userInputMoveScalar.x;
     }else{
       // Bother Left AND Right direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[0]=curTime;
@@ -2084,7 +2090,7 @@ export class Camera{
       // Subtract strafing movement from dolly movement to reduce diagonal super-speed
       let dollyRate=(1- Math.min(1, Math.abs(this.cameraMovement[0]*.07))) * this.cameraEasing[ easingMode ]; 
       rate[1]=( ((deltas[1]*(deltas[1]*3+2+this.pxlUser.moveSpeed))*.5) ) * dollyRate; 
-      rate[1]= Math.min( this.pxlUser.moveSpeed, rate[1] ) * this.movementScalar * this.userInputMoveScalar;
+      rate[1]= Math.min( this.pxlUser.moveSpeed, rate[1] ) * this.movementScalar * this.userInputMoveScalar.y;
     }else{
       // Both Up AND Down direction keys are pressed, cancel movement
       this.pxlDevice.keyDownCount[1]=curTime;
@@ -2107,7 +2113,7 @@ export class Camera{
    */
   initFrameCamPosition(){
     let curCamPos=this.cameraPos.clone();
-    
+
     if(!this.cameraBooted){ // These should be set from Scene File, if not, initial values
       this.cameraAimTarget.position.set(0, 0, 0);//.add(new Vector3(0,0,0));
       this.cameraPrevPos = new Vector3(curCamPos.clone());
@@ -2137,6 +2143,15 @@ export class Camera{
         
         this.cameraMovement[0] = Math.abs(this.cameraMovement[0])<this.posRotEasingThreshold ? 0 : this.cameraMovement[0]*this.cameraMovementEase;
         this.cameraMovement[1] = Math.abs(this.cameraMovement[1])<this.posRotEasingThreshold ? 0 : this.cameraMovement[1]*this.cameraMovementEase;
+
+        if( this.cameraMovement[0] == 0 ){
+          this.userInputMoveScalar.x=1;
+        }
+        if( this.cameraMovement[1] == 0 ){
+          this.userInputMoveScalar.y=1;
+        }
+        
+
         this.hasMoved=true;
       }
       
@@ -2336,8 +2351,8 @@ export class Camera{
       let camPoseQuat;
       if( this.pxlDevice.mobile ){
         euler.set(
-            (this.pxlDevice.touchMouseData.netDistance.y/this.pxlDevice.sH*2),
-            (this.pxlDevice.touchMouseData.netDistance.x/this.pxlDevice.sW*2),
+            (this.pxlDevice.touchMouseData.netDistance.y/this.pxlDevice.sH*3),
+            (this.pxlDevice.touchMouseData.netDistance.x/this.pxlDevice.sW*6),
             0,
             'YXZ'
           ); // Device returns YXZ for deviceOrientation

@@ -27,6 +27,11 @@ export const pxlUserSettings = {
       'UPS' : 0.3, // Units per Step() per Step()
       'Max' : 15.5 // Max gravity rate
     },
+  'deadZone' : {
+      'controller' : 0.10, // Dead zone for controller input, in stick tilt
+      'touch' : 20, // Dead zone for touch input, in pixels
+      'xr' : 0.10 // Dead zone for XR input, in hand detection precision
+    },
   };
 
 

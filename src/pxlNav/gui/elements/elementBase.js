@@ -12,6 +12,10 @@ export class ElementBase{
     this.object = null; // DOM Object
     this.type = HUD_ELEMENT.REGION;
 
+    this.pxlOptions = null;
+    this.pxlEnums = null;
+    this.pxlDevice = null;
+
     this.isDown = false;
     this.isDragging = false;
 
@@ -20,7 +24,13 @@ export class ElementBase{
 
     this.startPos = null;
     this.currentPos = null;
-    this.delta = {
+    this.previousPos = null;
+    this.startDelta = {
+      'x':0,
+      'y':0
+    };
+
+    this.stepDelta = {
       'x':0,
       'y':0
     };
@@ -38,12 +48,30 @@ export class ElementBase{
       },
       'draw' : HUD_DRAW.DEFAULT,
       'style' : [],
+      'objectStyles' : [],
+      'objectStyleKeys' : [],
     };
+
+    this.defaultObjectStyleEntry = {
+      'object': 'parent',
+      'base': ['pxlNav-hudElement-thumbstick-default'],
+      'hover': ['pxlNav-hudElement-thumbstick-hover'],
+      'active': ['pxlNav-hudElement-thumbstick-active']
+    }
 
     if( typeof data !== 'object' ){
       data = {};
     }
     data = Object.assign( this.defaultObject, data );
+
+    // Parse object override style keys
+    //   Make for easier lookup into the objectStyles [{},{},...]
+    if( data.objectStyles.length > 0 ){
+      data.objectStyles.forEach(( style )=>{
+        data.objectStyleKeys.push( style.object );
+      });
+    }
+
     this.data = data;
 
     // -- -- --
@@ -53,10 +81,22 @@ export class ElementBase{
   
   // -- -- --
 
+  setDependencies( pxlNav ){
+    this.pxlOptions = pxlNav.pxlOptions;
+    this.pxlEnums = pxlNav.pxlEnums
+    this.pxlDevice = pxlNav.pxlDevice;
+  }
+
+  // -- -- --
+
   build(){
     let emptyObj = this.createMainElement();
     emptyObj.classList.add('pxlNav-hudElement-region');
     this.object = emptyObj;
+
+    this.object.ontouchstart = this.ontouchstart.bind( this );
+    this.object.ontouchend = this.ontouchend.bind( this );
+
     return emptyObj;
   }
 
@@ -80,11 +120,15 @@ export class ElementBase{
 
   // -- -- --
 
-  ontouchstart( e ){}
+  ontouchstart( e ){
+    this.emit( true );
+  }
 
   ontouchmove( e ){}
 
-  ontouchend( e ){}
+  ontouchend( e ){
+    this.emit( false );
+  }
 
   // -- -- --
   

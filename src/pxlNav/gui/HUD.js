@@ -57,6 +57,10 @@ export class HUD{
     /**
      * @type {Object|null}
      */
+    this.pxlEnums = null;
+    /**
+     * @type {Object|null}
+     */
     this.pxlGuiDraws = null;
     /**
      * @type {Object|null}
@@ -89,6 +93,7 @@ export class HUD{
    */
   setDependencies( pxlNav ){
     this.pxlOptions = pxlNav.pxlOptions;
+    this.pxlEnums = pxlNav.pxlEnums;
     this.pxlGuiDraws = pxlNav.pxlGuiDraws;
     this.pxlDevice = pxlNav.pxlDevice;
   }
@@ -108,7 +113,8 @@ export class HUD{
 
     // Add mobile hud elements
     //   Thumbsticks, jump + run empty regions
-    if( true || this.pxlOptions.mobile ){
+    if( this.pxlOptions.mobile && !this.pxlOptions.staticCamera ){
+      hudParent.classList.add('pxlNav-hud-parent-mobile');
       this.createMobileHUD();
     }
   }
@@ -127,7 +133,9 @@ export class HUD{
    * this.pxlHUD.addToHUD( newButton );
    */
   addToHUD( hudElement ){
-    if( hudElement?.object !== null ){
+    if( hudElement.hasOwnProperty('block') && hudElement.block !== null ){
+      this.hudParent.appendChild( hudElement.block );
+    }else if( hudElement?.object !== null ){
       this.hudParent.appendChild( hudElement.object );
     }else{
       this.hudParent.appendChild( hudElement );
@@ -241,9 +249,17 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newRegion );
    */
-  createRegion( label, data, callbackFn=null ){
+  createRegion( label, data, callbackFn=null, parentObj=null ){
     let region = new ElementBase( label, data );
+    region.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     region.build();
+
+    if(callbackFn !== null){
+      region.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( region.object );
+    }
 
     return region;
   }
@@ -265,9 +281,18 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newDragRegion );
    */
-  createDragRegion( label, data, callbackFn=null ){
+  createDragRegion( label, data, callbackFn=null, parentObj=null ){
     let dragRegion = new DragRegion( label, data );
+    dragRegion.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     dragRegion.build();
+
+    if(callbackFn !== null){
+      dragRegion.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( dragRegion.object );
+    }
+
     return dragRegion;
   }
 
@@ -287,9 +312,17 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newButton );
    */
-  createButton( label, data, callbackFn=null ){
+  createButton( label, data, callbackFn=null, parentObj=null ){
     let button = new ElementBase( label, data );
+    button.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     button.build();
+
+    if(callbackFn !== null){
+      button.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( button.object );
+    }
 
     return button;
   }
@@ -314,6 +347,7 @@ export class HUD{
   createThumbstick( label, data, callbackFn=null ){
 
     let thumbstickObj = new Thumbstick( label, data );
+    thumbstickObj.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     thumbstickObj.build();
 
     // Connect thumbstick interactions to listeners
@@ -341,9 +375,17 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newSlider );
    */
-  createSlider( label, data, callbackFn=null ){
+  createSlider( label, data, callbackFn=null, parentObj=null ){
     let slider = new ElementBase( label, data );
+    slider.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     slider.build();
+
+    if(callbackFn !== null){
+      slider.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( slider.object );
+    }
 
     return slider;
   }
@@ -364,9 +406,17 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newImage );
    */
-  createImage( label, data, callbackFn=null ){
+  createImage( label, data, callbackFn=null, parentObj=null ){
     let image = new ElementBase( label, data );
+    image.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     image.build();
+
+    if(callbackFn !== null){
+      image.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( image.object );
+    }
 
     return image;
   }
@@ -387,9 +437,17 @@ export class HUD{
    * });
    * this.pxlHUD.addToHUD( newText );
    */
-  createText( label, data, callbackFn=null ){
+  createText( label, data, callbackFn=null, parentObj=null ){
     let text = new ElementBase( label, data );
+    text.setDependencies( { 'pxlOptions':this.pxlOptions, 'pxlEnums':this.pxlEnums, 'pxlDevice':this.pxlDevice } );
     text.build();
+
+    if(callbackFn !== null){
+      text.subscribe( callbackFn );
+    }
+    if( parentObj !== null ){
+      parentObj.appendChild( text.object );
+    }
 
     return text;
   }
@@ -409,10 +467,39 @@ export class HUD{
     mobileHudParent.classList.add('pxlNav-hudMobile-parent');
     this.hudParent.appendChild( mobileHudParent );
 
+    let noneState = this.pxlEnums.HUD_ACTION.NONE;
+    let hoverState = this.pxlEnums.HUD_ACTION.HOVER;
+    let activeState = this.pxlEnums.HUD_ACTION.ACTIVE;
+
     // Virtual thumbsticks with dragable inner peg
     curId = 'thumbstick_left';
-    curData = { 'style': [ 'pxlNav-hudMobile-joystick-left' ] };
-    curElement = this.addItem( curId, HUD_ELEMENT.THUMBSTICK, curData, null, mobileHudParent );
+    curData = {
+       'style': [ 'pxlNav-hudMobile-joystick-left' ],
+       'objectStyles': [
+          {
+            'object': 'block',
+          },
+          {
+            'object': 'parent',
+          },
+          {
+            'object': 'inner',
+          },
+        ]
+      };
+      curData['objectStyles'][0][noneState] = ['pxlNav-hudElement-thumbstick-block-default'];
+      curData['objectStyles'][0][hoverState] = ['pxlNav-hudElement-thumbstick-block-hover'];
+      curData['objectStyles'][0][activeState] = ['pxlNav-hudElement-thumbstick-block-active'];
+
+      curData['objectStyles'][1][noneState] = ['pxlNav-hudElement-thumbstick-default'];
+      curData['objectStyles'][1][hoverState] = ['pxlNav-hudElement-thumbstick-hover'];
+      curData['objectStyles'][1][activeState] = ['pxlNav-hudElement-thumbstick-active'];
+
+      curData['objectStyles'][2][noneState] = ['pxlNav-hudElement-thumbstick-inner-default'];
+      curData['objectStyles'][2][hoverState] = ['pxlNav-hudElement-thumbstick-inner-hover'];
+      curData['objectStyles'][2][activeState] = ['pxlNav-hudElement-thumbstick-inner-active'];
+
+    curElement = this.addItem( curId, HUD_ELEMENT.THUMBSTICK, Object.assign({},curData) );
 
     // Connect movement joystick to device actions
     curElement.subscribe(( deltas )=>{
@@ -424,8 +511,8 @@ export class HUD{
     // -- -- --
 
     curId =  'thumbstick_right';
-    curData = { 'style': [ 'pxlNav-hudMobile-joystick-right' ] };
-    curElement = this.addItem( curId, HUD_ELEMENT.THUMBSTICK, curData, null, mobileHudParent );
+    curData['style'] = [ 'pxlNav-hudMobile-joystick-right' ];
+    curElement = this.addItem( curId, HUD_ELEMENT.THUMBSTICK, curData );
 
     // Connect look joystick to device actions
     curElement.subscribe(( deltas )=>{
@@ -436,30 +523,29 @@ export class HUD{
 
     // -- -- --
 
+
     // Empty tap reagions for mobile jump & run
     curId = 'mobile_jump';
     curData = { 'style': [ 'pxlNav-hudMobile-region-jump' ] };
-    curElement = this.addItem( curId, HUD_ELEMENT.REGION, curData, null, mobileHudParent );
-
-    // Connect jump region to device actions
-    curElement.subscribe(( e )=>{
-      this.mobileDeligate( DEVICE_ACTION.JUMP, e );
-    });
+    curElement = this.addItem( curId, HUD_ELEMENT.REGION, curData, ( e )=>{
+      this.mobileDeligate( DEVICE_ACTION.JUMP, {}, e );
+    } );
 
     this.mobileHUD[ 'jump' ] = curElement;
 
     // -- -- --
 
-    curId =  'mobile_run';
-    curData = { 'style': [ 'pxlNav-hudMobile-region-run' ] };
-    curElement = this.addItem( curId, HUD_ELEMENT.REGION, curData, null, mobileHudParent );
+    curId =  'mobile_ACTION';
+    curData = { 'style': [ 'pxlNav-hudMobile-region-ACTION' ] };
+    curElement = this.addItem( curId, HUD_ELEMENT.REGION, curData );
 
-    // Connect run region to device actions
+    // Connect item region to device actions
     curElement.subscribe(( e )=>{
-      this.mobileDeligate( DEVICE_ACTION.RUN, e );
+      console.log( 'Item clicked!' );
+      this.mobileDeligate( DEVICE_ACTION.ACTION, e );
     });
 
-    this.mobileHUD[ 'run' ] = curElement;
+    this.mobileHUD[ 'item' ] = curElement;
 
 
 
@@ -473,9 +559,8 @@ export class HUD{
    * @param {Object} data - The data for the event.
    * @private
    */
-  mobileDeligate( eventType, data ){
-    console.log( eventType, data );
-    this.pxlDevice.deviceAction( eventType, data );
+  mobileDeligate( eventType, data={}, status=true ){
+    this.pxlDevice.deviceAction( eventType, data, status );
   }
 
 
@@ -496,6 +581,9 @@ export class HUD{
    */
   subscribe( label, callbackFn ){
     if( this.huds.hasOwnProperty( label ) ){
+      if( !this.huds[ label ].hasOwnProperty('callbacks') ){
+        this.huds[ label ].callbacks = [];
+      }
       this.huds[ label ].callbacks.push( callbackFn );
     }
   }
@@ -508,7 +596,7 @@ export class HUD{
    * @param {Object} data - The data for the event.
    */
   emit( label, data ){
-    if( this.huds.hasOwnProperty( label ) ){
+    if( this.huds.hasOwnProperty( label ) && this.huds[ label ].hasOwnProperty('callbacks') ){
       this.huds[ label ].callbacks.forEach( (fn)=>{
         fn( data );
       });

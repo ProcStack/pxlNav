@@ -381,6 +381,7 @@ export class Environment{
     this.pxlTimer.step();
     this.pxlAudio.step();
     this.pxlQuality.step();
+    this.pxlDevice.step();
     if( this.pxlAutoCam.step() ){
         this.pxlCamera.step();
     }
