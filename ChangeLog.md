@@ -3,6 +3,9 @@
 
 
 ### Major Changes
+
+  - Primary `canvas` style class changed from `pxlNavCoreCanvasStyle` to `pxlNav-coreCanvasStyle`
+
   - `JSDoc` added at `./docs/jsdoc/index.html` - `https://procstack.github.io/pxlNav-docs`
     - pxlNav
     - Animation

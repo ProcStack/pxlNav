@@ -159,7 +159,7 @@ if( navBarObj ){
       curItem.addEventListener("click", function(){
         let targetRoom = curItem.getAttribute("targetRoom");
         let targetCam = curItem.getAttribute("targetCam");
-        console.log( "Switching to camera: ", targetCam );
+        //console.log( "Switching to camera: ", targetCam );
         pxlNavEnv.trigger( 'warptoroom', targetRoom, targetCam );
       });
     }

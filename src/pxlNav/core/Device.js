@@ -1250,7 +1250,8 @@ export class Device{
     //this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio);
     //this.pxlEnv.engine.setSize(this.mapW, this.mapH);
     this.pxlEnv.engine.setSize(this.sW, this.sH);
-    let aspectRatio=this.mapW/this.mapH;
+    //let aspectRatio=this.mapW/this.mapH;
+    let aspectRatio = window.innerWidth / window.innerHeight;
     this.pxlCamera.setAspect( aspectRatio );
         
         

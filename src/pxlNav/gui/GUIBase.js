@@ -1593,7 +1593,8 @@ export class GUIManager{
     tmpThis.toggleGuiWindowContainer(e, false, true );
   }
   this.guiWindowBG=bgDiv;
-  this.addToContainer( bgDiv );
+  //this.addToContainer( bgDiv );
+  document.body.appendChild( bgDiv );
   }
   toggleGuiWindowContainer(e, active, closeWindows=false ){
   if(e){
@@ -1672,7 +1673,7 @@ export class GUIManager{
     });
     
     // -- -- --
-
+    
     // Close Button
     let tmpThis=this;
     let guiClose=document.getElementById("guiHelpBackButton");
@@ -1731,13 +1732,16 @@ export class GUIManager{
       this.helpGuiBuild();
     }
   
+
   active= active==null ? !this.guiWindows.helpGui.active : active;
   this.guiWindows.helpGui.active=active;
   this.promptFader( this.guiWindows.helpGui.gui, active );
+  
   this.toggleGuiWindowContainer( null, active );
   if(this.hudBlock.active){ this.toggleHudBlock( active ); }
   
-    
+  //this.promptFader( this.guiWindows.container, active );
+
     if(this.introHelpActive && !active){
       this.introHelpActive=false;
       this.pxlEnv.postHelpIntro();
@@ -2357,6 +2361,7 @@ export class GUIManager{
   guiClose.onclick=(e)=>{ 
       tmpThis.toggleMobileWelcome( false );
       tmpThis.pxlEnv.postHelpIntro();
+      tmpThis.promptFader(this.guiWindowBG, false,null,false);
     };
     
   // -- -- -- -- -- -- -- -- -- -- //
@@ -2373,8 +2378,14 @@ export class GUIManager{
   
   active= active==null ? !this.guiWindows.mobileGui.active : active;
     
-  this.guiWindows.mobileGui.active=active;
+  this.guiWindows.mobileGui.active=active;		 
   this.promptFader( this.guiWindows.mobileGui.gui, active );
+  /*
+  if( active ){
+    this.promptFader( this.guiWindows.mobileGui.gui, active );
+  }else{
+    this.promptFader( this.guiWindows.mobileGui.gui, active, null, true );
+  }*/
   this.toggleGuiWindowContainer( null, active );
   if(this.hudBlock.active){ this.toggleHudBlock( active ); }
   }

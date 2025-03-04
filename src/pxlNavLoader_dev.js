@@ -27,7 +27,7 @@ const pxlRoomRootPath = "../pxlRooms";
 const pxlAssetRoot = "../pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
-const showOnboarding = false;
+const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
 const bootRoomList = ["VoidEnvironment"];//"OutletEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];

@@ -167,7 +167,7 @@ if( switchButton && switchButton.hasAttribute("roomToggles") ){
       nextVal = labelKeys[curIndex];
       switchButtonObj.innerText = roomLabelDict[nextVal];
       switchButtonObj.setAttribute("curRoom", nextVal);
-      console.log( "Switching to room: ", nextVal );  
+      //console.log( "Switching to room: ", nextVal );  
       pxlNavEnv.trigger( 'warptoroom', nextVal );
     }
   });
