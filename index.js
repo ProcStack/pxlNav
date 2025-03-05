@@ -26,6 +26,9 @@ if(args.length > 0 && args[0] == "examples"){
   app.use( express.static(path.join(__dirname, 'src')) );
 }
 
+// Direct 'dist/pxlAssets' to './dist/pxlAssets' --
+app.use('/dist/pxlAssets', express.static(path.join(__dirname, 'dist/pxlAssets')));
+
 app.use(function(req, res, next) {
   if (req.url.endsWith('.js')) {
     res.setHeader('Content-Type', 'application/javascript');
@@ -50,6 +53,11 @@ app.use(function(req, res, next) {
 
 
 //Setup http and https servers
-http.listen(httpPort, function () {
-	console.log(`${projectName} listening at localhost:${httpPort}`);
+//http.listen(httpPort, function () {
+//let listenIP = 'localhost';
+let listenIP = '192.168.1.3';
+
+http.listen(httpPort, listenIP, function () {
+	//console.log(`${projectName} listening at localhost:${httpPort}`);
+	console.log(`${projectName} listening at ${listenIP}:${httpPort}`);
 });

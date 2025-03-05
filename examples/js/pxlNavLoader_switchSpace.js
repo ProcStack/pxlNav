@@ -24,7 +24,7 @@ const projectTitle = "pxlNav : The Outlet";
 const pxlRoomRootPath = "../js/pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../js/pxlAssets";
+const pxlAssetRoot = "../../dist/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
@@ -71,10 +71,10 @@ userSettings['gravity']['Max'] = 15.5; // Max gravity rate
 // -- -- --
 
 // Target FPS (Frames Per Second)
-//   Default is - PC = 30  -&-  Movile = 30
+//   Default is - PC = 60  -&-  Mobile = 30
 const targetFPS = {
-  'PC' : 60,
-  'Mobile' : 30
+  'pc' : 60,
+  'mobile' : 30
 };
 
 // Anti-aliasing level
@@ -178,8 +178,7 @@ if( switchButton && switchButton.hasAttribute("roomToggles") ){
 
 
 function pxlNav_init(){
-  // Start the timer and initilize pxlNAv
-  pxlNavEnv.bootTimer();
+  // Start pxlNav
   pxlNavEnv.init();
 
   // -- -- --

@@ -1255,6 +1255,12 @@ export class FileIO{
               curSide=DoubleSide;
             }
 
+            if(c.userData.hasOwnProperty("scripted") || c.userData.hasOwnProperty("Scripted") ){
+              if( !envObj.geoList.hasOwnProperty('Scripted') ){
+                envObj.geoList['Scripted']={};
+              }
+              envObj.geoList['Scripted'][c.name]=c;
+            }
             
             // Custom material shader was added to this object, apply it
             if( materialList.hasOwnProperty( c.name ) ){
@@ -1313,10 +1319,14 @@ export class FileIO{
               envObj.lightList[ c.type ].push( c );
             }else if( c.type == "Group" ){
               let addChildren = true;
-              if( envObj.geoList.hasOwnProperty('Scripted') ){
-                let scriptedList = Object.keys(envObj.geoList['Scripted']);
-                //addChildren = false;
+              
+              if(c.userData.hasOwnProperty("scripted") || c.userData.hasOwnProperty("Scripted") ){
+                if( !envObj.geoList.hasOwnProperty('Scripted') ){
+                  envObj.geoList['Scripted']={};
+                }
+                envObj.geoList['Scripted'][c.name]=c;
               }
+              
               if( addChildren ){
                 ch.push( ...c.children );
               }

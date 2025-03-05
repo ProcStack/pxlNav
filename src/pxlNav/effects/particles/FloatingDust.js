@@ -14,10 +14,53 @@ import { dustVert, dustFrag } from './shaders/FloatingDust.js';
 /**
  * Class representing floating dust particles in the environment.
  * Extends the ParticleBase class.
- * @alias FloatingDust
+ * 
+ * Access at - `pxlNav.pxlEffects.pxlParticles.FloatingDust`
+ * 
+ * Extends - [ParticleBase]{@link ParticleBase}
+ * 
+ * @alias pxlParticles/FloatingDust
  * @class
- * @extends ParticleBase
  * @memberof pxlNav.pxlEffects.pxlParticles
+ * @example
+ * this.shaderSettings = {
+ *   "vertCount" : 1000,
+ *   "pScale" : 7,
+ *   "pOpacity" : 1.0,
+ *   "proxDist" : 200,
+ *   "atlasRes" : 4,
+ *   "atlasPicks" : [],
+ *   "randomAtlas" : false,
+ *   "additiveBlend" : false,
+ *
+ *   "windDir" : new Vector3( 0, 0, 1 ),
+ *   "offsetPos" : new Vector3( 0, 0, 0 ),
+ *
+ *   "hasLights" : false,
+ *   "fadeOutScalar" : 1.59 , 
+ *   "wanderInf" : 1.0 , 
+ *   "wanderRate" : 1.0 , 
+ *   "wanderFrequency" : 2.85 
+ * }
+ * @example
+ * // Floating Dust Particle System for pxlNav
+ * import { pxlEffects } from "pxlNav.esm.js";
+ * const FloatingDust = pxlEffects.pxlParticles.FloatingDust; 
+ * 
+ * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * fbxPostLoad(){
+ * 
+ *   let floatingDustSystem = new FloatingDust( room, 'floatingDust' );
+ *  
+ *   let curShaderSettings = floatingDustSystem.getSettings();
+ *   curShaderSettings["vertCount"] = 1200; // Number of particles
+ *   curShaderSettings["pScale"] = 9; // Scale of the particles
+ *   curShaderSettings["pOpacity"] = 0.8; // Opacity of the particles
+ *   curShaderSettings["proxDist"] = 400; // Proximity distance
+ *   curShaderSettings["additiveBlend"] = true; // Additive blending for the particles
+ * 
+ *   floatingDustSystem.build( curShaderSettings );
+ * }
  */
 export class FloatingDust extends ParticleBase{
   /**
@@ -85,6 +128,8 @@ export class FloatingDust extends ParticleBase{
   
   /**
    * Builds the floating dust particle system with the given shader settings.
+   * @method
+   * @memberof pxlParticles/FloatingDust
    * @param {Object} [curShaderSettings={}] - Current shader settings to override the default settings.
    */
   build( curShaderSettings={} ){

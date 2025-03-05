@@ -779,11 +779,11 @@ export class Camera{
     // Gravity settings
     //   From a Jump or running off a ledge
     if( userSettingsObject.hasOwnProperty("gravity") ){
-      if( userSettingsObject.gravity.hasOwnProperty("UPS") ){
-        this.setGravityRate( userSettingsObject.gravity.UPS );
+      if( userSettingsObject.gravity.hasOwnProperty("ups") ){
+        this.setGravityRate( userSettingsObject.gravity.ups );
       }
-      if( userSettingsObject.gravity.hasOwnProperty("Max") ){
-        this.setGravityMax( userSettingsObject.gravity.Max );
+      if( userSettingsObject.gravity.hasOwnProperty("max") ){
+        this.setGravityMax( userSettingsObject.gravity.max );
       }
     }
   }

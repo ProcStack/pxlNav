@@ -118,6 +118,11 @@ export class Colliders{
       console.log( msg );
     }
   }
+  debug( msg ){
+    if( this.verbose >= VERBOSE_LEVEL.DEBUG ){
+      console.log( msg );
+    }
+  }
   warn( msg ){
     if( this.verbose >= VERBOSE_LEVEL.WARN ){
       console.warn( msg );
@@ -207,14 +212,14 @@ export class Colliders{
         this.roomColliderData[ roomName ][ colliderType ][ 'gridSizeInv' ] = gridSizeInv;
 
         // Verbose feedback to aid in adjusting grid size for users
-        this.log( "Grid size adjusted for pxlRoom: " + roomName + "; from " + origGridSize + " to " + gridSize + " units; " + gridSizeScalar + "%" );
-        this.log( "Reference bound set to: " + this.colliderBoundsReference + " units" );
-        this.log( "Total pxlRoom bounds found: " + maxColliderSize + " units" );
+        this.debug( "Grid size adjusted for pxlRoom: " + roomName + "; from " + origGridSize + " to " + gridSize + " units; " + gridSizeScalar + "%" );
+        this.debug( "Reference bound set to: " + this.colliderBoundsReference + " units" );
+        this.debug( "Total pxlRoom bounds found: " + maxColliderSize + " units" );
       }else{
         // Verbose feedback to aid in adjusting grid size for users
-        this.log( "-- Grid size unchanged for pxlRoom '" + roomName + "', collider bounds within reference bounds --" );
+        this.debug( "-- Grid size unchanged for pxlRoom '" + roomName + "', collider bounds within reference bounds --" );
       }
-      this.log( "Collider bounds: {x:" + colliderMinMax.min.x + ", y:" + colliderMinMax.min.y + "} -to- {x:" + colliderMinMax.max.x + ", y:" + colliderMinMax.max.y +" }" );
+      this.debug( "Collider bounds: {x:" + colliderMinMax.min.x + ", y:" + colliderMinMax.min.y + "} -to- {x:" + colliderMinMax.max.x + ", y:" + colliderMinMax.max.y +" }" );
 
       // Generate the grid map for collision detection per faces within grid locations
       //   Store the face vertices, edges, and barycentric coordinates for collision detection performance
@@ -385,15 +390,15 @@ export class Colliders{
 
 
       this.roomColliderData[ roomName ][ colliderType ][ 'count' ] = colliderTriCount;
-      this.log( " -- Collider Count for " + roomName + " : " + colliderTriCount );
+      this.debug( " -- Collider Count for " + roomName + " : " + colliderTriCount );
 
 
       // Full dump of collider data for the room
       //   This is for debugging purposes
       //this.log( this.roomColliderData[roomName][ colliderType ]['faceGridGroup'] );
     }else{
-      this.log( " -- No colliders found for room: " + pxlRoomObj.getName() );
-      this.log( "      If you didn't intend on including collider objects in your FBX, something went wrong. Please check your FBX for unintentional collider user-detail attributes on mainScene objects." );
+      this.debug( " -- No colliders found for room: " + pxlRoomObj.getName() );
+      this.debug( "      If you didn't intend on including collider objects in your FBX, something went wrong. Please check your FBX for unintentional collider user-detail attributes on mainScene objects." );
     }
   }
   

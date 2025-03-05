@@ -44,6 +44,10 @@ export class Device{
     sH = window.innerHeight;
     this.sW=sW;
     this.sH=sH;
+
+    this.lookRange = .30;
+    this.lookXScalar = 1 / (this.sW * this.lookRange);
+    this.lookYScalar = 1 / (this.sH * this.lookRange);
     this.touchScreen=false;
     this.x=sW*.5;
     this.y=sH*.5;
@@ -307,6 +311,18 @@ export class Device{
     }
   }
   
+  requestFullScreen(){
+    let elem = document.documentElement;
+    let requestMethod = elem.requestFullScreen ||
+                        elem.webkitRequestFullScreen ||
+                        elem.mozRequestFullScreen ||
+                        elem.msRequestFullScreen;
+    if( requestMethod ){
+      requestMethod.call(elem);
+    }
+  }
+
+
   // -- -- -- -- -- -- -- -- -- -- //
   
   onmousemove(curObj,e){
@@ -364,6 +380,10 @@ export class Device{
       }
       document.body.style.cursor=cursorType;
     }
+  }
+
+  hideAddressBar(){
+    setTimeout(function(){ window.scrollTo(0, 1); }, 0);
   }
     
   getMouseXY(e){
@@ -1029,11 +1049,17 @@ export class Device{
         let startDeltaX = absDeltaX > deadZone ? data.startDelta.x - deadZone*Math.sign(data.startDelta.x) : 0;
         let startDeltaY = absDeltaY > deadZone ? data.startDelta.y - deadZone*Math.sign(data.startDelta.y) : 0;
 
+        // Fit pixel distances to percentage of screen
+        let xRatio = this.sW / this.sH;
+        let yRatio = this.sH / this.sW;
+        startDeltaX = Math.min(startDeltaX * this.lookXScalar, 1.0) * this.pxlOptions.userSettings.movement.max * xRatio;
+        startDeltaY = Math.min(startDeltaY * this.lookYScalar, 1.0) * this.pxlOptions.userSettings.movement.max * yRatio;
+
         //this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + Math.min( Math.max( startDeltaX * 0.01, -1), 1) ) * .5; // x / 50
         //this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] + Math.min( Math.max( startDeltaY * 0.01, -1), 1) ) * .5; // x / 50 
 
-        this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + startDeltaX * 0.01 ) * .5; // x / 50
-        this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] +  startDeltaY * 0.01 ) * .5; // x / 50 
+        this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + startDeltaX ) * .7 // x / 50
+        this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] +  startDeltaY ) * .5; // y / 50 
         this.userInputMoveScalar = Math.max(this.pxlCamera.cameraMovement[0]**2, this.pxlCamera.cameraMovement[1]**2) ** .5;
         this.userInputMoveScalar = this.userInputMoveScalar*this.userInputMoveScalar*this.userInputMoveScalar * 1.5;
         this.userInputMoveScalar += this.userInputMoveScalar>1.0 ? (this.userInputMoveScalar-1.0)*20. : 0;
@@ -1091,6 +1117,7 @@ export class Device{
         this.touchMouseData.releaseTime=this.pxlTimer.curMS;
       }else{
         this.touchMouseData.endPos=new Vector2(this.mouseX,this.mouseY);
+
         this.touchMouseData.curDistance= new Vector2( data.startDelta.x, data.startDelta.y );
         this.touchMouseData.curStepDistance = new Vector2( data.stepDelta.x, data.stepDelta.y );
         this.touchMouseData.netDistance.add( this.touchMouseData.curStepDistance.clone() );
@@ -1157,11 +1184,11 @@ export class Device{
   // ## Have it run a pxlEnv class function instead of all this mess
   resizeRenderResolution( iWidthBase=null, iHeightBase=null ){
 
-    let iWidth= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
-    let iHeight= window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
+    //let iWidth= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
+    //let iHeight= window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
 
-    iWidth = window.innerWidth;
-    iHeight = window.innerHeight;
+    let iWidth = window.innerWidth;
+    let iHeight = window.innerHeight;
     
     // -- -- -- 
 
@@ -1171,10 +1198,10 @@ export class Device{
     this.mapW=(this.sW=iWidth)*this.pxlQuality.screenResPerc;
     this.mapH=(this.sH=iHeight)*this.pxlQuality.screenResPerc;
         
-    let screenWidth = window?.screen?.width ? window.screen.width : this.mapW;
+    /*let screenWidth = window?.screen?.width ? window.screen.width : this.mapW;
     let screenHeight = window?.screen?.height ? window.screen.height : this.mapH;
     this.mapW=screenWidth;
-    this.mapH=screenHeight;
+    this.mapH=screenHeight;*/
 
     this.screenRes.x=1/this.mapW;
     this.screenRes.y=1/this.mapH;

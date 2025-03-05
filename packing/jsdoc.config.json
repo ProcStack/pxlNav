@@ -19,16 +19,17 @@
   "docdash": {
     "search": true,
     "private": false,
+    "inherits": false,
     "sectionOrder": [
+      "Global",
       "Modules",
       "Classes",
       "Namespaces",
       "Interfaces",
       "Events",
       "Mixins",
-      "Tutorials",
       "Externals",
-      "Global"
+      "Tutorials"
     ],
     "menu": {
       "pxlNav Example : The Outlet": {

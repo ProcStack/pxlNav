@@ -19,7 +19,7 @@ import { Environment } from './Environment.js';
 
 // HTML DOM; HUD / GUI
 import { GUI } from './gui/GUI.js';
-import { HUD } from './gui/HUD.js';
+import { HUD } from './hud/HUD.js';
 
 // Camera and Camera Sequencing Automation
 import { Camera } from './cam/Camera.js';

@@ -231,7 +231,7 @@ export class AutoCamera{
   }
   
   getNextPath( unique=true, dir=1 ){
-    if( this.autoCamPaths.hasOwnProperty( this.pxlEnv.currentRoom ) ){
+    if( this.enabled && this.active && this.autoCamPaths.hasOwnProperty( this.pxlEnv.currentRoom ) ){
       let camPathCount= this.autoCamPaths[ this.pxlEnv.currentRoom ].length ;
       this.curPath = (this.curPath+dir) % camPathCount;
       if( unique && dir==0 ){

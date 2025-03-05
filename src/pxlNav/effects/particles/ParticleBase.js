@@ -19,10 +19,35 @@ import { dustVert, dustFrag } from './shaders/FloatingDust.js';
 /**
  * Default Particle System Class
  * 
+ * Access at - `pxlNav.pxlEffects.pxlParticles.ParticleBase`
+ * 
  * Outputs a basic system expecting uniforms, vertex shader, and fragment shader to be passed into `build()`
- * @alias ParticleBase
+ * @alias pxlParticles/ParticleBase
  * @class
  * @memberof pxlNav.pxlEffects.pxlParticles
+ * @example
+ * this.shaderSettings = {
+ *   "vertCount" : 1000,
+ *   "pScale" : 7,
+ *   "atlasRes" : 4,
+ *   "atlasPicks" : [],
+ *   "randomAtlas" : false,
+ *   "additiveBlend" : false,
+ *   "hasLights" : false,
+ * }
+ *@example
+ * // This is a default particle system
+ * //   It expects uniforms, a vertex shader, and a fragment shader to be passed into the build() function
+ * //
+ * // Access this class from your pxlRoom javascript file
+ * //   Create a new ParticleBase instance
+ * build(){
+ *  let dust = new pxlParticleBase( this, 'dust' );
+ *  let uniforms = {};
+ *  let vertShader = dustVert( dust.shaderSettings );
+ *  let fragShader = dustFrag( hasAlphaMap );
+ *  dust.build( uniforms, vertShader, fragShader );
+ * }
  */
 export class ParticleBase{
   /**
@@ -130,7 +155,7 @@ export class ParticleBase{
   /**
    * Set the position of the particle system.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {Vector3} position - The position of the particle system.
    */
   setPosition( ...args ){
@@ -147,7 +172,7 @@ export class ParticleBase{
   /**
    * Set the shader settings for the particle system.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @returns {Object} The shader settings for the particle system.
    */
   getSettings(){
@@ -164,7 +189,7 @@ export class ParticleBase{
   /**
    * Add the particle system to the scene.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {number} vertexCount - The number of vertices.
    * @param {number} pScale - The scale of the particles.
    * @param {number} atlasRes - The atlas resolution.
@@ -259,7 +284,7 @@ export class ParticleBase{
   /**
    * Generate random atlas values.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {number} [atlasRes=4] - The atlas resolution.
    * @param {number} [dSize=2] - The size of the atlas.
    * @returns {Array} Random atlas values.
@@ -284,7 +309,7 @@ export class ParticleBase{
   /**
    * Generate a list of random atlas values.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {number} [count=4] - The number of random atlas values to generate.
    * @param {number} [res=4] - The atlas resolution.
    * @param {number} [size=2] - The size of the atlas.
@@ -308,7 +333,7 @@ export class ParticleBase{
   /**
    * Pick a random atlas value from an array.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {Array} arr - The array of atlas values.
    * @returns {Array} A random atlas value from the array.
    * @example
@@ -332,7 +357,7 @@ export class ParticleBase{
   /**
    * Duplicate an array.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {Array} val - The array to duplicate.
    * @param {number} count - The number of times to duplicate the array.
    * @returns {Array} The duplicated array.
@@ -353,7 +378,7 @@ export class ParticleBase{
   /**
    * Duplicate an element in an array.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {Array} arr - The array to duplicate.
    * @param {number} [count=4] - The number of times to duplicate the array.
    * @returns {Array} The duplicated array.
@@ -383,7 +408,7 @@ export class ParticleBase{
   /**
    * Find the light positions in the room.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @returns {Array} The light positions in the room.
    * @private
    */
@@ -402,7 +427,7 @@ export class ParticleBase{
   /**
    * Check if the room has point lights.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @returns {boolean} Flag for whether the room has point lights.
    */
   hasPointLights(){
@@ -415,7 +440,7 @@ export class ParticleBase{
   /**
    * Set the path for the atlas texture file.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {string} path - The path to the atlas texture file.
    * @param {string} [alphaPath=null] - The path to the atlas alpha texture
    * @returns {void}
@@ -423,7 +448,7 @@ export class ParticleBase{
    * // Run from your pxlRoom javascript file
    * // Set the path for the atlas texture file
    * build(){
-    * let dust = pxlNav.pxlEffects.pxlParticles.pxlParticleBase.newParticle();
+    * let dust = new pxlParticleBase();
     * dust.setAtlasPath( "sprite_dustAtlas_rgb.jpg", "sprite_dustAtlas_alpha.jpg" );
    * }
    */
@@ -443,7 +468,7 @@ export class ParticleBase{
   /**
    * Set the material for the particle system.
    * @method
-   * @memberof ParticleBase
+   * @memberof pxlParticles/ParticleBase
    * @param {Material} mtl - The material for the particle system.
    * @returns {void}
    * @example

@@ -24,13 +24,13 @@ const projectTitle = "pxlNav :: The Void";
 const pxlRoomRootPath = "../pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../pxlAssets";
+const pxlAssetRoot = "../../dist/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["VoidEnvironment"];//"OutletEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
+const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -58,6 +58,7 @@ userSettings['height']['stepSize'] = 5; // Max step height in units
 userSettings['movement']['scalar'] = 1.0; // Overall movement rate scalar
 userSettings['movement']['max'] = 10.0; // Max movement speed
 userSettings['movement']['easing'] = 0.55; // Easing rate between Step() calls
+userSettings['look']['mobile']['invert'] = true; // Invert the look controls on mobile
 userSettings['headBounce']['height'] = 0.3; // Bounce magnitude in units
 userSettings['headBounce']['rate'] = 0.025; // Bounce rate per Step()
 userSettings['headBounce']['easeIn'] = 0.03; // When move key is pressed, the ease into bounce; `bounce * ( boundInf + easeIn )`
@@ -71,10 +72,10 @@ userSettings['gravity']['Max'] = 15.5; // Max gravity rate
 // -- -- --
 
 // Target FPS (Frames Per Second)
-//   Default is - PC = 30  -&-  Movile = 30
+//   Default is - PC = 60  -&-  Mobile = 30
 const targetFPS = {
-  'PC' : 60,
-  'Mobile' : 30
+  'pc' : 60,
+  'mobile' : 30
 };
 
 // Anti-aliasing level
@@ -162,8 +163,7 @@ pageListenEvents.forEach( (e)=>{
 
 
 function pxlNav_init(){
-  // Start the timer and initilize pxlNAv
-  pxlNavEnv.bootTimer();
+  // Start pxlNav
   pxlNavEnv.init();
 
   // -- -- --

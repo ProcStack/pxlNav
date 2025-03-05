@@ -51,8 +51,7 @@ import { UnrealBloomPass } from '../libs/three/UnrealBloomPass.js';
 // TODO : This class needs breaking up into BaseEnvironment & MainEnvironment expand
 
 /**
- * @alias pxlEnv
- * @class
+ * @namespace pxlEnv
  * @description pxlNav Environment
  */
 export class Environment{
@@ -71,7 +70,12 @@ export class Environment{
     this.prevRenderMS=0;
     this.nextRenderMS=0;
     // Max frame rate - 
-    this.fps = mobile ? this.pxlOptions.fps.Mobile : this.pxlOptions.fps.PC;
+    this.fps = 30;
+    if( this.pxlOptions.fps.hasOwnProperty("mobile") ){
+      this.fps = mobile ? this.pxlOptions.fps.mobile : this.pxlOptions.fps.pc;
+    }else if( this.pxlOptions.fps.hasOwnProperty("Mobile") ){ // Legacy
+      this.fps = mobile ? this.pxlOptions.fps.Mobile : this.pxlOptions.fps.PC;
+    }
     this.renderInterval = 1.0 / this.fps;
     // -- -- -- --
 

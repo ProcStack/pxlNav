@@ -30,6 +30,7 @@ export class GUIManager{
   this.sW = window.innerWidth;
   this.sH = window.innerHeight;
   this.mobile=false;
+  this.pxlOptions=null;
   this.pxlFile=null;
   this.pxlCookie=null;
   this.pxlTimer=null;
@@ -205,6 +206,7 @@ export class GUIManager{
   }
 
   setDependencies( pxlNav ){
+    this.pxlOptions=pxlNav.pxlOptions;
     this.pxlFile=pxlNav.pxlFile;
     this.pxlCookie=pxlNav.pxlCookie;
     this.pxlTimer=pxlNav.pxlTimer;
@@ -590,10 +592,10 @@ export class GUIManager{
 		let curObj=obj;
 		if( typeof(curObj) === "string" ){
 			curObj=document.getElementById(curObj);
-			if(!curObj){
-				return;
-			}
 		}
+    if(!curObj){
+      return;
+    }
 			
 		curObj.classList.add("fader");
 		curObj.classList.add( (startVis ? "visOn" : "visOff") );
@@ -613,13 +615,19 @@ export class GUIManager{
   promptFader(faderObj, vis, fadeOutLimit=null, deleteOnEnd=false){
   if(typeof(faderObj)=="string"){
     faderObj=document.getElementById(faderObj);
-    if(!faderObj){
-      return;
-    }
   }
-  if(faderObj.classList.value.indexOf("fader")<0){
+  if(!faderObj){
+    return;
+  }
+
+  if( faderObj.hasOwnProperty("gui") ){
+    faderObj = faderObj[ 'gui' ];
+  }
+
+  if(faderObj.classList?.value.indexOf("fader")<0){
     faderObj.classList.add("fader");
   }
+
   if(vis){
     faderObj.style.display="inline-block";
     setTimeout( ()=>{
@@ -636,15 +644,15 @@ export class GUIManager{
     faderObj.classList.remove("visOn");
     faderObj.classList.add("visOff");
     if(deleteOnEnd){
-  let transEnd=["webkitTransitionEnd", "otransitionend", "oTransitionEnd", "msTransitionEnd", "transitionend"];
-  transEnd.forEach((end)=>{
-    faderObj.addEventListener(end,()=>{
-    let curParent=faderObj.parentNode;
-    if(curParent){
-      curParent.removeChild(faderObj);
-    }
-    });
-  });
+      let transEnd=["webkitTransitionEnd", "otransitionend", "oTransitionEnd", "msTransitionEnd", "transitionend"];
+      transEnd.forEach((end)=>{
+        faderObj.addEventListener(end,()=>{
+        let curParent=faderObj.parentNode;
+        if(curParent){
+          curParent.removeChild(faderObj);
+        }
+        });
+      });
     }else{
       setTimeout( ()=>{
         if(faderObj.classList.contains("visOff")){
@@ -742,24 +750,24 @@ export class GUIManager{
   * @param {boolean=} close If all open GUI window objects need to close out as well.
   */
   toggleHudBlock(active=null, close=false){
-  if(!this.hudBlock){
-    return; // No Hud Block Exists
-  }
-  active = active==null ? !this.hudBlock.active : active;
-  this.hudBlock.active=active;
-  let hudObjDisplay = false
-  if( active ){
-    hudObjDisplay="inline-block";
-  }else{
-    if( !this.checkOpenWindows( close ) ){ // Returns if any windows are open, if not, hide the background object.
-  hudObjDisplay="none";
-  if(this.pxlNavCanvas){ this.pxlNavCanvas.focus(); }
+    if(!this.hudBlock){
+      return; // No Hud Block Exists
     }
-  }
-  
-  if( this.hudBlock.obj && this.hudBlock.obj.style && hudObjDisplay != false ){
-    this.hudBlock.obj.style.display=hudObjDisplay;
-  }
+    active = active==null ? !this.hudBlock.active : active;
+    this.hudBlock.active=active;
+    let hudObjDisplay = false
+    if( active ){
+      hudObjDisplay="inline-block";
+    }else{
+      if( !this.checkOpenWindows( close ) ){ // Returns if any windows are open, if not, hide the background object.
+    hudObjDisplay="none";
+    if(this.pxlNavCanvas){ this.pxlNavCanvas.focus(); }
+      }
+    }
+    
+    if( this.hudBlock.obj && this.hudBlock.obj.style && hudObjDisplay != false ){
+      this.hudBlock.obj.style.display=hudObjDisplay;
+    }
     
   }
   /**
@@ -768,28 +776,29 @@ export class GUIManager{
   * @param {boolean=} close Optional for closing all open GUI windows.
   */
   checkOpenWindows( close=false ){
-  let guiList = Object.keys( this.guiWindows );
-  let openStatus=false;
-  guiList.forEach( (g)=>{
-      if( g == "chatBoxGui" ){
+    let guiList = Object.keys( this.guiWindows );
+    let openStatus=false;
+    // TODO : This is a bit of a mess from Antib0dy, needs to be cleaned up
+    guiList.forEach( (g)=>{
+      if( ["container","failState","chatBoxGui"].includes( g ) ){
         return;
       }
-    if(close){
-  if(this.guiWindows[g].button){
-    this.flipIcon(this.guiWindows[g].button, false );
-  }
-  if(this.guiWindows[g].gui && this.guiWindows[g].active){
-    this.guiWindows[g].active=false;
-    this.promptFader( this.guiWindows[g].gui, false );
-          
+      if(close){
+        if(this.guiWindows[g].button){
+          this.flipIcon(this.guiWindows[g].button, false );
+        }
+        if(this.guiWindows[g].gui && this.guiWindows[g].active){
+          this.guiWindows[g].active=false;
+          this.promptFader( this.guiWindows[g].gui, false );
+                
           if( g == "settingsGui" ){
             this.togglePxlNavDataDisplay( false );
           }
-  }
-    }
-    openStatus=openStatus || this.guiWindows[ g ].active;
-  });
-  return openStatus;
+        }
+      }
+      openStatus=openStatus || this.guiWindows[ g ].active;
+    });
+    return openStatus;
   }
   
   
@@ -1423,10 +1432,10 @@ export class GUIManager{
           <table cellpadding=0 cellspacing=5 border=0 style="height:100%;"><tbody><tr>
               <td align="left">
                   <div id="djPlayerVol"></div>
-              <  d><td valign="center" align="left" width=100%>
+              </td><td valign="center" align="left" width=100%>
                   <div id="djPlayerVolumeParent" class="volParent"><div id="djPlayerVolume" class="volSlider"></div></div>
-              <  d><  r>
-          <  body><  able>`;
+              </td></tr>
+          </tbody></table>`;
       this.djPlayerObj.innerHTML=djPlayerHtml;
 
       let playerParent=document.getElementById( "musicControllerBlock" );
@@ -1581,42 +1590,45 @@ export class GUIManager{
 
 
   buildGuiWindowContainer(){
-  let bgDiv=document.createElement("div");
-  bgDiv.classList.id="guiWindowBackground";
-  bgDiv.classList.add("guiWindowBackground");
-  bgDiv.classList.add("fader");
-  bgDiv.classList.add("visOff");
-  bgDiv.style.display="none";
-  
-  let tmpThis=this;
-  bgDiv.onclick=(e)=>{
-    tmpThis.toggleGuiWindowContainer(e, false, true );
+    let bgDiv=document.createElement("div");
+    bgDiv.classList.id="guiWindowBackground";
+    bgDiv.classList.add("guiWindowBackground");
+    bgDiv.classList.add("fader");
+    bgDiv.classList.add("visOff");
+    bgDiv.style.display="none";
+    
+    let tmpThis=this;
+    bgDiv.onclick=(e)=>{
+      tmpThis.toggleGuiWindowContainer(e, false, true );
+    }
+    this.guiWindowBG=bgDiv;
+    //this.addToContainer( bgDiv );
+    document.body.appendChild( bgDiv );
   }
-  this.guiWindowBG=bgDiv;
-  //this.addToContainer( bgDiv );
-  document.body.appendChild( bgDiv );
-  }
+
   toggleGuiWindowContainer(e, active, closeWindows=false ){
-  if(e){
-    let target= e.path ? e.path[0] : e.target;
-    let targetId=target.getAttribute("id");
-    if(targetId!="guiWindowBackground"){
-      // ## Bad way to do this....
-      let exitObjList=["gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
-      if( !exitObjList.includes( targetId ) ){
-        return null;
+    if(e){
+      let target= e.path ? e.path[0] : e.target;
+      let targetId=target.getAttribute("id");
+      if(targetId!="guiWindowBackground"){
+        // ## Bad way to do this....
+        let exitObjList=["pxlNav-container", "gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
+        if( !exitObjList.includes( targetId ) ){
+          return null;
+        }
       }
     }
-  }
     let openStatus=this.checkOpenWindows( closeWindows );
 
-    
-  if(this.guiWindowBG && openStatus==active ){ this.promptFader(this.guiWindowBG, active,null,false); }
-  if(active){
-    this.pxlNavCanvas.blur();
-  }else{
-    this.pxlNavCanvas.focus();
-  }
+    if(this.guiWindowBG && openStatus==active ){
+      this.promptFader(this.guiWindowBG, active,null,false); 
+    }
+
+    if(active){
+      this.pxlNavCanvas.blur();
+    }else{
+      this.pxlNavCanvas.focus();
+    }
   }
 
   helpGuiBuild(){
@@ -1629,10 +1641,36 @@ export class GUIManager{
     helpGuiDiv.classList.add("gui_helpGuiParentStyle");
     this.prepPromptFader( helpGuiDiv );
     this.guiWindowBG.appendChild( helpGuiDiv );
+
+    // Build welcome message
+    let messageText = "";
+    let messageHTML = "";
+    if( this.pxlOptions.onboarding.pc?.message != "" ){
+      messageText = this.pxlOptions.onboarding.pc.message;
+      messageText = this.formatWelcomeMessage( messageText );
+
+      let messageStyles = "";
+      if( this.pxlOptions.onboarding.pc.messageStyle.length > 0 ){
+        messageStyles = this.pxlOptions.onboarding.pc.messageStyle.join(" ");
+      }
+      messageHTML = `<div class="${messageStyles}" id="guiWelcomeMessage">${messageText}</div>`;
+    }
     
-    let html="";
+    // Build close button text and styles
+    let buttonText = "close";
+    let buttonStyles = "guiButton";
+    if( this.pxlOptions.onboarding.pc?.buttonText != "" ){
+      buttonText = this.pxlOptions.onboarding.pc.buttonText;
+    }
+    if( this.pxlOptions.onboarding.pc?.buttonStyle.length > 0 ){
+      buttonStyles = this.pxlOptions.onboarding.pc.buttonStyle.join(" ");
+    }
+    
+    // Build the help window
+    let html = "";
     html+=`
       <div id="gui_helpContent" class="gui_contentStyle">
+      ${messageHTML}
     <div class="gui_body">
       <div id="gui_helpGui_keyboardParent" class="gui_helpGui_keyboardParent">
       <div id="gui_helpGui_controlsKeyboard" class="guiPadding settings_sectionHeader">keyboard controls</div>
@@ -1655,7 +1693,7 @@ export class GUIManager{
             <br> For additional info, see the <span class="gui_boldText">Info (I)</span> screen
           </div>
     <div id="guiHelpFooter" class="gui_footer">
-      <div class="guiButton" id="guiHelpBackButton">close</div>
+      <div class="${buttonStyles}" id="guiHelpBackButton">${buttonText}</div>
     </div>
     <div class="gui_spacer"></div>
       </div>
@@ -1677,13 +1715,15 @@ export class GUIManager{
     // Close Button
     let tmpThis=this;
     let guiClose=document.getElementById("guiHelpBackButton");
-    guiClose.onclick=(e)=>{ 
-        if(tmpThis.introHelpActive){
-          tmpThis.introHelpActive=false;
-          tmpThis.pxlEnv.postHelpIntro();
-        }
-        tmpThis.svgCheckClick(e, "close");
-      };
+    if(guiClose){
+      guiClose.onclick=(e)=>{ 
+          if(tmpThis.introHelpActive){
+            tmpThis.introHelpActive=false;
+            tmpThis.pxlEnv.postHelpIntro();
+          }
+          tmpThis.svgCheckClick(e, "close");
+        };
+    }
     
     // Remove linking from hud icons only
     //let hudIconKeys=Object.keys( this.hudIcons );
@@ -1736,11 +1776,12 @@ export class GUIManager{
   active= active==null ? !this.guiWindows.helpGui.active : active;
   this.guiWindows.helpGui.active=active;
   this.promptFader( this.guiWindows.helpGui.gui, active );
-  
+
   this.toggleGuiWindowContainer( null, active );
   if(this.hudBlock.active){ this.toggleHudBlock( active ); }
   
-  //this.promptFader( this.guiWindows.container, active );
+    //this.promptFader( this.guiWindows.container, active );
+    this.promptFader( this.guiWindows.container, true );
 
     if(this.introHelpActive && !active){
       this.introHelpActive=false;
@@ -1781,6 +1822,7 @@ export class GUIManager{
     <br>
     </div>
   </div>
+  
   <div id="guiInfoFooter" class="gui_footer">
     <div class="guiButton" id="guiInfoBackButton">close</div>
   </div>
@@ -2325,6 +2367,23 @@ export class GUIManager{
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //
 ///////////////////////////////////////////
 
+  /**
+   * Format the welcome message to include the project title.
+   * 
+   * Pass `%projectTitle%` in the message to have it replaced with the project title.
+   * 
+   * Set the welcome message in the pxlOptions fields -
+   * `pxlOptions.onboarding.pc.message`
+   * `pxlOptions.onboarding.mobile.message`
+   * @param {string} message - The message to format
+   * @returns {string} The formatted message
+   * @memberof pxlGui
+   */
+  formatWelcomeMessage( message ){
+    let projectTitle=this.projectTitle;
+    let outputMessage = message.replace(/%projectTitle%/g, projectTitle);
+    return outputMessage;
+  }
 
 
 
@@ -2339,15 +2398,47 @@ export class GUIManager{
   this.prepPromptFader( mobileWelcomeGuiDiv );
   this.guiWindowBG.appendChild( mobileWelcomeGuiDiv );
   
+
+  // Format welcome screen message
+  let welcomeText="";
+  let welcomeHTML="";
+  if( this.pxlOptions.onboarding.mobile?.message != "" ){
+    welcomeText = this.pxlOptions.onboarding.mobile.message;
+    welcomeText = this.formatWelcomeMessage( welcomeText );
+    let welcomeStyle=""
+    if( this.pxlOptions.onboarding.mobile?.messageStyle.length > 0 ){
+      welcomeStyle=this.pxlOptions.onboarding.mobile.messageStyle.join(" ");
+      welcomeStyle = `class="${welcomeStyle}"`;
+    }
+
+    welcomeHTML=`<div id="gui_mobileWelcomeMessage" ${welcomeStyle}>${welcomeText}</div>`;
+  }
+
+  // Button Text
+  let buttonStyles="guiButton";
+  if( this.pxlOptions.onboarding.mobile?.buttonStyle.length > 0 ){
+    buttonStyles=this.pxlOptions.onboarding.mobile.buttonStyle.join(" ");
+  }
+
+  let buttonText="enter";
+  if( this.pxlOptions.onboarding.mobile?.buttonText != "" ){
+    buttonText=this.pxlOptions.onboarding.mobile.buttonText;
+  }
+
   let html="";
   html+=`
-    <div id="gui_helpContent" class="gui_contentStyle" style="min-height:45%;">
-  <div class="gui_mobileBody">
-    welcome to
-          <br>${this.projectTitle}
+    <div id="gui_helpContent" class="gui_contentStyle">
+  <div class="pxlGui-mobile-body">
+    ${welcomeHTML}
+  </div> 
+  <div id="gui_helpGui_hotKeys" class="gui_helpGui_mobileHud">
+    Tap-&-Drag the <span class="gui_boldText">Left Circle</span> to move you,
+    <br>The <span class="gui_boldText">Right Circle</span> to look around;
+    <br>
+    <br> Tap the <span class="gui_boldText">upper</span> half of the screen to jump
   </div>
-  <div id="guiHelpFooter" class="gui_footer" style="margin-bottom: 4vh;">
-    <div class="guiButton" style="font-weight: 700; font-size: 5em;" id="guiMobileWelcomeButton">enter</div>
+  <div id="guiHelpFooter" class="gui_footer">
+    <div class="${buttonStyles}" id="guiMobileWelcomeButton">${buttonText}</div>
   </div>
   <div class="gui_spacer"></div>
     </div>
@@ -2362,6 +2453,9 @@ export class GUIManager{
       tmpThis.toggleMobileWelcome( false );
       tmpThis.pxlEnv.postHelpIntro();
       tmpThis.promptFader(this.guiWindowBG, false,null,false);
+
+      // Request fullscreen
+      this.pxlDevice.requestFullScreen();
     };
     
   // -- -- -- -- -- -- -- -- -- -- //
@@ -2376,16 +2470,21 @@ export class GUIManager{
     this.buildMobileWelcome();
   }
   
+  if( active !== null && this.guiWindows.mobileGui.active == active ){
+    console.error("Mobile welcome already set to active: "+active);
+    return;
+  }
+
   active= active==null ? !this.guiWindows.mobileGui.active : active;
-    
+  
   this.guiWindows.mobileGui.active=active;		 
-  this.promptFader( this.guiWindows.mobileGui.gui, active );
-  /*
+  //this.promptFader( this.guiWindows.mobileGui.gui, active );
+  
   if( active ){
     this.promptFader( this.guiWindows.mobileGui.gui, active );
   }else{
     this.promptFader( this.guiWindows.mobileGui.gui, active, null, true );
-  }*/
+  }
   this.toggleGuiWindowContainer( null, active );
   if(this.hudBlock.active){ this.toggleHudBlock( active ); }
   }
@@ -2406,10 +2505,10 @@ export class GUIManager{
   }
   if( !this.googleDocHTML ){
     this.ctaContentLoading=true;
-    this.pxlFile.getURLContent( this.ctaLocalDocURL['blmSupport'] ).then( (r)=>{
-  this.ctaContentLoading=false;
-  this.googleDocHTML=r;
-  this.ctaDisplayPopup();
+    this.pxlFile.getURLContent( this.ctaLocalDocURL['cta'] ).then( (r)=>{
+      this.ctaContentLoading=false;
+      this.googleDocHTML=r;
+      this.ctaDisplayPopup();
     });
   }else{
     this.ctaDisplayPopup();

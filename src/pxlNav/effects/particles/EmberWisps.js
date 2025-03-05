@@ -16,10 +16,47 @@ import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
 
 /**
  * Class representing EmberWisps, a type of particle effect that simulates fire embers wisping into the air.
- * @alias EmberWisps
+ * 
+ * Access at - `pxlNav.pxlEffects.pxlParticles.EmberWisps`
+ * 
+ * Extends - [ParticleBase]{@link ParticleBase}
+ * 
+ * @alias pxlParticles/EmberWisps
  * @class
- * @extends ParticleBase
  * @memberof pxlNav.pxlEffects.pxlParticles
+ * @example
+ * this.shaderSettings = {
+ *   "vertCount" : 600,
+ *   "pScale" : 7,
+ *   "pOpacity" : 1.0,
+ *   "proxDist" : 200,
+ *   "atlasRes" : 4,
+ *   "atlasPicks" : [],
+ *   "randomAtlas" : true,
+ *   "additiveBlend" : false,
+ *
+ *   "windDir" : new Vector3( 0, 0, 1 ),
+ *   "offsetPos" : new Vector3( 0, 0, 0 ),
+ * }
+ * @example
+ * // Floating Dust Particle System for pxlNav
+ * import { pxlEffects } from "pxlNav.esm.js";
+ * const EmberWisps = pxlEffects.pxlParticles.EmberWisps; 
+ * 
+ * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * fbxPostLoad(){
+ * 
+ *   let emberWispsSystem = new EmberWisps( room, 'emberWisps' );
+ *  
+ *   let curShaderSettings = emberWispsSystem.getSettings();
+ *   curShaderSettings["vertCount"] = 1200; // Number of particles
+ *   curShaderSettings["pScale"] = 9; // Scale of the particles
+ *   curShaderSettings["pOpacity"] = 0.8; // Opacity of the particles
+ *   curShaderSettings["proxDist"] = 400; // Proximity distance
+ *   curShaderSettings["additiveBlend"] = true; // Additive blending for the particles
+ * 
+ *   emberWispsSystem.build( curShaderSettings );
+ * }
  */
 export class EmberWisps extends ParticleBase{
   /**
@@ -78,6 +115,8 @@ export class EmberWisps extends ParticleBase{
   //                    Sprite texture size given - 1/atlasRes
   /**
    * Build the EmberWisps particle effect with the given shader settings.
+   * @method
+   * @memberof pxlParticles/EmberWisps
    * @param {Object} [curShaderSettings={}] - Current shader settings to override the default settings.
    */
   build( curShaderSettings={} ){

@@ -17,10 +17,83 @@ import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
 /**
  * Class representing a HeightMap particle system.
  * Extends the ParticleBase class.
- * @alias HeightMap
+ * 
+ * Access at - `pxlNav.pxlEffects.pxlParticles.HeightMap`
+ * 
+ * Extends - [ParticleBase]{@link ParticleBase}
+ * 
+ * @alias pxlParticles/HeightMap
  * @class
- * @extends ParticleBase
  * @memberof pxlNav.pxlEffects.pxlParticles
+ * @example
+ * this.shaderSettings = {
+ *   "vertCount" : 1000,
+ *   "pScale" : 7,
+ *   "pOpacity" : 1.0,
+ *   "proxDist" : 200,
+ *   "atlasRes" : 4,
+ *   "atlasPicks" : [],
+ *   "randomAtlas" : false,
+ *   "additiveBlend" : false,
+ *
+ *   "jumpHeightMult" : 0,
+ *   "offsetPos" : new Vector3( 0, 0, 0 ),
+ *   "windDir" : new Vector3( 0, 0, 0 ),
+ *
+ *   "size" : new Vector3( 0, 0, 0 ),
+ *
+ *   "hasLights" : false,
+ *   "fadeOutScalar" : 1.59 , 
+ *   "wanderInf" : 1.0 , 
+ *   "wanderRate" : 1.0 , 
+ *   "wanderFrequency" : 2.85 
+ * }
+ *@example
+ * // HeightMap particle system
+ * //   Generate a system that uses a height map to set the Y position of the particles
+ * //   With a spawn map to determine the density of the particles
+ * //   Set noise and other settings to alter the particles
+ * import { Object3D } from "three";
+ * import { pxlEffects } from "pxlNav.esm.js";
+ * const HeightMap = pxlEffects.pxlParticles.HeightMap; 
+ * 
+ * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * fbxPostLoad(){
+ *   
+ *   // Create the HeightMap system
+ *   let heightMapSystem = new HeightMap( this, "heightMap" );
+ *   
+ *   // Set the paths for the height map
+ *   heightMapSystem.setHeightMapPath( "path/to/heightMap.jpg" );
+ *   
+ *   // Set the paths for the spawn map
+ *   heightMapSystem.setSpawnMapPath( "path/to/spawnMap.jpg", 1 ); // 1 for single channel map, 3 for RGB
+ *   
+ *   // Get a copy of the current particle systems settings
+ *   //   Update the settings as needed
+ *   let curShaderSettings = heightMapSystem.getSettings();
+ *   curShaderSettings["vertCount"] = 600; // Number of particles
+ *   curShaderSettings["pScale"] = 9; // Scale of the particles
+ *   curShaderSettings["pOpacity"] = 0.8; // Opacity of the particles
+ *   curShaderSettings["proxDist"] = 400; // Proximity distance
+ *   curShaderSettings["additiveBlend"] = true; // Additive blending for the particles
+ *   
+ *   // Create a 3D object to use as a reference for the particle system
+ *   //   The position is used for the system's position
+ *   //   The scale is used for bounding box size of the system 
+ *   let objectRef = new Object3D();
+ *   objectRef.position.set( 0, 0, 0 );
+ *   objectRef.scale.set( 1000, 100, 1000 );
+ *   
+ *   // If you used a 3D object in your FBX file, you can use it to set the size
+ *   //   The object should have a userData property with `Scripted`{bool}
+ *   //   To set the bounding box size, set your objects scale
+ *   //     Or use these user attributes - `SizeX`{num}, `SizeY`{num}, & `SizeZ`{num}
+ *   // let objectRef = this.geoList[ "Scripted" ][ "YouObjectName" ];
+ *   
+ *   heightMapSystem.build( curShaderSettings, objectRef );
+ * 
+ * }
  */
 export class HeightMap extends ParticleBase{
   /**
@@ -99,6 +172,8 @@ export class HeightMap extends ParticleBase{
   
   /**
    * Sets the path for the height map texture.
+   * @method
+   * @memberof pxlParticles/HeightMap
    * @param {string} path - The path to the height map texture.
    */
   setHeightMapPath( path ){
@@ -107,6 +182,8 @@ export class HeightMap extends ParticleBase{
 
   /**
    * Sets the path for the spawn map texture and its mode.
+   * @method
+   * @memberof pxlParticles/HeightMap
    * @param {string} path - The path to the spawn map texture.
    * @param {number} [channels=1] - The number of channels in the spawn map texture.
    */
@@ -122,6 +199,8 @@ export class HeightMap extends ParticleBase{
 
   /**
    * Builds the particle system with the given shader settings and object reference.
+   * @method
+   * @memberof pxlParticles/HeightMap
    * @param {Object} [curShaderSettings={}] - The current shader settings.
    * @param {Object} [objectRef=null] - The reference object for positioning and sizing.
    * @returns {Object} The particle system added to the scene.
@@ -164,15 +243,21 @@ export class HeightMap extends ParticleBase{
     let sizeX = 100;
     let sizeY = 100;
     let sizeZ = 100;
-    if( objectRef && objectRef.hasOwnProperty("userData") ){
-      if( objectRef.userData.hasOwnProperty("SizeX") ){
-        sizeX = objectRef.userData.SizeX;
-      }
-      if( objectRef.userData.hasOwnProperty("SizeY") ){
-        sizeY = objectRef.userData.SizeY;
-      }
-      if( objectRef.userData.hasOwnProperty("SizeZ") ){
-        sizeZ = objectRef.userData.SizeZ;
+    if( objectRef ){
+      if( objectRef.hasOwnProperty("userData") ){
+        if( objectRef.userData.hasOwnProperty("SizeX") ){
+          sizeX = objectRef.userData.SizeX;
+        }
+        if( objectRef.userData.hasOwnProperty("SizeY") ){
+          sizeY = objectRef.userData.SizeY;
+        }
+        if( objectRef.userData.hasOwnProperty("SizeZ") ){
+          sizeZ = objectRef.userData.SizeZ;
+        }
+      }else if( objectRef.hasOwnProperty("scale") ){
+        sizeX = objectRef.scale.x;
+        sizeY = objectRef.scale.y;
+        sizeZ = objectRef.scale.z;
       }
     }
     if( curShaderSettings.hasOwnProperty("size") ){

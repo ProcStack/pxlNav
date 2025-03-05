@@ -105,38 +105,116 @@ sH = window.innerHeight;
  * @param {string} startingRoom - The initial room to load
  * @param {string[]} roomBootList - A list of rooms to load
  * @example
- *  // Initialize the pxlNav environment
- *  const pxlNavEnv = new pxlNav( pxlEnums.VERBOSE_LEVEL.ERROR || 2, "My Crunkle Dunk Project", "./pxlRooms", "OutletEnvironment", ["OutletEnvironment", "SaltFlatsEnvironment"] );
+ * // Example of a pxlNav environment setup
+ * //   This is how you would initialize the pxlNav environment for your project
+ * import { pxlNav, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.js';
+ *  
+ * // Verbose Level
+ * //   NONE = 0, ERROR = 1, WARN = 2, INFO = 3, DEBUG = 4
+ * const verboseLevel = pxlEnums.VERBOSE_LEVEL.INFO || 3;
+ *  
+ * // Project name
+ * const projectTitle = "Your Project Title";
+ * 
+ * // Booting rooms
+ * const startingRoom = "YourEnvironment";
+ * const bootRoomList = [startingRoom];
+ * 
+ * // pxlRoom folder path, available to change folder names or locations if desired
+ * const pxlRoomRootPath = "../pxlRooms";
+ * // User settings for the default/initial pxlNav environment
+ * //   These can be adjusted from your `pxlRoom` but easily set defaults here
+ * const userSettings = Object.assign({}, pxlUserSettings);
+ * userSettings['height']['standing'] = 1.75; // Standing height in units; any camera in your room's FBX will override this height once loaded
+ * userSettings['height']['stepSize'] = 5; // Max step height in units
+ *  
+ * // Target FPS (Frames Per Second)
+ * //   Default is - PC = 60  -&-  Mobile = 30
+ * const targetFPS = {
+ *   'pc' : 45,
+ *   'mobile' : 30
+ * };
+ * 
+ * // Copy the default options
+ * let pxlNavOptions = Object.assign({},pxlOptions);
+ * pxlNavOptions.verbose = verboseLevel;
+ * pxlNavOptions.fps = targetFPS;
+ * pxlNavOptions.userSettings = userSettings;
+ * pxlNavOptions.pxlRoomRoot = pxlRoomRootPath;
+ * 
+ * // Initialize the pxlNav environment
+ * const pxlNavEnv = new pxlNav( pxlNavOptions, projectTitle, startingRoom, bootRoomList );
+ * pxlNavEnv.init();
  * @returns {pxlNav} - The pxlNav environment object
  * @example
- *  // Subscribe to events emitted from pxlNav for callback handling
- *  //   Non loop - pxlNavObj.subscribe("pxlNavEventNameHere", procPages.functionName.bind(procPages));
- *  const printEvent = ( eventType, eventValue )=>{
- *    console.log( eventType, eventValue );
- *  };
- *  const myClassObj = new MyCustomClass();
- *
- *  // Subscribe a single function to an event -
- *  pxlNavEnv.subscribe( "booted", printEvent );
- *
- *  // Or multiple event subscriptions -
- *  const pageListenEvents = [ "booted", "shaderEditorVis", "roomChange-Start", "roomChange-Middle", "roomChange-End", "fromRoom", "pingPong" ];
- *  pageListenEvents.forEach( ( eventType )=>{
- *     // Subscribe functions to events -
- *    pxlNavEnv.subscribe( eventType, printEvent );
- *    // Make sure to bind the class object if you are using class methods
- *    pxlNavEnv.subscribe( eventType, myClassObj.eventHandler.bind(myClassObj) );
- *  }); 
+ * // Subscribe to events emitted from pxlNav for callback handling
+ * //   Non loop - pxlNavObj.subscribe("pxlNavEventNameHere", procPages.functionName.bind(procPages));
+ * const printEvent = ( eventType, eventValue )=>{
+ *   console.log( eventType, eventValue );
+ * };
+ * const myClassObj = new MyCustomClass();
  * 
+ * // Subscribe a single function to an event -
+ * pxlNavEnv.subscribe( "booted", printEvent );
+ * 
+ * // Or multiple event subscriptions -
+ * const pageListenEvents = [ "booted", "shaderEditorVis", "roomChange-Start", "roomChange-Middle", "roomChange-End", "fromRoom", "pingPong" ];
+ * pageListenEvents.forEach( ( eventType )=>{
+ *    // Subscribe functions to events -
+ *   pxlNavEnv.subscribe( eventType, printEvent );
+ *   // Make sure to bind the class object if you are using class methods
+ *   pxlNavEnv.subscribe( eventType, myClassObj.eventHandler.bind(myClassObj) );
+ * }); 
  * @example
- *  // Trigger events within pxlNav
- *  // Possible triggers -
- *  //   "warptoroom" - Change the room to a new room
- *  //   "ping" - Send a "pong" event
- *  //   "roommessage" - Send a message to the current pxlRoom, add a `onMessage( eventType, eventValue)` method in your pxlRoom to get outside messages.
- *  pxlNavEnv.trigger( "ping" );
- * @returns eventListenerCallback( "pingPong", "pong" )
+ * // Trigger events within pxlNav
+ * // Possible triggers -
+ * //   "camera" - Change the camera position, either 'roam' or 'static'
+ * //   "warptoroom" - Change the room to a new room
+ * //   "roommessage" - Send a message to the current pxlRoom, add a `onMessage( eventType, eventValue)` method in your pxlRoom to get outside messages.
+ * //   "ping" - Send a "pong" event
+ * pxlNavEnv.trigger( "warptoroom", "changeRoom", "SaltFlatsEnvironment" );
+ * pxlNavEnv.trigger( "camera", "roam" );
+ *  
+ * // For testing purposes, trigger a `pingPong` event
+ * //   Subscribe to the `ping` event
+ * const pongPrint = ( eventType, eventValue )=>{
+ *   console.log( eventType, eventValue );
+ * };
+ * pxlNavEnv.subscribe( "pingPong", pongPrint );
  * 
+ * // Trigger the `pingPong` event
+ * pxlNavEnv.trigger( "ping" );
+ * @example
+ * // pxlNav Event List
+ * //   "booted" : Emitted after the engine has fully booted and is ready to be addressed.
+ * //   "shaderEditorVis" : Returns a [bool]; Emitted when the shader editor is toggled on or off.
+ * //   "roomChange-Start" : Emitted when the room change transition begins.
+ * //   "roomChange-Middle" : Emitted when the room change process occurs mid transition.
+ * //   "roomChange-End" : Returns a [bool]; Emitted when the room change transition ends.
+ * //   "fromRoom" : Returns a custom object; Emitted from your Room code you choose to emit during run time.
+ * //   "device-keydown" : Returns an [int]; The just pressed key.
+ * //   "device-keyup" : Returns an [int]; The just released key.
+ * //   "device-resize" : Returns an [{height:#,width:#}]; Height Width object of the new window size.
+ * //   "camera-move" : Returns a {'pos':vec3(),'dist':float}; Emitted when the camera moves.
+ * //   "camera-rotate" : Returns a [quaternion]; Emitted when the camera rotates.
+ * //   "camera-jump" : Returns a [bool]; Emitted when the camera jumps to a new position.
+ * //   "camera-fall" : Returns a [bool]; Emitted when the camera starts to free-fall / gravity.
+ * //   "camera-landed" : Returns a [bool]; Emitted when the camera lands from a jump / fall.
+ * //   "camera-collision" : Returns a [bool]; Emitted when the camera collides with an object.
+ * //   "pxlNavEventNameHere" : Never emitted; You did some copy'pasta.
+ * //   "help" : Hello! I'm here to help you!
+ * //   "pingPong" : Send 'ping', Get 'pong'! - pxlNav.trigger('ping');
+ * //
+ * //   ** NOTE : callbacks get an event object shaped -  **
+ * //   **   callbackFn( eventType, eventValue ) **
+ * //   **   eventValue = { 'type' : *eventName*, 'value' : *data* } **
+ * 
+ * // Listen to when pxlNav has finished booting
+ * const printBoot = ( eventType, eventValue )=>{
+ *   console.log( "pxlNav has booted!" );
+ *   console.log( eventType, eventValue );
+ * };
+ * pxlNavEnv.subscribe( "booted", printBoot );
  */
 class pxlNav{
   constructor( options, projectTitle, startingRoom, roomBootList ){
@@ -231,8 +309,9 @@ class pxlNav{
       "camera-landed" : "Returns a [bool]; Emitted when the camera lands from a jump / fall.",
       "camera-collision" : "Returns a [bool]; Emitted when the camera collides with an object.",
       "pxlNavEventNameHere" : "Never emitted; You did some copy'pasta.",
-      "" : "** NOTE : callbacks get an event object shaped -  **",
-      "" : "** { 'type' : *eventName*, 'value' : *data* } **",
+      "" : "** NOTE : callbacks get an event object shaped - **",
+      "" : "**  callbackFn( eventType, eventValue ) **",
+      "" : "**  eventValue = { 'type' : *eventName*, 'value' : *data* } **",
       "" : "",
       "help" : "Hello! I'm here to help you!",
       "pingPong" : "Send 'ping', Get 'pong'! - pxlNav.trigger('ping');",
@@ -349,9 +428,14 @@ class pxlNav{
   // -- -- --
   
   init(){
-    this.pxlTimer.init();
+    // Boot timer
+    if(!this.pxlTimer.active){
+      this.bootTimer();
+    }
 
+    // Start the pxlNav environment
     this.pxlEnv.boot(); // Environment Asset Prep
+    // Initialize a base quality level
     this.pxlQuality.startBenchmark(); // Start benchmark timer
 
     this.checkPxlOptions();
@@ -388,7 +472,7 @@ class pxlNav{
         }
       })
        .finally( ()=>{
-        if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+        if( this.verbose >= pxlEnums.VERBOSE_LEVEL.DEBUG ){
           console.log("'pxlNavCore' Room Build Promise-Chain Completed; ", this.loadPercent);
           console.log("-- Starting pxlNav in Room `"+this.pxlEnv.bootRoom+"`");
         }
@@ -873,6 +957,7 @@ class pxlNav{
       tmpThis.pxlEnv.postBoot();
       if(tmpThis.pxlGuiDraws.mapPrompt) tmpThis.pxlGuiDraws.promptFader(tmpThis.pxlGuiDraws.mapPrompt, false,null,true);
       if(tmpThis.pxlGuiDraws.mapPromptBG) tmpThis.pxlGuiDraws.promptFader(tmpThis.pxlGuiDraws.mapPromptBG, false,null,false);
+      this.pxlDevice.hideAddressBar();
       tmpThis.emit("booted", true);
     }, 200);
   }
@@ -940,9 +1025,9 @@ class pxlNav{
     let curObj=obj;
     if( typeof(curObj) === "string" ){
       curObj=document.getElementById(curObj);
-      if(!curObj){
-        return;
-      }
+    }
+    if(!curObj){
+      return;
     }
         
     curObj.classList.add("fader");
@@ -963,11 +1048,11 @@ class pxlNav{
   promptFader(faderObj, vis, fadeOutLimit=null, deleteOnEnd=false){
     if(typeof(faderObj)=="string"){
       faderObj=document.getElementById(faderObj);
-      if(!faderObj){
-        return;
-      }
     }
-    if(faderObj.classList.value.indexOf("fader")<0){
+    if(!faderObj){
+      return;
+    }
+    if(faderObj.classList?.value.indexOf("fader")<0){
       faderObj.classList.add("fader");
     }
     if(vis){
@@ -1058,6 +1143,11 @@ class pxlNav{
    * @param {*} eventType 
    * @param {*} eventValue 
    * @param {*} eventObj 
+   * @example
+   * pxlNav.trigger( "warptoroom", "roomName" );
+   * pxlNav.trigger( "camera", "roam" );
+   * pxlNav.trigger( "ping" );
+   * pxlNav.trigger( "roomMessage", *roomName*, { "type" : "event", "value" : "eventValue" } );
    */
   trigger( eventType, eventValue=null, eventObj=null ){
     eventType = eventType.toLowerCase();

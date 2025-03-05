@@ -22,12 +22,11 @@
 	grid-template-rows:auto;
 	grid-gap:0px;
 	align-content:stretch;
-	justify-content:strech;
 	text-align:center;
 	align-items:center;
 	width:40%;
-	min-height:600px;
-	min-width:530px;
+  min-height: min(90vh, 600px);
+  min-width: min(90vw, 530px);
 	position:fixed;
 	left:50%;
 	top:50%;
@@ -35,13 +34,6 @@
 	z-index:117;
 }
 
-
-.gui__header{
-	display:grid;
-	justify-content:center;
-	align-content:space-center;
-	width:100%;
-}
 .gui_body{
 	color:#ffffff;
 	display:grid;
@@ -50,14 +42,24 @@
 	align-content:space-between;
 	width:100%;
 }
-.gui_mobileBody{
-	color:#ffffff;
-	display:grid;
-	justify-content:strech;
-    font-size: 7.5em;
-    font-weight: 700;
-    align-self: end;
+.pxlGui-welcome-message{
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 2.75em;
 }
+.pxlGui-mobile-body{
+	color: #ffffff;
+	display: grid;
+  font-size: 2.0em;
+  font-weight: 700;
+  align-self: end;
+  text-wrap-style: pretty;
+}
+.pxlGui-mobile-welcomeButton{
+  font-weight: 700;
+  font-size: 3em;
+}
+
 .gui_footer{
 	display:grid;
 }
@@ -169,8 +171,13 @@
 	color:#ffffff;
     font-size:130%;
 }
+
+.gui_helpGui_mobileHud{
+	color:#ffffff;
+    font-size:1.5em;
+}
 .gui_helpGui_fastTravelKeys{
-	font-align:left;
+  text-align:left;
 }
 
 /* -- -- -- -- -- -- -- -- */

@@ -6,19 +6,27 @@
 
   - Primary `canvas` style class changed from `pxlNavCoreCanvasStyle` to `pxlNav-coreCanvasStyle`
 
+  -`pxlOptions.js` renamed `pxlOptions.fps.PC` to `pxlOptions.fps.pc`
+  -`pxlOptions.js` renamed `pxlOptions.fps.Mobile` to `pxlOptions.fps.mobile`
+  -`pxlOptions.js` renamed `pxlOptions.gravity.UPS` to `pxlOptions.gravity.ups`
+  -`pxlOptions.js` renamed `pxlOptions.gravity.Max` to `pxlOptions.gravity.max`
+
   - `JSDoc` added at `./docs/jsdoc/index.html` - `https://procstack.github.io/pxlNav-docs`
     - pxlNav
-    - Animation
-    - Camera
-    - HUD
-    - RoomEnvironment (pxlRoom)
+    - pxlOptions
+    - pxlUserSettings
+    - pxlEnums
+    - pxlAnim
+    - pxlCamera
+    - pxlHUD
+    - pxlRoom RoomEnvironment
     - pxlEffects.pxlParticles
       - ParticleBase
       - BillowSmoke
       - EmberWisps
       - FloatingDust
       - HeightMap
-  - `HUD.js` support added for different displays & button/click/tap'able regions of the screen.
+  - `./hud/HUD.js` support added for different displays & button/click/tap'able regions of the screen.
   - `HUD.js` automatically builds + adds 2 joysticks for move & look controls; and jump & run tap'able regions
   - `./docs/assets` converted to `webp`
 
@@ -33,6 +41,15 @@ npm run jsdoc
   - `JSDoc` + `./packing/docs-init.js` adds Class Methods List at the top of each page and adds a `^Top` link to each Method header on page
 
 ---
+
+  - `pxlAssets` removed from './src' & './examples' to reduce package size
+<br/>&nbsp;&nbsp; - All pxlNav launchers now read from `./dist/pxlAssets`
+
+  - `package.json` now has `buildFiles`, `buildFinish`, & `buildAll`
+  - `package.json` build scripts now fix corrections and move files to correct locations automatically
+
+---
+
 
   - `HUD.js` added to support an array of HUD element types, found through the `HUD_ELEMENT` enum
 <br/>&nbsp;&nbsp; - `Region`; A transparent clickable region
@@ -89,6 +106,61 @@ export const HUD_DRAW = {
 
   - `EventManager.js` has further development, not integrated, but nearly ready for implementation.
 <br/>&nbsp;&nbsp; - Added checks for failed callbacks execuded through Promises
+
+
+---
+
+  -`pxlNav.js` runs `bootTimer()` automatically on `init()` now
+
+  -`pxlOptions.js` renamed `pxlOptions.fps.PC` to `pxlOptions.fps.pc`
+  -`pxlOptions.js` renamed `pxlOptions.fps.Mobile` to `pxlOptions.fps.mobile`
+```
+export const pxlOptions = {
+  [...]
+  'fps' : {
+    'pc' : 60,
+    'mobile' : 30
+  },
+  [...]
+}
+```
+  -`pxlOptions.js` added look inversion `look.invert` to `pxlUserSettings`
+```
+export const pxlUserSettings = {
+  [...]
+  'look' : {
+      'invert' : {
+        'pc' : false, // Invert ( Southpaw ) look on desktop
+        'mobile' : false // Invert look on mobile
+      }
+    },
+  [...]
+}
+```
+
+  -`pxlOptions.js` now has some basic onboarding options on `pxlOptions.onboarding`
+<br/>&nbsp;&nbsp; - Node, the only 'tag' right now is '%projectTitle%' that is replaced with your `projectTitle`
+```
+export const pxlOptions = {
+  [...]
+  'onboarding' : {
+    'pc' : {
+      'message' : "Welcome to<br>%projectTitle%",
+      'messageStyle' : ['pxlGui-welcome-message'],
+      'buttonText' : "close",
+      'buttonStyle' : ['guiButton']
+    },
+    'mobile' : {
+      'message' : "Welcome to<br>%projectTitle%",
+      'messageStyle' : ['pxlGui-mobile-body'],
+      'buttonText' : "start",
+      'buttonStyle' : ['guiButton', 'pxlGui-mobile-welcomeButton']
+    }
+  },
+  [...]
+}
+```
+
 
 
 ---
