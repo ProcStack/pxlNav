@@ -892,12 +892,12 @@ export class ShaderEditor {
 		}
 
 		if( this.gui ){
-			this.gui.style.height=this.guiManager.sH-bBarHeight;
+			this.gui.style.height = window.innerHeight-bBarHeight;
 
 			let vertTextTop = this.children.vertObj.getBoundingClientRect().top;
 			let bHeight = this.children.updateObj.getBoundingClientRect().height;
 			bHeight += 40;
-			let pHeight =  this.guiManager.sH - bHeight - vertTextTop;
+			let pHeight = window.innerHeight - bHeight - vertTextTop;
 			
 			this.children.vertObj.style.maxHeight=pHeight*.4+"px";
 			this.children.vertObj.displayHeight=pHeight*.4;
@@ -976,7 +976,8 @@ export class ShaderEditor {
     
     let vertSize = guiWindow.vertObj.displayHeight;
     let fragSize = guiWindow.fragObj.displayHeight;
-    let minSize = Math.max(150, this.guiManager.sH * .135);
+    // TODO : Upgrade to CSS restrictions
+    let minSize = Math.max(150, window.innerHeight * .135);
     let sizeShift= guiWindow.fieldBodyHeight-minSize;
     
     vertSize= area=="vertObj" ? sizeShift : minSize;

@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.26";
+const pxlNavVersion = "0.0.27";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -77,22 +77,17 @@ import { pxlEffects } from './pxlNav/effects/effects.js';
 import { RoomEnvironment } from './pxlNav/RoomClass.js';
 
 const pxlCore = "pxlNav-coreCanvas"; // Name of DIV in Index
-var cloud3dTexture = null;
-
 
 var mapW,mapH;
-let sW = window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
-let sH =  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
-
-
-sW = window.innerWidth;
-sH = window.innerHeight;
-
+let sW = window.innerWidth;
+let sH = window.innerHeight;
 
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
 /**
  * pxlNav - Core Engine
  *   The primary entry point for the pxlNav engine.
@@ -507,22 +502,10 @@ class pxlNav{
       this.pxlGuiDraws.booted();
         
       this.pxlGuiDraws.pxlNavCanvas=document.getElementById(pxlCore);
-
-      let screenWidth = window?.screen?.width ? window.screen.width : window.innerWidth;
       
-      let screenHeight =  window?.screen?.height ? window.screen.height : window.innerHeight;
+      this.pxlGuiDraws.pxlNavCanvas.width= window.innerWidth * this.pxlQuality.screenResPerc;
+      this.pxlGuiDraws.pxlNavCanvas.height= window.innerHeight * this.pxlQuality.screenResPerc;
       
-      screenWidth = window.innerWidth;
-      screenHeight = window.innerHeight;
-
-      this.pxlGuiDraws.pxlNavCanvas.width=screenWidth*this.pxlQuality.screenResPerc;
-      this.pxlGuiDraws.pxlNavCanvas.height=screenHeight*this.pxlQuality.screenResPerc;
-      
-      //mapW=window.innerWidth*this.pxlQuality.screenResPerc;
-      //this.pxlGuiDraws.pxlNavCanvas.width=window.innerWidth;
-      //mapH=window.innerHeight*this.pxlQuality.screenResPerc;
-      //this.pxlGuiDraws.pxlNavCanvas.height=window.innerHeight;
-
       if(this.pxlDevice.canCursorLock){
         this.pxlGuiDraws.pxlNavCanvas.requestPointerLock=
             this.pxlGuiDraws.pxlNavCanvas.requestPointerLock ||
@@ -626,9 +609,7 @@ class pxlNav{
         //this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio);
         this.pxlEnv.engine.setSize(mapW/this.pxlQuality.screenResPerc, mapH/this.pxlQuality.screenResPerc);
         
-        let screenWidth = window?.screen?.width ? window.screen.width : window.innerWidth;
-        let screenHeight =  window?.screen?.height ? window.screen.height : window.innerHeight;
-        this.pxlEnv.engine.setSize( screenWidth, screenHeight );
+        this.pxlEnv.engine.setSize( window.innerWidth, window.innerHeight );
         
         this.pxlEnv.engine.setPixelRatio(1);
 

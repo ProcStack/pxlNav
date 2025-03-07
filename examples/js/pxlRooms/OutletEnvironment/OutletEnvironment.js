@@ -1,6 +1,25 @@
 // pxlNav Example :: `The Outlet` Environment
+//   Created by Kevin Edzenga; 2024,2025
+// -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //
-// A more complex example of a custom room environment for the pxlNav framework
+// This room is a more complex example of a pxlNav room.
+//   It uses many custom shaders and particle systems.
+//
+// If you are looking for a simple example to look at first,
+//   See the `Void Environment` in the `pxlRooms` folder.
+//     It has a single custom shader, a simple pxlNav particle system, and no animations.
+//
+// What's in this room?
+//  - Custom shaders for the environment ground, water, plants, and more.
+//      The ground shader mixes different textures using a data map
+//      The water shader has a coast-line data texture which creates frag ripples
+//      The plants shader uses vertex-color to add wind sway
+//  - Custom particle systems for floating dust and bugs.
+//      The dust floats around the camera
+//      The bugs are height-mapped & spawn-mapped to the ground
+//  - A custom shader for the water-way, with a coast-line texture and ripples
+//
+
 
 import {
   Vector2,
@@ -29,6 +48,8 @@ import {
       } from "./Shaders.js";
 import { RoomEnvironment, pxlShaders, pxlEffects } from "../../pxlNav.esm.js";
 
+const pxlPrincipledVert = pxlShaders.objects.pxlPrincipledVert;
+const pxlPrincipledFrag = pxlShaders.objects.pxlPrincipledFrag;
 const FloatingDust = pxlEffects.pxlParticles.FloatingDust;
 const HeightMapSpawner = pxlEffects.pxlParticles.HeightMap;
 
@@ -88,7 +109,14 @@ buildDust(){
   let systemName = "floatingDust";
   let dustSystem = new FloatingDust( this, systemName );
 
+  // -- -- --
+
+  // Request the settings object from the particle system
+  //   If you log this object, you can see all the settings you can adjust
+  // This is optional, as the default settings is created for you
+  //   If you don't pass one to the `build()` function
   let dustSystemSettings = dustSystem.getSettings();
+  
   dustSystemSettings["vertCount"] = vertexCount;
   dustSystemSettings["pScale"] = pScale;
   dustSystemSettings["pOpacity"] = particleOpacity;
@@ -107,8 +135,22 @@ buildDust(){
     ...dustSystem.dupeArray([0.0,0.75],3), ...dustSystem.dupeArray([0.25,0.75],3)
   ];
 
-  // Use a texture from the internal `pxlAsset` folder; ( RGB, Alpha )
-  //dustSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
+  // -- -- --
+
+  // Texturing the particles -
+
+  // For a RGB + Alpha texture, use the second parameter for the Alpha map -
+  //  dustSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
+  // For a RGBA texture, leave the second parameter empty -
+  //  dustSystem.setAtlasPath( "sprite_dustLiquid.png" );
+
+  // When no pathing, just a name, is passed to `setAtlasPath()`
+  //   It will read the texture from the internal `./pxlAsset` folder
+  //     Set on your `pxlOptions` object when building `new pxlNav( pxlOptions, ... )`
+  // If you pass a path, it will look in the path you provide, like the room's asset folder -
+  //  dustSystem.setAtlasPath( this.assetPath + "/customSpriteAtlas.png" );
+  
+  // -- -- --
 
   // Generate geometry and load texture resources
   dustSystem.build( dustSystemSettings );
@@ -117,11 +159,11 @@ buildDust(){
 }
 
 builBugs(){
-  if( this.mobile ) return;
+  //if( this.mobile ) return;
 
   let vertexCount = 500; // Point Count
   let pScale = 10.0;  // Point Base Scale
-  let visibleDistance = 460;  // Proximity Distance from Camera
+  let visibleDistance = 400;  // Proximity Distance from Camera
   let particleOpacity = 1.0;  // Overall Opacity
   let opacityRolloff = 0.9;  // Distance-opacity falloff multiplier
 
@@ -144,7 +186,7 @@ builBugs(){
 
   grassBugsSettings["jumpHeightMult"] = jumpHeightMult;
   grassBugsSettings["offsetPos"].y = .1 ;
-
+  
   grassBugsSettings["wanderInf"] = wanderInfluence;
   grassBugsSettings["wanderFrequency"] = wanderFrequency;
   
@@ -161,16 +203,12 @@ builBugs(){
 
 
   // Set height map
-  grassBugsSystem.setHeightMapPath( this.assetPath + "bug_heightMap.jpg" );
+  grassBugsSystem.setHeightMapPath( this.assetPath+"bug_heightMap.jpg" );
 
   // Set spawn map
-  grassBugsSystem.setSpawnMapPath( this.assetPath + "bug_spawnMap.jpg" );
+  grassBugsSystem.setSpawnMapPath( this.assetPath+"bug_spawnMap.jpg" );
 
-  let bugObj = null; // No reference object
-
-  // Loaded from a null/locator in the FBX marked `userData.Scripted = true`
-  //   The locator also has userData floats - `SizeX`, `SizeY`, `SizeZ`
-  //     Used as the bounding box for the height & spawn maps
+  let bugObj = null;
   if( this.geoList['Scripted'] && this.geoList['Scripted']['bugParticles_loc'] ){
     bugObj = this.geoList['Scripted']['bugParticles_loc'];
   }
@@ -193,6 +231,21 @@ builBugs(){
 
     // Add some bugs jumping in the grass
     this.builBugs();
+
+    if( this.geoList.hasOwnProperty('LightHouse_geo') ){
+      let lhMtl = this.geoList['LightHouse_geo'].material;
+      if( lhMtl.map && !lhMtl.emissiveMap ){
+        lhMtl.emissiveMap = lhMtl.map;
+        lhMtl.emissive.set( 0x404040 );
+      }
+      // Certain material types in programs don't support AlphaMaps as it seems
+      //   I'll need to investigate which programs have which limitations in what materials
+      if( !lhMtl.alphaMap ){
+        lhMtl.alphaMap = this.pxlUtils.loadTexture( this.assetPath+"LightHouseA_alpha.jpg" );
+        lhMtl.transparent = true;
+        lhMtl.alphaTest = .05;
+      }
+    }
     
     // Adding a basic ambient light
     var ambientLight = new AmbientLight( 0x383838 ); // soft white light
@@ -290,7 +343,12 @@ builBugs(){
     grassCardsAUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_diffuse.jpg" );
     grassCardsAUniforms.alphaMap.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_alpha.jpg" );
 
-    let grassCardsMat=this.pxlFile.pxlShaderBuilder( grassCardsAUniforms, instPlantsVert(), instPlantsFrag( true, true ) );
+    let grassCardSettings = {
+      'buildAlpha' : true,
+      'addShimmer' : true
+    }
+
+    let grassCardsMat=this.pxlFile.pxlShaderBuilder( grassCardsAUniforms, instPlantsVert(), instPlantsFrag( grassCardSettings ) );
     grassCardsMat.side = DoubleSide;
     grassCardsMat.lights = true;
     grassCardsMat.transparent = false;

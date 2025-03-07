@@ -38,10 +38,8 @@ export class Device{
     
     //this.bootTime=new Date().getTime();
 
-    let sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
-    let sH= window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
-    sW = window.innerWidth;
-    sH = window.innerHeight;
+    let sW = window.innerWidth;
+    let sH = window.innerHeight;
     this.sW=sW;
     this.sH=sH;
 
@@ -275,6 +273,51 @@ export class Device{
     
   // -- -- -- -- -- -- -- -- -- -- //
   
+  getRenderScalar(){
+    let renderScalar = 1.0;
+    if( this.mobile && this.pxlOptions.renderScale.mobile != 0){
+      renderScalar = this.pxlOptions.renderScale.mobile;
+    }else if( this.pxlOptions.renderScale.pc != 0){
+      renderScalar = this.pxlOptions.renderScale.pc;
+    }
+
+    return renderScalar;
+  }
+
+  // Set main pxlNav canvas size, with overscan if enabled
+  //   Overscan is a percentage to render outside the canvas size
+  //     But is scaled back to fit within the canvas
+  //   This is primarily to allow for better rendering on mobile devices
+  // Set `overscan` in pxlOptions to a percentage value
+  //   pxlOptions.overscan = {
+  //    'pc' : 0.0,
+  //    'mobile' : 0.0
+  //   }
+  /**
+   * Set main pxlNav canvas size, with overscan if enabled
+   * 
+   * Overscan is a percentage to render outside the canvas size
+   * <br/>&nbsp;&nbsp; But is scaled back to fit within the canvas
+   * <br/>This is primarily to allow for better rendering on mobile devices
+   */
+  setCanvasSize( sW, sH ){
+    // Set main pxlNav Canvas Size
+    this.pxlGuiDraws.pxlNavCanvas.width = sW;
+    this.pxlGuiDraws.pxlNavCanvas.height = sH;
+    
+    let renderScalar = this.getRenderScalar();
+
+    // Set overscan if enabled
+    if( renderScalar != 1.0 ){
+      let overscanFit = 1 / renderScalar;
+      this.pxlGuiDraws.pxlNavCanvas.style.transform = "scale(" + overscanFit + ")";
+    }else{
+      this.pxlGuiDraws.pxlNavCanvas.style.transform = "";
+    }
+  }
+
+  // -- -- -- -- -- -- -- -- -- -- //
+
   runHiddenCalcs(){
       if( this.windowHidden ){
           setTimeout( ()=>{
@@ -912,7 +955,7 @@ export class Device{
           // Prevent current item from wearing off
           //   Printing it from the check list
           if( this.pxlUser?.itemInactiveCmd?.length >0 ){
-            console.log( this.pxlUser.itemInactiveCmd.pop() );
+            this.pxlUser.itemInactiveCmd.pop();
           }
           return;
         }
@@ -1059,10 +1102,10 @@ export class Device{
         //this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] + Math.min( Math.max( startDeltaY * 0.01, -1), 1) ) * .5; // x / 50 
 
         this.pxlCamera.cameraMovement[0] =  ( this.pxlCamera.cameraMovement[0] + startDeltaX ) * .7 // x / 50
-        this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] +  startDeltaY ) * .5; // y / 50 
+        this.pxlCamera.cameraMovement[1] = ( this.pxlCamera.cameraMovement[1] +  startDeltaY ) * .7; // y / 50 
         this.userInputMoveScalar = Math.max(this.pxlCamera.cameraMovement[0]**2, this.pxlCamera.cameraMovement[1]**2) ** .5;
         this.userInputMoveScalar = this.userInputMoveScalar*this.userInputMoveScalar*this.userInputMoveScalar * 1.5;
-        this.userInputMoveScalar += this.userInputMoveScalar>1.0 ? (this.userInputMoveScalar-1.0)*20. : 0;
+        this.userInputMoveScalar += this.userInputMoveScalar>1.0 ? (this.userInputMoveScalar-1.0)*30. : 0;
         if( this.userInputMoveScalar > 1.0 ){
           // Trigger Run automatically on mobile
           this.deviceAction( this.pxlEnums.DEVICE_ACTION.RUN, {}, true );
@@ -1189,11 +1232,14 @@ export class Device{
 
     let iWidth = window.innerWidth;
     let iHeight = window.innerHeight;
-    
-    // -- -- -- 
-
     iWidth=!iWidthBase ? iWidth : iWidthBase;
     iHeight=!iHeightBase ? iHeight : iHeightBase;
+
+    // -- -- -- 
+
+    let renderScalar = this.getRenderScalar();
+    iWidth = iWidth * renderScalar;
+    iHeight = iHeight * renderScalar;
         
     this.mapW=(this.sW=iWidth)*this.pxlQuality.screenResPerc;
     this.mapH=(this.sH=iHeight)*this.pxlQuality.screenResPerc;
@@ -1205,8 +1251,8 @@ export class Device{
 
     this.screenRes.x=1/this.mapW;
     this.screenRes.y=1/this.mapH;
-    this.screenRatio.x=this.sW/this.sH;
-    this.screenRatio.y=this.sH/this.sW;
+    this.screenRatio.x=this.sW * this.screenRes.x;
+    this.screenRatio.y=this.sH * this.screenRes.y;
 
     if(this.pxlEnv.geoList['HDRView']){
       let rU=this.mapW>this.mapH ? 1 : this.mapW/this.mapH;
@@ -1269,8 +1315,11 @@ export class Device{
       this.pxlEnv.mapOverlaySlimPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
     }
     
-    this.pxlGuiDraws.pxlNavCanvas.width=this.sW;
-    this.pxlGuiDraws.pxlNavCanvas.height=this.sH;
+
+    // Set main pxlNav canvas size
+    this.setCanvasSize( this.sW, this.sH );
+
+
     this.pxlGuiDraws.loading=true;
     
     this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio*this.pxlQuality.screenResPerc);
@@ -1296,14 +1345,9 @@ export class Device{
 
     this.screenAspect.x=aspectMult[0] * (1/(.5**2+.5**2)**.5);
     this.screenAspect.y=aspectMult[1];
-        
-        
+    
     this.screenResDeltaPerc.x=this.sW/this.origRes.x;
     this.screenResDeltaPerc.y=this.sH/this.origRes.y;
-        
-    if( this.pxlEnv.roomSubList['Lobby'] ){
-      this.pxlEnv.roomSubList['Lobby'].setShaders();
-    }
 
     this.pxlEnv.updateCompUniforms();
     
@@ -1317,6 +1361,8 @@ export class Device{
         
     // Emit the resize calculations 
     this.emit("resize", {
+      "rawWidth" : window.innerWidth,
+      "rawHeight" : window.innerHeight,
       "width" : this.mapW,
       "height" : this.mapH,
       "xPixelPerc" : this.screenRes.x,
@@ -1328,7 +1374,6 @@ export class Device{
         this.pxlEnv.mapRender( false );
     }
     
-    //this.pxlEnv.engine.render(this.pxlEnv.scene,this.pxlCamera.camera);
   }
 
   // -- -- -- -- -- -- -- -- -- -- //

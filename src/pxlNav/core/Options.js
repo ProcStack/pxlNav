@@ -259,6 +259,10 @@ export const pxlOptions = {
         'pc' : 60,
         'Mobile' : 30
       },
+    'renderScale' : {
+        'pc' : 1.0,
+        'mobile' : 1.0
+      },
     'staticCamera' : false,
     'autoCamera' : false,
     'allowStaticRotation' : false,

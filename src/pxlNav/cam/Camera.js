@@ -2350,9 +2350,13 @@ export class Camera{
       let euler=new Euler();
       let camPoseQuat;
       if( this.pxlDevice.mobile ){
+
+        let invertLookBool = this.pxlOptions.userSettings.look.mobile.invert || false;
+        let invertLook = invertLookBool ? -1 : 1;
+
         euler.set(
-            (this.pxlDevice.touchMouseData.netDistance.y/this.pxlDevice.sH*3),
-            (this.pxlDevice.touchMouseData.netDistance.x/this.pxlDevice.sW*6),
+            this.pxlDevice.touchMouseData.netDistance.y/this.pxlDevice.sH*4 * invertLook,
+            this.pxlDevice.touchMouseData.netDistance.x/this.pxlDevice.sW*7 * invertLook + xGrav,
             0,
             'YXZ'
           ); // Device returns YXZ for deviceOrientation
@@ -2361,9 +2365,13 @@ export class Camera{
         camPoseQuat=this.pxlDevice.touchMouseData.initialQuat.clone().multiply(camPoseQuat);
         //camPoseQuat.multiply(poseQuat.setFromAxisAngle(viewNormal,-this.cameraPose.orientation));
       }else{
+
+        let invertLookBool = this.pxlOptions.userSettings.look.pc.invert || false;
+        let invertLook = invertLookBool ? -1 : 1;
+
         euler.set(
-            this.pxlDevice.touchMouseData.velocity.y*.005,
-            this.pxlDevice.touchMouseData.velocity.x*.008+xGrav,
+            this.pxlDevice.touchMouseData.velocity.y*.005 * invertLook,
+            this.pxlDevice.touchMouseData.velocity.x*.008 * invertLook + xGrav,
             0,
             'YXZ'// Device returns YXZ for deviceOrientation
           ); 

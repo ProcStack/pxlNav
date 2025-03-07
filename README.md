@@ -1,10 +1,10 @@
-# pxlNav v0.0.26
+# pxlNav v0.0.27
 Javascript Player Controller & Environment Manager for Three.js
 
 #### Visit the [pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)
 
 **Since the docs are still being written,**
-**<br>&nbsp;&nbsp; If you have any questions / feedback, feel free to join the [pxlNav Support](https://discord.gg/D8kMgtBsmp) discord group.**
+**<br>&nbsp;&nbsp; If you have any questions / feedback, feel free to join the [pxlNav Support](https://discord.gg/UqEY9mpZ9x) discord group.**
 
 **Visit [procstack.github.io site](https://procstack.github.io/) to see camera location switching action.**
 
@@ -12,7 +12,7 @@ Javascript Player Controller & Environment Manager for Three.js
 <p align='center'>
  <b>If you'd like to roam around a coastal environment,</b>
  <br/><sub>vvv&nbsp;&nbsp; </sub><b>visit <a href="https://procstack.github.io/Outlet.htm" alt="pxlNav Example The Outlet">procstack.github.io/Outlet.htm</a></b><sub>&nbsp;&nbsp; vvv</sub>
- <h5><a href="https://procstack.github.io/Outlet.htm"><img src='./docs/assets/pxlNav_TheOutlet_2025-2-9_Coastline_sm.webp' alt="pxlNav Example The Outlet" /></a></h5></p>
+ <h5><a href="https://procstack.github.io/Outlet.htm"><img src='./docs/assets/pxlNav_The Outlet_2025-3-6_Coastline.webp' alt="pxlNav Example The Outlet" /></a></h5></p>
 
 ## <br/>**Index**
 * [Install Files](#install-files)

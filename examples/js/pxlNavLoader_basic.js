@@ -77,6 +77,14 @@ const targetFPS = {
   'mobile' : 30
 };
 
+// Render Overscan - Render larger than the screen resolution to reduce edge artifacts
+//   Since mobile devices have a lower resolution, overscan may help
+// Default is - PC = 0.0  -&-  Mobile = 0.0
+const renderOverscan = {
+  'pc' : 0.0,
+  'mobile' : 0.5
+}
+
 // Anti-aliasing level
 //   Options are - NONE, LOW, MEDIUM, HIGH
 const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
@@ -126,6 +134,7 @@ const collisionScale = {
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.fps = targetFPS;
+pxlNavOptions.overscan = renderOverscan;
 pxlNavOptions.userSettings = userSettings;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.collisionScale = collisionScale;

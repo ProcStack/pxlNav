@@ -24,11 +24,6 @@ export class GUIManager{
   this.verbose = verbose;
 
   //this.bootTime=new Date().getTime();
-
-  this.sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
-  this.sH=  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
-  this.sW = window.innerWidth;
-  this.sH = window.innerHeight;
   this.mobile=false;
   this.pxlOptions=null;
   this.pxlFile=null;
@@ -406,12 +401,6 @@ export class GUIManager{
   }
   
   resize(){
-
-    this.sW= window?.screen?.width ? window.screen.width / window.devicePixelRatio : window.innerWidth;
-    this.sH=  window?.screen?.height ? window.screen.height / window.devicePixelRatio : window.innerHeight;
-		
-    this.sW = window.innerWidth;
-    this.sH = window.innerHeight;
 		// Linked to icons, run for any parenting
 		this.resetHelpTextPlacement();
 		
@@ -420,26 +409,26 @@ export class GUIManager{
 			let optionBlockId=null;
 			let curIcon=null;
 			if( type=="videoinput" ){
-		//this.camChoicesObj=deviceList;
-		optionBlockId="camChoiceOptionsBlock";
-		curIcon=this.hudIcons.camChoiceIcon;
+        //this.camChoicesObj=deviceList;
+        optionBlockId="camChoiceOptionsBlock";
+        curIcon=this.hudIcons.camChoiceIcon;
 			}else if( type=="audioinput" ){
-		//this.micChoicesObj=deviceList;
-		optionBlockId="micChoiceOptionsBlock";
-		curIcon=this.hudIcons.micChoiceIcon;
+        //this.micChoicesObj=deviceList;
+        optionBlockId="micChoiceOptionsBlock";
+        curIcon=this.hudIcons.micChoiceIcon;
 			}else if( type=="audiooutput" ){
-		//this.micChoicesObj=deviceList;
-		optionBlockId="speakerChoiceOptionsBlock";
-		curIcon=this.hudIcons.speakerChoiceIcon;
+        //this.micChoicesObj=deviceList;
+        optionBlockId="speakerChoiceOptionsBlock";
+        curIcon=this.hudIcons.speakerChoiceIcon;
 			}
 			
 			let optionBlock=document.getElementById( optionBlockId );
 			if(optionBlock && curIcon){
-		let curWidth=optionBlock.getBoundingClientRect().width
-		
-		let bbox=curIcon.parent.getBoundingClientRect();
-		optionBlock.style.left=bbox.x-curWidth*.5;
-		optionBlock.style.bottom=this.sH - this.hudBottomBar.getBoundingClientRect().y;
+        let curWidth=optionBlock.getBoundingClientRect().width
+        
+        let bbox=curIcon.parent.getBoundingClientRect();
+        optionBlock.style.left=bbox.x-curWidth*.5;
+        optionBlock.style.bottom=this.sH - this.hudBottomBar.getBoundingClientRect().y;
 			}
 		});
     
@@ -468,13 +457,13 @@ export class GUIManager{
 					let toY=0;
 					let pOffset=false;
 					if(pos[1]<0){
-					toY=parentBox.y+helpBox.height*pos[1];
-					pOffset=true;
+            toY=parentBox.y+helpBox.height*pos[1];
+            pOffset=true;
 					}else if(pos[1]==0){
-					toY=parentBox.y+parentBox.height*.5-helpBox.height*.5;
+					  toY=parentBox.y+parentBox.height*.5-helpBox.height*.5;
 					}else if(pos[1]>0){
-					toY=parentBox.y+parentBox.height+helpBox.height*(pos[1]-1);
-					pOffset=true;
+					  toY=parentBox.y+parentBox.height+helpBox.height*(pos[1]-1);
+					  pOffset=true;
 					}
 					if(pOffset){
 					if(pos[0]<0){
@@ -496,9 +485,9 @@ export class GUIManager{
 					toX=toX+offset[0];
 					
 					if(toX+helpBox.width > this.sW-pad){
-					toX=this.sW-pad-helpBox.width;
+					  toX=this.sW-pad-helpBox.width;
 					}else if(toX<pad){
-					toX=pad;
+					  toX=pad;
 					}
 					toY=toY+offset[1];
 					

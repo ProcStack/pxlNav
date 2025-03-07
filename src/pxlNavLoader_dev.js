@@ -78,6 +78,14 @@ const targetFPS = {
   'mobile' : 30
 };
 
+// Render Resolution Scale
+//   Since mobile devices have a lower resolution, up scaling may help
+// Default is - PC = 1.0  -&-  Mobile = 1.0
+const renderScale = {
+  'pc' : 1.0,
+  'mobile' : 1.5
+}
+
 // Anti-aliasing level
 //   Options are - NONE, LOW, MEDIUM, HIGH
 const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
@@ -127,6 +135,7 @@ const collisionScale = {
 let pxlNavOptions = Object.assign({},pxlOptions);
 pxlNavOptions.verbose = verbose;
 pxlNavOptions.fps = targetFPS;
+pxlNavOptions.renderScale = renderScale;
 pxlNavOptions.userSettings = userSettings;
 pxlNavOptions.antiAliasing = antiAliasing;
 pxlNavOptions.collisionScale = collisionScale;
