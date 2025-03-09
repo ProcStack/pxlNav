@@ -1,6 +1,6 @@
 //
 //  Core pxlNav Engine
-const pxlNavVersion = "0.0.27";
+const pxlNavVersion = "0.0.28-dev";
 //      Written by Kevin Edzenga 2020;2024-2025
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -215,6 +215,9 @@ class pxlNav{
   constructor( options, projectTitle, startingRoom, roomBootList ){
     this._active = false;
 
+    // Count of loader bar steps
+    this.loaderStepTotalCount = 9;
+
     // -- -- --
     let pxlRoomRoot = "./pxlRooms";
     if( options.hasOwnProperty("pxlRoomRoot") ){
@@ -321,7 +324,8 @@ class pxlNav{
     //   For further information of each item & object,
     //     See https://github.com/ProcStack/pxlNav/tree/main/docs
     // TODO : Turning this off breaks loading, fix that
-    this.loadEnvAssetFile = true; // this.pxlOptions['LoadEnvAssetFile'];
+    this.loadEnvAssetFile = this.pxlOptions['loadEnvAssetFile'] || false;
+    this.loadEnvAssetFile = true;
 
 
     this.pxlTimer = new pxlBase.Timer();
@@ -362,7 +366,8 @@ class pxlNav{
     this.pxlAnim = new pxlBase.Animation( this.folderDict["assetRoot"], this.pxlTimer );
 
     this.pxlGuiDraws = new pxlBase.GUI( this.verbose, projectTitle, this.folderDict["assetRoot"], this.folderDict["guiRoot"] );
-    
+    this.pxlGuiDraws.pxlLoaderTotal = this.loaderStepTotalCount;
+
     this.pxlHUD = new pxlBase.HUD();
 
     // TODO : These should really be requested via pxlEnv methods, but for now...
@@ -438,14 +443,18 @@ class pxlNav{
     this.buildGui()
       .then( ()=>{ 
         this.tickLoader();
+        this.pxlGuiDraws.stepLoader("Build Engine"); // --
         this.bootEnvironment();
       })
       .then( ()=>{
         this.tickLoader();
+        this.pxlGuiDraws.stepLoader("Boot Engine"); // --
         this.bootEngine();
       })
       .then( ()=>{ 
         this.tickLoader();
+
+        this.pxlGuiDraws.stepLoader("Build Composers"); // --
 
         // Create post-process passes
         this.pxlEnv.buildComposers();
@@ -453,19 +462,21 @@ class pxlNav{
         // Prep the HUD
         //   Post room boot to allow for room specific HUD elements
         this.pxlHUD.init();
-
+      })
+      .then( ()=>{
+        this.tickLoader();
         //this.pxlDevice.resizeRenderResolution();
         this.cameraRunAnimatorMobile( this );
         this.pxlGuiDraws.stepLoader("postBoot"); // --
         this.pxlEnv.mapRender();
         this.pxlDevice.setCursor("grab");
        })
-       .catch( (err)=>{
-        if( this.verbose > pxlEnums.VERBOSE_LEVEL.NONE ){
-          console.error("Error in pxlNavCore.init(); Load level - ", err);
-          console.error(err);
-        }
-      })
+       .catch(( err )=>{
+          if( this.verbose > pxlEnums.VERBOSE_LEVEL.NONE ){
+            console.error("Error in pxlNavCore.init(); Load level - ", err);
+            console.error(err);
+          }
+        })
        .finally( ()=>{
         if( this.verbose >= pxlEnums.VERBOSE_LEVEL.DEBUG ){
           console.log("'pxlNavCore' Room Build Promise-Chain Completed; ", this.loadPercent);
@@ -569,7 +580,13 @@ class pxlNav{
         }
         
         Promise.all( promiseList ).then( ()=>{
-            resolve( true );
+          resolve( true );
+        })
+        .catch(err => {
+          if (this.verbose >= pxlEnums.VERBOSE_LEVEL.ERROR) {
+            console.error("Error loading rooms:", err);
+          }
+          reject(err);
         });
     });
   }
@@ -814,7 +831,7 @@ class pxlNav{
     tmpThis.pxlEnv.buildRoomEnvironments();
     tmpThis.monitorRoomLoad( tmpThis );
   }
-  monitorRoomLoad( tmpThis, loop=0 ){
+  monitorRoomLoad( tmpThis, loop=0, maxAttempts = 20 ){
     let stillLoadingCheck=false;
     let keys=Object.keys(tmpThis.pxlEnv.geoLoadList);
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
@@ -824,9 +841,22 @@ class pxlNav{
         break;
       }
     }
+
+    // Monitor the loading of the rooms
+    //   If the rooms are still loading, wait a bit and check again
+    //   If the rooms are not loading, continue the room prep
+
+    // Check loop count to prevent infinite loop
+    //  TODO : This requires a verification check of the rooms and perhaps auto refresh
+    //           But that is nuclear.
+    if( loop > maxAttempts ){
+      this.warn("pxlNav: Room Load Monitor timed out, continuing with boot");
+      stillLoadingCheck=false;
+    }
+
     if( stillLoadingCheck ){ // Files are still loading
       setTimeout(()=>{
-        tmpThis.monitorRoomLoad( tmpThis );
+        tmpThis.monitorRoomLoad( tmpThis, loop+1, maxAttempts );
       },300);
     }else{
       tmpThis.pxlQuality.mapAutoQualityUpdate(1,true);
@@ -851,6 +881,11 @@ class pxlNav{
    * @param {*} cmdList 
    */
   runPrepDrawScenes(runner=0, jumpCam=true, cmdList=[]){
+
+    if( runner == 0 ){
+      this.pxlGuiDraws.stepLoader("Room Prep"); // --
+    }
+
     runner++;
     if( cmdList.length > 0 ){
       if(jumpCam){

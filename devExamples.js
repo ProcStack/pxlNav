@@ -1,16 +1,16 @@
 
 const projectName = "pxlNav Examples";
 let listenIP = 'localhost';
+//listenIP = '192.168.1.3'; // For testing on local network
 var httpPort = 3000;
 
 const args = process.argv.slice(2);
-
 
 const express = require('express');
 const app = express();
 
 const path = require('path');
-const http = require('http').Server(app);
+const http = require('http').createServer(app);
 
 
 

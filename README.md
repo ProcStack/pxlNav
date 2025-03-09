@@ -1,4 +1,4 @@
-# pxlNav v0.0.27
+# pxlNav v0.0.28
 Javascript Player Controller & Environment Manager for Three.js
 
 #### Visit the [pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)

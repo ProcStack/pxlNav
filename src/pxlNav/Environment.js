@@ -293,9 +293,25 @@ export class Environment{
     this.emit=pxlNav.emit.bind(pxlNav);
   }
   
-  log( msg, level=VERBOSE_LEVEL.INFO ){
+  log( ...msg ){
     if( this.pxlOptions.verbose > VERBOSE_LEVEL.INFO ){
       console.log( msg );
+    }
+  }
+
+  debug( ...msg ){
+    if( this.pxlOptions.verbose > VERBOSE_LEVEL.DEBUG ){
+      console.log( msg );
+    }
+  }
+  warn( ...msg ){
+    if( this.pxlOptions.verbose > VERBOSE_LEVEL.WARN ){
+      console.warn( msg );
+    }
+  }
+  error( ...msg ){
+    if( this.pxlOptions.verbose > VERBOSE_LEVEL.ERROR ){
+      console.error( msg );
     }
   }
 
@@ -428,6 +444,7 @@ export class Environment{
       
       import( curImportPath )
         .then((module)=>{
+          this.debug("Module loaded - ", module);
           let roomObj=new module[roomName]( roomName, `${this.pxlRoomLclRoot}/${roomName}/`, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
           roomObj.setDependencies( this );
 
@@ -472,10 +489,12 @@ export class Environment{
             this.roomNameList.push( roomName );
           }
           this.roomSceneList[ roomName ]=roomObj;
+          this.debug(this.roomSceneList[ roomName ]);
       
           resolve(true);
         })
         .catch((err)=>{
+          console.error("Error Loading Room - ", roomName);
           if(this.pxlOptions.verbose >= VERBOSE_LEVEL.ERROR){
             console.log(err);
           }
@@ -548,12 +567,14 @@ export class Environment{
   //   Should see if this is still necessary
   buildRoomEnvironments(){
     
-    this.log("Building Room Environments");
-    this.log(this.roomNameList);
+    this.debug("Building Room Environments - ");
+    this.debug(this.roomNameList);
     let loadPromisList=[];
     
     this.roomNameList.forEach( (r)=>{
-      this.roomSceneList[ r ].init();
+      if( this.roomSceneList[ r ].init ){
+        this.roomSceneList[ r ].init();
+      }
       if( this.roomSceneList[ r ].build ){
         this.roomSceneList[ r ].build();
       }

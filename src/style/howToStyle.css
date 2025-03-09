@@ -48,6 +48,10 @@
 	align-content:center;
 }
 
+#refeshPxlPage{
+  text-decoration: underline;
+  font-weight: 600;
+}
 
 .audioPlayer{
 	position:fixed;

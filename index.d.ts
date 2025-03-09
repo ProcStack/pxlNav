@@ -94,7 +94,7 @@ declare module 'pxlNav' {
       gridReference: number;
     };
     shadowMapBiasing: number;
-    LoadEnvAssetFile: boolean;
+    loadEnvAssetFile: boolean;
     skyHaze: number;
     postProcessPasses: {
       roomGlowPass: boolean;

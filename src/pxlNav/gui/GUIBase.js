@@ -69,7 +69,7 @@ export class GUIManager{
   //      This should be a registration system, not hard coded
   //      As it would be better for loading status for multi-room systems
   //      Loader stages added to a promise/stage list during pre-boot, update max stage count here
-  this.pxlLoaderTotal=5;
+  this.pxlLoaderTotal=8;
   
   this.hudBlock={obj:null, active:false};
   this.userControlBlock=null;
@@ -2445,6 +2445,7 @@ export class GUIManager{
   let refreshPage=document.getElementById("refeshPxlPage");
   if(refreshPage){
     refreshPage.onclick=(e)=>{
+      e.preventDefault();
       this.refreshPage();
     };
   }

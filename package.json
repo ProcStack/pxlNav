@@ -1,6 +1,6 @@
 {
   "name": "pxlnav",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "Player Controller & Environment Framework for Three.js",
   "author": "Kevin Edzenga <kevin@metal-asylum.net>",
   "license": "GPL-3.0-or-later",
@@ -15,9 +15,9 @@
     "buildSingle": "cross-env NODE_ENV=production webpack --config ./packing/webpack-single.config.js",
     "lineCount": "python ./utils/recursiveFileLineCounter.py",
     "convertToCjs": "rollup --bundleConfigAsCjs -c ./packing/rollupConvert.config.js",
-    "examples": "node index.js examples",
+    "examples": "node devExamples.js examples",
     "start": "npm run examples",
-    "dev": "node index.js dist",
+    "dev": "node devExamples.js dist",
     "tar": "npm pack",
     "jsdoc-show": "start ./docs/jsdoc/index.html",
     "jsdoc-gen": "npx jsdoc -c ./packing/jsdoc.config.json --readme ./packing/jsdoc.readme.md",
@@ -38,22 +38,30 @@
     "controller",
     "framework"
   ],
-  "main": "dist/pxlNav.cjs.js",
+  "main": "dist/pxlNav.esm.js",
   "module": "dist/pxlNav.esm.js",
-  "browser": "dist/pxlNav.umd.js",
   "exports": {
     ".": {
       "import": "./dist/pxlNav.esm.js",
-      "require": "./dist/pxlNav.cjs.js"
+      "types": "./index.d.ts"
     }
   },
   "files": [
-    "examples.js"
+    "examples.js",
+    "index.js",
+    "index.d.ts"
   ],
   "bugs": {
     "url": "https://github.com/ProcStack/pxlNav/issues"
   },
   "homepage": "https://github.com/ProcStack/pxlNav#readme",
+  "documentation": "https://procstack.github.io/pxlNav-docs",
+  "directories": {
+    "doc": "./docs/jsdoc"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
   "peerDependencies": {
     "three": "^0.171.0"
   },

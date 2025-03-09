@@ -172,7 +172,7 @@ export const pxlUserSettings = {
  * @property {number} collisionScale.gridSize - Grid size for collision
  * @property {number} collisionScale.gridReference - Grid reference for collision
  * @property {string} shadowMapBiasing - Shadow map biasing level
- * @property {boolean} LoadEnvAssetFile - Whether to load environment asset file
+ * @property {boolean} loadEnvAssetFile - Whether to load environment asset file
  * @property {string} skyHaze - Sky haze level
  * @property {object} postProcessPasses - Post-process passes settings
  * @property {boolean} postProcessPasses.roomGlowPass - Whether to enable room glow pass
@@ -245,7 +245,7 @@ export const pxlUserSettings = {
  *      'gridReference' : 1000
  *    },
  *   'shadowMapBiasing' : pxlEnums.SHADOW_MAP.BASIC,
- *   'LoadEnvAssetFile' : false,
+ *   'loadEnvAssetFile' : false,
  *   'skyHaze' : pxlEnums.SKY_HAZE.OFF,
  *   'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
  *      'roomGlowPass' : false,
@@ -296,7 +296,7 @@ export const pxlOptions = {
         'gridReference' : 1000
       },
     'shadowMapBiasing' : pxlEnums.SHADOW_MAP.BASIC,
-    'LoadEnvAssetFile' : false,
+    'loadEnvAssetFile' : false,
     'skyHaze' : pxlEnums.SKY_HAZE.OFF,
     'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
         'roomGlowPass' : false,

@@ -213,6 +213,17 @@ export class Device{
           return "Close tab?";
       }
     });
+
+
+    // Catch uncaught promises --
+    window.addEventListener('unhandledrejection', ( e )=>{
+      if( this.verbose >= pxlEnums.VERBOSE_LEVEL.ERROR ){
+          console.error('Unhandled promise rejection:', e.reason);
+      }else{ // Silently fail rejections
+        e.preventDefault();
+      }
+      return false;
+    });
   }
     
   // -- -- -- -- -- -- -- -- -- -- //
