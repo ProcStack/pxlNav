@@ -499,6 +499,10 @@ export class GUIManager{
 			}
 		});
   }
+
+  refreshPage(){
+    window.location.reload();
+  }
   
   crashLinkTrigger(e){
     let search=location.search.match(/[a-zA-Z0-9=]+/g)
@@ -2425,6 +2429,9 @@ export class GUIManager{
     <br>The <span class="gui_boldText">Right Circle</span> to look around;
     <br>
     <br> Tap the <span class="gui_boldText">upper</span> half of the screen to jump
+    <br>
+    <br> If the screen is black behind this message,
+    <br> Please <span id="refeshPxlPage">refresh</span> the page
   </div>
   <div id="guiHelpFooter" class="gui_footer">
     <div class="${buttonStyles}" id="guiMobileWelcomeButton">${buttonText}</div>
@@ -2434,6 +2441,14 @@ export class GUIManager{
   `;
   mobileWelcomeGuiDiv.innerHTML=html;
     
+  // Refresh page link
+  let refreshPage=document.getElementById("refeshPxlPage");
+  if(refreshPage){
+    refreshPage.onclick=(e)=>{
+      this.refreshPage();
+    };
+  }
+
   
   // Close Button
   let tmpThis=this;

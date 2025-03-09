@@ -47,6 +47,9 @@
       "require": "./dist/pxlNav.cjs.js"
     }
   },
+  "files": [
+    "examples.js"
+  ],
   "bugs": {
     "url": "https://github.com/ProcStack/pxlNav/issues"
   },

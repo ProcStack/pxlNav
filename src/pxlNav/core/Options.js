@@ -210,7 +210,11 @@ export const pxlUserSettings = {
  *   'verbose' : pxlEnums.VERBOSE_LEVEL.NONE,
  *   'fps' : {
  *      'pc' : 60,
- *      'Mobile' : 30
+ *      'mobile' : 30
+ *    },
+ *    'renderScale' : {
+ *      'pc' : 1.0,
+ *      'mobile' : 1.0
  *    },
  *   'staticCamera' : false,
  *   'autoCamera' : false,
