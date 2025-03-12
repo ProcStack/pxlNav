@@ -47,7 +47,7 @@ export function heightMapVert( userDustData = {} ){
         const float JumpHeightMult = ${ toFloatStr( userDustData.jumpHeightMult ) };
 
         #define PROX ${userDustData.proxDist.toFixed(3)}
-        #define PROX_INV 1.0/${(userDustData.proxDist * 0.95).toFixed(3)}
+        #define PROX_INV 1.0/${(userDustData.proxDist * 0.98).toFixed(3)}
 
     // -- -- --
   `;
@@ -177,12 +177,13 @@ export function heightMapVert( userDustData = {} ){
       float heightVal = heightCd[0] * oneThird + heightCd[1] * oneThird + heightCd[2] * oneThird;
 
       pos.y = tankSize.y * heightVal + mPos.y;
-      pos.y += max(1.0, (jumpHeight + positionOffset.y) * JumpHeightMult * WanderInf);
       
       
       float pScalar = clamp( (1.-length(pos-cameraPosition )*PROX_INV) * FadeOutScalar, 0.0, 1.0  );
-      float aMult = min(1.0, pScalar*3.0);
+      float aMult = min(1.0, pScalar*pScalar*4.0);
       vAlpha = min( 1.0, (seeds.x*.5+.75) * aMult * spawnInf * 2.5 * ParticleOpacity );
+
+      pos.y += max(1.0, (jumpHeight*pScalar + positionOffset.y) * JumpHeightMult * WanderInf);
 
   `;
 
@@ -201,9 +202,8 @@ export function heightMapVert( userDustData = {} ){
   }
 
   ret+=`
-        float pScale = pointScale.x * seeds.z * pScalar;
+        float pScale = pointScale.x * (seeds.w*.25+1.0) * pScalar * 2.;
         pScale *= 1.0 - clamp( ((1.0-pScalar)-.5)*10.0 * FadeOutScalar, 0.0, 1.0 );
-        pScale *= step( .5, atlas.x ) ;
 
         gl_PointSize = pScale;
         
@@ -218,6 +218,7 @@ export function heightMapFrag( hasAlphaMap = false ){
   ret+=`
     uniform sampler2D atlasTexture;
     uniform sampler2D atlasAlphaTexture;
+    uniform vec3 tint;
     uniform vec2 time;
     uniform float rate;
     
@@ -235,13 +236,21 @@ export function heightMapFrag( hasAlphaMap = false ){
 
         vec2 uv=gl_PointCoord;
 
-        vec2 pos = uv*.25-.125;
+        /*vec2 pos = uv*.25-.125;
         float vis = max(0.0, 1.0-max(0.0,length(pos)-.09)*20.);
 
         vec2 rotUV;
         rotUV.x = vRot.y * pos.x - vRot.x * pos.y;
         rotUV.y = vRot.x * pos.x + vRot.y * pos.y;
-        rotUV=(rotUV+.125) + vAtlas;
+        rotUV=(rotUV+.125) + vAtlas;*/
+
+        vec2 pos = (uv-.5)*.85;
+
+        vec2 rotUV;
+        rotUV.x = vRot.y * pos.x - vRot.x * pos.y;
+        rotUV.y = vRot.x * pos.x + vRot.y * pos.y;
+        rotUV=(rotUV+.5)*.25+vAtlas;
+        
 
       `;
   if( hasAlphaMap ){
@@ -262,8 +271,8 @@ export function heightMapFrag( hasAlphaMap = false ){
   }
 
   ret+=`
-        float alpha = min(1.0, dustCd.a*1.5) * vAlpha * vis;
-        vec4 Cd=vec4( dustCd.rgb, alpha );
+        float alpha = min(1.0, dustCd.a*1.5) * vAlpha ;
+        vec4 Cd=vec4( dustCd.rgb * tint, alpha );
 
         gl_FragColor=Cd;
     }`;

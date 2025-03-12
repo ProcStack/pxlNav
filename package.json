@@ -40,14 +40,16 @@
   ],
   "main": "dist/pxlNav.esm.js",
   "module": "dist/pxlNav.esm.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/pxlNav.esm.js",
+      "require": "./index.js",
       "types": "./index.d.ts"
     }
   },
   "files": [
-    "examples.js",
+    "devExamples.js",
     "index.js",
     "index.d.ts"
   ],

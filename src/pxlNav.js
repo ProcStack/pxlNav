@@ -426,6 +426,29 @@ class pxlNav{
   }
   
   // -- -- --
+
+  log( ...msg ){
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+      console.log( ...msg );
+    }
+  }
+  warn( ...msg ){
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.WARN ){
+      console.warn( ...msg );
+    }
+  }
+  error( ...msg ){
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.ERROR ){
+      console.error( ...msg );
+    }
+  }
+  debug( ...msg ){
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.DEBUG ){
+      console.debug( ...msg );
+    }
+  }
+
+  // -- -- --
   
   init(){
     // Boot timer
@@ -831,7 +854,7 @@ class pxlNav{
     tmpThis.pxlEnv.buildRoomEnvironments();
     tmpThis.monitorRoomLoad( tmpThis );
   }
-  monitorRoomLoad( tmpThis, loop=0, maxAttempts = 20 ){
+  monitorRoomLoad( tmpThis, loop=0, maxAttempts = 25 ){
     let stillLoadingCheck=false;
     let keys=Object.keys(tmpThis.pxlEnv.geoLoadList);
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading

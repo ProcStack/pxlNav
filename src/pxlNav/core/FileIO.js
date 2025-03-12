@@ -29,6 +29,12 @@ import {
   SpotLight
 } from "../../libs/three/three.module.min.js";
 import { FBXLoader } from "../../libs/three/FBXLoader.js";
+
+import {MeshoptDecoder} from "../../libs/three/meshopt_decoder.module.js";
+import {GLTFLoader} from "../../libs/three/GLTFLoader.js";
+import {DRACOLoader} from "../../libs/three/DRACOLoader.js";
+import {KTX2Loader} from "../../libs/three/KTX2Loader.js";
+
 import { VERBOSE_LEVEL } from "./Enums.js";
 
 export class FileIO{
@@ -86,6 +92,12 @@ export class FileIO{
     this.verbose = this.pxlOptions.verbose;
   }
 
+  // -- -- --
+
+  setLogging( enableLogging = false ){
+    this.runDebugger = enableLogging;
+  }
+
   log(...logger){
     if( this.runDebugger ||
        this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG
@@ -96,6 +108,24 @@ export class FileIO{
       //console.log(logger);
     }
   }
+
+  warn(...logger){
+    if( this.runDebugger ||
+        this.verbose >= this.pxlEnums.VERBOSE_LEVEL.WARN
+    ){
+      logger.forEach( (l)=>{ console.warn(l); } );
+    }
+  }
+
+  debug(...logger){
+    if( this.runDebugger ||
+        this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG
+    ){
+      logger.forEach( (l)=>{ console.log(l); } );
+    }
+  }
+
+  // -- -- --
   
   toggleDebugger( val=null ){
     if( !val ){
@@ -377,348 +407,351 @@ export class FileIO{
       return false;
     }
 
-    if( mesh.hasOwnProperty("userData")
-        && mesh.userData.hasOwnProperty("Instance")
-        && envObj.baseInstancesList.hasOwnProperty(mesh.userData.Instance) ){
-          
-          let name = mesh.name;
-          this.log("Generate Instance - ",name);
-          
-          if( !envObj.geoList.hasOwnProperty("InstanceObjects") ){
-            envObj.geoList['InstanceObjects']={};
-          }
-          
-          // -- -- --
-
-          // Regex attribute checks --
-          
-          // Instance Geometry Object for LOD level N
-          let lodInstanceRegex = new RegExp( /(instlod)\d+/, "i" );
-          let lodNumberRegex = new RegExp( /\d+/, "i" );
-
-          // Instance Switch Distance for LOD level N
-          let lodDistRegex = new RegExp( /(instlod)\d+(dist)/, "i" );
-
-          // Instance Mesh Point Skip Rate for LOD level N
-          //   If no child mesh with lod level found,
-          //     It will auto skip verts to spawn at to help with performance
-          let lodSkipRegex = new RegExp( /(instlod)\d+(skip)/, "i" );
-
-          // -- -- --
-
-          // LOD data objects
-
-          let lodMeshes = { 'lod0' : 
-            { 
-              'mesh': mesh, 
-              'dist': 1 
-            }
-          };
-
-          let instObjectData = {
-            'mesh' : mesh,
-            'instMesh' : null,
-            'dist' : 1,
-            'skip' : 0
-          }
-
-          // -- -- --
-
-          // Base variables
-
-          let hasLods = false;
-          let hasInstSettings = {};
-          let instanceBaseObject = null;
-          let foundInstLODLevels = {};
-
-          // -- -- --
-
-          // Check for LOD
-
-          try{
-            let userDataKeys = Object.keys( mesh.userData );
-
-            userDataKeys.forEach( ( dataKey )=>{
-              let isInstanceLODLevel = lodInstanceRegex.test (dataKey );
-              if( isInstanceLODLevel ){
-                let curLevelNumber = lodNumberRegex.exec( dataKey );
-                if( !curLevelNumber || curLevelNumber.length < 1 ){
-                  return;
-                }
-                curLevelNumber = parseInt( curLevelNumber[0] );
-
-                let levelData = {};
-                if( foundInstLODLevels.hasOwnProperty( curLevelNumber ) ){
-                  levelData = foundInstLODLevels[ curLevelNumber ];
-                }else{
-                  foundInstLODLevels[ curLevelNumber ] = Object.assign( {}, instObjectData );
-                  levelData = foundInstLODLevels[ curLevelNumber ];
-                }
-
-                if( lodDistRegex.test( dataKey ) ){
-                  let curDist = mesh.userData[ dataKey ];
-                  levelData['dist'] = curDist;
-                }else if( lodSkipRegex.test( dataKey ) ){
-                  let curSkip = mesh.userData[ dataKey ];
-                  levelData['skip'] = curSkip;
-                }else{
-                  levelData['instMesh'] = mesh.userData[ dataKey ];
-                }
-              }
-            });
-          }catch(e){
-            if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
-              console.error(e);
-            }
-          }
-
-
-          // -- -- --
-
-
-          // Check for Child LODs levels
-          let lodChildren = mesh.children;
-          
-          for( let x=0; x<lodChildren.length; ++x ){ 
-            if( !lodChildren[x].hasOwnProperty("userData") ){
-              continue;
-            }
-            let curUserData = lodChildren[x].userData;
-            for( let c=0; c<curUserData.length; ++c ){
-              let dataKey = curUserData[c];
-              let curKey = lodInstanceRegex.test( dataKey );
-              let curDataObj = Object.assign( {}, instObjectData );
-              if( curKey ){
-                let curLevelNumber = lodNumberRegex.exec( dataKey );
-                let onParent = foundInstLODLevels.hasOwnProperty( curLevelNumber );
-                if( onParent ){
-                  curDataObj = foundInstLODLevels[ curLevelNumber ];
-                }
-              }
-              if( lodDistRegex.test( dataKey ) ){
-                let curDist = curUserData[ dataKey ];
-                curDataObj['dist'] = curDist;
-              }else if( lodSkipRegex.test( dataKey ) ){
-                let curSkip = curUserData[ dataKey ];
-                curDataObj['skip'] = curSkip;
-              }else{
-                curDataObj['instMesh'] = curUserData[ dataKey ];
-              } 
-            }
-          }
-
-          // -- -- --
-
-          let lodKeysList = Object.keys( lodMeshes );
-
-          try{
-            if( hasLods ){
-              instanceBaseObject = new LOD();
-              instanceBaseObject.name = name + "_LOD_TOPLVL";
-              instanceBaseObject.userData = Object.assign( {},  mesh.userData );
-              instanceBaseObject.userData['pxlInstanceToMesh'] = true;
-              envObj.geoList['InstanceObjects'][name] = instanceBaseObject;
-              envObj.lodList.push( instanceBaseObject );
-              mesh.parent.add(instanceBaseObject);
-            }
-
-            for( let x=0; x<lodKeysList.length; ++x ){
-              let curMesh = lodMeshes[lodKeysList[x]].mesh;
-              let curPos = curMesh.position;
-              let curRot = curMesh.rotation;
-              let curScale = curMesh.scale;
-              
-              let instBase = envObj.baseInstancesList[ curMesh.userData.Instance ];
-
-              if( curMesh.type == "Mesh" ){
-                let matrix = new Matrix4();
-                let position = new Vector3();
-                let normal = new Vector3();
-                let quaternion = new Quaternion();
-                let scale = new Vector3(1, 1, 1);
-                const hasColor = curMesh.geometry.attributes.hasOwnProperty("color");
-                let userDataKeys = Object.keys( curMesh.userData );
-                let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
-
-                let hasFitScale = false;
-                let minScale = 0;
-                let maxScale = 1;
-                if( userDataKeysLower.includes("minscale") ){
-                  hasFitScale = true;
-                  minScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
-                }
-                if( userDataKeysLower.includes("maxscale") ){
-                  hasFitScale = true;
-                  maxScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
-                }
-
-                // Prevent dupelicate instances
-                //   Verts are split, so neighboring polygons have stacked vertices
-                //     'entry' checks those dupes
-                let pointRecorder = {};
-                let instanceMatricies = [];
-                for (let x = 0; x < curMesh.geometry.attributes.position.count; ++x) {
-                  position.fromBufferAttribute(curMesh.geometry.attributes.position, x);
-                  let entry = position.toArray();
-
-                  // Flatten array elements to 0.01 precision joined by ","
-                  entry = this.pxlUtils.flattenArrayToStr( entry );
-
-                  if( !pointRecorder.hasOwnProperty(entry) ){
-                    normal.fromBufferAttribute(curMesh.geometry.attributes.normal, x);
-                    let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
-                    quaternion.setFromEuler(randomRot);
-                    
-                    let curInstScale = scale;
-                    if( hasColor ){
-                      let curScalar = curMesh.geometry.attributes.color.getX(x);
-                      if( hasFitScale ){
-                        // Scale the object based on object parameter `minScale` & `maxScale`
-                        curScalar = minScale + (maxScale - minScale) * curScalar;
-                      }
-                      curInstScale = new Vector3(curScalar, curScalar, curScalar);
-                    }
-                    matrix.compose(position, quaternion, curInstScale);
-                    instanceMatricies.push( matrix.clone() );
-                    pointRecorder[entry]=true;
-                  }
-                }
-                if( instanceMatricies.length > 0 ){
-                  let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
-                  instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-
-                  instancedMesh.userData = Object.assign( {},  curMesh.userData );
-                  instancedMesh.userData['pxlInstanceToMesh'] = true;
-
-                  /*if( instBase.material.hasOwnProperty("curMeshSettings") ){
-                    if( instBase.material.curMeshSettings.hasOwnProperty("renderOrder") ){
-                      instancedMesh.renderOrder = instBase.material.curMeshSettings.renderOrder;
-                    }
-                  }*/
-                  this.checkForMeshSettings( instancedMesh, instBase.material );
-                  
-                  for (let x = 0; x < instanceMatricies.length; ++x) {
-                    instancedMesh.setMatrixAt( x, instanceMatricies[x] );
-                  }
-
-
-                  instancedMesh.visible = true;
-                  instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
-                  instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
-                  instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
-
-                  instancedMesh.updateMatrix();
-
-
-                  if( hasLods ){
-
-                    instancedMesh.name = name + "Geo_" + lodKeysList[x];
-                    let curDist = lodMeshes[lodKeysList[x]].dist;
-                    instanceBaseObject.addLevel(instancedMesh, curDist);
-
-                  }else{
-
-                    instancedMesh.name = name + "Geo";
-                    envObj.geoList['InstanceObjects'][name] = instancedMesh;
-                    curMesh.parent.add(instancedMesh);
-                  }
-                  curMesh.visible = false;
-                  curMesh.parent.remove(curMesh);
-                }
-              }else{
-                // Clone the base instance; single instance
-                let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
-                instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-
-                instancedMesh.userData = Object.assign( {},  curMesh.userData );
-                instancedMesh.userData['pxlInstanceToMesh'] = false;
-
-                this.checkForMeshSettings( instancedMesh, instBase.material );
-
-
-                let altInstPlacement = false;
-                if( curMesh.userData.hasOwnProperty("fixInstMatrix") ){
-                  altInstPlacement = !!curMesh.userData.fixInstMatrix;
-                }
-
-                if( altInstPlacement ){
-                  instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
-                  instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
-                  instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
-                }else{
-                  const matrix = new Matrix4();
-                  matrix.compose(curPos, new Quaternion().setFromEuler(curRot), curScale);
-                  instancedMesh.setMatrixAt(0, matrix);
-                }
-
-                instancedMesh.visible=true;
-                instancedMesh.updateMatrix();
-
-                if( hasLods ){
-
-                  instancedMesh.name = name + "Geo_" + lodKeysList[x];
-                  let curDist = lodMeshes[lodKeysList[x]].dist;
-                  instanceBaseObject.addLevel(instancedMesh, curDist);
-
-                }else{
-
-                  instancedMesh.name = name + "Geo";
-                  envObj.geoList['InstanceObjects'][name] = instancedMesh;
-                  curMesh.parent.add(instancedMesh);
-                }
-                
-                curMesh.visible=false;
-                curMesh.parent.remove(curMesh);
-
-              }
-            }
-          }catch(e){
-            if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
-              console.error(e);
-            }
-          }
-
-          if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG && hasLods ){
-            let status = "Failed";
-            let createdLods = -1;
-            let lodKeys = [];
-            if( instanceBaseObject?.levels ){
-              status = "Created";
-              createdLods = instanceBaseObject.levels;
-              lodKeys = Object.keys( createdLods );
-            }
-
-            let printText = "Instance LODs " + status + " - " + name;
-            this.log( printText );
-            if( lodKeys.length > 0 ){
-              printText = "LOD Levels - " + createdLods;
-              this.log( printText );
-              this.log( instanceBaseObject );
-            }
-          }
-
-          /*
-          // Dupe the base object; single dupe
-          
-          let dupe=instBase.clone();//new Mesh(instBase.geometry.clone());
-          dupe.rotation.set(curRot.x,curRot.y,curRot.z);
-          dupe.position.set(curPos.x,curPos.y,curPos.z);
-          dupe.scale.set(curScale.x,curScale.y,curScale.z);
-           
-          dupe.visible=true;
-          dupe.updateMatrix();
-          
-          let curSide = FrontSide;
-          if(instBase.userData.doubleSided){
-            curSide=DoubleSide;
-          }
-          dupe.material.side=curSide;
-          dupe.name = name+"Geo";
-            
-          envObj.geoList['InstanceObjects'][name]=dupe;
-          mesh.parent.add( dupe );
-          */
+    if( !(mesh.hasOwnProperty("userData") && mesh.userData.hasOwnProperty("Instance")) ){
+      return false;
     }
+    if( !envObj.baseInstancesList.hasOwnProperty(mesh.userData.Instance) ){
+      this.warn(`Instance '${mesh.userData.Instance}' not found for ${mesh.name}`);
+      return false;
+    }
+    
+    let name = mesh.name;
+    this.log("Generate Instance - ",name);
+    
+    if( !envObj.geoList.hasOwnProperty("InstanceObjects") ){
+      envObj.geoList['InstanceObjects']={};
+    }
+    
+    // -- -- --
+
+    // Regex attribute checks --
+    
+    // Instance Geometry Object for LOD level N
+    let lodInstanceRegex = new RegExp( /(instlod)\d+/, "i" );
+    let lodNumberRegex = new RegExp( /\d+/, "i" );
+
+    // Instance Switch Distance for LOD level N
+    let lodDistRegex = new RegExp( /(instlod)\d+(dist)/, "i" );
+
+    // Instance Mesh Point Skip Rate for LOD level N
+    //   If no child mesh with lod level found,
+    //     It will auto skip verts to spawn at to help with performance
+    let lodSkipRegex = new RegExp( /(instlod)\d+(skip)/, "i" );
+
+    // -- -- --
+
+    // LOD data objects
+
+    let lodMeshes = { 'lod0' : 
+      { 
+        'mesh': mesh, 
+        'dist': 1 
+      }
+    };
+
+    let instObjectData = {
+      'mesh' : mesh,
+      'instMesh' : null,
+      'dist' : 1,
+      'skip' : 0
+    }
+
+    // -- -- --
+
+    // Base variables
+
+    let hasLods = false;
+    let hasInstSettings = {};
+    let instanceBaseObject = null;
+    let foundInstLODLevels = {};
+
+    // -- -- --
+
+    // Check for LOD
+
+    try{
+      let userDataKeys = Object.keys( mesh.userData );
+
+      userDataKeys.forEach( ( dataKey )=>{
+        let isInstanceLODLevel = lodInstanceRegex.test (dataKey );
+        if( isInstanceLODLevel ){
+          let curLevelNumber = lodNumberRegex.exec( dataKey );
+          if( !curLevelNumber || curLevelNumber.length < 1 ){
+            return;
+          }
+          curLevelNumber = parseInt( curLevelNumber[0] );
+
+          let levelData = {};
+          if( foundInstLODLevels.hasOwnProperty( curLevelNumber ) ){
+            levelData = foundInstLODLevels[ curLevelNumber ];
+          }else{
+            foundInstLODLevels[ curLevelNumber ] = Object.assign( {}, instObjectData );
+            levelData = foundInstLODLevels[ curLevelNumber ];
+          }
+
+          if( lodDistRegex.test( dataKey ) ){
+            let curDist = mesh.userData[ dataKey ];
+            levelData['dist'] = curDist;
+          }else if( lodSkipRegex.test( dataKey ) ){
+            let curSkip = mesh.userData[ dataKey ];
+            levelData['skip'] = curSkip;
+          }else{
+            levelData['instMesh'] = mesh.userData[ dataKey ];
+          }
+        }
+      });
+    }catch(e){
+      if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
+        console.error(e);
+      }
+    }
+
+
+    // -- -- --
+
+
+    // Check for Child LODs levels
+    let lodChildren = mesh.children;
+    
+    for( let x=0; x<lodChildren.length; ++x ){ 
+      if( !lodChildren[x].hasOwnProperty("userData") ){
+        continue;
+      }
+      let curUserData = lodChildren[x].userData;
+      for( let c=0; c<curUserData.length; ++c ){
+        let dataKey = curUserData[c];
+        let curKey = lodInstanceRegex.test( dataKey );
+        let curDataObj = Object.assign( {}, instObjectData );
+        if( curKey ){
+          let curLevelNumber = lodNumberRegex.exec( dataKey );
+          let onParent = foundInstLODLevels.hasOwnProperty( curLevelNumber );
+          if( onParent ){
+            curDataObj = foundInstLODLevels[ curLevelNumber ];
+          }
+        }
+        if( lodDistRegex.test( dataKey ) ){
+          let curDist = curUserData[ dataKey ];
+          curDataObj['dist'] = curDist;
+        }else if( lodSkipRegex.test( dataKey ) ){
+          let curSkip = curUserData[ dataKey ];
+          curDataObj['skip'] = curSkip;
+        }else{
+          curDataObj['instMesh'] = curUserData[ dataKey ];
+        } 
+      }
+    }
+
+    // -- -- --
+
+    let lodKeysList = Object.keys( lodMeshes );
+
+    try{
+      if( hasLods ){
+        instanceBaseObject = new LOD();
+        instanceBaseObject.name = name + "_LOD_TOPLVL";
+        instanceBaseObject.userData = Object.assign( {},  mesh.userData );
+        instanceBaseObject.userData['pxlInstanceToMesh'] = true;
+        envObj.geoList['InstanceObjects'][name] = instanceBaseObject;
+        envObj.lodList.push( instanceBaseObject );
+        mesh.parent.add(instanceBaseObject);
+      }
+
+      for( let x=0; x<lodKeysList.length; ++x ){
+        let curMesh = lodMeshes[lodKeysList[x]].mesh;
+        let curPos = curMesh.position;
+        let curRot = curMesh.rotation;
+        let curScale = curMesh.scale;
+        
+        let instBase = envObj.baseInstancesList[ curMesh.userData.Instance ];
+
+        if( curMesh.type == "Mesh" ){
+          let matrix = new Matrix4();
+          let position = new Vector3();
+          let normal = new Vector3();
+          let quaternion = new Quaternion();
+          let scale = new Vector3(1, 1, 1);
+          const hasColor = curMesh.geometry.attributes.hasOwnProperty("color");
+          let userDataKeys = Object.keys( curMesh.userData );
+          let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
+
+          let hasFitScale = false;
+          let minScale = 0;
+          let maxScale = 1;
+          if( userDataKeysLower.includes("minscale") ){
+            hasFitScale = true;
+            minScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
+          }
+          if( userDataKeysLower.includes("maxscale") ){
+            hasFitScale = true;
+            maxScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
+          }
+
+          // Prevent dupelicate instances
+          //   Verts are split, so neighboring polygons have stacked vertices
+          //     'entry' checks those dupes
+          let pointRecorder = {};
+          let instanceMatricies = [];
+          for (let x = 0; x < curMesh.geometry.attributes.position.count; ++x) {
+            position.fromBufferAttribute(curMesh.geometry.attributes.position, x);
+            let entry = position.toArray();
+
+            // Flatten array elements to 0.01 precision joined by ","
+            entry = this.pxlUtils.flattenArrayToStr( entry );
+
+            if( !pointRecorder.hasOwnProperty(entry) ){
+              normal.fromBufferAttribute(curMesh.geometry.attributes.normal, x);
+              let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
+              quaternion.setFromEuler(randomRot);
+              
+              let curInstScale = scale;
+              if( hasColor ){
+                let curScalar = curMesh.geometry.attributes.color.getX(x);
+                if( hasFitScale ){
+                  // Scale the object based on object parameter `minScale` & `maxScale`
+                  curScalar = minScale + (maxScale - minScale) * curScalar;
+                }
+                curInstScale = new Vector3(curScalar, curScalar, curScalar);
+              }
+              matrix.compose(position, quaternion, curInstScale);
+              instanceMatricies.push( matrix.clone() );
+              pointRecorder[entry]=true;
+            }
+          }
+          if( instanceMatricies.length > 0 ){
+            let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
+            instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+            instancedMesh.userData = Object.assign( {},  curMesh.userData );
+            instancedMesh.userData['pxlInstanceToMesh'] = true;
+
+            /*if( instBase.material.hasOwnProperty("curMeshSettings") ){
+              if( instBase.material.curMeshSettings.hasOwnProperty("renderOrder") ){
+                instancedMesh.renderOrder = instBase.material.curMeshSettings.renderOrder;
+              }
+            }*/
+            this.checkForMeshSettings( instancedMesh, instBase.material );
+            
+            for (let x = 0; x < instanceMatricies.length; ++x) {
+              instancedMesh.setMatrixAt( x, instanceMatricies[x] );
+            }
+
+
+            instancedMesh.visible = true;
+            instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
+            instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
+            instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
+
+            instancedMesh.updateMatrix();
+
+
+            if( hasLods ){
+
+              instancedMesh.name = name + "Geo_" + lodKeysList[x];
+              let curDist = lodMeshes[lodKeysList[x]].dist;
+              instanceBaseObject.addLevel(instancedMesh, curDist);
+
+            }else{
+
+              instancedMesh.name = name + "Geo";
+              envObj.geoList['InstanceObjects'][name] = instancedMesh;
+              curMesh.parent.add(instancedMesh);
+            }
+            curMesh.visible = false;
+            curMesh.parent.remove(curMesh);
+          }
+        }else{
+          // Clone the base instance; single instance
+          let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, 1);
+          instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+
+          instancedMesh.userData = Object.assign( {},  curMesh.userData );
+          instancedMesh.userData['pxlInstanceToMesh'] = false;
+
+          this.checkForMeshSettings( instancedMesh, instBase.material );
+
+
+          let altInstPlacement = false;
+          if( curMesh.userData.hasOwnProperty("fixInstMatrix") ){
+            altInstPlacement = !!curMesh.userData.fixInstMatrix;
+          }
+
+          if( altInstPlacement ){
+            instancedMesh.rotation.set(curRot.x,curRot.y,curRot.z);
+            instancedMesh.position.set(curPos.x,curPos.y,curPos.z);
+            instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
+          }else{
+            const matrix = new Matrix4();
+            matrix.compose(curPos, new Quaternion().setFromEuler(curRot), curScale);
+            instancedMesh.setMatrixAt(0, matrix);
+          }
+
+          instancedMesh.visible=true;
+          instancedMesh.updateMatrix();
+
+          if( hasLods ){
+
+            instancedMesh.name = name + "Geo_" + lodKeysList[x];
+            let curDist = lodMeshes[lodKeysList[x]].dist;
+            instanceBaseObject.addLevel(instancedMesh, curDist);
+
+          }else{
+
+            instancedMesh.name = name + "Geo";
+            envObj.geoList['InstanceObjects'][name] = instancedMesh;
+            curMesh.parent.add(instancedMesh);
+          }
+          
+          curMesh.visible=false;
+          curMesh.parent.remove(curMesh);
+
+        }
+      }
+    }catch(e){
+      if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
+        console.error(e);
+      }
+    }
+
+    if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.DEBUG && hasLods ){
+      let status = "Failed";
+      let createdLods = -1;
+      let lodKeys = [];
+      if( instanceBaseObject?.levels ){
+        status = "Created";
+        createdLods = instanceBaseObject.levels;
+        lodKeys = Object.keys( createdLods );
+      }
+
+      let printText = "Instance LODs " + status + " - " + name;
+      this.log( printText );
+      if( lodKeys.length > 0 ){
+        printText = "LOD Levels - " + createdLods;
+        this.log( printText );
+        this.log( instanceBaseObject );
+      }
+    }
+
+    /*
+    // Dupe the base object; single dupe
+    
+    let dupe=instBase.clone();//new Mesh(instBase.geometry.clone());
+    dupe.rotation.set(curRot.x,curRot.y,curRot.z);
+    dupe.position.set(curPos.x,curPos.y,curPos.z);
+    dupe.scale.set(curScale.x,curScale.y,curScale.z);
+      
+    dupe.visible=true;
+    dupe.updateMatrix();
+    
+    let curSide = FrontSide;
+    if(instBase.userData.doubleSided){
+      curSide=DoubleSide;
+    }
+    dupe.material.side=curSide;
+    dupe.name = name+"Geo";
+      
+    envObj.geoList['InstanceObjects'][name]=dupe;
+    mesh.parent.add( dupe );
+    */
   }
   
   
@@ -903,53 +936,197 @@ export class FileIO{
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
- 
- 
+
+  // -- -- --
+
+  getSettings( ){
+    let settingsObj = {
+      'fileType' : this.pxlEnums.FILE_TYPE.AUTO,
+      'filePath' : '',
+      'meshKey' : '',
+      'meshIsChild' : false, 
+      'enableLogging' : false
+    };
+    return settingsObj;
+  }
+
+  readSettings( roomObj, settingsObj ){
+    let curSettings = Object.assign( this.getSettings(), settingsObj );
+
+    // Toggle debugging during load
+    this.setLogging( curSettings.enableLogging );
+
+    // Verify File Path
+    if( curSettings.filePath == '' ){
+      curSettings.filePath = roomObj.sceneFile;
+    }
+    // If no file path is provided, warn and return
+    if( curSettings.filePath == null || curSettings.filePath == "" ){
+      this.warn("No Path Provided for Environment Load");
+      curSettings.filePath = null;
+      return curSettings;
+    }
+
+    // Read File Type
+    if( curSettings.fileType == this.pxlEnums.FILE_TYPE.AUTO || typeof curSettings.fileType != "number" ){
+      let fileType = curSettings.filePath.split('.').pop().toLowerCase();
+      if( fileType == "fbx" ){
+        curSettings.fileType = this.pxlEnums.FILE_TYPE.FBX;
+      }else if( fileType == "glb" ){
+        curSettings.fileType = this.pxlEnums.FILE_TYPE.GLB;
+      }else if( fileType == "gltf" ){
+        curSettings.fileType = this.pxlEnums.FILE_TYPE.GLTF;
+      }
+    }
+
+
+    // Set "Loader" mesh key, the key used to monitor the loading status of the current file
+    //   This is only used during the loading process and is not used for any other purpose
+    if( curSettings.meshKey == '' ){
+      curSettings.meshKey = roomObj.getName();
+    }
+
+    curSettings.verified = true;
+
+    return curSettings;
+  }
+
+  verifySettings( envObj, settingsObj ){
+    if( !settingsObj.hasOwnProperty("verified") || !settingsObj.verified ){
+      return this.readSettings( envObj, settingsObj );
+    }
+    return settingsObj;
+  }
+
+  // -- -- --
+
+  loadPath( envObj, filePath = null, settingsObj={} ){
+    // Verify settings
+    let curSettings = Object.assign( this.getSettings(), settingsObj );
+    if( filePath != null && filePath != "" ){
+      curSettings.filePath = filePath;
+    }
+
+    // Parse settings
+    curSettings = this.readSettings( envObj, curSettings );
+    if( curSettings.filePath == null ){
+      return;
+    }
+
+    // Load the room scene file
+    this.loadRoom( envObj, curSettings );
+  }
+  
+  // -- -- --
+
+  loadRoom( envObj, settingsObj = {} ){
+    // Parse settings
+    let curSettings = this.readSettings( envObj, settingsObj );
+    if( curSettings.filePath == null ){
+      return;
+    }
+
+    // Use file type to determine loader method
+    let fileType = curSettings.fileType;
+
+    // Check File Type
+    if( fileType == this.pxlEnums.FILE_TYPE.FBX ){
+      this.loadRoomFBX( envObj, curSettings );
+    }else if( fileType == this.pxlEnums.FILE_TYPE.GLB || fileType == this.pxlEnums.FILE_TYPE.GLTF ){
+      this.loadRoomGLTF( envObj, curSettings );
+    }
+  }
+
+  loadRoomGLTF( envObj, settingsObj={} ){
+    settingsObj = this.readSettings( envObj, settingsObj );
+    if( !settingsObj.filePath ){
+      return;
+    }
+
+    // Supports GLTF & GLB
+    let gltfLoader = new GLTFLoader()
+    
+    let dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("https://threejs.org/examples/jsm/libs/draco/");
+    dracoLoader.preload();
+    gltfLoader.setDRACOLoader(dracoLoader);
+    
+    let meshOptLoader = gltfLoader;
+    meshOptLoader.setMeshoptDecoder(MeshoptDecoder)
+
+    // Add error callback, if GLB fails to load, check for Kaydara
+    //let glbError = (err)=>{
+    //  console.log("GLB Load Error - ",err);
+      let ktx2Loader = new KTX2Loader();
+      ktx2Loader.setTranscoderPath("https://threejs.org/examples/jsm/libs/basis/");
+      ktx2Loader.detectSupport( this.pxlEnv.engine );
+      meshOptLoader.setKTX2Loader(ktx2Loader);
+
+    //  this.loadRoomFile( meshOptLoader, envObj, settingsObj );
+    //};
+    //settingsObj.onError = glbError;
+    
+    this.loadRoomFile( meshOptLoader, envObj, settingsObj );
+  }
+    
+
+
  // -- -- -- -- -- -- -- -- -- -- //
  // Environment FBX Loader        //
  // -- -- -- -- -- -- -- -- -- -- //
 
-  loadRoomFBX( envObj, fbxPath = null, meshKey = null, enableLogging = false ){
-    if( enableLogging ){
-      this.runDebugger = true;
-    }else{
-      this.runDebugger = false;
-    }
-    if(meshKey==null){ // Prep for IsLoaded checks
-        meshKey = envObj.getName();
-    }
-    if( !fbxPath ){
-      fbxPath = envObj.sceneFile;
+  loadRoomFBX( envObj, settingsObj={} ){
+    settingsObj = this.readSettings( envObj, settingsObj );
+    if( !settingsObj.filePath ){
+      return;
     }
 
-    let objPath = envObj.sceneFile ;
+    // TODO : Do new FBXLoader objects really need to be created?
+    //          Sounds like the potential for a memory leak if not handled correctly
+    var fbxLoader=new FBXLoader();
+
+    this.loadRoomFile( fbxLoader, envObj, settingsObj );
+  }
+
+  // Currently no support for multiple scenes within a file
+  loadRoomFile( loaderObject, envObj, settingsObj={} ){
+    settingsObj = this.verifySettings( envObj, settingsObj );
+    if( !settingsObj.filePath ){
+      return;
+    }
+
+    let meshKey = settingsObj.meshKey;
+
+    let objPath = settingsObj.filePath; ;
     let materialList = envObj.materialList ;
 
     this.pxlEnv.geoLoadListComplete=0;
     this.pxlEnv.geoLoadList[meshKey]=0;
 
-    let addedGlow=0;
     let envScene=envObj.scene;
     
-    // TODO : Do new FBXLoader objects really need to be created?
-    //          Sounds like the potential for a memory leak if not handled correctly
-    var fbxLoader=new FBXLoader();
-    fbxLoader.load( objPath, (curFbx)=>{
+    loaderObject.load( objPath, (curScene)=>{
+      //envScene.add(curScene.scene);
+      
+      
+      if( curScene.hasOwnProperty("scenes") && !curScene.hasOwnProperty("children") ){
+        curScene = curScene.scene;
+      }
+
       //envScene.add(curFbx);
-      let groups=curFbx.children;
+      let groups=curScene.children;
 
       if( groups.length == 1 ){
         let curGroup = groups[0];
         let isMainScene = curGroup.name.toLowerCase().includes("scene");
         if( !isMainScene ){
           groups = curGroup.children;
-          console.warn("-- pxlFile.loadRoomFBX() - Top level Environment Group not found --\n Attempting to use the first child group as FBX Scene\n Make sure your top group holds all sub-groups.");
+          //console.warn("-- pxlFile.loadRoomFBX() - Top level Environment Group not found --\n Attempting to use the first child group as FBX Scene\n Make sure your top group holds all sub-groups.");
         }
       }
 
       let groupTypes={};
       let groupNames=[];
-      
       groups.forEach( (c,x)=>{
         let curName=c.name.split("_")[0].toLowerCase();
         groupNames.push(curName);
@@ -1238,7 +1415,8 @@ export class FileIO{
 
           let c=ch.pop();
           
-          this.log( "Cur Object - ", c.name );
+          this.log( `Cur Object - ${c.name}` );
+          this.debug( c );
           this.checkForUserData( envObj, envScene, c );
 
           if(c.isMesh){
@@ -1501,7 +1679,6 @@ export class FileIO{
             c.layers.set( this.pxlEnums.RENDER_LAYER.SCENE );
             c.matrixAutoUpdate=false;
             envScene.add(c);
-            //addToScene[1].add(c.clone());
           }
         }
       }
@@ -1542,7 +1719,6 @@ export class FileIO{
             c.layers.set( this.pxlEnums.RENDER_LAYER.SCENE );
             c.matrixAutoUpdate=false;
             envScene.add(c);
-            //addToScene[1].add(c.clone());
           }
         }
       }
@@ -1886,23 +2062,27 @@ export class FileIO{
         }
       }
 
-      this.pxlEnv.geoList[meshKey]=curFbx;
+      this.pxlEnv.geoList[meshKey]=curScene;
       this.pxlEnv.geoLoadList[meshKey]=1;
 
       envObj.fbxPostLoad();
       
       this.runDebugger = false;
     }, null, (err)=>{
-      if(meshKey!=''){
-        this.pxlEnv.geoLoadList[meshKey]=1;
+      if( settingsObj.hasOwnProperty("onError") ){
+        settingsObj.onError(err);
+      }else{
+        if(meshKey!=''){
+          this.pxlEnv.geoLoadList[meshKey]=1;
+        }
+        this.log("Error Loading FBX");
+        this.log(err);
+        
+        this.runDebugger = false;
       }
-      this.log("Error Loading FBX");
-      this.log(err);
-      
-      this.runDebugger = false;
     });
     
-    return fbxLoader;
+    return loaderObject;
   }
 
 

@@ -88,6 +88,42 @@ export const VERBOSE_LEVEL = {
 	'DEBUG' : 4
 };
 
+/**
+ * Known File Types in pxlNav
+ * 
+ * Used internally to determine the file type when loading scene + asset files.
+ * 
+ * More to come as support changes,
+ * 
+ * Note: GLB can support WEBP textures while most CGI programs cannot.
+ *         If your CGI program cannot support WEBP,
+ *           Build + use Three.js or pxlNav materials in your pxlRoom
+ * 
+ * @name FILE_TYPE
+ * @type {Object}
+ * @method
+ * @memberof pxlEnums
+ * @property {number} AUTO - Auto detect file type on pre-load
+ * @property {number} JPG - JPG file type
+ * @property {number} JPEG - JPEG file type
+ * @property {number} PNG - PNG file type
+ * @property {number} WEBP - WEBP file type
+ * @property {number} FBX - FBX file type
+ * @property {number} GLTF - GLTF file type
+ * @property {number} GLB - GLB file type
+ */
+export const FILE_TYPE = {
+  'AUTO' : -1,
+  'JPG' : 0,
+  'JPEG' : 0,
+  'PNG' : 1,
+  'WEBP' : 2,
+  'FBX' : 3,
+  'GLTF' : 4,
+  'GLB' : 5
+};
+
+
 // Anti-aliasing settings
 //   Low - cross kernal sampling, 1 center sample + 4 samples diangonally from center pixel
 //   medium - 1 center sample + 8 samples diangonally from center pixel
@@ -505,7 +541,7 @@ export const HUD_DRAW = {
 // Easy access to the enums
 //   Reduce the need to import the enums individually
 /**
- * pxlNav Enums
+ * Full pxlNav Enums list
  * @type {Object}
  * @memberof pxlEnums
  * @property {Object} VERBOSE_LEVEL - Console logging levels
@@ -527,21 +563,22 @@ export const HUD_DRAW = {
  * @property {Object} HUD_DRAW - GUI & HUD Element draw types
  */
 export const pxlEnums = {
-  'VERBOSE_LEVEL' : VERBOSE_LEVEL,
-  'ANTI_ALIASING' : ANTI_ALIASING,
-  'RENDER_LAYER' : RENDER_LAYER,
-  'SKY_HAZE' : SKY_HAZE,
-  'SHADOW_MAP' : SHADOW_MAP,
-  'CAMERA_EVENT' : CAMERA_EVENT,
-  'COLLIDER_TYPE' : COLLIDER_TYPE,
-  'GEOMETRY_SIDE' : GEOMETRY_SIDE,
-  'COLOR_SHIFT' : COLOR_SHIFT,
-  'USER_SPEED' : USER_SPEED,
-  'DEVICE_TYPE' : DEVICE_TYPE,
-  'DEVICE_EVENT' : DEVICE_EVENT,
-  'DEVICE_BUTTON' : DEVICE_BUTTON,
-  'DEVICE_ACTION' : DEVICE_ACTION,
-  'HUD_ELEMENT' : HUD_ELEMENT,
-  'HUD_ACTION' : HUD_ACTION,
-  'HUD_DRAW' : HUD_DRAW
+  VERBOSE_LEVEL,
+  FILE_TYPE,
+  ANTI_ALIASING,
+  RENDER_LAYER,
+  SKY_HAZE,
+  SHADOW_MAP,
+  CAMERA_EVENT,
+  COLLIDER_TYPE,
+  GEOMETRY_SIDE,
+  COLOR_SHIFT,
+  USER_SPEED,
+  DEVICE_TYPE,
+  DEVICE_EVENT,
+  DEVICE_BUTTON,
+  DEVICE_ACTION,
+  HUD_ELEMENT,
+  HUD_ACTION,
+  HUD_DRAW
 };

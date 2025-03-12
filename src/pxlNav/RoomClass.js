@@ -52,6 +52,8 @@ class RoomEnvironment{
    */
   constructor( roomName='pxlRoomEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
     this.roomName=roomName;
+    this.pxlOptions=null;
+    this.pxlEnums=null;
     this.pxlFile=null;
     this.pxlUtils=null;
     this.pxlTimer=null;
@@ -176,6 +178,8 @@ class RoomEnvironment{
    * @param {Object} pxlNav - The pxlNav object.
    */
   setDependencies( pxlNav ){
+    this.pxlOptions = pxlNav.pxlOptions;
+    this.pxlEnums = pxlNav.pxlEnums;
     this.pxlEnv = pxlNav;
     this.pxlFile = pxlNav.pxlFile;
     this.pxlAnim = pxlNav.pxlAnim;
@@ -967,7 +971,7 @@ class RoomEnvironment{
     if( !this.sceneFile ){
       return;
     }
-    this.pxlFile.loadRoomFBX( this ) 
+    //this.pxlFile.loadRoomFBX( this ) 
   }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- //

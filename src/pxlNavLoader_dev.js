@@ -18,7 +18,7 @@ const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav :: The Void";
+const projectTitle = "pxlNav :: The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
 const pxlRoomRootPath = "../pxlRooms";

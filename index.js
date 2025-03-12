@@ -18,6 +18,7 @@ import {
 // Export all components
 export { 
   pxlNavVersion, 
+  pxlNav,
   pxlEnums, 
   pxlUserSettings,
   pxlOptions,
@@ -28,5 +29,4 @@ export {
 };
 
 // Export pxlNav as both named & default
-export { pxlNav };
 export default pxlNav;

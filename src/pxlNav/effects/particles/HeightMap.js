@@ -151,6 +151,7 @@ export class HeightMap extends ParticleBase{
       "randomAtlas" : false,
       "additiveBlend" : false,
 
+      "tint" : new Vector3( 1, 1, 1 ),
       "jumpHeightMult" : 0,
       "offsetPos" : new Vector3( 0, 0, 0 ),
       "windDir" : new Vector3( 0, 0, 0 ),
@@ -243,23 +244,7 @@ export class HeightMap extends ParticleBase{
     let sizeX = 100;
     let sizeY = 100;
     let sizeZ = 100;
-    if( objectRef ){
-      if( objectRef.hasOwnProperty("userData") ){
-        if( objectRef.userData.hasOwnProperty("SizeX") ){
-          sizeX = objectRef.userData.SizeX;
-        }
-        if( objectRef.userData.hasOwnProperty("SizeY") ){
-          sizeY = objectRef.userData.SizeY;
-        }
-        if( objectRef.userData.hasOwnProperty("SizeZ") ){
-          sizeZ = objectRef.userData.SizeZ;
-        }
-      }else if( objectRef.hasOwnProperty("scale") ){
-        sizeX = objectRef.scale.x;
-        sizeY = objectRef.scale.y;
-        sizeZ = objectRef.scale.z;
-      }
-    }
+
     if( curShaderSettings.hasOwnProperty("size") ){
       if( curShaderSettings["size"].x > 0 ){
         sizeX = curShaderSettings["size"].x;
@@ -271,8 +256,34 @@ export class HeightMap extends ParticleBase{
         sizeZ = curShaderSettings["size"].z;
       }
     }
+
+    // Object Reference has priority
+    if( objectRef ){
+      if( objectRef.hasOwnProperty("userData") && objectRef.userData.hasOwnProperty("SizeX")){
+        sizeX = objectRef.userData.SizeX;
+      }else{
+        sizeX = objectRef.scale.x;
+      }
+      if( objectRef.hasOwnProperty("userData") && objectRef.userData.hasOwnProperty("SizeY")){
+        sizeY = objectRef.userData.SizeY;
+      }else{
+        sizeY = objectRef.scale.y;
+      }
+      if( objectRef.hasOwnProperty("userData") && objectRef.userData.hasOwnProperty("SizeZ")){
+        sizeZ = objectRef.userData.SizeZ;
+      }else{
+        sizeZ = objectRef.scale.z;
+      }
+
+      //this.shaderSettings["offsetPos"] = this.shaderSettings["offsetPos"].add( objectRef.position );
+
+    }
+
     let tankSize = new Vector3( sizeX, sizeY, sizeZ );
 
+    if( objectRef.pScale >=0 ){
+      this.pscale.x = objectRef.pScale;
+    }
 
 
     // -- -- --
@@ -288,6 +299,7 @@ export class HeightMap extends ParticleBase{
       time:{ type:"f", value: this.room.msRunner },
       pointScale:{ type:"f", value: this.pscale },
       intensity:{ type:"f", value:1.0 },
+      tint:{ type:"v", value:this.shaderSettings["tint"] },
       rate:{ type:"f", value:.035 },
       positionOffset:{ type:"v", value:this.shaderSettings["offsetPos"] },
       windDir:{ type:"v", value:this.shaderSettings["windDir"] }
@@ -329,8 +341,11 @@ export class HeightMap extends ParticleBase{
     this.material = mtl;
 
 
+
     let pSystem = super.addToScene();
-    pSystem.position.set( objectRef.position.x, objectRef.position.y, objectRef.position.z );
+    if( objectRef ){
+      pSystem.position.set( objectRef.position.x, objectRef.position.y, objectRef.position.z );
+    }
     pSystem.userData["tankRes"] = tankSize;
 
     return pSystem;
