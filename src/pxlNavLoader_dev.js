@@ -1,4 +1,4 @@
-// pxlNav v0.0.18 -  Javascript Launcher
+// pxlNav v0.0.28 -  Javascript Launcher
 //  Written by Kevin Edzenga; 2024,2025
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -6,7 +6,7 @@
 //   This is an example implementation of `pxlNav` in a project;
 //     Tieing in `ProcPages` to manage the pages of the site,
 //       Listening to / triggering events on `pxlNav`
-//   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
+//   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.js';
@@ -30,8 +30,23 @@ const pxlAssetRoot = "../../dist/pxlAssets";
 const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
+const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment", "VoidEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
 const startingRoom = bootRoomList[0];
+
+// -- -- --
+
+// Optional : Display a Frame Rate (FPS) counter in a console
+//              This is an example callback to show the FPS in a div
+// You can also enable this with `?showfps=1` in the URL
+//   If you leave the `uriSearch` code below vvv
+
+// Name of the div to display verbose messages
+//   This uses callback events from `pxlNav` to display messages
+const verboseDivName = 'verbErrorConsole';
+
+// Display FPS in the `verboseDivName` div
+//   Useful for debugging and performance testing
+const enableFPSDisplay = false;
 
 // -- -- --
 
@@ -58,7 +73,7 @@ userSettings['height']['stepSize'] = 5; // Max step height in units
 userSettings['movement']['scalar'] = 1.0; // Overall movement rate scalar
 userSettings['movement']['max'] = 10.0; // Max movement speed
 userSettings['movement']['easing'] = 0.55; // Easing rate between Step() calls
-userSettings['look']['mobile']['invert'] = true; // Invert the look controls on mobile
+userSettings['look']['mobile']['invert'] = true; // Invert the look controls on mobile; Default is `True`
 userSettings['headBounce']['height'] = 0.3; // Bounce magnitude in units
 userSettings['headBounce']['rate'] = 0.025; // Bounce rate per Step()
 userSettings['headBounce']['easeIn'] = 0.03; // When move key is pressed, the ease into bounce; `bounce * ( boundInf + easeIn )`
@@ -66,8 +81,8 @@ userSettings['headBounce']['easeOut'] = 0.95; // When move key is let go, the ea
 userSettings['jump']['impulse'] = 0.75; // Jump impulse force applied to the player while holding the jump button
 userSettings['jump']['holdMax'] = 2.85; // Max influence of holding the jump button on current jump; in seconds
 userSettings['jump']['repeatDelay'] = 0.08; // Delay between jumps when holding the jump button
-userSettings['gravity']['UPS'] = 0.3; // Units per Step() per Step()
-userSettings['gravity']['Max'] = 15.5; // Max gravity rate
+userSettings['gravity']['ups'] = 0.3; // Units per Step() per Step()
+userSettings['gravity']['max'] = 15.5; // Max gravity rate
 
 // -- -- --
 
@@ -126,6 +141,41 @@ const collisionScale = {
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 
+// Add some search uri parameters to the page
+//   These are used to set the target FPS and renderScale
+// This is not needed for pxlNav, but is useful for testing
+//
+// Find search parameters in the URL for procstack.github.io
+//   Not needed for pxlNav
+// Note : procPages clears the search parameters on the page
+//          So search is lost on page change,
+//            Running before procPages.init() is needed
+let uriSearch = window.location.search;
+
+// Check hash for fps and renderScale
+let searchParams = new URLSearchParams(uriSearch);
+let showFPS = searchParams.has('showfps') ? !!parseInt(searchParams.get('showfps')) : false;
+if( searchParams.has('fps') ){
+  let fps = parseInt(searchParams.get('fps'));
+  if( fps > 0 ){
+    targetFPS.pc = fps;
+    targetFPS.mobile = fps;
+  }
+}
+if( searchParams.has('scale') ){
+  let scale = parseFloat(searchParams.get('scale'));
+  if( scale > 0 ){
+    renderScale.pc = scale;
+    renderScale.mobile = scale;
+  }
+}
+
+
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+
+
 
 // -- Below are the initialization and event handling for pxlNav
 // --   No need to edit the below code unless you're adding custom event handling
@@ -166,6 +216,45 @@ pageListenEvents.forEach( (e)=>{
   pxlNavEnv.subscribe( e, procPages.eventHandler.bind(procPages) );
 });
 */
+
+// -- -- --
+
+// Display the frame rate (FPS) in the `verboseDivName` div
+//   This is useful for debugging and performance testing
+// Listen to the `render-prep` call, occuring before the render occurs per frame
+//   Then have it update with a 4-frame average of the FPS
+// Display the frame rate (FPS) in the `verboseDivName` div
+function setupFPSDisplay( pxlNavEnv, verboseDivName, avgCount = 4 ){
+  let verboseConsole = document.getElementById(verboseDivName);
+  if( !verboseConsole ){
+    if( verbose >= pxlEnums.VERBOSE_LEVEL.WARN ){
+      console.warn("No verbose console found with id: " + verboseDivName);
+    }
+    return;
+  }
+
+  let skipRunner = 0;
+  let avgFPS = 0;
+  let prevTime = 0;
+
+  pxlNavEnv.subscribe('render-prep', (e) => {
+    skipRunner++;
+    let delta = (1 / (e.value.time - prevTime));
+    prevTime = e.value.time;
+    avgFPS += delta;
+    if (skipRunner >= avgCount) {
+      avgFPS = (avgFPS / skipRunner).toFixed(2);
+      verboseConsole.innerText = avgFPS;
+      avgFPS = 0;
+      skipRunner = 0;
+    }
+  });
+}
+
+// Then in the initialization code:
+if( enableFPSDisplay || showFPS ){
+  setupFPSDisplay(pxlNavEnv, verboseDivName);
+}
 
 
 // -- -- --

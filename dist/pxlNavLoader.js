@@ -3,13 +3,21 @@
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //
-//   This is an example implementation of `pxlNav` in a project;
-//     Tieing in `ProcPages` to manage the pages of the site,
-//       Listening to / triggering events on `pxlNav`
-//   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
+// This is an example more complete implementation of `pxlNav` in a project;
 //
+// - Below are the options to customize your `pxlNav` environment + user settings
+// - Added `search` parameters to the URL to set the target FPS and renderScale-
+//    _`?fps=60` to set the target FPS
+//    _`?scale=1.5` to set the renderScale
+//    _`?showfps=1` to enable the FPS display in the `verboseDivName` div set below
+// - An implementation of a Frame Rate (FPS) counter is included below
+//    _This function is subscribing to the `render-prep` event emitted from `pxlNav`
+//       This will update the `verboseDivName` div as `pxlNav` prepares to render each frame
+// - Example to 'mass' subscribe to events emitted from `pxlNav` is included below as well
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+
+import { pxlNav, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -20,15 +28,15 @@ const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
 const projectTitle = "pxlNav :: The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "../js/pxlRooms";
+const pxlRoomRootPath = "./pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../dist/pxlAssets";
+const pxlAssetRoot = "./pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
-// Current possible rooms - "OutletEnvironment", "VoidEnvironment"
+// Current possible rooms - "OutletEnvironment", "SaltFlatsEnvironment", "OutletEnvironment", "VoidEnvironment"
 const bootRoomList = ["OutletEnvironment"];
 const startingRoom = bootRoomList[0];
 
@@ -169,15 +177,9 @@ if( searchParams.has('scale') ){
   }
 }
 
-
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-
-
-
-// -- Below are the initialization and event handling for pxlNav
-// --   No need to edit the below code unless you're adding custom event handling
 
 // -- Prepare pxlNav options --
 
@@ -198,10 +200,8 @@ pxlNavOptions.shadowMapBiasing = shadowMapBiasing;
 pxlNavOptions.loaderPhrases = loaderPhrases;
 
 
-
 // Create the pxlNav environment manager
 const pxlNavEnv = new pxlNav( pxlNavOptions, projectTitle, startingRoom, bootRoomList );
-
 
 // -- -- --
 
@@ -216,10 +216,7 @@ pageListenEvents.forEach( (e)=>{
 });
 */
 
-
 // -- -- --
-
-// <div id="roomToggle" roomToggles="VoidEnvironment:Void Space;OutletEnvironment:Field">Void Space</div>
 
 let switchButton = document.getElementById("roomToggle");
 if( switchButton && switchButton.hasAttribute("roomToggles") ){
@@ -247,7 +244,6 @@ if( switchButton && switchButton.hasAttribute("roomToggles") ){
   });
 }
 
-
 // -- -- --
 
 // Display the frame rate (FPS) in the `verboseDivName` div
@@ -268,6 +264,8 @@ function setupFPSDisplay( pxlNavEnv, verboseDivName, avgCount = 4 ){
   let avgFPS = 0;
   let prevTime = 0;
 
+  // Subscribe to the `render-prep` event to calculate FPS
+  //   This event is emitted before the render occurs per frame in `pxlNav`
   pxlNavEnv.subscribe('render-prep', (e) => {
     skipRunner++;
     let delta = (1 / (e.value.time - prevTime));
@@ -287,31 +285,9 @@ if( enableFPSDisplay || showFPS ){
   setupFPSDisplay(pxlNavEnv, verboseDivName);
 }
 
-
 // -- -- --
 
-
-function pxlNav_init(){
+window.addEventListener('load', function() {
   // Start pxlNav
   pxlNavEnv.init();
-
-  // -- -- --
-
-  // -- Add pxlNav versioning to the page --
-  // Set the version number
-  //   Remove this section if you are using this file as a template
-  let version = pxlNavVersion;
-  if( version[0] != "v" ){
-    version = "v" + version;
-  }
-  let pnv = [...document.getElementsByClassName("pxlNavVersion")];
-  pnv.forEach(curPNV => {
-    curPNV.innerText = version;
-  });
-  // -- End of versioning --
-
-}
-
-window.addEventListener('load', function() {
-  pxlNav_init();
 });

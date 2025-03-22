@@ -68,7 +68,9 @@ export class Environment{
     // -- -- -- --
     // TODO : Move to pxlQuality, when I finally get to that module
     this.prevRenderMS=0;
+    this.prevRuntimeMS=0;
     this.nextRenderMS=0;
+
     // Max frame rate - 
     this.fps = 30;
     if( this.pxlOptions.fps.hasOwnProperty("mobile") ){
@@ -424,6 +426,12 @@ export class Environment{
       //this.pxlCamera.colliderShiftActive=!(this.pxlCamera.colliderAdjustPerc==1 || this.pxlCamera.colliderAdjustPerc==0);
       //this.updateCompUniforms(curExp);
     //}
+
+    this.emit( "step", {
+      'time': this.pxlTimer.curMS,
+      'delta': this.pxlTimer.msRunner.y,
+    });
+
   }
   
   // Function required, stoping functions
@@ -1625,14 +1633,21 @@ export class Environment{
         this.step();
     }
     
-    if( this.pxlTimer.curMS > this.nextRenderMS || anim==false ){
+    if( this.pxlTimer.runtime > this.nextRenderMS || anim==false ){
+
       this.prevRenderMS = this.nextRenderMS;
-      this.nextRenderMS = this.pxlTimer.curMS + this.renderInterval;
+      this.nextRenderMS = this.pxlTimer.runtime + this.renderInterval;
+
 
       // Render appropriate room
       this.stepShaderValues();
       this.stepAnimatedObjects();
       
+      // Send out event to allow for any pre-render calculations
+      this.emit( "render-prep", {
+        'time': this.pxlTimer.runtime
+      });
+
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){
         curRoom.step();

@@ -48,7 +48,10 @@ export class Timer{
     this.msLog=0;
     this.fpsStats=-1;
     
-		let msTime=new Date().getTime()*.001;
+    this._msRate = 0.001; // MS to Seconds
+    this.baseRate = 0.001; // MS to Seconds
+
+		let msTime=new Date().getTime() * this._msRate; // Current time in seconds
     this._bootMS=msTime;
     this._prevWorldMS=msTime;
 		this._curMS=msTime;
@@ -58,8 +61,6 @@ export class Timer{
 
     this.avgDeltaRate = 0.7;  // Rate of averaging prior delta time with current delta time
 
-    this._msRate = 0.001; // MS to Seconds
-    this.baseRate = 0.001; // MS to Seconds
     
     this.videoFeeds=[];
     this.booted=false;
@@ -93,10 +94,6 @@ export class Timer{
   }
   set prevMS( val ){
       this._prevMS=val;
-  }
-
-  get runtime(){
-    return this._curMS-this._bootMS;
   }
   
   // -- -- --

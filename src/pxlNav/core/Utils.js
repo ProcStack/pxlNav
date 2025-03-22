@@ -523,4 +523,30 @@ export class Utils{
     });
     return {texture, material};
   }
+
+  // -- -- -- //
+
+  
+  /**
+   * Duplicate an array.
+   * @method
+   * @memberof pxlParticles/ParticleBase
+   * @param {Array} val - The array to duplicate.
+   * @param {number} count - The number of times to duplicate the array.
+   * @returns {Array} The duplicated array.
+   * @example
+   * // Duplicate an array
+   * import { pxlNav } from 'pxlNav.esm.js';
+   * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
+   * 
+   * build(){
+   *  pxlParticleBase.dupeArray( [0.0,0.75], 4 );
+   *  // Output: [0.0,0.75], [0.0,0.75], [0.0,0.75], [0.0,0.75]
+   * }
+   */
+  dupeArray( val, count ){
+    return Array.from({length:count}).fill(val);
+  }
+  
+  
 }

@@ -1,4 +1,4 @@
-// pxlNav v0.0.18 -  Javascript Launcher
+// pxlNav v0.0.28 -  Javascript Launcher
 //  Written by Kevin Edzenga; 2024,2025
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -6,7 +6,7 @@
 //   This is an example implementation of `pxlNav` in a project;
 //     Tieing in `ProcPages` to manage the pages of the site,
 //       Listening to / triggering events on `pxlNav`
-//   For `pxlNav` scripting, the entry-point is `./Source/js/pxlNavCore.js`
+//   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.js';
@@ -64,8 +64,8 @@ userSettings['headBounce']['easeOut'] = 0.95; // When move key is let go, the ea
 userSettings['jump']['impulse'] = 0.75; // Jump impulse force applied to the player while holding the jump button
 userSettings['jump']['holdMax'] = 2.85; // Max influence of holding the jump button on current jump; in seconds
 userSettings['jump']['repeatDelay'] = 0.08; // Delay between jumps when holding the jump button
-userSettings['gravity']['UPS'] = 0.3; // Units per Step() per Step()
-userSettings['gravity']['Max'] = 15.5; // Max gravity rate
+userSettings['gravity']['ups'] = 0.3; // Units per Step() per Step()
+userSettings['gravity']['max'] = 15.5; // Max gravity rate
 
 // -- -- --
 
@@ -79,7 +79,7 @@ const targetFPS = {
 // Render Resolution Scale
 //   Since mobile devices have a lower resolution, up scaling may help
 // Default is - PC = 1.0  -&-  Mobile = 1.0
-pxlNavOptions.renderScale = renderScale;
+const renderScale = {
   'pc' : 1.0,
   'mobile' : 1.5
 }

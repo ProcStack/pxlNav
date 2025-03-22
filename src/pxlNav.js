@@ -292,6 +292,8 @@ class pxlNav{
     
     this.validEvents = {
       "booted" : "Emitted after the engine has fully booted and is ready to be addressed.",
+      "step" : "Emitted when frame update occurs, pre render.",
+      "render-prep" : "Emitted when the pxlNav engine starting to prepare for scene rendering.",
       "shaderEditorVis" : "Returns a [bool]; Emitted when the shader editor is toggled on or off.",
       "roomChange-Start" : "Emitted when the room change transition begins.",
       "roomChange-Middle" : "Emitted when the room change process occurs mid transition.",
@@ -491,7 +493,7 @@ class pxlNav{
         //this.pxlDevice.resizeRenderResolution();
         this.cameraRunAnimatorMobile( this );
         this.pxlGuiDraws.stepLoader("postBoot"); // --
-        this.pxlEnv.mapRender();
+        this.pxlEnv.mapRender( false );
         this.pxlDevice.setCursor("grab");
        })
        .catch(( err )=>{
@@ -860,7 +862,7 @@ class pxlNav{
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
       stillLoadingCheck=tmpThis.pxlEnv.geoLoadList[keys[x]]==0;
       stillLoadingCheck = stillLoadingCheck && !tmpThis.pxlEnv.roomSceneList[x]?.booted;
-      if(stillLoadingCheck){ // If entry isn't 1, means not fully loaded
+      if(keys[x] == this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
         break;
       }
     }

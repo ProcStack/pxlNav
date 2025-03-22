@@ -12,6 +12,11 @@ import {
   Color,
   Group,
   Mesh,
+  Points,
+  PointsMaterial,
+  Float32BufferAttribute,
+  BufferGeometry,
+  BufferAttribute,
   InstancedMesh,
   DoubleSide,
   FrontSide,
@@ -173,6 +178,20 @@ export class FileIO{
         }
       }
 
+      if( mesh.userData.hasOwnProperty("pSystem") && mesh.userData.pSystem ){
+        let pSystem = this.pSystemBuild( mesh, envObj );
+        if( pSystem ){
+          if( !envObj.pSystemList ) {
+            envObj.pSystemList={};
+          }
+          envObj.pSystemList[mesh.name]=pSystem;
+          envScene.add( pSystem );
+          mesh.parent.remove(mesh);
+          mesh = pSystem;
+        }
+      }
+
+
       // Add to Glow render pass; ran by blurComposer
       if( mesh.userData.hasOwnProperty("GlowPass") && mesh.userData.GlowPass ){
         if( !envObj.geoList['GlowPass'] ){
@@ -290,10 +309,36 @@ export class FileIO{
 
   // -- -- --
   
+  /**
+   * The `meshSettings={}` object is used to set the mesh properties for the object.
+   * 
+   * Pass `meshSettings` as - `pxlRoom.materialList[objectName].meshSettings={}`
+   * 
+   * Supported properties are:
+   * - `frontSided` - Boolean, sets the mesh to be front sided (default) or back sided
+   * - `doubleSided` - Boolean, sets the mesh to be double sided
+   * - `renderOrder` - Integer, sets the render order for the mesh
+   * - `castShadow` - Boolean, sets the mesh to cast shadows
+   * - `receiveShadow` - Boolean, sets the mesh to receive shadows
+   * @param {Object} meshObject - The ThreeJS mesh object to check for settings
+   * @param {Object} baseMaterial - The material object to check for meshSettings
+   */
   checkForMeshSettings( meshObject, baseMaterial ){
     if( baseMaterial.hasOwnProperty("meshSettings") ){
+      if( baseMaterial.meshSettings.hasOwnProperty("frontSided") ){
+        meshObject.side = baseMaterial.meshSettings.frontSided ? FrontSide : BackSide;
+      }
+      if( baseMaterial.meshSettings.hasOwnProperty("doubleSided") ){
+        meshObject.side = baseMaterial.meshSettings.doubleSided ? DoubleSide : FrontSide;
+      }
       if( baseMaterial.meshSettings.hasOwnProperty("renderOrder") ){
         meshObject.renderOrder = baseMaterial.meshSettings.renderOrder;
+      }
+      if( baseMaterial.meshSettings.hasOwnProperty("castShadow") ){
+        meshObject.castShadow = baseMaterial.meshSettings.castShadow;
+      }
+      if( baseMaterial.meshSettings.hasOwnProperty("receiveShadow") ){
+        meshObject.receiveShadow = baseMaterial.meshSettings.receiveShadow;
       }
     }
   }
@@ -317,7 +362,7 @@ export class FileIO{
   canAddToScene( envObj, mesh ){
     let valid = true;
     if( mesh.hasOwnProperty("userData")
-        && mesh.userData.hasOwnProperty("Instance")
+        && (mesh.userData.hasOwnProperty("Instance") || mesh.userData.hasOwnProperty("MobileInstance") )
         && envObj.hasOwnProperty("baseInstancesNames")
         && envObj.baseInstancesNames.hasOwnProperty(mesh.userData.Instance) ){
       valid = false;
@@ -407,7 +452,9 @@ export class FileIO{
       return false;
     }
 
-    if( !(mesh.hasOwnProperty("userData") && mesh.userData.hasOwnProperty("Instance")) ){
+    if( !(mesh.hasOwnProperty("userData") &&
+     ( mesh.userData.hasOwnProperty("Instance")) ||
+     mesh.userData.hasOwnProperty("MobileInstance") )){
       return false;
     }
     if( !envObj.baseInstancesList.hasOwnProperty(mesh.userData.Instance) ){
@@ -425,7 +472,7 @@ export class FileIO{
     // -- -- --
 
     // Regex attribute checks --
-    
+
     // Instance Geometry Object for LOD level N
     let lodInstanceRegex = new RegExp( /(instlod)\d+/, "i" );
     let lodNumberRegex = new RegExp( /\d+/, "i" );
@@ -562,7 +609,10 @@ export class FileIO{
         let curRot = curMesh.rotation;
         let curScale = curMesh.scale;
         
-        let instBase = envObj.baseInstancesList[ curMesh.userData.Instance ];
+        let instBaseName = this.pxlOptions.mobile &&
+            curMesh.userData.hasOwnProperty("MobileInstance") ? 
+            curMesh.userData.MobileInstance : curMesh.userData.Instance;
+        let instBase = envObj.baseInstancesList[ instBaseName ];
 
         if( curMesh.type == "Mesh" ){
           let matrix = new Matrix4();
@@ -599,9 +649,21 @@ export class FileIO{
             entry = this.pxlUtils.flattenArrayToStr( entry );
 
             if( !pointRecorder.hasOwnProperty(entry) ){
-              normal.fromBufferAttribute(curMesh.geometry.attributes.normal, x);
-              let randomRot = new Euler( 0,Math.random() * 2 * Math.PI, 0);
-              quaternion.setFromEuler(randomRot);
+
+              // Check if normals exist, if not use a random rotation
+              //   This prevents the object from being rotated the same
+              if( !curMesh.geometry.attributes.normal ){
+                let randomNormal = new Vector3( Math.random(), Math.random()*.1, Math.random() ).normalize();
+                normal.copy( randomNormal );
+                let curUp = new Vector3(0, 1, 0).cross( randomNormal ).normalize();
+                quaternion.setFromUnitVectors( randomNormal, curUp );
+              }else{
+                normal.fromBufferAttribute(curMesh.geometry.attributes.normal, x);
+                let curUp = normal.clone();
+                curUp = curUp.cross( new Vector3(0, 1, 0) ).cross( curUp ).normalize();
+                quaternion.setFromUnitVectors( normal, curUp );
+              }
+              
               
               let curInstScale = scale;
               if( hasColor ){
@@ -642,7 +704,6 @@ export class FileIO{
             instancedMesh.scale.set(curScale.x,curScale.y,curScale.z);
 
             instancedMesh.updateMatrix();
-
 
             if( hasLods ){
 
@@ -755,11 +816,181 @@ export class FileIO{
   }
   
   
+
+// -- -- --
+
+
+
+
+pSystemBuild( mesh, envObj ){
+  if( !mesh.hasOwnProperty("userData") ||
+      !mesh.userData.hasOwnProperty("pSystem") ||
+      !mesh.userData.pSystem ){
+    return null;
+  }
+
+  this.log("Processing Particle System - ", mesh.name);
+
+  try{
+    let curMesh = mesh;
+    let curPos = curMesh.position;
+    let curRot = curMesh.rotation;
+    let curScale = curMesh.scale;
+
+    if( curMesh.type == "Mesh" ){
+      let matrix = new Matrix4();
+      let position = new Vector3();
+      let normal = new Vector3();
+      let quaternion = new Quaternion();
+      let scale = new Vector3(1, 1, 1);
+      const hasColor = curMesh.geometry.attributes.hasOwnProperty("color");
+      let userDataKeys = Object.keys( curMesh.userData );
+      let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
+
+      let hasFitScale = false;
+      let minScale = 0;
+      let maxScale = 1;
+      if( userDataKeysLower.includes("minscale") ){
+        hasFitScale = true;
+        minScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("minscale") ] ];
+      }
+      if( userDataKeysLower.includes("maxscale") ){
+        hasFitScale = true;
+        maxScale = curMesh.userData[ userDataKeys[ userDataKeysLower.indexOf("maxscale") ] ];
+      }
+
+      // Prevent dupelicate instances
+      //   Verts are split, so neighboring polygons have stacked vertices
+      //     'entry' checks those dupes
+      let pointRecorder = {};
+      let particlePositions = [];
+      let hasColorAttr = curMesh.geometry.attributes.hasOwnProperty("color");
+      let particleColors = [];
+      for (let x = 0; x < curMesh.geometry.attributes.position.count; ++x) {
+        position.fromBufferAttribute(curMesh.geometry.attributes.position, x);
+        let entry = position.toArray();
+
+        // Flatten array elements to 0.01 precision joined by ","
+        entry = this.pxlUtils.flattenArrayToStr( entry );
+
+        if( !pointRecorder.hasOwnProperty(entry) ){
+
+          if( hasColorAttr ){
+            particleColors.push( curMesh.geometry.attributes.color.getX(x) );
+            particleColors.push( curMesh.geometry.attributes.color.getY(x) );
+            particleColors.push( curMesh.geometry.attributes.color.getZ(x) );
+          }
+          
+          
+          let curInstScale = scale;
+          if( hasColor ){
+            let curScalar = curMesh.geometry.attributes.color.getX(x);
+            if( hasFitScale ){
+              // Scale the object based on object parameter `minScale` & `maxScale`
+              curScalar = minScale + (maxScale - minScale) * curScalar;
+            }
+            curInstScale = new Vector3(curScalar, curScalar, curScalar);
+          }
+          particlePositions.push( position.x );
+          particlePositions.push( position.y );
+          particlePositions.push( position.z );
+          pointRecorder[entry]=true;
+        }
+      }
+      if( particlePositions.length > 0 ){
+        let pPositionArray = new Float32BufferAttribute( particlePositions, 3 );
+        
+        // -- -- --
+
+        let pointBufferGeo = new BufferGeometry();
+        pointBufferGeo.setAttribute( 'position', pPositionArray );
+/*
+        if( hasColorAttr ){
+          let pColorArray = new Float32BufferAttribute( particleColors, 3 );
+          pointBufferGeo.setAttribute( 'color', pColorArray );
+        }*/
+
+        pointBufferGeo.userData = Object.assign( {},  curMesh.userData );
+        pointBufferGeo.userData['pSystem'] = true;
+
+        let zero = new Vector3(0, 0, 0);
+        if( !zero.equals( curMesh.position ) ){
+          pointBufferGeo.userData['pPosition'] = curMesh.position;
+        }
+        if( !zero.equals( curMesh.rotation ) ){
+          pointBufferGeo.userData['pRotation'] = curMesh.rotation;
+        }
+        if( !zero.equals( curMesh.scale ) ){
+          pointBufferGeo.userData['pScale'] = curMesh.scale;
+        }
+        pointBufferGeo.computeBoundingBox();
+        pointBufferGeo.computeBoundingSphere();
+
+        envObj.particleList[ curMesh.name ] = pointBufferGeo ;
+
+        
+        curMesh.parent.remove(curMesh);
+        
+        return;
+        
+        // -- -- --
+
+        let curGeo = curMesh.geometry;
+        let pointMtl = null;
+        
+        if( envObj.materialList.hasOwnProperty( curMesh.name ) ){
+          pointMtl = envObj.materialList[ curMesh.name ];
+        }
+        if( !pointMtl ){
+          pointMtl = new PointsMaterial({ color : 0xffffff, size: 20.1, sizeAttenuation: true });
+        }
+        pointMtl.depthWrite = false;
+        pointMtl.depthTest = false;
+        pointMtl.transparent = true;
+
+        if( hasColorAttr ){
+          pointMtl.vertexColors = true;
+        }
+
+        //let pointMesh = new Points( pointBufferGeo, pointMtl );
+
+        let pointMesh = new Points( curGeo, pointMtl );
+        console.log(pointMesh)
+        pointMesh.name = curMesh.name+"_pSystem";
+        pointMesh.position.set(curPos.x,curPos.y,curPos.z);
+        pointMesh.rotation.set(curRot.x,curRot.y,curRot.z);
+        pointMesh.scale.set(curScale.x,curScale.y,curScale.z);
+        pointMesh.updateMatrix();
+        pointMesh.visible=true;
+        pointMesh.matrixAutoUpdate=false;
+        pointMesh.userData = Object.assign( {}, pointMesh.userData,  curMesh.userData );
+        pointMesh.userData['pSystem'] = true;
+
+        envObj.particleList[ curMesh.name ] = pointMesh;
+
+        envObj.scene.add( pointMesh );
+
+        envObj.materialList[ curMesh.name ] = pointMtl;
+
+        console.log( pointMesh)
+
+      }
+    }
+  }catch(e){
+    if( this.verbose >= this.pxlEnums.VERBOSE_LEVEL.ERROR ){
+      console.error(e);
+    }
+  }
+}
+
+
   
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
  // -- -- -- -- -- -- -- -- -- -- -- -- -- //
   
+
+
   // TODO : Apparently traversing FBX objects with no children on a leaf breaks
   //   Oh well... Just get it done
   
@@ -2094,7 +2325,8 @@ export class FileIO{
     this.pxlEnv.geoLoadList[meshKey]=0;
 
     let addedGlow=0;
-    let envScene=envObj.scene;
+    let envScene = envObj.scene;
+    let materialList = envObj.materialList ;
     // TODO : Do new FBXLoader objects really need to be created?
     //          Sounds like the potential for a memory leak if not handled correctly
     var fbxLoader=new FBXLoader();
@@ -2108,6 +2340,39 @@ export class FileIO{
 
       curFbx.traverse((c)=>{
         this.checkForUserData( envObj, envScene, c );
+
+        if( c.isMesh ){
+          envObj.geoList[c.name]=c;
+        }
+        
+        if( materialList.hasOwnProperty( c.name ) ){
+          let curMap = null;
+          if( c.material.map ){
+            curMap = c.material.map;
+          }
+          c.material= materialList[ c.name ];
+          this.checkForMeshSettings( c, c.material );
+
+          if( curMap ){
+            if( c.material.uniforms.hasOwnProperty("diffuse") ){
+              c.material.uniforms.diffuse.value = curMap;
+            }
+            if( c.material.hasOwnProperty("emissiveMap") ){
+              c.material.emissiveMap=curMap;
+              if( c.material.emissive.r>0 ){
+                c.material.emissiveIntensity=c.material.emissive.r;
+              }
+            }
+          }
+          c.matrixAutoUpdate=false;
+        }else{
+          /*if( c.material.map && !c.material.emissiveMap && c.material.color.r>0 ){
+            let curMap = c.material.map;
+            c.material.emissiveMap=curMap;
+            c.material.emissiveIntensity=c.material.color.r*.4;
+            c.material.emissive= c.material.color.clone();
+          }*/
+        }
 
         if(c.userData.hasOwnProperty("doubleSided") && c.userData.doubleSided){
           c.material.side=DoubleSide;

@@ -112,7 +112,7 @@ export const pxlUserSettings = {
             'invert' : false // Invert ( Southpaw ) look on desktop
           },
         'mobile' : {
-            'invert' : false // Invert look on mobile
+            'invert' : true // Invert look on mobile
           }
       },
     'headBounce' : {
@@ -265,7 +265,7 @@ export const pxlOptions = {
       },
     'renderScale' : {
         'pc' : 1.0,
-        'mobile' : 1.0
+        'mobile' : 1.5
       },
     'staticCamera' : false,
     'autoCamera' : false,

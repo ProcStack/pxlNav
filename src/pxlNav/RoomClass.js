@@ -75,7 +75,8 @@ class RoomEnvironment{
     
     // Environment Shader 
     this.spiralizerUniforms = {};
-    this.materialList = {};
+    this.materialList={};
+    this.particleList={};
     
     // Room warp data
     this.camInitPos = null;
@@ -331,6 +332,9 @@ class RoomEnvironment{
    * Reset the camera.
    */
   resetCamera(){
+    if( (this.camInitPos == null || this.camInitLookAt == null) && this.pxlOptions.verbose >= this.pxlEnums.VERBOSE_LEVEL.WARN ){
+      console.warn("pxlRoomEnvironment: Room Initial Camera Positions not initialized, \n Ensure `this.booted=true` is ran in `build()` or `fbxPostLoad()` \n -&-\n That there is a `Camera` group with `position` & `lookAt` child nulls in your scene file.");
+    }
     this.pxlEnv.pxlCamera.setTransform( this.camInitPos, this.camInitLookAt );
     /*if( !this.pxlEnv.pxlOptions["staticCamera"] ){
       this.pxlEnv.pxlCamera.camUpdated = true;

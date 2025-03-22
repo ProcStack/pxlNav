@@ -20,10 +20,10 @@
  * @requires ./particles.js
  */
 
-import { BillowSmoke, EmberWisps, FloatingDust, HeightMap } from './particles.js';
+import { ParticleBase, BillowSmoke, EmberWisps, FloatingDust, HeightMap } from './particles.js';
 
 const pxlEffects = { 
-  "pxlParticles" : { BillowSmoke, EmberWisps, FloatingDust, HeightMap },
+  "pxlParticles" : { ParticleBase, BillowSmoke, EmberWisps, FloatingDust, HeightMap },
 };
 
 /**

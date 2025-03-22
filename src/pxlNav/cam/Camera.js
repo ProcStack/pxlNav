@@ -1005,6 +1005,10 @@ export class Camera{
     
     this.pxlDevice.touchMouseData.netDistance.set(0,0);
     
+    if( newPosition == null ){
+      newPosition = this.camera.position.clone();
+    }
+    
     this.camera.position.copy( newPosition );
     this.updateCameraMatrices();
     this.cameraPos.copy( newPosition );

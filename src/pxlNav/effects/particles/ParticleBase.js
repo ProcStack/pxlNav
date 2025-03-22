@@ -3,6 +3,7 @@
 
 import {
   Points,
+  PointsMaterial,
   Float32BufferAttribute,
   Vector2,
   Vector3,
@@ -70,6 +71,7 @@ export class ParticleBase{
    * @property {Array<string>} knownKeys - Known keys for shader settings.
    */
   constructor( room=null, systemName='particles' ){
+    this.type = "particleSystem";
     this.name=systemName;
     this.room=room;
     
@@ -127,14 +129,14 @@ export class ParticleBase{
    * @param {string} [vertShader=null] - The vertex shader for the particle system.
    * @param {string} [fragShader=null] - The fragment shader for the particle system.
    */
-  build( uniforms={}, vertShader=null, fragShader=null ){
+  build( curShaderSettings={}, uniforms={}, vertShader=null, fragShader=null ){
     if( !vertShader || !fragShader ){
       console.error("No Shader Found; Cannot Build Particle System");
       return;
     }
     if( curShaderSettings && typeof curShaderSettings === Object ){
       let curSettingKeys = Object.keys( curShaderSettings );
-      this.knownKeys.forEach( key => {
+      this.knownKeys.forEach(( key )=>{
         if( curSettingKeys.includes( key ) ){
           this.shaderSettings[key] = curShaderSettings[key];
         }else{
@@ -149,7 +151,15 @@ export class ParticleBase{
     
     let mtl = this.room.pxlFile.pxlShaderBuilder( uniforms, vertShader, fragShader );
 
-    this.addToScene( vertexCount, pScale, atlasRes, atlasPicks );
+    this.material = mtl;
+    this.material.transparent=true;
+    this.material.depthTest=true;
+    this.material.depthWrite=false;
+    if( this.shaderSettings.hasOwnProperty("additiveBlend") && this.shaderSettings.additiveBlend ){
+      this.material.blending = AdditiveBlending;
+    }
+
+    this.addToScene();
   }
 
   /**
@@ -169,6 +179,33 @@ export class ParticleBase{
     }
   }
   
+
+  setMaterial( mtl ){
+    if( !mtl && !mtl.isMaterial ){
+      console.error("No Material Found; Cannot Set Particle System Material");
+      return;
+    }
+
+    this.material = mtl;
+    if( this.points ){
+      this.points.material = mtl;
+    }
+  }
+
+  setGeometry( geo ){
+    if( !geo && !geo.isBufferGeometry ){
+      console.error("No Geometry Found; Cannot Set Particle System Geometry");
+      return;
+    }
+
+    this.shaderSettings.vertCount = geo.attributes.position.count;
+
+    this.geometry = geo;
+    if( this.points ){
+      this.points.geometry = geo;
+    }
+  }
+
   /**
    * Set the shader settings for the particle system.
    * @method
@@ -179,6 +216,26 @@ export class ParticleBase{
     return this.shaderSettings;
   }
 
+  setSettings( settings={} ){
+    if( !settings || typeof settings !== "object" ){
+      console.error("No Settings Found; Cannot Set Particle System Settings");
+      return;
+    }
+    let curSettingKeys = Object.keys( settings );
+    this.knownKeys.forEach(( key )=>{
+      if( curSettingKeys.includes( key ) ){
+        this.shaderSettings[key] = settings[key];
+      }else{
+        settings[key] = this.shaderSettings[key];
+      }
+    });
+    if( this.points ){
+      this.points.material.uniforms.pointScale.value = new Vector2(
+        this.shaderSettings.pScale * this.room.pxlEnv.pxlQuality.screenResPerc,
+        this.shaderSettings.pScale * this.room.pxlEnv.pxlQuality.screenResPerc
+      );
+    }
+  }
 
   // -- -- -- -- -- -- -- --
   // -- Add To Scene Function  -- --
@@ -203,7 +260,6 @@ export class ParticleBase{
       return;
     }
 
-
     let vertexCount = this.shaderSettings.vertCount;
     let pScale = this.shaderSettings.pScale;
     let atlasMtl = this.material;
@@ -212,6 +268,12 @@ export class ParticleBase{
     let randomRanges = this.shaderSettings.randomAtlas;
     let blendAdditive = this.shaderSettings.additiveBlend;
 
+    if( this.geometry && this.geometry.attributes.position.count > 0 ){
+      vertexCount = this.geometry.attributes.position.count;
+      this.shaderSettings.vertCount = vertexCount;
+    }
+
+    this.room.materialList[ this.name ] = atlasMtl;
     
     this.count = vertexCount;
     this.pscale.x = pScale * this.room.pxlEnv.pxlQuality.screenResPerc ;
@@ -233,28 +295,77 @@ export class ParticleBase{
     let verts = [];
     let seeds = [];
     let atlasId = [];
+    let geo = null;
     
 
-    for( let x=0; x<vertexCount; ++x ){
-      verts.push( 0,0,0 );
-      seeds.push( (Math.random()), (Math.random()*2-1), (Math.random()), (Math.random()*2-1) );
-      atlasId.push( ...atlasPicker( atlasPicks ) );
+    // -- -- --
+
+    // If a BufferGeometry is already set, check for attributes and generate if needed
+
+    if( this.geometry ){
+      geo = this.geometry;
+
+      let genSeed = false;
+      let genAtlas = false;
+
+      vertexCount = geo.attributes.position.count;
+      this.count = vertexCount;
+
+      if( !geo.attributes.hasOwnProperty('atlas') ){
+        genAtlas = true;
+      }
+      if( !geo.attributes.hasOwnProperty('seeds') ){
+        genSeed = true;
+      }
+
+      if( genAtlas || genSeed ){
+        for( let x=0; x<vertexCount; ++x ){
+          if( genSeed ){
+            seeds.push( (Math.random()), (Math.random()*2-1), (Math.random()), (Math.random()*2-1) );
+          }
+          if( genAtlas ){
+            atlasId.push( ...atlasPicker( atlasPicks ) );
+          }
+        }
+      }
+      
+      if( genSeed ){
+        let seedAttribute = new Float32BufferAttribute( seeds, 4 );
+        geo.setAttribute( 'seeds', seedAttribute );
+      }
+      if( genAtlas ){
+        let atlasAttribute = new Float32BufferAttribute( atlasId, 2 );
+        geo.setAttribute( 'atlas', atlasAttribute );
+      }
+
+    // If no geometry is set, create a new BufferGeometry
+    }else{
+      for( let x=0; x<vertexCount; ++x ){
+        verts.push( 0,0,0 );
+        seeds.push( (Math.random()), (Math.random()*2-1), (Math.random()), (Math.random()*2-1) );
+        atlasId.push( ...atlasPicker( atlasPicks ) );
+      }
+      let posAttribute = new Float32BufferAttribute( verts, 3 );
+      let seedAttribute = new Float32BufferAttribute( seeds, 4 );
+      let atlasAttribute = new Float32BufferAttribute( atlasId, 2 );
+      geo = new BufferGeometry();
+      geo.setAttribute( 'position', posAttribute );
+      geo.setAttribute( 'seeds', seedAttribute );
+      geo.setAttribute( 'atlas', atlasAttribute );
     }
-    
-    let posAttribute = new Float32BufferAttribute( verts, 3 );
-    let seedAttribute = new Float32BufferAttribute( seeds, 4 );
-    let atlasAttribute = new Float32BufferAttribute( atlasId, 2 );
-    //let idAttribute = new Uint8BufferAttribute( pId, 1 ); // ## would only be 0-65536; set up vector array for ids
-    let geo = new BufferGeometry();
-    geo.setAttribute( 'position', posAttribute );
-    geo.setAttribute( 'seeds', seedAttribute );
-    geo.setAttribute( 'atlas', atlasAttribute );
-    //geo.setAttribute( 'id', idAttribute );
+
+    // -- -- --
+
+
+    //atlasMtl.transparent = true;
+    atlasMtl.depthTest=true;
+    atlasMtl.depthWrite=false;
+
 
     let psystem = new Points( geo, atlasMtl );
     psystem.sortParticles = false;
     psystem.frustumCulled = false;
-    
+
     this.room.scene.add( psystem );
 
     psystem.layers.set(1);
@@ -267,12 +378,11 @@ export class ParticleBase{
     this.material = atlasMtl;
     this.points = psystem;
 
-    psystem.position.copy( this.position );
+    //psystem.position.copy( this.position );
     
     if( blendAdditive ){
       psystem.material.blending = AdditiveBlending;
     }
-
 
     return psystem;
   }
@@ -516,7 +626,7 @@ export class ParticleBase{
     }
 
 
-    mtl.uniforms.noiseTexture.value = this.room.softNoiseTexture;
+    mtl.uniforms.noiseTexture.value = this.room.smoothNoiseTexture;
     mtl.depthTest=true;
     mtl.depthWrite=false;
     if( setSystemMtl ){

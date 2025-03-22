@@ -1,0 +1,346 @@
+global proc thresholdCleanKeys(float $threshold, int $sampleSize, float $mmScalar, int $keySpacing, float $rotScalar, float $transScalar, int $useMiddleKey) {
+    string $selection[] = `ls -sl`;
+    int $numObjects = size($selection);
+    
+    // Create progress bar - proper initialization
+    global string $gMainProgressBar;
+    if (!`control -exists $gMainProgressBar`) {
+        $gMainProgressBar = `progressBar`;
+    }
+    progressBar -edit 
+        -beginProgress
+        -isInterruptable true
+        -status "Processing Animation Keys..."
+        -maxValue $numObjects
+        $gMainProgressBar;
+    
+    int $objectIndex = 0;
+    for ($obj in $selection) {
+        // Update progress
+        $objectIndex++;
+        progressBar -edit -step 1 $gMainProgressBar;
+        
+        // Check for user cancel
+        if (`progressBar -query -isCancelled $gMainProgressBar`) {
+            progressBar -edit -endProgress $gMainProgressBar;
+            error "User interrupted the operation";
+        }
+        
+        string $animCurves[] = `listConnections -type "animCurve" $obj`;
+        for ($curve in $animCurves) {
+            float $values[] = `keyframe -q -vc $curve`;
+            float $times[] = `keyframe -q -tc $curve`;
+            
+            // Calculate value range for this curve
+            float $minVal = $values[0];
+            float $maxVal = $values[0];
+            for ($val in $values) {
+                if ($val < $minVal) $minVal = $val;
+                if ($val > $maxVal) $maxVal = $val;
+            }
+            float $valueRange = $maxVal - $minVal;
+            // Prevent division by zero and handle very small ranges
+            if ($valueRange < 0.0001) $valueRange = 0.0001;
+            
+            // Scale threshold to the value range
+            float $scaledThreshold = $threshold * $valueRange;
+            
+            int $keysToDelete[];
+            int $deleteIndex = 0;
+            int $consecutiveDeletes = 0;
+            int $seriesStartIndex = -1;
+            float $adjustedThreshold = $scaledThreshold;
+
+            // Detect if the curve is for rotation or translation
+            string $connections[] = `listConnections -d 1 -p 1 $curve`;
+            float $rotateSensitivity = 1.0;
+            float $translateSensitivity = 1.0;
+            for ($conn in $connections) {
+              if (`gmatch $conn "*rotate*"`) {
+                $adjustedThreshold *= $rotScalar;
+              } else if (`gmatch $conn "*translate*"`) {
+                $adjustedThreshold *= $transScalar;
+              }
+            }
+
+            int $numKeysInCurve = size($values);
+            for ($i = $sampleSize; $i < $numKeysInCurve-$sampleSize; $i++) {
+                float $avgGradientPrev = 0;
+                float $avgGradientNext = 0;
+                float $gradientDiff = 0;
+                float $gradientAvg = ($values[$i+$sampleSize] - $values[$i-$sampleSize]) / ($times[$i+$sampleSize] - $times[$i-$sampleSize]);
+                float $firstDerivPrev = 0;
+                float $firstDerivNext = 0;
+                float $secondDeriv = 0;
+                
+                for ($j = 1; $j <= $sampleSize; $j++) {
+                    float $timeDiffPrev = $times[$i] - $times[$i-$j];
+                    float $timeDiffNext = $times[$i+$j] - $times[$i];
+                    
+                    // First derivatives
+                    float $gradientPrev = ($values[$i] - $values[$i-$j]) / $timeDiffPrev;
+                    float $gradientNext = ($values[$i+$j] - $values[$i]) / $timeDiffNext;
+                    
+                    // Second derivative approximation
+                    float $curvature = ($gradientNext - $gradientPrev) / (($timeDiffNext + $timeDiffPrev) * 0.5);
+                    
+                    // Weight based on time proximity
+                    float $weight = 1.0 / $j;
+                    $firstDerivPrev += $gradientPrev * $weight;
+                    $firstDerivNext += $gradientNext * $weight;
+                    $secondDeriv += $curvature * $weight;
+                    
+
+                    $avgGradientPrev += $gradientPrev;
+                    $avgGradientNext += $gradientNext;
+                    $gradientDiff += abs($gradientNext - $gradientPrev);
+
+                }
+                // Average gradients
+                $avgGradientPrev /= $sampleSize;
+                $avgGradientNext /= $sampleSize;
+                $gradientDiff /= $sampleSize;
+
+
+                float $tangentAnglePrev = atan2($avgGradientPrev, 1);
+                float $tangentAngleNext = atan2($avgGradientNext, 1);
+                float $tangentDiff = abs($tangentAngleNext - $tangentAnglePrev);
+                
+                if ($tangentDiff > 0.5) { // About 28.6 degrees
+                    continue; // Skip deletion for significant tangent changes
+                }
+
+                // Include curvature in the decision making
+                float $curvatureWeight = 0.3; // Adjust this value to control curvature influence
+                float $relativeChange = $gradientDiff / (abs($gradientAvg) + 0.0001);
+                $relativeChange += abs($secondDeriv) * $curvatureWeight;
+                
+                // Use relative threshold for comparison
+                if ($relativeChange < $adjustedThreshold ) {
+                    if ($seriesStartIndex == -1) {
+                        $seriesStartIndex = $i;
+                    }
+                    $consecutiveDeletes++;
+                    
+                    float $deadZone = max( 0.0, abs($avgGradientNext - $avgGradientNext) - $threshold );
+                    if ($useMiddleKey) {
+                        // Middle key preservation strategy
+                        if ($consecutiveDeletes >= $keySpacing && $deadZone>0.0) {
+                            // Keep the middle key of the series
+                            int $middleIndex = $seriesStartIndex + int($consecutiveDeletes/2);
+                            if ($middleIndex < $numKeysInCurve) {
+                                $keysToDelete[$middleIndex] = -1;
+                            }
+                            $keysToDelete[$deleteIndex] = $i;
+                            $deleteIndex++;
+                        }
+                    } else {
+                        // Every N keys strategy
+                        if ($consecutiveDeletes >= $keySpacing && $deadZone>0.0) {
+                            $consecutiveDeletes = 0;
+                            continue;
+                        }
+                        $keysToDelete[$deleteIndex] = $i;
+                        $deleteIndex++;
+                    }
+                } else {
+                    $consecutiveDeletes = 0;
+                    $seriesStartIndex = -1;
+                }
+            }
+            
+            // Delete keys in reverse order
+            for ($i = size($keysToDelete)-1; $i >= 0; $i--) {
+                if ($keysToDelete[$i] >= 0) { // Only delete valid keys
+                    cutKey -index $keysToDelete[$i] -option keys $curve;
+                }
+            }
+        }
+        // Force viewport update periodically
+        if ($objectIndex % 5 == 0) {
+            refresh -f;
+        }
+    }
+    
+    // Clean up progress bar
+    progressBar -edit -endProgress $gMainProgressBar;
+}
+
+// Example usage: thresholdCleanKeys(threshold, sampleSize, keySpacing, useMiddleKey);
+// threshold - how much gradient difference to allow (smaller = more keys kept)
+// sampleSize - number of keys to sample in each direction for gradient calculation
+// keySpacing - either N for skip-N strategy or minimum series length for middle-key strategy
+// useMiddleKey - 1 to keep middle key of series, 0 to keep every Nth key
+
+// Keep every 3rd key in series
+//thresholdCleanKeys(0.005, 4, 1.0, 3, 0);
+
+// Keep middle key when 5 or more similar keys are found
+//thresholdCleanKeys(0.01, 2, 1.0, 5, 1);
+
+
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+global proc thresholdCleanKeysFromUI() {
+    float $threshold = `floatSliderGrp -q -value thresholdSlider`;
+    int $sampleSize = `intSliderGrp -q -value sampleSizeSlider`;
+    int $mmScalar = `floatSliderGrp -q -value minMaxScalarSlider`;
+    int $keySpacing = `intSliderGrp -q -value keySpacingSlider`;
+    float $rotScalar = `floatSliderGrp -q -value rotScalarSlider`;
+    float $transScalar = `floatSliderGrp -q -value transScalarSlider`;
+    int $useMiddleKey = `checkBox -q -value middleKeyToggle`;
+
+    //Sanitize!
+    if ($threshold < 0.0001) $threshold = 0.00001;
+    if ($sampleSize < 1) $sampleSize = 1;
+    if ($mmScalar < 0.0001) $mmScalar = 0.0001;
+    if ($keySpacing < 1) $keySpacing = 1;
+    if ($useMiddleKey < 0) $useMiddleKey = 0;
+    if ($useMiddleKey > 1) $useMiddleKey = 1;
+    
+    thresholdCleanKeys($threshold, $sampleSize, $mmScalar, $keySpacing, $rotScalar, $transScalar, $useMiddleKey);
+}
+
+global int $gHasCleanedKeys = 0;
+global int $gCleanKeyLastUndo = 0;
+
+global proc thresholdRunUndo(){
+    // Undo previous operation if it exists
+    global int $gHasCleanedKeys;
+    global int $gCleanKeyLastUndo;
+
+    int $undoCount = `undoInfo -q -l` ;
+
+    // Reset if the undo stack has changed significantly
+    if( abs( $undoCount-$gCleanKeyLastUndo ) > 1 ) {
+        $gCleanKeyLastUndo = $undoCount;
+        $gHasCleanedKeys = 0;
+    }
+
+    if ($gHasCleanedKeys> 0 && $undoCount > 0) {
+        undo;
+    }
+
+    $gHasCleanedKeys++;
+}
+
+
+global proc thresholdCleanKeysLiveUpdate() {
+    // Only run if we have cleaned keys before
+    thresholdRunUndo();
+    
+    thresholdCleanKeysFromUI();
+
+    // Create progress bar - proper initialization
+    global string $gMainProgressBar;
+    if (!`control -exists $gMainProgressBar`) {
+        $gMainProgressBar = `progressBar`;
+    }
+    if( `progressBar -query -isCancelled $gMainProgressBar` ) {
+        return; // User cancelled the operation
+    }
+    progressBar -edit -endProgress $gMainProgressBar;
+
+    // Force viewport update
+    refresh -f;
+}
+
+global proc toggleLiveUpdate() {
+    int $isLive = `checkBox -q -value liveUpdateToggle`;
+    
+    string $sliders[] = {"thresholdSlider", "sampleSizeSlider", "minMaxScalarSlider", "keySpacingSlider", "middleKeyToggle", "rotScalarSlider", "transScalarSlider"};
+    string $changeCmd = $isLive ? "thresholdCleanKeysLiveUpdate" : "";
+    
+    for ($slider in $sliders) {
+        if ($slider == "middleKeyToggle") {
+            checkBox -e -cc $changeCmd $slider;
+        } else {
+            if (`floatSliderGrp -exists $slider`) {
+                floatSliderGrp -e -dc $changeCmd $slider;
+            } else {
+                intSliderGrp -e -dc $changeCmd $slider;
+            }
+        }
+    }
+}
+
+global proc createThresholdCleanKeysUI() {
+    string $window = "thresholdCleanKeysWindow";
+    
+    if (`window -exists $window`) {
+        deleteUI $window;
+    }
+    
+    window -title "Threshold Clean Keys" -widthHeight 400 200 $window;
+    columnLayout -adjustableColumn true;
+    
+    floatSliderGrp -label "Threshold" 
+        -field true
+        -min 0.00001 -max 0.1 -value 0.01
+        -step 0.00001
+        thresholdSlider;
+        
+    intSliderGrp -label "Sample Size" 
+        -field true
+        -min 1 -max 10 -value 2
+        -step 1
+        sampleSizeSlider;
+        
+    floatSliderGrp -label "mm Scalar" 
+        -field true
+        -min 0.001 -max 3.0 -value 1.0
+        -step 0.001
+        minMaxScalarSlider;
+        
+    intSliderGrp -label "Key Spacing" 
+        -field true
+        -min 1 -max 20 -value 5
+        -step 1
+        keySpacingSlider;
+        
+    checkBox -label "Use Middle Key Strategy" 
+        -value 0
+        middleKeyToggle;
+    
+    separator -height 10;
+
+    floatSliderGrp -label "Rotate Scalar" 
+        -field true
+        -min 0.001 -max 3.0 -value 1.0
+        -step 0.001
+        rotScalarSlider;
+        
+    floatSliderGrp -label "Translate Scalar" 
+        -field true
+        -min 0.001 -max 3.0 -value 1.0
+        -step 0.001
+        transScalarSlider;
+        
+
+    separator -height 10;
+    
+    // Update to 3 columns layout
+    rowLayout -numberOfColumns 3 
+        -columnWidth3 127 127 126 
+        -columnAlign3 "center" "center" "center";
+        
+        button -label "Clean Keys" 
+            -command "thresholdCleanKeysFromUI";
+            
+        button -label "Undo" 
+            -command "thresholdRunUndo";
+            
+        checkBox -label "Live Update" 
+            -value 1
+            -cc "toggleLiveUpdate"
+            liveUpdateToggle;
+    setParent ..;
+    
+    toggleLiveUpdate(); // Set initial state of live update
+
+    showWindow $window;
+}
+
+// Call this to open the UI
+createThresholdCleanKeysUI();

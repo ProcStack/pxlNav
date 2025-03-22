@@ -257,6 +257,10 @@ export class HeightMap extends ParticleBase{
       }
     }
 
+    if( this.shaderSettings.pScale >=0 ){
+      this.pscale.x = this.shaderSettings.pScale;
+    }
+    console.log( objectRef)
     // Object Reference has priority
     if( objectRef ){
       if( objectRef.hasOwnProperty("userData") && objectRef.userData.hasOwnProperty("SizeX")){
@@ -277,13 +281,11 @@ export class HeightMap extends ParticleBase{
 
       //this.shaderSettings["offsetPos"] = this.shaderSettings["offsetPos"].add( objectRef.position );
 
+      this.pscale.x = objectRef.pScale;
     }
 
     let tankSize = new Vector3( sizeX, sizeY, sizeZ );
 
-    if( objectRef.pScale >=0 ){
-      this.pscale.x = objectRef.pScale;
-    }
 
 
     // -- -- --
