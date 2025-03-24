@@ -165,3 +165,19 @@ buildFireflies(){
 
  - `particles.js` now exporting `ParticleBase`
  - `ParticleBase.js` default behavior expects Uniform, Vertex, Fragment shaders + BufferGoemetry to use as the vertex locations to convert vertices to particles.
+
+ - `EmberWisps.js` + `Smoke.js` particle systems now use `shaderSettings.offsetPos` [Vector3], only Smoke was using `offsetPos.xz`
+ <br/>&nbsp;&nbsp; - Applied after all animation positioning calculated --
+```
+  vec4 mvPos = modelViewMatrix * vec4( animatedPosition + offsetPos, 1.0 );
+```
+
+ - `shaders.js` + `pxlParticles` now export a settings objects that holds all the possible settings per Particle effect
+
+ ```
+  emberWispsSettings, emberWispsVert, emberWispsFrag,
+  dustSettings, dustVert, dustFrag
+  heightMapSettings, heightMapVert, heightMapFrag
+  smokeSettings, smokeVert, smokeFrag
+  snowSettings, snowFallVert, snowFallFrag
+ ```

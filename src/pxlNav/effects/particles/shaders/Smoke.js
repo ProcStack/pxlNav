@@ -4,18 +4,41 @@
 
 import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
 
-export function smokeVert(){
+export const smokeSettings = {
+    'BaseSpread' : 200.0,
+    'SmokeBrightness' : 0.65,
+    'InnerBulster' : -0.05,
+    'SmokeDensity' : 0.12,
+    'WindInfluenceBoost' : 0.45,
+    'TightenBaseSpread' : 1.0,
+    'TightenMidSpread' : 0.08,
+    'TightenTipSpread' : 0.20
+  };
+
+
+export function smokeVert( shaderSettings = {} ){
+
+  shaderSettings = Object.assign( {}, smokeSettings, shaderSettings );
+
+  // -- -- --
+
+  let toFloatStr = ( num ) => {
+    return (num+"").includes(".") ? num : num+".0";
+  };
+
+  // -- -- --
+
   let ret=`
 // Billowy goodness!
-  const float BaseSpread = 200.0;
-  const float SmokeBrightness = 0.65;
-  const float InnerBulster = -0.05;
-  const float SmokeDensity = 0.12;
-  const float WindInfluenceBoost = .45;
+  const float BaseSpread = ${toFloatStr(shaderSettings.BaseSpread)};
+  const float SmokeBrightness = ${toFloatStr(shaderSettings.SmokeBrightness)};
+  const float InnerBulster = ${toFloatStr(shaderSettings.InnerBulster)};
+  const float SmokeDensity = ${toFloatStr(shaderSettings.SmokeDensity)};
+  const float WindInfluenceBoost = ${toFloatStr(shaderSettings.WindInfluenceBoost)};
 
-  const float TightenBaseSpread = 1.0;
-  const float TightenMidSpread = 0.08;
-  const float TightenTipSpread = 0.20;
+  const float TightenBaseSpread = ${toFloatStr(shaderSettings.TightenBaseSpread)};
+  const float TightenMidSpread = ${toFloatStr(shaderSettings.TightenMidSpread)};
+  const float TightenTipSpread = ${toFloatStr(shaderSettings.TightenTipSpread)};
 
   // -- -- --
   `;
@@ -95,7 +118,7 @@ export function smokeVert(){
       vec2 curWindDir = windInf * windDir.xz ;
       
       float yPush = ( life * (life*.5+.5))* min(1.0,pos.y*.12) * .08;
-      pos.xz += curWindDir*life + curWindDir * WindInfluenceBoost + offsetPos.xz ;
+      pos.xz += curWindDir*life + curWindDir * WindInfluenceBoost ;
       
       
       // Alpha with cam distance inf
@@ -123,11 +146,8 @@ export function smokeVert(){
       float originDelta = length(pos)*(-InnerBulster);
       vBrightness *= max(0.0, 1.0-originDelta * life * 0.807) * SmokeBrightness;
       
-      
-      // Add Particle System position
-      pos += modelMatrix[3].xyz + vec3( -1.1, 0.0, 0.67);
-      
-      vec4 mvPos=viewMatrix * vec4(pos, 1.0);
+      // Apply Offset Position and move to camera space
+      vec4 mvPos=modelViewMatrix * vec4(pos+offsetPos, 1.0);
       gl_Position = projectionMatrix*mvPos;
     }`;
   return ret;

@@ -1,6 +1,6 @@
 // pxlNav Shader
 //  -- -- -- --
-// Written by Kevin Edzenga; 2020; 2024-2025
+// Written by Kevin Edzenga; 2020; 2024
 
 import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
  
@@ -8,8 +8,25 @@ import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
 // Snow Shaders                                         //
 /////////////////////////////////////////////////////////
 
-export function snowFallVert( mobile=false ){
-    let colCalcs=!mobile;
+export const snowSettings = {
+  'ProxDist' : 1000.0, // Distance to loop snow points
+  'CalculateCollisions' : true,
+  'LandHeight' : 50.0, // Height of the ground
+};
+
+
+export function snowFallVert( userSettings = {} ){
+
+  userSettings = Object.assign( {}, snowSettings, userSettings );
+
+  // -- -- --
+
+  let toFloatStr = ( num ) => {
+    return (num+"").includes(".") ? num : num+".0";
+  };
+
+  // -- -- --
+
   let ret=shaderHeader();
   ret+=`
     uniform vec2 time;
@@ -23,8 +40,8 @@ export function snowFallVert( mobile=false ){
     varying vec2 vRot;
     varying float vScalar;
     
-    #define PROX 1000.0
-    #define LAND 50.0
+    #define PROX ${toFloatStr(userSettings.ProxDist)}
+    #define LAND ${toFloatStr(userSettings.LandHeight)}
     
     float colDetect( vec2 pos, vec2 pt, vec2 n1, vec2 n2 ){
         vec2 ref=pos-pt;
@@ -58,7 +75,7 @@ export function snowFallVert( mobile=false ){
         // Find rooves from xz pos + dot products
         float floor=0.0;
     `;
-    if( colCalcs ) {
+    if( userSettings.CalculateCollisions ){
         ret+=`
         // -- --
         vec2 lp1=vec2( -186.0, -1002.0 ); // Point 1

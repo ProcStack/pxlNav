@@ -3,15 +3,34 @@
 // Written by Kevin Edzenga; 2020; 2024, 2025
 
 import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
- 
-export function emberWispsVert( shaderSettings ){
+
+export const emberWispsSettings = {
+  'BaseSpeed' : 0.77,
+  'EmberSpread' : 10.0,
+  'EmberFadeDistance' : 0.04,
+  'ShiftFromZero' : 0.6,
+  'MultPosXZ' : 1.313
+};
+
+
+export function emberWispsVert( shaderSettings = {} ){
+
+  shaderSettings = Object.assign( {}, emberWispsSettings, shaderSettings );
+
+  let toFloatStr = ( num ) => {
+    return (num+"").includes(".") ? num : num+".0";
+  }
+
+
   let ret=`
 // Ember Settings
   const vec3 EmberEarlyCd = vec3( 0.8, 0.5, .1 );
   const vec3 EmberOldCd = vec3( 0.634, 0.20, 0.20 );
-  const float BaseSpeed = 0.77;
-  const float EmberSpread = 4.0;
-  const float EmberFadeDistance = 0.04;
+  const float BaseSpeed = ${toFloatStr(shaderSettings.BaseSpeed)};
+  const float EmberSpread = ${toFloatStr(shaderSettings.EmberSpread)};
+  const float EmberFadeDistance = ${toFloatStr(shaderSettings.EmberFadeDistance)};
+  const float ShiftFromZero = ${toFloatStr(shaderSettings.ShiftFromZero)};
+  const float MultPosXZ = ${toFloatStr(shaderSettings.MultPosXZ)};
 
 // -- -- --
   `;
@@ -80,6 +99,9 @@ void main(){
     float spreadPerc = min(1.0, life*2.) * EmberSpread;
     pos.xz=fract(noiseCd.rg*noiseCd.r + loopSeed)*(seeds.x)*(life*seeds.zy*fract(seeds.w*30.0 )) * spreadPerc ;
     
+    // Add gap from (0,0) and scale to spread after shift
+    pos.x = ( pos.x + (step( 0.0, pos.x )-.5) * ShiftFromZero ) * MultPosXZ;
+    pos.z = ( pos.z + (step( 0.0, pos.z )-.5) * ShiftFromZero ) * MultPosXZ;
     
     // Directional push
     float yPush = ( life * (life*.5+.5))  * min(1.0,pos.y*.03) * 4.2;
@@ -107,8 +129,8 @@ void main(){
     float tightenBase = min( 1.0, pos.y* 0.12 + .32 );
     pos.xz *= tightenBase*tightenBase;
     
-    pos += modelMatrix[3].xyz + vec3( -0.85, 0.0269, -0.150);
-    vec4 mvPos=viewMatrix * vec4(pos, 1.0);
+    // Apply Offset Position and move to camera space
+    vec4 mvPos=modelViewMatrix * vec4(pos+offsetPos, 1.0);
     gl_Position = projectionMatrix*mvPos;
     
     float cdAge = clamp( 1.0 - life, 0.0, 1.0);

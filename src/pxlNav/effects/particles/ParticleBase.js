@@ -609,8 +609,6 @@ export class ParticleBase{
       dustUniforms['atlasAlphaTexture'] = {type:"t",value: null };
     }
 
-
-    //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallFrag() );
     let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, dustVert( this.shaderSettings ), dustFrag( this.hasAlphaMap ) );
 
     mtl.transparent=true;

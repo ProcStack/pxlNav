@@ -8,29 +8,19 @@ import {shaderHeader} from "../../../shaders/core/ShaderHeader.js";
 // Floating Dust Shaders                                //
 /////////////////////////////////////////////////////////
 
+export const dustSettings = {
+  "pOpacity" : 1.0,
+  "proxDist" : 200,
+  "hasLights" : false,
+  "fadeOutScalar" : 1.59 , 
+  "wanderInf" : 1.0 , 
+  "wanderRate" : 1.0 , 
+  "wanderFrequency" : 2.85 
+};
 
 export function dustVert( userDustData = {} ){
   
-
-  let dustData = {
-    "pOpacity" : 1.0,
-    "proxDist" : 200,
-    "hasLights" : false,
-    "fadeOutScalar" : 1.59 , 
-    "wanderInf" : 1.0 , 
-    "wanderRate" : 1.0 , 
-    "wanderFrequency" : 2.85 
-  }
-
-  if( userDustData && typeof userDustData == 'object' ){
-    let curSettingKeys = Object.keys( userDustData );
-    let dustKeys = Object.keys( dustData );
-    dustKeys.forEach( key => {
-      if( !curSettingKeys.includes( key ) ){
-        userDustData[key] = dustData[key];
-      }
-    });
-  }
+  userDustData = Object.assign( {}, dustSettings, userDustData );
   
   let toFloatStr = ( num ) => {
     return (num+"").includes(".") ? num : num+".0";

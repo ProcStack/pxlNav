@@ -184,7 +184,6 @@ export class FloatingDust extends ParticleBase{
       positionOffset:{ type:"v", value:this.shaderSettings["offsetPos"] },
       windDir:{ type:"v", value:this.shaderSettings["windDir"] }
     };
-    //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallVert() );
 
     
     let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, dustVert( this.shaderSettings ), dustFrag( this.hasAlphaMap ) );

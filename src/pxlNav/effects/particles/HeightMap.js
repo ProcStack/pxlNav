@@ -306,7 +306,6 @@ export class HeightMap extends ParticleBase{
       positionOffset:{ type:"v", value:this.shaderSettings["offsetPos"] },
       windDir:{ type:"v", value:this.shaderSettings["windDir"] }
     };
-    //let mtl = this.pxlFile.pxlShaderBuilder( snowUniforms, snowFallVert( true ), snowFallVert() );
 
     
     let mtl = this.room.pxlFile.pxlShaderBuilder( dustUniforms, heightMapVert( this.shaderSettings ), heightMapFrag( this.hasAlphaMap ) );
