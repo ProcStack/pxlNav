@@ -2067,7 +2067,6 @@ export class Camera{
     // Get millisecond time differences so camera movement is independant of FPS
     let deltas=[ (curTime-this.pxlDevice.keyDownCount[0]), (curTime-this.pxlDevice.keyDownCount[1]) ]; // 1.000 seconds
 
-    //console.log( dir );
     // Array entry
     let easingMode = this.mobile ? 1 : 0;
 

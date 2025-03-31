@@ -1544,8 +1544,8 @@ export class Environment{
       if(typeof(x)=="object"){
         x.step();
       }else if(typeof(x)=="string"){
-        console.log("shader trigger?");
-        console.log(x);
+        //console.log("shader trigger?");
+        //console.log(x);
         //(x);
       }
     });

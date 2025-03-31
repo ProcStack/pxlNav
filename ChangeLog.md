@@ -1,6 +1,10 @@
 # pxlNav Change Log :: 0.0.27 - 0.0.28
 ---------------------
 
+# NOTE -
+  React.js & Next.js support in `./src/react-next-dev` is initial pass of pxlNav as a component;
+<br/>  These are in development and will be moved to `./examples` when working
+
 # Major Changes
  - `FileIO.js` no longer auto applying diffuse map to emissive map
  - `pxlNav.js` has two new callbacks you can listen to, `step` & `render-prep`
@@ -18,7 +22,8 @@
   - `FileIO.js` all room loading functions take a settings[object] now, to aid with backwards compatability in the future
   - `FileIO.js` now has `setLogging( bool )`, `getSettings()`, & `readSettings()`
 <br/>&nbsp;&nbsp; - `meshIsChild` (default `false`) is used when your GLB is optimized to split mesh + transforms, where the child of the named transform is the geometry itself.
-<br/>&nbsp;&nbsp;&nbsp;&nbsp; - Not all GLB's have split mesh + transforms by default, and would be a manual step in asset development.  If you aren't manually optimizing your GLB, then leave this `false` 
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; - Not all GLB's have split mesh + transforms by default, and would be a manual step in asset development.
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If you aren't manually optimizing your GLB, then leave this `false` 
 <br/>&nbsp;&nbsp; - `getSettings()` returns -
 
 ```
@@ -77,8 +82,9 @@
   - `pxlNav.js` + `Environment.js` were never reaching load state for pxlRoom module
 <br/>&nbsp;&nbsp; - Attempt to catch errors & check for methods added mostly to `Environment.js`
 
-  - `Device.js` drops failed rejections in attempt a global catch for missed erroneous Promises / async 
+  - `Device.js` catches failed promises / rejections; global catch for missed erroneous Promises / Async 
 <br/>&nbsp;&nbsp; - May error twice, but shouldn't error in the first place; saving potential heart ache.
+<br/>&nbsp;&nbsp;&nbsp;&nbsp; Testing to be had still... unit test failed promises
 
 ---
 
@@ -122,8 +128,6 @@ import { fireflyVert, fireflyFrag } from "./Shaders.js";
 //   Using the `fireflies_vfx` geometry from the CampfireEnvironment.fbx
 //     Marked with the custom property `pSystem = true`
 buildFireflies(){
-  if( this.mobile ) return;
-
   let nameOfSystem = "fireflies_vfx";
   if( this.particleList?.hasOwnProperty( nameOfSystem ) && this.particleList[nameOfSystem].type == "BufferGeometry" ){
     let fireflyUniforms = {
@@ -131,9 +135,7 @@ buildFireflies(){
         'atlasAlphaTexture' : { type:'t', value: null },
         'noiseTexture' : { type:"t", value: null },
         'pointScale' : { type: "v", value: new Vector2( 5.0, 0.0 ) },
-        'tint' : { type: "c", value: new Color( 1.5, 1.4, 0.6 ) },
-        'fogColor' : { type: "c", value: this.fogColor },
-        'rate' : { type:"f", value:.035 }
+        'tint' : { type: "c", value: new Color( 1.5, 1.4, 0.6 ) }
       };
     fireflyUniforms.atlasTexture.value = this.pxlUtils.loadTexture( "sprite_dustAtlas_rgb.jpg", null, {'encoding':SRGBColorSpace} );
     fireflyUniforms.atlasAlphaTexture.value = this.pxlUtils.loadTexture( "sprite_dustAtlas_alpha.jpg" );
@@ -172,6 +174,8 @@ buildFireflies(){
   vec4 mvPos = modelViewMatrix * vec4( animatedPosition + offsetPos, 1.0 );
 ```
 
+ - `FloatingDust.js` clamps alpha after multiplying `FloatingDust.getSettings()['pOpacity']` into the frag
+
  - `shaders.js` + `pxlParticles` now export a settings objects that holds all the possible settings per Particle effect
 
  ```
@@ -181,3 +185,6 @@ buildFireflies(){
   smokeSettings, smokeVert, smokeFrag
   snowSettings, snowFallVert, snowFallFrag
  ```
+
+  - `pxlNavBridge.js` + `pxlNavContainer.jsx` first passes added to allow for React & Next usage with `pxlNav`
+ <br/>&nbsp;&nbsp; - First pass added, to be updated for v0.0.29

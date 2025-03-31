@@ -850,7 +850,7 @@ export class ShaderEditor {
   updateShaderList(){
     let pulldown=this.children.shaderSelect;
     if( !pulldown ){
-      console.log("No pulldown");
+      console.log("No Object shader pulldown found.");
       console.log(this.gui);
       return;
     }

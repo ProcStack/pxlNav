@@ -261,7 +261,7 @@ export function heightMapFrag( hasAlphaMap = false ){
   }
 
   ret+=`
-        float alpha = min(1.0, dustCd.a*1.5) * vAlpha ;
+        float alpha = min(1.0, dustCd.a*1.75) * vAlpha ;
         vec4 Cd=vec4( dustCd.rgb * tint, alpha );
 
         gl_FragColor=Cd;

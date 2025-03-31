@@ -213,7 +213,7 @@ export function dustFrag( hasAlphaMap = false ){
   }
 
   ret+=`
-        float alpha = dustCd.a * vAlpha * vScalar;
+        float alpha = clamp( dustCd.a * vAlpha * vScalar, 0.0, 1.0 );
         vec4 Cd=vec4( dustCd.rgb, alpha );
 
         gl_FragColor=Cd;

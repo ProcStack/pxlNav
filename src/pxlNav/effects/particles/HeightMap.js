@@ -260,7 +260,7 @@ export class HeightMap extends ParticleBase{
     if( this.shaderSettings.pScale >=0 ){
       this.pscale.x = this.shaderSettings.pScale;
     }
-    console.log( objectRef)
+    
     // Object Reference has priority
     if( objectRef ){
       if( objectRef.hasOwnProperty("userData") && objectRef.userData.hasOwnProperty("SizeX")){
