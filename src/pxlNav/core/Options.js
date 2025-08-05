@@ -267,6 +267,7 @@ export const pxlOptions = {
         'pc' : 1.0,
         'mobile' : 1.5
       },
+    'fullLoadPreBoot' : true,
     'staticCamera' : false,
     'autoCamera' : false,
     'allowStaticRotation' : false,

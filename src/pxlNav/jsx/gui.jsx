@@ -5,36 +5,36 @@
 import { useRef } from 'react';
 
 import React, { useEffect, useState } from 'react';
-import { getPxlNav, subscribeToPxlNav } from './pxlNavBridge';
+import { getPxlNav, subscribePxlNav, unsubscribePxlNav } from '../../pxlNavBridge';
 
 export default function pxlNavHUD() {
-  const [hudVisibility, setHudVisibility] = useState(true);
-  const [currentRoom, setCurrentRoom] = useState('');
-  const componentId = useRef('hud-' + Math.random().toString(36).substring(2));
+  const [hudVisibility, setHudVisibility] = useState( true );
+  const [currentRoom, setCurrentRoom] = useState( '' );
+  const componentId = useRef( 'hud-' + Math.random().toString(36).substring(2) );
   
   useEffect(() => {
     const pxlNavInstance = getPxlNav();
     if (!pxlNavInstance) return;
     
     // Get initial states
-    setHudVisibility(pxlNavInstance.pxlGuiDraws.hudVisibility);
-    setCurrentRoom(pxlNavInstance.pxlEnv.currentRoom);
-    
+    setHudVisibility( pxlNavInstance.pxlGuiDraws.hudVisibility );
+    setCurrentRoom( pxlNavInstance.pxlEnv.currentRoom );
+
     // Subscribe to changes
-    subscribeToPxlNav(componentId.current, 'roomChange-End', (event) => {
-      setCurrentRoom(pxlNavInstance.pxlEnv.currentRoom);
+    subscribePxlNav( componentId.current, 'roomChange-End', (event)=>{
+      setCurrentRoom( pxlNavInstance.pxlEnv.currentRoom );
     });
     
     // Clean up subscriptions
-    return () => unsubscribeFromPxlNav(componentId.current);
+    return () => unsubscribePxlNav( componentId.current );
   }, []);
   
   // Handle button clicks by calling pxlNav methods
-  const handleToggleHud = () => {
+  const handleToggleHud = ()=>{
     const pxlNavInstance = getPxlNav();
-    if (pxlNavInstance) {
-      pxlNavInstance.pxlGuiDraws.guiToggleVisibility(!hudVisibility);
-      setHudVisibility(!hudVisibility);
+    if( pxlNavInstance ){
+      pxlNavInstance.pxlGuiDraws.guiToggleVisibility( !hudVisibility );
+      setHudVisibility( !hudVisibility );
     }
   };
   

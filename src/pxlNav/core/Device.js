@@ -1403,12 +1403,14 @@ export class Device{
   }
 
   unsubscribe( eventType, callbackFn ){
+    let index = -1;
     if( this.callbackList[eventType] ){
-      let index = this.callbackList[eventType].indexOf( callbackFn );
+      index = this.callbackList[eventType].indexOf( callbackFn );
       if( index >= 0 ){
         this.callbackList[eventType].splice( index, 1 );
       }
     }
+    return (index >= 0);
   }
 
   emit( eventType, data ){

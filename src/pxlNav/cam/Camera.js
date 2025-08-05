@@ -2758,6 +2758,23 @@ export class Camera{
   }
 
   /**
+   * Unsubscribes from a camera event.
+   * @param {string} event - The camera event.
+   * @param {function} callback - The callback function.
+   * @returns {boolean} - Whether the callback was found and unsubscribed.
+   */
+  unsubscribe( event, callback ){
+    let hasCallback = false;
+    if( this.callbacks.hasOwnProperty(event) ){
+      hasCallback = this.callbacks[event].includes(callback);
+      if( hasCallback ){
+        this.callbacks[event] = this.callbacks[event].filter( cb => cb !== callback );
+      }
+    }
+    return hasCallback;
+  }
+
+  /**
    * Emits a camera event.
    * @private
    */

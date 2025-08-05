@@ -1,4 +1,4 @@
-export class MediaPipePlugin {
+export class MediaPipePoseEngine {
   constructor() {
     this.workerScriptUrl = "./PoseEngine_worker.js";
     this.worker = null;
@@ -49,14 +49,14 @@ export class MediaPipePlugin {
     try {
       // Load MediaPipe from CDN
       console.log("Loading MediaPipe...");
-      await MediaPipePlugin.loadScriptWithProgress(mediaPipeUrl, onProgress);
+      await MediaPipePoseEngine.loadScriptWithProgress(mediaPipeUrl, onProgress);
 
       // Initialize WebWorker
       this.worker = new Worker(this.workerScriptUrl);
       this.booted = true;
-      console.log("MediaPipe Plugin Initialized");
+      console.log("MediaPipe Pose Engine Initialized");
     } catch (error) {
-      console.error("Error initializing MediaPipePlugin:", error);
+      console.error("Error initializing MediaPipePoseEngine:", error);
     }
   }
 
@@ -65,7 +65,7 @@ export class MediaPipePlugin {
 
   sendMessage(message) {
     if (!this.booted) {
-      console.warn("MediaPipePlugin is not initialized.");
+      console.warn("MediaPipePoseEngine is not initialized.");
       return;
     }
     this.worker.postMessage(message);

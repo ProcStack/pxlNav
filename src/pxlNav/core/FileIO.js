@@ -404,6 +404,7 @@ export class FileIO{
     mesh.material.specular.b = mesh.material.specular.b*.5 +.1;
     
     //mesh.material.side=FrontSide;
+    //mesh.material.side=FrontSide;
     //mesh.material.depthTest=true;
     mesh.material.side=BackSide;
     mesh.material.depthWrite=false;

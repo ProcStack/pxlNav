@@ -39,13 +39,17 @@ import {
 } from "../../libs/three/three.module.min.js";
 /*ShaderMaterial*/
 
+// -- -- --
+
+import { RoomEnvironment, pxlEffects } from "../../pxlNav.esm.js";
+
 import {
-        envGroundVert, envGroundFrag,
-        instPlantsVert, instPlantsFrag,
-        creekWaterVert, creekWaterFrag,
-        waterWayVert, waterWayFrag
-      } from "./Shaders.js";
-import { RoomEnvironment, pxlShaders, pxlEffects } from "../../pxlNav.esm.js";
+  envGroundVert, envGroundFrag,
+  instPlantsVert, instPlantsFrag,
+  creekWaterVert, creekWaterFrag,
+  pineTreeFrag, pineTreeVert,
+  waterWayVert, waterWayFrag
+} from "./Shaders.js";
 
 const FloatingDust = pxlEffects.pxlParticles.FloatingDust;
 const HeightMapSpawner = pxlEffects.pxlParticles.HeightMap;
@@ -61,6 +65,7 @@ export class OutletEnvironment extends RoomEnvironment{
     // The FBX file to load for your room
     //   Defaults to " ./ pxlRooms / *YourRoomEnv* / Assets / *YourSceneFile.fbx* "
     this.sceneFile = this.assetPath+"OutletEnvironment.fbx";
+    //this.sceneFile = this.assetPath+"OutletEnvironment.glb";
 		
 		// Environment Shader 
 		this.spiralizerUniforms={};
@@ -70,12 +75,12 @@ export class OutletEnvironment extends RoomEnvironment{
     this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
     
     // Near-Far Clipping Planes for your room
-    this.pxlCamNearClipping = 3;
+    this.pxlCamNearClipping = 2.25;
     this.pxlCamFarClipping = 12000;
 
     // Room Fog Settings
     this.fogColor=new Color( 0x48415d );
-    this.fogExp=.0007;
+    this.fogExp=.00035;
     this.fog=new FogExp2( this.fogColor, this.fogExp);
         
 	}
@@ -89,7 +94,7 @@ export class OutletEnvironment extends RoomEnvironment{
 // OutletEnvironment Helper Functions
 
 buildDust(){
-  if( this.mobile ) return;
+  //if( this.mobile ) return;
 
   let vertexCount = 600; // Point Count
   let pScale = 8.0;  // Point Base Scale
@@ -158,15 +163,16 @@ buildDust(){
 builBugs(){
   //if( this.mobile ) return;
 
-  let vertexCount = 500; // Point Count
-  let pScale = 10.0;  // Point Base Scale
-  let visibleDistance = 400;  // Proximity Distance from Camera
+  let vertexCount = 250; // Point Count
+  let pScale = 5.5;  // Point Base Scale
+  let visibleDistance = 550;  // Proximity Distance from Camera
   let particleOpacity = 1.0;  // Overall Opacity
   let opacityRolloff = 0.9;  // Distance-opacity falloff multiplier
 
-  let jumpHeightMult = 17.0; // How high the bugs jump
-  let wanderInfluence = 0.85; // How much the particle sways
-  let wanderFrequency = 3.50; // How frequent the sway happens
+  let jumpHeightMult = 18.0; // How high the bugs jump
+  let wanderInfluence = 0.93; // How much the particle sways
+  let wanderRate = 1.75; // How fast the sway happens
+  let wanderFrequency = 5.25; // How frequent the sway happens
 
   // -- -- --
 
@@ -180,27 +186,26 @@ builBugs(){
   grassBugsSettings["proxDist"] = visibleDistance;
   grassBugsSettings["fadeOutScalar"] = opacityRolloff;
   grassBugsSettings["additiveBlend"] = false;
+  
+  grassBugsSettings["tint"].set( .8, .64, .58 );
 
   grassBugsSettings["jumpHeightMult"] = jumpHeightMult;
-  grassBugsSettings["offsetPos"].y = .1 ;
+  grassBugsSettings["offsetPos"].y = .2 ;
   
   grassBugsSettings["wanderInf"] = wanderInfluence;
+  grassBugsSettings["wanderRate"] = wanderRate;
   grassBugsSettings["wanderFrequency"] = wanderFrequency;
   
-  grassBugsSettings["atlasPicks"] = [
-    ...grassBugsSystem.dupeArray([0.0,0.],4), ...grassBugsSystem.dupeArray([0.25,0.],4),
-    ...grassBugsSystem.dupeArray([0.50,0.],4), ...grassBugsSystem.dupeArray([0.75,0.],4),
-    ...grassBugsSystem.dupeArray([0.50,0.25],4), ...grassBugsSystem.dupeArray([0.75,0.25],4),
-    ...grassBugsSystem.dupeArray([0.50,0.5],2), ...grassBugsSystem.dupeArray([0.75,0.5],2),
-    ...grassBugsSystem.dupeArray([0.50,0.75],3), ...grassBugsSystem.dupeArray([0.75,0.75],3)
-  ];
-
   // Use a texture from the internal `pxlAsset` folder; ( RGB, Alpha )
+
+  // For the darker tones, few of the white dust
+  grassBugsSettings["atlasPicks"] = [ [0.0,0.0], [0.25,0.0], [0.0,0.25], [0.25,0.25] ];
+  grassBugsSettings["atlasPicks"] = [ [0.50,0.0], [0.5,0.25], [0.75,0.0], [0.75,0.25] ];
   grassBugsSystem.setAtlasPath( "sprite_dustLiquid_rgb.jpg", "sprite_dustLiquid_alpha.jpg" );
 
 
   // Set height map
-  grassBugsSystem.setHeightMapPath( this.assetPath+"bug_heightMap.jpg" );
+  grassBugsSystem.setHeightMapPath( this.assetPath+"bug_heightMap.webp" );
 
   // Set spawn map
   grassBugsSystem.setSpawnMapPath( this.assetPath+"bug_spawnMap.jpg" );
@@ -212,6 +217,7 @@ builBugs(){
 
   // Generate geometry and load texture resources
   grassBugsSystem.build( grassBugsSettings, bugObj );
+  
   this.particleList[systemName] = grassBugsSystem;
 }
 
@@ -308,15 +314,15 @@ builBugs(){
     );
 
     envGroundUniforms.fogColor.value = this.scene.fog.color;
-    envGroundUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Diffuse.jpg", null, textureOptionsSRGB );
+    envGroundUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Diffuse.webp", null, textureOptionsSRGB );
 
-    envGroundUniforms.dirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"Dirt_Diffuse.jpg", null, textureOptionsSRGB );
-    envGroundUniforms.crackedDirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"CrackedDirtGround_diffuse.jpg", null, textureOptionsSRGB );
-    envGroundUniforms.hillDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"RockLayerDirtHill_diffuse.jpg", null, textureOptionsSRGB );
-    envGroundUniforms.grassDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"GrassA_diffuse.jpg", null, textureOptionsSRGB );
-    envGroundUniforms.mossDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"MossyB_diffuse.jpg", null, textureOptionsSRGB );
+    envGroundUniforms.dirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"Dirt_Diffuse.webp", null, textureOptionsSRGB );
+    envGroundUniforms.crackedDirtDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"CrackedDirtGround_diffuse.webp", null, textureOptionsSRGB );
+    envGroundUniforms.hillDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"RockLayerDirtHill_diffuse.webp", null, textureOptionsSRGB );
+    envGroundUniforms.grassDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"GrassA_diffuse.webp", null, textureOptionsSRGB );
+    envGroundUniforms.mossDiffuse.value = this.pxlUtils.loadTexture( this.assetPath+"MossyB_diffuse.webp", null, textureOptionsSRGB );
 
-    envGroundUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Data.jpg", null, textureOptionsClamp );
+    envGroundUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"EnvGround_Data.webp", null, textureOptionsClamp );
 
     envGroundUniforms.noiseTexture.value = this.cloud3dTexture;
     envGroundUniforms.uniformNoise.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg", null, textureOptionsRepeat );
@@ -344,12 +350,14 @@ builBugs(){
       }]
     )
     grassCardsAUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
-    grassCardsAUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_diffuse.jpg" );
-    grassCardsAUniforms.alphaMap.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_alpha.jpg" );
+    grassCardsAUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_diffuse.webp" );
+    grassCardsAUniforms.alphaMap.value = this.pxlUtils.loadTexture( this.assetPath+"grassCardsA_mask.jpg" );
 
     let grassCardSettings = {
       'buildAlpha' : true,
-      'addShimmer' : true
+      'addShimmer' : true,
+      'depthScalar' : .0001,
+      'dewarpFactor' : .35,
     }
 
     let grassCardsMat=this.pxlFile.pxlShaderBuilder( grassCardsAUniforms, instPlantsVert(), instPlantsFrag( grassCardSettings ) );
@@ -379,10 +387,52 @@ builBugs(){
     )
     grassClusterUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
 
-    let grassMat=this.pxlFile.pxlShaderBuilder( grassClusterUniforms, instPlantsVert(), instPlantsFrag() );
-    grassMat.side = FrontSide;
+    let instPlantSettings = {
+      'depthScalar' : .00013,
+      'dewarpFactor' : .35,
+    }
+
+    let grassMat=this.pxlFile.pxlShaderBuilder( grassClusterUniforms, instPlantsVert(), instPlantsFrag(instPlantSettings) );
+    grassMat.side = DoubleSide;
     grassMat.lights = true;
     grassMat.transparent = false;
+    
+        
+        
+    // -- -- --
+    
+
+    // -- -- -- -- -- -- -- -- -- -- -- -- --
+    // -- Pine Tree Instances Material -- --
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
+    let pineTreeUniforms = UniformsUtils.merge(
+      [
+      UniformsLib[ "lights" ],
+      /*UniformsLib[ "shadowmap" ],*/
+      {
+        'diffuse' : { type:'t', value: null },
+        'alphaMap' : { type:'t', value: null },
+        'noiseTexture' : { type:'t', value: null },
+        'fogColor' : { type: "c", value: this.fogColor },
+      }]
+    )
+    pineTreeUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
+    pineTreeUniforms.diffuse.value = this.pxlUtils.loadTexture( this.assetPath+"pineTree_bark_diffuse.webp" );
+    pineTreeUniforms.alphaMap.value = this.pxlUtils.loadTexture( this.assetPath+"pineTree_bark_alpha.jpg" );
+
+
+    let pineTreeSettings = {
+      'buildAlpha' : true,
+      'alphaTest' : 0.1,
+      'zFitScalar' : 0.40,
+    };
+
+    let pineTreeMat=this.pxlFile.pxlShaderBuilder( pineTreeUniforms, pineTreeVert(), pineTreeFrag( pineTreeSettings ) );
+    pineTreeMat.side = DoubleSide;
+    pineTreeMat.lights = true;
+    pineTreeMat.transparent = false;
     
         
     
@@ -427,7 +477,6 @@ builBugs(){
         [
         UniformsLib[ "lights" ],
         {
-          'dataTexture' : { type:'t', value: null },
           'coastLineTexture' : { type:'t', value: null },
           'rippleTexture' : { type:'t', value: null },
           'noiseTexture' : { type:'t', value: null },
@@ -436,8 +485,7 @@ builBugs(){
           'intensity': { type:'f', value:1 },
         }]
     )
-    waterWayUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterWay_Data.jpg", textureOptionsSRGB );
-    waterWayUniforms.coastLineTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterWay_CoastLine.jpg" );
+    waterWayUniforms.coastLineTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterWay_CoastLine.webp" );
     waterWayUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipples_CoastalB.jpg" );
     waterWayUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg", textureOptionsRepeat );
 
@@ -467,7 +515,6 @@ builBugs(){
       [
       UniformsLib[ "lights" ],
       {
-        'dataTexture' : { type:'t', value: null },
         'rippleTexture' : { type:'t', value: null },
         'noiseTexture' : { type:'t', value: null },
         'fogColor' : { type: "c", value: this.fogColor },
@@ -475,7 +522,6 @@ builBugs(){
         'intensity': { type:'f', value:1 },
       }]
     )
-    creekWaterUniforms.dataTexture.value = this.pxlUtils.loadTexture( this.assetPath+"CreekWater_Data.jpg" );
     creekWaterUniforms.rippleTexture.value = this.pxlUtils.loadTexture( this.assetPath+"WaterRipples_CoastalB.jpg" );
     creekWaterUniforms.noiseTexture.value = this.pxlUtils.loadTexture( this.assetPath+"Noise_UniformWebbing.jpg" );
 
@@ -503,6 +549,7 @@ builBugs(){
 
     this.materialList[ "grassClusterA_lod0_geo" ] = grassMat;
     this.materialList[ "grassClusterA_lod1_geo" ] = grassMat;
+    this.materialList[ "grassClusterA_lod2_geo" ] = grassCardsMat;
 
     this.materialList[ "swampGrassA_lod0_geo" ] = grassMat;
     this.materialList[ "swampGrassA_lod1_geo" ] = grassMat;
@@ -513,14 +560,27 @@ builBugs(){
     this.materialList[ "catTailA_lod0_geo" ] = grassMat;
     this.materialList[ "catTailA_lod1_geo" ] = grassMat;
 
+    this.materialList[ "pineTreeA_lod0_geo" ] = pineTreeMat;
+    this.materialList[ "pineTreeA_lod1_geo" ] = pineTreeMat;
+
     this.materialList[ "waterWay_geo" ] = waterWayMat;
 
     this.materialList[ "creekWater_geo" ] = creekWaterMat;
     
   //
     // -- -- -- 
-        
-		let fieldFbxLoader = this.pxlFile.loadRoomFBX( this );// , null, null, true );
+    
+    // 'meshIsChild' - Some GLTF compressions splits Meshes -&- Transforms into Parent-Child relationships
+    //                   Read transforms from the parent, but apply the material + settings to the child
+    let loadSettings = Object.assign( {}, this.pxlFile.getSettings() );
+    loadSettings['filePath'] = this.sceneFile;
+    loadSettings['fileType'] = this.pxlEnums.FILE_TYPE.GLB; // Optional; Default is 'AUTO'
+    loadSettings['filePath'] = this.assetPath+"OutletEnvironment.glb";
+    loadSettings['filePath'] = this.assetPath+"OutletEnvironment_blender.glb";
+    loadSettings['meshIsChild'] = true; // If your GLB has been "optimized" to split transforms & meshes
+    loadSettings['enableLogging'] = true;
+		//let fieldFbxLoader = this.pxlFile.loadRoom( this, loadSettings );
+		let fieldFbxLoader = this.pxlFile.loadRoom( this );
 		
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- //
 		

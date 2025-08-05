@@ -340,7 +340,8 @@ class pxlNav{
     this.pxlUtils = new pxlBase.Utils( this.folderDict["assetRoot"], this.mobile );
     this.pxlFile = new pxlBase.FileIO( this.folderDict );
 
-    this.pxlExtensions = new pxlBase.Extensions();
+    // Mid Dev, null for now until fully implemented
+    this.pxlExtensions = null; // new pxlBase.Extensions();
 
     this.pxlAudio = new pxlBase.Audio( this.pxlTimer );
     this.pxlAutoCam = new pxlBase.AutoCamera( this.autoCam, this.mobile );
@@ -859,10 +860,11 @@ class pxlNav{
   monitorRoomLoad( tmpThis, loop=0, maxAttempts = 25 ){
     let stillLoadingCheck=false;
     let keys=Object.keys(tmpThis.pxlEnv.geoLoadList);
+    let bootOnFirst = !pxlOptions["fullLoadPreBoot"];
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
-      stillLoadingCheck=tmpThis.pxlEnv.geoLoadList[keys[x]]==0;
+      stillLoadingCheck = tmpThis.pxlEnv.geoLoadList[keys[x]]==0;
       stillLoadingCheck = stillLoadingCheck && !tmpThis.pxlEnv.roomSceneList[x]?.booted;
-      if(keys[x] == this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
+      if( bootOnFirst && keys[x] == this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
         break;
       }
     }
@@ -1278,13 +1280,71 @@ class pxlNav{
           this.pxlCamera.subscribe( camEventType, callbackFunc );
 
         }else{
-          this.callbacks[eventType] = callbackFunc;
+          if( !this.callbacks.hasOwnProperty(eventType) ){
+            this.callbacks[eventType] = [];
+          }
+          this.callbacks[eventType].push( callbackFunc );
         }
       }
     }else{
       console.warn("Warning : `pxlNav.subscribe( '"+eventType+"', ... )` was used; use 'help' for a list of valid events.");  
     }
   }
+
+
+  /**
+   * 
+   * @param {*} eventType
+   * @param {*} callbackFunc 
+   */
+  unsubscribe( eventType, callbackFunc ){
+    let retValue = false;
+    let eventSplit = eventType.split("-");
+    if( eventSplit[0] == "device" ){
+      retValue = this.pxlDevice.unsubscribe(  eventSplit[1], callbackFunc );
+    }else if( eventSplit[0] == "camera" ){
+      let camEventType = pxlEnums.CAMERA_EVENT.MOVE;
+
+      // Find the camera event type
+      switch( eventSplit[1] ){
+          case "move":
+            camEventType = pxlEnums.CAMERA_EVENT.MOVE;
+            break;
+          case "rotate":
+            camEventType = pxlEnums.CAMERA_EVENT.ROTATE;
+            break;
+          case "jump":
+            camEventType = pxlEnums.CAMERA_EVENT.JUMP;
+            break;
+          case "fall":
+            camEventType = pxlEnums.CAMERA_EVENT.FALL;
+            break;
+          case "landed":
+            camEventType = pxlEnums.CAMERA_EVENT.LANDED;
+            break;
+          case "collision":
+            camEventType = pxlEnums.CAMERA_EVENT.COLLISION;
+            break;
+          default:
+            console.warn("Warning : `pxlNav.subscribe( 'camera-"+eventSplit[1]+"', ... )` was used; use 'help' for a list of valid events.");
+            break;
+        }
+
+      retValue = this.pxlCamera.unsubscribe( camEventType, callbackFunc );
+
+    }else{
+      if( this.callbacks.hasOwnProperty(eventType) ){
+        if( this.callbacks.hasOwnProperty(eventType) && this.callbacks[eventType] instanceof Array ){
+          retValue = this.callbacks[eventType].includes( callbackFunc );
+          this.callbacks[eventType] = this.callbacks[eventType].filter( cb => cb !== callbackFunc );
+        }else{
+          console.warn("Warning : `pxlNav.unsubscribe( '"+eventType+"', ... )` was used; but the callback function does not match the one used in `pxlNav.subscribe()`.");
+        }
+      }
+    }
+    return retValue;
+  }
+
 
   /**
    *   
@@ -1294,7 +1354,7 @@ class pxlNav{
    */
 
   emit( eventType, eventValue, statusValue=null ){
-    if( this.callbacks[eventType] ){
+    if( this.callbacks.hasOwnProperty(eventType) ){
       let msg = {
         "type" : eventType,
         "value" : eventValue
@@ -1302,7 +1362,9 @@ class pxlNav{
       if( statusValue !== null ){
         msg["status"] = statusValue;
       }
-      this.callbacks[eventType]( msg );
+      for( let cb of this.callbacks[eventType] ){
+        cb( msg );
+      }
     }
   }
 }

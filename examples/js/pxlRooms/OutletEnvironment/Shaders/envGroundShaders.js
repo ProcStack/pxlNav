@@ -149,6 +149,13 @@ export function envGroundFrag( pointLightCount ){
       uv.x = ( pos.x + pos.y*.05 + baseCd.r + baseCd.r*0.50);
       uv.y = ( pos.z + pos.y*.05 + baseCd.g + baseCd.g*0.65);
       
+      // -- -- -- -- -- -- -- -- -- -- -- -- --
+      // -- Texture Offset by Position atan  -- --
+      // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      
+      vec2 atanVec = normalize( vec2( vModelPos.x + vModelPos.y*.5, vModelPos.z + vModelPos.y*.1 ) );
+      float deg = atan( atanVec.y, atanVec.x );
+      
       // -- -- -- -- -- -- -- -- 
       // -- UV & Color Noise  -- --
       // -- -- -- -- -- -- -- -- -- --
@@ -169,14 +176,6 @@ export function envGroundFrag( pointLightCount ){
       float baseDirtNoise = dirtNoise;
       
       
-      // -- -- -- -- -- -- -- -- -- -- -- -- --
-      // -- Texture Offset by Position atan  -- --
-      // -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      
-      vec2 atanVec = normalize( vec2( vModelPos.x + vModelPos.y*.5, vModelPos.z + vModelPos.y*.1 ) );
-      float deg = atan( atanVec.y, atanVec.x );
-      deg = cos(deg*PI*2.0 - pos.x*.02 + pos.z*.02 )*0.050;
-      
       // -- -- -- -- -- -- -- -- -- --
       // -- World Space Texturing - -- --
       // -- -- -- -- -- -- -- -- -- -- -- --
@@ -186,7 +185,7 @@ export function envGroundFrag( pointLightCount ){
       // Masking the fire pit since there is too much variation in normals
       
       //vec2 subUv = fract( pos.xz + baseDirtNoise );
-      vec2 subUv = vec2( pos.x*.2 + pos.z*.2325  );
+      vec2 subUv = pos.xz;
       
       // Read world-uv'ed textures
       vec3 crackDirtCd = texture2D( crackedDirtDiffuse, subUv ).rgb ;
@@ -196,7 +195,7 @@ export function envGroundFrag( pointLightCount ){
       vec3 grassCd = texture2D( grassDiffuse, pos.xz*2.0 + uvNoiseOffset ).rgb ;
       
       // Shift the rocky hill texture so it reads it more horizontally
-      vec2 hillLayerUv =  vec2( subUv.x-uv.y*0.15,  vModelPos.y*.007 ) ;  
+      vec2 hillLayerUv =  vec2( pos.x*0.1885 + pos.z*0.836 + deg*9.17,  vModelPos.y*.007 ) ;  
       vec3 rockyHillCd = texture2D(hillDiffuse,hillLayerUv).rgb ;
       
       // -- -- --

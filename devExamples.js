@@ -46,8 +46,15 @@ app.get("/", function(req,res){
 //   So the 404 page only reroutes to index.htm
 app.use(function(req, res, next) {
   //res.status(404).sendFile(path.join(__dirname, publicDir, '404.html'));
+
   // Since no 404 page exists, reroute to index.htm
-  res.redirect( "/" + indexFile );
+  // Only redirect HTML page requests, not asset requests (.js, .css, .png, etc.)
+  if (req.accepts('html') && !req.path.includes('.')) {
+    res.redirect( "/" + indexFile );
+  } else {
+    // For asset requests, return proper 404
+    res.status(404).send('File not found');
+  }
 });
 
 // -- -- --

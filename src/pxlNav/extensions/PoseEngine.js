@@ -1,5 +1,6 @@
 
 import { ExtensionBase } from './ExtensionBase.js';
+import { MediaPipePoseEngine } from './PoseEngine/MediaPipe.js';
 
 const pxlPoseEngineList = [
   'MediaPipe'
@@ -15,15 +16,16 @@ const pxlPoseEngineList = [
   */
 ];
 
-export class PoseEngine extends ExtensionBase {
+export default class PoseEngine extends ExtensionBase {
   constructor(modelName) {
+    super();
     this.active = false;
     this.verbose = false;
 
 
     switch (modelName) {
       case 'MediaPipe':
-        this.model = new MediaPipePose(); // Google's model
+        this.model = new MediaPipePoseEngine(); // Google's model
         break;
       default:
         throw new Error("Unknown pose estimation '"+modelName+"' model");
