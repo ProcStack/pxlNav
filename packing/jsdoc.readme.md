@@ -1,4 +1,4 @@
-# pxlNav v0.0.28 Documentation
+# pxlNav v1.0.0 Documentation
 
 
 These are the docs for **`pxlNav`**
