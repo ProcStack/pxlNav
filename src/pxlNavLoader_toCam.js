@@ -1,4 +1,4 @@
-// pxlNav v0.0.28 -  Javascript Launcher
+// pxlNav v1.0.0 -  Javascript Launcher
 //  Written by Kevin Edzenga; 2024,2025
 //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --

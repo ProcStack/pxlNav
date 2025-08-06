@@ -6,6 +6,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "roomManifest": "node ./scripts/generateRoomManifest.js",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     ]
   },
   "dependencies": {
-    "pxlnav": "file:../../pxlNav"
+    "pxlnav": "file:../../../",
+    "three": "^0.171.0"
   }
 }

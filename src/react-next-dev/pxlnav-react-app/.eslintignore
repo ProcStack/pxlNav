@@ -1,0 +1,11 @@
+# Ignore minified third-party libraries
+src/components/libs/three/ktx-parse.module.js
+src/components/libs/three/zstddec.module.js
+
+# Ignore all minified files
+**/*.min.js
+**/*.module.js
+
+# Ignore build outputs
+build/
+dist/

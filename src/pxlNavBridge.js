@@ -42,13 +42,25 @@ export function subscribePxlNav( componentId, eventType, callback ){
 export function unsubscribePxlNav( componentId ){
   if( !subscriptions.has( componentId ) ) return;
   
-  // Note: pxlNav doesn't appear to have an unsubscribe method
-  // This is a limitation we need to address
   const componentSubscriptions = subscriptions.get( componentId );
+  let unsubscribedCount = 0;
+  
   componentSubscriptions.forEach(( { eventType, callback } )=>{
-    // TODO: Implement proper unsubscribe when pxlNav supports it
-    console.warn(`Cannot properly unsubscribe from ${eventType} - pxlNav needs unsubscribe method`);
+    if( pxlNavInstance && typeof pxlNavInstance.unsubscribe === 'function' ){
+      const success = pxlNavInstance.unsubscribe( eventType, callback );
+      if( success ){
+        unsubscribedCount++;
+      }else{
+        console.warn(`Failed to unsubscribe from ${eventType} - callback may not match`);
+      }
+    }else{
+      console.warn(`Cannot unsubscribe from ${eventType} - pxlNav instance not available`);
+    }
   });
+
+  if( unsubscribedCount > 0 ){
+    console.log(`Successfully unsubscribed ${unsubscribedCount} event(s) for component ${componentId}`);
+  }
 
   subscriptions.delete( componentId );
 }
@@ -56,10 +68,21 @@ export function unsubscribePxlNav( componentId ){
 // Reset the entire pxlNav instance (useful for hot reload in development)
 export function resetPxlNav(){
   if( pxlNavInstance ){
+    // Clean up all subscriptions first
+    unsubscribeAllPxlNav();
+    
     pxlNavInstance.stop();
     pxlNavInstance = null;
     subscriptions.clear();
   }
+}
+
+// Clean up all subscriptions (useful for complete cleanup)
+export function unsubscribeAllPxlNav(){
+  const allComponentIds = Array.from( subscriptions.keys() );
+  allComponentIds.forEach( componentId => {
+    unsubscribePxlNav( componentId );
+  });
 }
 
 // Safe way to check if pxlNav is ready
