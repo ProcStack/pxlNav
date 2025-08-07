@@ -1,5 +1,6 @@
 export class ExtensionBase{
-  constructor() {
+  constructor( extType = null ) {
+    this.extType = extType || "ExtensionBase";
     this.active = false;
     this.verbose = false;
     this.callbacks = {};

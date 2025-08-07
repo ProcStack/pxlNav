@@ -259,9 +259,10 @@ export const pxlUserSettings = {
  */
 export const pxlOptions = {
     'verbose' : pxlEnums.VERBOSE_LEVEL.NONE,
+    'framework' : pxlEnums.FRAMEWORK.NATIVE,
     'fps' : {
         'pc' : 60,
-        'Mobile' : 30
+        'mobile' : 30
       },
     'renderScale' : {
         'pc' : 1.0,

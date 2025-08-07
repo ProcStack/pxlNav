@@ -1,0 +1,2 @@
+(self.webpackChunkpxlnav_react_app=self.webpackChunkpxlnav_react_app||[]).push([[78],{78:()=>{self.onmessage=async e=>{const{type:a,data:s}=e.data;switch(a){case"init":await(async()=>{try{console.log("Pose model initialization placeholder")}catch(e){console.error("Failed to initialize pose model:",e)}})(),self.postMessage({type:"initialized"});break;case"processFrame":return void self.postMessage({type:"error",error:"Pose model not initialized"});default:console.warn("Unknown message type:",a)}}}}]);
+//# sourceMappingURL=78.5eff9c7c.chunk.js.map

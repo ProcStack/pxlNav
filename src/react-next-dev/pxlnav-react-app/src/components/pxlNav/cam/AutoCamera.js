@@ -96,12 +96,12 @@ export class AutoCamera{
   }
   
   step( force=false ){
-    if( this.autoCamActive == null || this.active == null ){
+    if( this.autoCamActive === null || this.active === null ){
       this.autoCamActive = false;
       this.active = false;
       return true;
     }
-    if( this.active == false){ // Check active state of Auto Cam
+    if( this.active === false){ // Check active state of Auto Cam
       if( this.autoCamActive ){
         this.updateAutoCamera();
       }else{
@@ -121,9 +121,9 @@ export class AutoCamera{
       
       this.pxlDevice.touchMouseData.netDistance.multiplyScalar(0);
     
-      if( this.camMode == 1 ){
+      if( this.camMode === 1 ){
         this.setCamMode(0);
-      }else if( this.camMode == 2 ){
+      }else if( this.camMode === 2 ){
         this.setCamMode(0);
       }else{
         this.curCluster=[];
@@ -156,7 +156,7 @@ export class AutoCamera{
     
     // Insert Mode Logic --
     
-    if( this.camMode!=prevCamMode && this.camMode==0){
+    if( this.camMode !== prevCamMode && this.camMode === 0){
       this.forceNewRoom=true;
     }
     return ret;
@@ -164,15 +164,18 @@ export class AutoCamera{
   
   setCamMode( autoCamData ){
     let timeMult=1;
-    if( autoCamData.type == 1 ){
+    if( autoCamData.type === 1 ){
       timeMult= 1;
-    }else if( autoCamData.type == 2 ){
+    }else if( autoCamData.type === 2 ){
       timeMult= 1;
     }else{
       this.camMode=0;
       this.forceNewRoom=true;
     }
     this.step( true );
+
+    // TODO : Check if this is needed
+    return timeMult;
   }
   
   
@@ -207,7 +210,7 @@ export class AutoCamera{
           nextRoom=(nextRoom+1)%roomCount;
         }else{
           nextRoom=Math.floor( Math.random() * roomCount );
-          if( nextRoom == this.curRoomIndex){
+          if( nextRoom === this.curRoomIndex){
             nextRoom=(nextRoom+1)%roomCount;
           }
         }
@@ -215,7 +218,7 @@ export class AutoCamera{
       
       this.curRoomIndex=nextRoom;
       
-      if( this.curRoom != this.roomList[ nextRoom ] ){
+      if( this.curRoom !== this.roomList[ nextRoom ] ){
         this.curRoom = this.roomList[ nextRoom ];
         this.forceNewRoom=false;
         this.curRoomCount=0;
@@ -234,11 +237,11 @@ export class AutoCamera{
     if( this.enabled && this.active && this.autoCamPaths.hasOwnProperty( this.pxlEnv.currentRoom ) ){
       let camPathCount= this.autoCamPaths[ this.pxlEnv.currentRoom ].length ;
       this.curPath = (this.curPath+dir) % camPathCount;
-      if( unique && dir==0 ){
+      if( unique && dir===0 ){
         let path= Math.random( this.nextCamChange );
         path= Math.floor( path * this.autoCamPaths[ this.pxlEnv.currentRoom ].length );
         
-        if( this.curPath==path ){
+        if( this.curPath===path ){
           path = (path+1) % camPathCount;
         }
         
@@ -264,9 +267,9 @@ export class AutoCamera{
   }
 
   preAutoCamToggle(){
-    //if(this.enabled == false){ // Check active state of Auto Cam
+    //if(this.enabled === false){ // Check active state of Auto Cam
       if( !this.autoCamActive ){
-        if( this.pxlCamera.colliderCurObjHit == "AudioTrigger_2" ){
+        if( this.pxlCamera.colliderCurObjHit === "AudioTrigger_2" ){
           this.pxlCamera.proximityScaleTrigger=true;
           this.exposureShiftActive=true;
         }
@@ -282,7 +285,7 @@ export class AutoCamera{
   
   setAutoCamMode( curMode=0 ){
     this.autoCamMode=curMode;
-    if( curMode==1 ){
+    if( curMode===1 ){
       this.resetAutoCam=true;
     }
   }
@@ -305,7 +308,7 @@ export class AutoCamera{
       }
       let origActive=this.autoCamActive;
 
-      this.autoCamActive= setValue==null && camPathCount>0 ? !this.autoCamActive : setValue;
+      this.autoCamActive= setValue===null && camPathCount>0 ? !this.autoCamActive : setValue;
       this.autoCamActive = this.mobile || this.autoCamActive;
       if( !origActive && this.autoCamActive ){
         this.netDistance= new Vector2().copy( this.pxlDevice.touchMouseData.netDistance );

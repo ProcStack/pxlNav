@@ -132,7 +132,7 @@ export class EmberWisps extends ParticleBase{
       });
     }
 
-    if( !this.shaderSettings['atlasPicks'] || this.shaderSettings['atlasPicks'].length == 0 ){
+    if( !this.shaderSettings['atlasPicks'] || this.shaderSettings['atlasPicks'].length === 0 ){
       this.shaderSettings['atlasPicks']=super.elementDuplicator([ [0.0,0.75], [0.0,0.5], [0.25,0.75], [0.25,0.5] ],4);
     }
     

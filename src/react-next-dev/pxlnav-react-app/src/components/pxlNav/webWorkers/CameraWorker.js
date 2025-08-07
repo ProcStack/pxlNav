@@ -198,7 +198,7 @@ const funcs={
         
     if(stats.cameraJumpActive){
       let jumpRate=jumpPerc ;
-      if(jumpRate==1){
+      if(jumpRate===1){
         stats.cameraJumpActive=false;
       }else{
         jumpRate=(1-jumpRate)*(1-jumpRate);
@@ -208,7 +208,7 @@ const funcs={
     }
     stats.cameraJumpImpulse*=(1-jumpPerc);//*.5+.5;
 
-    if( jumpPerc==1 ){
+    if( jumpPerc===1 ){
       stats.cameraJumpActive=false;
     }
   },
@@ -226,7 +226,7 @@ const funcs={
   "killJumpImpulse": ()=>{
     let toImpulse=stats.cameraJumpImpulse * stats.cameraJumpImpulseEaseOut;
     stats.cameraJumpImpulse= toImpulse>.1 ? toImpulse : 0;
-        if( stats.cameraJumpImpulse == 0 ){
+        if( stats.cameraJumpImpulse === 0 ){
             stats.jumpStartTime=0;
         }
   },

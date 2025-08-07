@@ -26,13 +26,12 @@ import {
   FogExp2,
   Group,
   RepeatWrapping,
-  AmbientLight,
   UniformsUtils,
   UniformsLib
 } from "../libs/three/three.module.min.js";
 import { pxlPrincipledVert, pxlPrincipledFrag } from "./shaders/objects/PxlPrincipled.js";
 
-import { RENDER_LAYER, COLLIDER_TYPE } from "./core/Enums.js";
+import { COLLIDER_TYPE } from "./core/Enums.js";
 
 /**
  * Class representing a Room Environment.
@@ -332,7 +331,7 @@ class RoomEnvironment{
    * Reset the camera.
    */
   resetCamera(){
-    if( (this.camInitPos == null || this.camInitLookAt == null) && this.pxlOptions.verbose >= this.pxlEnums.VERBOSE_LEVEL.WARN ){
+    if( (this.camInitPos===null || this.camInitLookAt===null) && this.pxlOptions.verbose >= this.pxlEnums.VERBOSE_LEVEL.WARN ){
       console.warn("pxlRoomEnvironment: Room Initial Camera Positions not initialized, \n Ensure `this.booted=true` is ran in `build()` or `fbxPostLoad()` \n -&-\n That there is a `Camera` group with `position` & `lookAt` child nulls in your scene file.");
     }
     this.pxlEnv.pxlCamera.setTransform( this.camInitPos, this.camInitLookAt );
@@ -544,7 +543,7 @@ class RoomEnvironment{
    * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
    */
   hitColliders( colliderList=[], colliderType=COLLIDER_TYPE.FLOOR ){
-    if( colliderList.length == 0 ){
+    if( colliderList.length===0 ){
       return;
     }
     // Implement custom-event logic in this function to handle collisions in your room
@@ -626,6 +625,9 @@ class RoomEnvironment{
       case COLLIDER_TYPE.CLICKABLE:
         hasCollidersOfType = this.hasClickables;
         break;
+      default:
+        hasCollidersOfType = false;
+        break;
     }
 
     return hasCollidersOfType;
@@ -646,22 +648,22 @@ class RoomEnvironment{
 
     // Kick out if the collider type is not active
     //  ( No colliders of the given type exist )
-    if( colliderType == COLLIDER_TYPE.WALL && !this.antiColliderActive ){
+    if( colliderType===COLLIDER_TYPE.WALL && !this.antiColliderActive ){
       forHashing = this.antiColliderList;
       return forHashing;
-    }else if( colliderType == COLLIDER_TYPE.WALL_TOP && !this.antiColliderTopActive ){
+    }else if( colliderType===COLLIDER_TYPE.WALL_TOP && !this.antiColliderTopActive ){
       forHashing = this.antiColliderTopList;
       return forHashing;
-    }else if( colliderType == COLLIDER_TYPE.PORTAL_WARP && !this.hasPortalExit ){
+    }else if( colliderType===COLLIDER_TYPE.PORTAL_WARP && !this.hasPortalExit ){
       forHashing = this.portalList;
       return forHashing;
-    }else if( colliderType == COLLIDER_TYPE.ROOM_WARP && !this.hasRoomWarp ){
+    }else if( colliderType===COLLIDER_TYPE.ROOM_WARP && !this.hasRoomWarp ){
       forHashing = this.roomWarp;
       return forHashing;
-    }else if( colliderType == COLLIDER_TYPE.HOVERABLE && !this.hasHoverables ){
+    }else if( colliderType===COLLIDER_TYPE.HOVERABLE && !this.hasHoverables ){
       forHashing = this.hoverableList;
       return forHashing;
-    }else if( colliderType == COLLIDER_TYPE.CLICKABLE && !this.hasClickables ){
+    }else if( colliderType===COLLIDER_TYPE.CLICKABLE && !this.hasClickables ){
       forHashing = this.clickableList;
       return forHashing;
     }
@@ -773,7 +775,7 @@ class RoomEnvironment{
    * @param {string|null} [positionName=null] - The name of the position.
    */
   toCameraPos( positionName = null ){
-    if( positionName == null ){
+    if( positionName===null ){
       positionName = this.defaultCamLocation;
     }
     positionName = positionName.toLowerCase();
@@ -821,9 +823,9 @@ class RoomEnvironment{
     if(lightTypeList.length>0){
       lightTypeList.forEach( (type)=>{
         this.lightList[type].forEach( (light)=>{
-          if( type == "DirectionalLight" ){ 
+          if( type==="DirectionalLight" ){ 
             light.castShadow=false;
-          }else if( type == "PointLight" ){ 
+          }else if( type==="PointLight" ){ 
             if( light.castShadow){
               light.shadow.radius = 5;
               light.shadow.receiveShadow = true;
@@ -843,7 +845,7 @@ class RoomEnvironment{
     if( this.shaderGeoList ) {
       for( const x in this.shaderGeoList){
         let curObj = this.shaderGeoList[x];
-        if( curObj.userData && curObj.userData.Shader == "pxlPrincipled"){
+        if( curObj.userData && curObj.userData.Shader === "pxlPrincipled"){
           
           let shaderUniforms = UniformsUtils.merge(
               [
@@ -864,7 +866,7 @@ class RoomEnvironment{
           
           let ShaderParms = {};
           let useLights = true
-          let useShadows = curObj.userData.castShadow == true || curObj.userData.receiveShadow == true
+          let useShadows = curObj.userData.castShadow === true || curObj.userData.receiveShadow === true
           let useFog = true;
           
           let useColor = false;
@@ -873,7 +875,7 @@ class RoomEnvironment{
           }
           
           // Add ShaderParms support
-          if( curObj.userData.ShaderParms && curObj.userData.ShaderParms != "" ){
+          if( curObj.userData.ShaderParms && curObj.userData.ShaderParms !== "" ){
             ShaderParms = JSON.parse(curObj.userData.ShaderParms);
           }
           

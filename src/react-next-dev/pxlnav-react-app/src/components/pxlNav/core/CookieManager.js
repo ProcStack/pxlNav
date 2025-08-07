@@ -22,7 +22,7 @@ import { VERBOSE_LEVEL } from "./Enums.js";
 export class CookieManager{
   constructor(verbose=false, prefix="pxlNav-", path="/", expiration=30){
     // Suffix name to help searching and avoid cookie name conflictions
-    let prepPrepend= prefix.substring(-1)=="-" ? prefix : prefix+"-" ;
+    let prepPrepend= prefix.substring(-1)==="-" ? prefix : prefix+"-" ;
     this.prepend=prepPrepend; 
     this.verbose=verbose;
     
@@ -66,7 +66,7 @@ export class CookieManager{
   isEqual( cName ){ 
     if( this.hasCookie(cName) ){
       this.log( cName );
-      return this.readCookie( cName ) == this.variableToString( cName );
+      return this.readCookie( cName ) === this.variableToString( cName );
     }
     return false;
   }
@@ -109,11 +109,11 @@ export class CookieManager{
     
     if( !isNaN(Number(val)) ){
       return val;
-    }else if( type=="string" ){
+    }else if( type==="string" ){
       return "'" + val + "'";
-    }else if( type=="boolean" ){
+    }else if( type==="boolean" ){
       return ( val ? "true" : "false" );
-    }else if(val==null){ // Non-Strict Null Check; null==undefined true; null===undefined false
+    }else if(val===null || val===undefined){ // Non-Strict Null Check; null===undefined true; null===undefined false
       return "null";
     }else if( isNaN(Number(val) )){
       return "NaN";
@@ -161,13 +161,13 @@ export class CookieManager{
       
       let val=document.cookie.match(reg)[0].split("=")[1].replace(this.prepend,'').replace(this.sub,';');
       
-      if( val=="true" ){
+      if( val==="true" ){
         val = true;
-      }else if( val=="false" ){
+      }else if( val==="false" ){
         val = false;
-      }else if( parseInt(val)==val ){
+      }else if( parseInt(val)===val ){
         val=parseInt(val);
-      }else if( parseFloat(val)==val ){
+      }else if( parseFloat(val)===val ){
         val = parseFloat(val);
       }
       return val;
@@ -243,7 +243,7 @@ export class CookieManager{
       let curCookies = document.cookie.match( reg );
       curCookies.forEach( c =>{ document.cookie = c + "=;" + this.deleteDate + this.path; });
     }else{
-      if( typeof(cName) == "string" ){
+      if( typeof(cName) === "string" ){
         cName=[cName];
       }
       cName.forEach( c =>{ document.cookie = c + "=;" + this.deleteDate + this.path; });

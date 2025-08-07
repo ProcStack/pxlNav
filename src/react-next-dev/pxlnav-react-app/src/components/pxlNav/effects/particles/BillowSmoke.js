@@ -4,7 +4,6 @@
 import {
   Vector3,
   AdditiveBlending,
-  DoubleSide,
   NearestFilter,
   NearestMipmapNearestFilter
 } from "../../../libs/three/three.module.min.js";
@@ -132,7 +131,7 @@ export class BillowSmoke extends ParticleBase{
     }
 
     // Starting corners from the upper left for the given 1/atlasRes
-    if( !this.shaderSettings.atlasPicks || this.shaderSettings.atlasPicks.length == 0 ){
+    if( !this.shaderSettings.atlasPicks || this.shaderSettings.atlasPicks.length === 0 ){
       this.shaderSettings.atlasPicks = [...super.dupeArray([0.5,0.0],2), ...super.dupeArray([0.5,0.25],2),
                     ...super.dupeArray([0.5,0.5],2), ...super.dupeArray([0.5,0.75],2),
                     ...super.dupeArray([0.75,0.75],4), ...super.dupeArray([0.75,0.25],3),

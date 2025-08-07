@@ -80,7 +80,7 @@ export class Utils{
   }
     
   checkInt(val){
-    return (val%1)==0;
+    return (val%1)===0;
   }
 
   degToRad(deg){
@@ -136,7 +136,7 @@ export class Utils{
     let strip=document.createElement( "div" );
     strip.innerHTML=messageString;
     strip=strip.innerText;
-    let matcher=strip.match(/([a-zA-Z0-9\s\w-+()\[\]])+/g);
+    let matcher=strip.match(/([a-zA-Z0-9\s\w-+()[\]])+/g);
 
     if(matcher){
       strip=matcher.join("");
@@ -198,13 +198,13 @@ export class Utils{
   
   hexToRgb( hex ) {
     let buffer=hex[0];
-    if(buffer=="#"){
+    if(buffer==="#"){
       hex=hex.substr( 1, 6 );
     }else{
       hex=hex.substr( 0, 6 );
     }
     let r,g,b;
-    if(hex.length==3){
+    if(hex.length===3){
       r=hex[0]+hex[0];
       g=hex[1]+hex[1];
       b=hex[2]+hex[2];
@@ -233,9 +233,9 @@ export class Utils{
       let ccLength=charCode.length;
       if(ccLength>6){
         let offset=1;
-        if(string=="tussin"){
+        if(string==="tussin"){
           offset=0;
-        }else if(string=="fexofenadine"){
+        }else if(string==="fexofenadine"){
           offset=-1;
         }
         let reader=Math.max(0,parseInt((ccLength-6)/2+offset));
@@ -259,7 +259,7 @@ export class Utils{
       */
     }
     
-    if( zoFit==true ){
+    if( zoFit===true ){
       stringColor[0]=stringColor[0]/255;
       stringColor[1]=stringColor[1]/255;
       stringColor[2]=stringColor[2]/255;
@@ -274,7 +274,7 @@ export class Utils{
   // Convert Color/Vector3 to sRGB Color Space
   colorTosRGB( color ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.tosRGB(color.r);
@@ -307,7 +307,7 @@ export class Utils{
   // Convert Color/Vector3 to Linear Color Space
   colorToLinear( color ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.toLinear(color.r);
@@ -338,7 +338,7 @@ export class Utils{
 
   gammaCorrectColor( color, gammaIn="2.2", gammaOut="1.8" ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.gammaCorrect(color.r, gammaIn, gammaOut);
@@ -372,7 +372,7 @@ export class Utils{
   // TODO : Prep & re-implement THREE.GammaFactor -> pxlNav.pxlDevice.GammaFactor
   // TODO : pxlDevice OS detect needs to be implement for color conversion between known OS color spaces
   convertColor( color, space=this.pxlEnums.COLOR_SHIFT.KEEP ){
-    if( space == this.pxlEnums.COLOR_SHIFT.KEEP ){
+    if( space === this.pxlEnums.COLOR_SHIFT.KEEP ){
       return color;
     }
 
@@ -432,7 +432,7 @@ export class Utils{
     let tmpArr=[...inputArr];
     let retArr=[];
     while( tmpArr.length > 0){
-      let rand=tmpArr.length==1 ? 0 : parseInt(Math.random()*21*tmpArr.length)%tmpArr.length;
+      let rand=tmpArr.length===1 ? 0 : parseInt(Math.random()*21*tmpArr.length)%tmpArr.length;
       retArr.push( tmpArr.splice( rand, 1 )[0] );
     }
     return retArr;
@@ -475,12 +475,13 @@ export class Utils{
     if( !imgPath.includes( "/") ){
       imgPath = this.assetRoot + imgPath;
     }
-
+    
+    let texture=null;
     if(typeof(this.textLoaderArray[imgPath]) != "undefined"){
       texture=this.textLoaderArray[imgPath];
     }else{
       //var texLoader=new ImageLoader(verboseLoading);
-      var texture=new Texture();
+      texture=new Texture();
       let modKeys = Object.keys(mods);
       this.texLoader.load(imgPath,
         (tex)=>{

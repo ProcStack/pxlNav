@@ -31,6 +31,7 @@ class io {
 
 export default class Networking extends ExtensionBase {
   constructor( socketio ){
+    super("Networking");
     this.status=false;
     // AccessToken is grabbed from OAuth2 authentication of the account.
     this.accessToken = "";

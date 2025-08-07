@@ -57,7 +57,7 @@ export function skyObjectFrag( skyHazeValue=SKY_HAZE.OFF ){
         vec4 Cd=texture2D(diffuse,uv);
 
   `;
-  if( skyHazeValue == SKY_HAZE.VAPOR ){
+  if( skyHazeValue === SKY_HAZE.VAPOR ){
     ret+=`
 
         // -- -- -- -- -- -- -- -- --

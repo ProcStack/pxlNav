@@ -319,7 +319,7 @@ export class GUIManager{
 		
 		let inner;
     if(this.pxlQuality){
-      if(parseInt(this.pxlQuality.detailLimit)==0){
+      if(parseInt(this.pxlQuality.detailLimit)===0){
         inner=`Looks like your computer is having a hard time, but we’ve got your fix.
           <br>Please click <a id="pxlNav-crashLink" class="pxlNav-crashLink">HERE</a> to reload ${this.projectTitle}.`;
       }else{
@@ -337,7 +337,7 @@ export class GUIManager{
   stepLoader(msg=""){
 		this.pxlLoaderCount+=1;
     let curPerc=Math.min(100, this.pxlLoaderCount/(this.pxlLoaderTotal-1)*100.0 )
-    if( curPerc == 100 ){
+    if( curPerc === 100 ){
       this.pxlLoader.style.borderRadius = "5px";
     }
 		this.pxlLoader.style.width= curPerc +"%";
@@ -408,15 +408,15 @@ export class GUIManager{
 		optionList.forEach( (type)=>{
 			let optionBlockId=null;
 			let curIcon=null;
-			if( type=="videoinput" ){
+			if( type==="videoinput" ){
         //this.camChoicesObj=deviceList;
         optionBlockId="camChoiceOptionsBlock";
         curIcon=this.hudIcons.camChoiceIcon;
-			}else if( type=="audioinput" ){
+			}else if( type==="audioinput" ){
         //this.micChoicesObj=deviceList;
         optionBlockId="micChoiceOptionsBlock";
         curIcon=this.hudIcons.micChoiceIcon;
-			}else if( type=="audiooutput" ){
+			}else if( type==="audiooutput" ){
         //this.micChoicesObj=deviceList;
         optionBlockId="speakerChoiceOptionsBlock";
         curIcon=this.hudIcons.speakerChoiceIcon;
@@ -438,8 +438,7 @@ export class GUIManager{
     this.setArtistInfoSizing();
   }
   resetHelpTextPlacement(){
-		let hudIconKeys=Object.keys( this.textDescriptions );//this.hudIcons );
-		hudIconKeys.forEach( (i)=>{
+		Object.keys( this.textDescriptions ).forEach( (i)=>{
 			let textDesc = this.textDescriptions[ i ];
 			if(textDesc){
 				let helpObj=document.getElementById( "helpText_"+i );
@@ -459,7 +458,7 @@ export class GUIManager{
 					if(pos[1]<0){
             toY=parentBox.y+helpBox.height*pos[1];
             pOffset=true;
-					}else if(pos[1]==0){
+					}else if(pos[1]===0){
 					  toY=parentBox.y+parentBox.height*.5-helpBox.height*.5;
 					}else if(pos[1]>0){
 					  toY=parentBox.y+parentBox.height+helpBox.height*(pos[1]-1);
@@ -468,7 +467,7 @@ export class GUIManager{
 					if(pOffset){
 					if(pos[0]<0){
 						toX=parentBox.x+parentBox.width+helpBox.width*pos[0];
-					}else if(pos[0]==0){
+					}else if(pos[0]===0){
 						toX=parentBox.x+parentBox.width*.5-helpBox.width*.5;
 					}else if(pos[0]>0){
 						toX=parentBox.x+parentBox.width*(pos[0]-1);
@@ -476,7 +475,7 @@ export class GUIManager{
 					}else{
 					if(pos[0]<0){
 						toX=parentBox.x+helpBox.width*pos[0];
-					}else if(pos[0]==0){
+					}else if(pos[0]===0){
 						toX=parentBox.x+parentBox.width*.5-helpBox.width*.5;
 					}else if(pos[0]>0){
 						toX=parentBox.x+parentBox.width*2*pos[0];
@@ -510,7 +509,7 @@ export class GUIManager{
       let retSearch="?";
       search.forEach( (s)=>{
         let splitter=s.split("=");
-        if( splitter[0]=="dlimit" ){
+        if( splitter[0]==="dlimit" ){
           retSearch+=splitter[0]+"="+(parseInt(splitter[1])+1)+"&";
         }else{
           retSearch+=s+"&"
@@ -523,7 +522,7 @@ export class GUIManager{
   }
    
   guiToggleVisibility( active=null ){
-    active = active==null ? !this.hudVisibility : active;
+    active = active===null ? !this.hudVisibility : active;
     this.hudVisibility=active;
 
     if(this.hudTopBar && !this.hudTopBar.origDisplay){ this.hudTopBar.origDisplay = this.hudTopBar.style.display;}
@@ -627,7 +626,7 @@ export class GUIManager{
         if(faderObj.classList.contains("visOff")){
           faderObj.classList.remove("visOff");
           faderObj.classList.add("visOn");
-          if(fadeOutLimit!=null){
+          if(fadeOutLimit!==null){
             faderObj.setAttribute("fadeOut", fadeOutLimit*1000);
             //fadeOutList.push(faderObj);
           }
@@ -746,7 +745,7 @@ export class GUIManager{
     if(!this.hudBlock){
       return; // No Hud Block Exists
     }
-    active = active==null ? !this.hudBlock.active : active;
+    active = active===null ? !this.hudBlock.active : active;
     this.hudBlock.active=active;
     let hudObjDisplay = false
     if( active ){
@@ -758,7 +757,7 @@ export class GUIManager{
       }
     }
     
-    if( this.hudBlock.obj && this.hudBlock.obj.style && hudObjDisplay != false ){
+    if( this.hudBlock.obj && this.hudBlock.obj.style && hudObjDisplay !== false ){
       this.hudBlock.obj.style.display=hudObjDisplay;
     }
     
@@ -784,7 +783,7 @@ export class GUIManager{
           this.guiWindows[g].active=false;
           this.promptFader( this.guiWindows[g].gui, false );
                 
-          if( g == "settingsGui" ){
+          if( g === "settingsGui" ){
             this.togglePxlNavDataDisplay( false );
           }
         }
@@ -1037,8 +1036,8 @@ export class GUIManager{
       this.hudIcons.helpIcon = SVGUtils.svgIconPromise( `${this.guiRoot}icons/icon_help.svg`, "helpIcon", "help" );
       this.hudIcons.settingsIcon = SVGUtils.svgIconPromise( `${this.guiRoot}icons/icon_settings.svg`, "settingsIcon", "settings" );
       
-      let guiVerseTitle=document.getElementById("guiVerseTitle");
-      let tmpThis=this;
+      //let guiVerseTitle=document.getElementById("guiVerseTitle");
+      //let tmpThis=this;
     }else{
       let chatBlock=document.getElementById("hud_chatIconBlock");
       chatBlock.style.gridAutoColumns= "max-content max-content auto max-content";
@@ -1049,7 +1048,7 @@ export class GUIManager{
   // -- -- -- -- -- -- -- -- -- -- //
 	
   prepArtistInfo( artistInfo=null ){
-    if( !this.pxlEnv?.postIntro || artistInfo=="" ){
+    if( !this.pxlEnv?.postIntro || artistInfo==="" ){
       return;
     }
   if( !this.hudElements.artistInfo ){
@@ -1093,7 +1092,7 @@ export class GUIManager{
   }
     this.toggleArtistInfo(false);
       
-    if( artistInfo!= null && this.hudVisibility && !this.pxlAutoCam.active){
+    if( artistInfo!== null && this.hudVisibility && !this.pxlAutoCam.active){
       this.hudElements.artistInfo.parent.style.zIndex=155;
       this.hudElements.artistInfo.parent.style.display="grid";
       this.hudElements.artistInfo.inner.innerHTML=artistInfo;
@@ -1116,7 +1115,7 @@ export class GUIManager{
   this.hudElements.artistInfo.offAnim=fromX;
   
     }else{
-  if(run==2){
+  if(run===2){
     // This should never run,
     //   If it does, check the SVG file has propper IDs on the shapes
     //console.log("Failed to prep Status SVG");
@@ -1148,7 +1147,7 @@ export class GUIManager{
     }
   }
   toggleArtistInfo( active=null ){
-    active= active==null ? !this.hudElements.artistInfo.active : active;
+    active= active===null ? !this.hudElements.artistInfo.active : active;
     this.hudElements.artistInfo.active=active;
     
     let iHeight=this.hudElements.artistInfo.innerHeight;
@@ -1180,7 +1179,7 @@ export class GUIManager{
 	// -- -- -- --
 	
   prepPageDisplay( artistInfo=null ){
-    if( !this.pxlEnv?.postIntro || artistInfo=="" ){
+    if( !this.pxlEnv?.postIntro || artistInfo==="" ){
       return;
     }
 		if( !this.hudElements.artistInfo ){
@@ -1220,7 +1219,7 @@ export class GUIManager{
 		}
     this.togglePageDisplay(false);
       
-    if( artistInfo!= null && this.hudVisibility && !this.pxlAutoCam.active){
+    if( artistInfo!== null && this.hudVisibility && !this.pxlAutoCam.active){
       this.hudElements.artistInfo.parent.style.zIndex=155;
       this.hudElements.artistInfo.parent.style.display="grid";
       this.hudElements.artistInfo.inner.innerHTML=artistInfo;
@@ -1254,7 +1253,7 @@ export class GUIManager{
   togglePageDisplay( active=null ){
     if( this.hudElements.artistInfo ){
 			// If no active boolean is passed, toggle the current state
-			active= active==null ? !this.hudElements.artistInfo.active : active;
+			active= active===null ? !this.hudElements.artistInfo.active : active;
 			if( this.hudElements?.artistInfo ){
 				 this.hudElements.artistInfo.active=active;
 			}
@@ -1294,7 +1293,7 @@ export class GUIManager{
     if(this.hudBlock.obj){
       this.hudBlock.obj.style.display="none";
     }
-    if(func=="click"){
+    if(func==="click"){
       switch (mode) {
         case "chat":
           this.toggleChatBox();
@@ -1384,11 +1383,11 @@ export class GUIManager{
   
   loadingDeviceChange( loadingType, loadingState=true ){
   let curButton=null;
-  if( loadingType == "speaker"){ // Shouldn't run, but if I add this in the future.
+  if( loadingType === "speaker"){ // Shouldn't run, but if I add this in the future.
     curButton=this.hudIcons.speakerIcon;
-  }else if( loadingType == "audio"){
+  }else if( loadingType === "audio"){
     curButton=this.hudIcons.micIcon;
-  }else if( loadingType == "video"){
+  }else if( loadingType === "video"){
     curButton=this.hudIcons.camIcon;
   }
   
@@ -1513,11 +1512,11 @@ export class GUIManager{
 
   
   togglGuiWindow( guiName=null, vis=false ){
-    if(guiName=="helpGui"){
+    if(guiName==="helpGui"){
       this.helpGuiToggle( vis, false );
-    }else if(guiName=="infoGui"){
+    }else if(guiName==="infoGui"){
       this.infoGuiToggle( vis, false );
-    }else if(guiName=="settingsGui"){
+    }else if(guiName==="settingsGui"){
       this.settingsGuiToggle( vis, false );
     }
   }
@@ -1525,20 +1524,20 @@ export class GUIManager{
   svgCheckClick(e=null, action=null){
     if(!action){ return; }
     
-    if( action== "close" ){
+    if( action=== "close" ){
       this.toggleGuiWindowContainer(null, false, true );
       return;
     
-    }else if(action=="ft1"){
+    }else if(action==="ft1"){
       return;
-    }else if(action=="ft2"){
+    }else if(action==="ft2"){
       return;
-    }else if(action=="ft3"){
+    }else if(action==="ft3"){
         this.toggleInviteUser();
       return;
-    }else if(action=="ft4"){
+    }else if(action==="ft4"){
       return;
-    }else if(action=="ft5"){
+    }else if(action==="ft5"){
       this.pxlAutoCam.toggleAutoCam();
       return;
     }
@@ -1604,7 +1603,7 @@ export class GUIManager{
     if(e){
       let target= e.path ? e.path[0] : e.target;
       let targetId=target.getAttribute("id");
-      if(targetId!="guiWindowBackground"){
+      if(targetId!=="guiWindowBackground"){
         // ## Bad way to do this....
         let exitObjList=["pxlNav-container", "gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
         if( !exitObjList.includes( targetId ) ){
@@ -1614,7 +1613,7 @@ export class GUIManager{
     }
     let openStatus=this.checkOpenWindows( closeWindows );
 
-    if(this.guiWindowBG && openStatus==active ){
+    if(this.guiWindowBG && openStatus===active ){
       this.promptFader(this.guiWindowBG, active,null,false); 
     }
 
@@ -1639,7 +1638,7 @@ export class GUIManager{
     // Build welcome message
     let messageText = "";
     let messageHTML = "";
-    if( this.pxlOptions.onboarding.pc?.message != "" ){
+    if( this.pxlOptions.onboarding.pc?.message !== "" ){
       messageText = this.pxlOptions.onboarding.pc.message;
       messageText = this.formatWelcomeMessage( messageText );
 
@@ -1653,7 +1652,7 @@ export class GUIManager{
     // Build close button text and styles
     let buttonText = "close";
     let buttonStyles = "guiButton";
-    if( this.pxlOptions.onboarding.pc?.buttonText != "" ){
+    if( this.pxlOptions.onboarding.pc?.buttonText !== "" ){
       buttonText = this.pxlOptions.onboarding.pc.buttonText;
     }
     if( this.pxlOptions.onboarding.pc?.buttonStyle.length > 0 ){
@@ -1721,7 +1720,7 @@ export class GUIManager{
     
     // Remove linking from hud icons only
     //let hudIconKeys=Object.keys( this.hudIcons );
-    let hudIconKeys=Object.keys( this.textDescriptions );
+    //let hudIconKeys=Object.keys( this.textDescriptions );
     //hudIconKeys.push( "djPlayerVolumeParent" );
     /*hudIconKeys.forEach( (i)=>{
       let textDesc = this.textDescriptions[ i ];
@@ -1767,7 +1766,7 @@ export class GUIManager{
     }
   
 
-  active= active==null ? !this.guiWindows.helpGui.active : active;
+  active= active===null ? !this.guiWindows.helpGui.active : active;
   this.guiWindows.helpGui.active=active;
   this.promptFader( this.guiWindows.helpGui.gui, active );
 
@@ -1840,7 +1839,7 @@ export class GUIManager{
     this.infoGuiBuild();
   }
 
-  active= active==null ? !this.guiWindows.infoGui.active : active;
+  active= active===null ? !this.guiWindows.infoGui.active : active;
   this.guiWindows.infoGui.active=active;
   this.promptFader( this.guiWindows.infoGui.gui, active );
   this.toggleGuiWindowContainer( null, active );
@@ -1857,14 +1856,14 @@ export class GUIManager{
 ///////////////////////////////////////////
 
   applyCookies(){
-  if(this.controlSettings){
-    //console.log(this.controlSettings);
-    this.controlSettings=(this.controlSettings);
-  }
-  if(this.renderSettings){
-    //console.log(this.renderSettings);
-    this.renderSettings=(this.renderSettings);
-  }
+    /*if(this.controlSettings){
+      //console.log(this.controlSettings);
+      this.controlSettings=(this.controlSettings);
+    }*/
+    /*if(this.renderSettings){
+      //console.log(this.renderSettings);
+      this.renderSettings=(this.renderSettings);
+    }*/
   }
   
   settingsGuiBuild(){
@@ -2088,7 +2087,7 @@ export class GUIManager{
   tmpThis.pxlQuality.setQualityLevel(val);
   tmpThis.setRadioValues();
     });
-    /*if( val != 3){
+    /*if( val !== 3){
   rad.addEventListener('change', (e)=>{
     tmpThis.guiWindows.settingsGui.advObj.style.maxHeight="0px";
     tmpThis.pxlQuality.setQualityLevel(val);
@@ -2140,7 +2139,7 @@ export class GUIManager{
     let rad=document.getElementById( r );
     this.setRadioStyle(rad, x, rLength);
     
-    let val= rad.value==1;
+    let val= rad.value===1;
     rad.addEventListener('change', (e)=>{
   tmpThis.guiWindows.settingsGui.customObj.checked=true;
   tmpThis.pxlQuality.setGraphicsSettings( {bloom:val} );
@@ -2155,7 +2154,7 @@ export class GUIManager{
     let rad=document.getElementById( r );
     this.setRadioStyle(rad, x, rLength);
     
-    let val= rad.value==1;
+    let val= rad.value===1;
     rad.addEventListener('change', (e)=>{
   tmpThis.pxlQuality.setGraphicsSettings( {leftRight:val}, null );
   //tmpThis.pxlQuality.settings.leftRight=val;
@@ -2170,7 +2169,7 @@ export class GUIManager{
     let rad=document.getElementById( r );
     this.setRadioStyle(rad, x, rLength);
     
-    let val= rad.value==1;
+    let val= rad.value===1;
     rad.addEventListener('change', (e)=>{
   tmpThis.pxlQuality.setGraphicsSettings( {mouse:val}, null );
   //tmpThis.pxlQuality.settings.mouse=val;
@@ -2189,9 +2188,9 @@ export class GUIManager{
   
   setRadioStyle(rad,cur,aLen){
     let addStyle="settings_radio_label_mid";
-    if(cur==0){
+    if(cur===0){
   addStyle="settings_radio_label_start";
-    }else if(cur==aLen-1){
+    }else if(cur===aLen-1){
   addStyle="settings_radio_label_end";
     }
     rad.parentNode.children[1].classList.add( addStyle );
@@ -2203,7 +2202,7 @@ export class GUIManager{
   keys.forEach( (k)=>{
     let radioBlock=document.getElementById( "settingsRadioBlock_"+k );
     if(radioBlock){
-  let val= k=="resolution" ? qualitySettings[k]*4-1 : ~~qualitySettings[k];
+  let val= k==="resolution" ? qualitySettings[k]*4-1 : ~~qualitySettings[k];
   radioBlock.children[val].children[0].checked=true; // Assuming [input, label]
     }
   });
@@ -2222,7 +2221,7 @@ export class GUIManager{
     this.settingsGuiBuild();
   }
   
-  active= active==null ? !this.guiWindows.settingsGui.active : active;
+  active= active===null ? !this.guiWindows.settingsGui.active : active;
     
     if(active && this.guiWindows?.settingsGui?.usernameReturn){
       this.guiWindows.settingsGui.usernameReturn.innerText="";
@@ -2244,7 +2243,7 @@ export class GUIManager{
   }
 
   togglePxlNavDataDisplay( active=null ){
-    if( active==null ){
+    if( active===null ){
       if( this.guiWindows.settingsGui ){
       active = this.guiWindows.settingsGui.active;
       }else{
@@ -2350,7 +2349,7 @@ export class GUIManager{
     this.inviteUserBuild();
   }
 
-  active= active==null ? !this.guiWindows.inviteUserGui.active : active;
+  active= active===null ? !this.guiWindows.inviteUserGui.active : active;
   this.guiWindows.inviteUserGui.active=active;
   this.promptFader( this.guiWindows.inviteUserGui.gui, active );
     
@@ -2396,7 +2395,7 @@ export class GUIManager{
   // Format welcome screen message
   let welcomeText="";
   let welcomeHTML="";
-  if( this.pxlOptions.onboarding.mobile?.message != "" ){
+  if( this.pxlOptions.onboarding.mobile?.message !== "" ){
     welcomeText = this.pxlOptions.onboarding.mobile.message;
     welcomeText = this.formatWelcomeMessage( welcomeText );
     let welcomeStyle=""
@@ -2415,7 +2414,7 @@ export class GUIManager{
   }
 
   let buttonText="enter";
-  if( this.pxlOptions.onboarding.mobile?.buttonText != "" ){
+  if( this.pxlOptions.onboarding.mobile?.buttonText !== "" ){
     buttonText=this.pxlOptions.onboarding.mobile.buttonText;
   }
 
@@ -2476,12 +2475,12 @@ export class GUIManager{
     this.buildMobileWelcome();
   }
   
-  if( active !== null && this.guiWindows.mobileGui.active == active ){
+  if( active !== null && this.guiWindows.mobileGui.active === active ){
     console.error("Mobile welcome already set to active: "+active);
     return;
   }
 
-  active= active==null ? !this.guiWindows.mobileGui.active : active;
+  active= active===null ? !this.guiWindows.mobileGui.active : active;
   
   this.guiWindows.mobileGui.active=active;		 
   //this.promptFader( this.guiWindows.mobileGui.gui, active );
@@ -2542,7 +2541,7 @@ export class GUIManager{
   this.addToContainer(this.actionPopUp);
   
   let iframe=null;
-  if(bodyOnly == '' || !bodyOnly){
+  if(bodyOnly === '' || !bodyOnly){
     iframe=document.createElement("iframe");
     iframe.src=""
     iframe.classList.add("iframeGoogleLinkDoc");
@@ -2556,7 +2555,7 @@ export class GUIManager{
   let self=this;
   this.actionPopUp.onclick=function(e){
     let eventObject=e.srcElement.getAttribute("id");
-    if(eventObject == "ctaPopup" ){
+    if(eventObject === "ctaPopup" ){
   self.promptFader(this, false, null, true);
   self.actionPopUp=null;
     }
@@ -2597,7 +2596,7 @@ export class GUIManager{
   async setUserControlPosition(){
     if( this.userControlBlock ){
       let curTop=0;
-      let curLeft=0;
+      //let curLeft=0;
       if( this.hudTopBar ){
         let htbr=this.hudTopBar.getBoundingClientRect();
         curTop=htbr.y+htbr.height;
@@ -2630,9 +2629,9 @@ export class GUIManager{
       let cd=children[x];
       let curId=cd.getAttribute("id");
       ret[curId]=cd;
-      if( curId == "mute"){
+      if( curId === "mute"){
         cd.classList.add( "userControlVisStyle" );
-      }else if( curId == "button"){
+      }else if( curId === "button"){
         cd.classList.add( "userControlSpeakerButtonStyle" );
       }
     }
@@ -2655,7 +2654,7 @@ export class GUIManager{
 
   // Remote User Controls
   async addUserControls( curId, muted=false ){
-    let {curAvatar, curName, curGui} = this.getUserControls( curId );
+    let {curAvatar, curName} = this.getUserControls( curId );
     
     let userControlsBlock=document.createElement( "div" );
     userControlsBlock.classList.add( "userControlProximityOff" );
@@ -2695,7 +2694,7 @@ export class GUIManager{
   async setUserControlVolume( curId, audioLevel, smoothing=true ){
     if( this.userControlBlock.activeList.includes( curId ) ){
       let {curAudioGui, curAudioMuted} = this.getUserControls( curId );
-      if( curAudioGui && ( !curAudioMuted || audioLevel==0 ) ){
+      if( curAudioGui && ( !curAudioMuted || audioLevel===0 ) ){
         if( curAudioGui.remoteMuted ){
           audioLevel=0;
         }else if( smoothing && audioLevel>0){
@@ -2730,14 +2729,14 @@ export class GUIManager{
   async setUserControlRemoteMute( curId, track=null, inVerse=true, color="#ffffff" ){
     let {curAudio, curAudioGui} = this.getUserControls( curId );
     if( curAudioGui ){
-      if( track==null ){
+      if( track===null ){
         if( curAudio ){
           track=curAudio.muted;
         }else{
           track=false;
         }
       }
-      let active = typeof track == "object" ? track.muted : track;
+      let active = typeof track === "object" ? track.muted : track;
       curAudioGui.remoteMuted=active;
       curAudioGui.base.setAttribute("fill", (active ? "#ff0000" : color ) );
       curAudioGui.remoteMutedLines.style.display=(active || !inVerse ? "inline-block" : "none" );
@@ -2748,7 +2747,7 @@ export class GUIManager{
   }
   
   async setUserControlVis( curId, active=null, deleteController=false ){
-    let {curAvatar, curGui,curAudio} = this.getUserControls( curId );
+    let {curGui} = this.getUserControls( curId );
     
     /*if( !curAvatar.avatarGroup.visible ){
       return;
@@ -2757,7 +2756,7 @@ export class GUIManager{
     
     if(curGui){
       let proxVisOff="userControlProximityOff";
-      if( active == null ){
+      if( active === null ){
         active=!curGui.classList.contains( proxVisOff );
       }
       if( active ){
@@ -2780,12 +2779,12 @@ export class GUIManager{
           this.userControlBlock.activeList.splice( curIdEl, 1 );
         }
       }
-      this.userControlBlock.gui.style.padding= this.userControlBlock.activeList.length == 0 ? "0px" : "5px" ;
+      this.userControlBlock.gui.style.padding= this.userControlBlock.activeList.length === 0 ? "0px" : "5px" ;
     }
   }
   
   async deleteUserControlVis( curId ){
-    let {curAvatar, curGui} = this.getUserControls( curId );
+    let {curGui} = this.getUserControls( curId );
     
     if(curGui){
       let proxVisOff="userControlProximityOff";
@@ -2796,7 +2795,7 @@ export class GUIManager{
       if( curIdEl>-1 ){
         this.userControlBlock.activeList.splice( curIdEl, 1 );
       }
-      this.userControlBlock.gui.style.padding= this.userControlBlock.activeList.length == 0 ? "0px" : "5px" ;
+      this.userControlBlock.gui.style.padding= this.userControlBlock.activeList.length === 0 ? "0px" : "5px" ;
 
       // Clean up User Speaker Gui Element
       if( curGui ){
@@ -2820,7 +2819,7 @@ export class GUIManager{
   setUserControlColor( curId, color=null ){
     let {curAvatar, curGui, curAudioGui, curVerse} = this.getUserControls( curId );
     let verseCompare=true;
-    if( color == null ){
+    if( color === null ){
       if(verseCompare){
         color="#ffffff";
       }else{

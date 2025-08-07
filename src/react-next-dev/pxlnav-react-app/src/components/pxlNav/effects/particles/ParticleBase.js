@@ -3,7 +3,6 @@
 
 import {
   Points,
-  PointsMaterial,
   Float32BufferAttribute,
   Vector2,
   Vector3,
@@ -524,9 +523,9 @@ export class ParticleBase{
    */
   findLightPositions(){
     let lightPos=[];
-    let lightCount=0;
+    //let lightCount=0;
     if( this.room.lightList.hasOwnProperty("PointLight") ){
-      lightCount = this.room.lightList.PointLight.length;
+      //lightCount = this.room.lightList.PointLight.length;
       this.room.lightList.PointLight.forEach( (l)=>{
         lightPos.push( l.position.clone() );
       })

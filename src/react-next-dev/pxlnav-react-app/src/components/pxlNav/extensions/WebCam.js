@@ -2,6 +2,7 @@ import { ExtensionBase } from './ExtensionBase.js';
 
 export class WebCamera extends ExtensionBase {
   constructor(){
+    super("WebCamera");
     this.video = document.createElement('video');
     this.stream = null;
     this.isInitialized = false;

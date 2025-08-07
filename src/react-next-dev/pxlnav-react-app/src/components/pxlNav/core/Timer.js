@@ -140,14 +140,14 @@ export class Timer{
 		this.updateTime();
 
     // If the time was stepped multiple times in a single frame, ignore the step
-    if( this._curMS == prevTime ){
+    if( this._curMS === prevTime ){
       this._curMS = prevTime;
       return;
     }
 
 		this.prevMS=prevTime;
         
-    if(this.fpsStats!=-1){
+    if(this.fpsStats!==-1){
       this.fpsStats.update();
     }
     

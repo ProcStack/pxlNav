@@ -243,6 +243,8 @@ export class Animation{
       if( clipNames.length > 0 ){
         return clipNames[0]; // Return the first clip as fallback
       }
+    }else{
+      
     }
     return null;
   }
@@ -297,7 +299,7 @@ export class Animation{
         clip.setEffectiveWeight( weight );
         if( disableOthers ){
           clipNames.forEach( (clipKey)=>{
-            if( clipKey != clipName ){
+            if( clipKey !== clipName ){
               let nonClip = this.objects[ animName ][ 'clips' ][ clipKey ];
               nonClip.enabled = false;
               nonClip.setEffectiveTimeScale( 1 );

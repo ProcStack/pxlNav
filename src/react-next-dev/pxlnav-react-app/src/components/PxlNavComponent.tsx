@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { loadPxlNavModule } from './pxlNavLoader.js';
 
 // Import pxlNav using dynamic import for better ESM compatibility
 interface PxlNavModule {
@@ -45,47 +46,54 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
   const [loadError, setLoadError] = useState<Error | null>(null);
   const [pxlNavModule, setPxlNavModule] = useState<PxlNavModule | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
+  const [lastErrorTime, setLastErrorTime] = useState(0);
 
   // Load the pxlNav module dynamically
   useEffect(() => {
     const loadPxlNav = async () => {
       try {
-        const module = await import('./pxlNav.js') as any;
-        // Try to get named exports first, if not available use default export
-        let pxlNav, pxlEnums, pxlOptions, pxlUserSettings, pxlNavVersion, pxlEffects, pxlShaders, pxlBase, RoomEnvironment;
+        const moduleData = await loadPxlNavModule();
         
-        if (module.pxlNav) {
-          // Named exports are available
-          ({ pxlNav, pxlEnums, pxlOptions, pxlUserSettings, pxlNavVersion, pxlEffects, pxlShaders, pxlBase, RoomEnvironment } = module);
-        } else if (module.default) {
-          // Use default export
-          ({ pxlNav, pxlEnums, pxlOptions, pxlUserSettings, pxlNavVersion, pxlEffects, pxlShaders, pxlBase, RoomEnvironment } = module.default);
-        } else {
-          throw new Error('pxlNav module does not export the expected members');
+        setPxlNavModule(moduleData);
+        setIsLoading(false);
+        setErrorCount(0); // Reset error count on success
+      } catch (error) {
+        const currentTime = Date.now();
+        const timeSinceLastError = currentTime - lastErrorTime;
+        
+        // Throttle errors - only log if it's been more than 2 seconds since last error
+        // or if we haven't hit the max error count yet
+        setErrorCount(prev => prev + 1);
+        setLastErrorTime(currentTime);
+        
+        if (timeSinceLastError > 2000 || errorCount < 5) {
+          console.error(`Failed to load pxlNav module (attempt ${errorCount + 1}):`, error);
         }
         
-        setPxlNavModule({
-          pxlNav,
-          pxlEnums,
-          pxlOptions,
-          pxlUserSettings,
-          pxlNavVersion,
-          pxlEffects,
-          pxlShaders,
-          pxlBase,
-          RoomEnvironment
-        });
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Failed to load pxlNav module:', error);
-        setLoadError(error as Error);
-        setIsLoading(false);
-        onError?.(error as Error);
+        // Stop trying after 10 attempts
+        if (errorCount >= 10) {
+          console.error('Maximum error attempts reached. Stopping retries.');
+          setLoadError(error as Error);
+          setIsLoading(false);
+          onError?.(error as Error);
+          return;
+        }
+        
+        // Don't update loading state immediately - allow for retry
+        if (errorCount >= 3) {
+          setLoadError(error as Error);
+          setIsLoading(false);
+          onError?.(error as Error);
+        }
       }
     };
 
-    loadPxlNav();
-  }, [onError]);
+    // Only attempt to load if we haven't exceeded error threshold
+    if (errorCount < 10 && !loadError) {
+      loadPxlNav();
+    }
+  }, [onError, errorCount, lastErrorTime, loadError]);
 
   // Subscription helper with cleanup tracking
   const subscribeToPxlNav = useCallback((eventType: string, callback: Function) => {
@@ -220,7 +228,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
           // Subscribe to booted event
           subscribeToPxlNav('booted', () => {
             if (mounted) {
-              console.log('🎉 pxlNav has booted successfully!');
+              console.log(' pxlNav has booted successfully!');
               setIsInitialized(true);
               if (onBooted) onBooted();
             }
@@ -279,6 +287,11 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
       >
         <h3>- pxlNav Error</h3>
         <p>{loadError.message}</p>
+        {errorCount > 0 && (
+          <p style={{ fontSize: '12px', opacity: 0.8 }}>
+            Failed after {errorCount} attempts
+          </p>
+        )}
         <button 
           onClick={() => window.location.reload()}
           style={{

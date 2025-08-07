@@ -155,7 +155,7 @@ export class Colliders{
       // If the user runs `prepColliders` on Hover or Clickable objects,
       //   It's assumed the user meant to run `prepInteractables`
       // `prepColliders` is ran internally, but can be called externally
-      if( colliderType == COLLIDER_TYPE.HOVERABLE || colliderType == COLLIDER_TYPE.CLICKABLE ){
+      if( colliderType === COLLIDER_TYPE.HOVERABLE || colliderType === COLLIDER_TYPE.CLICKABLE ){
         this.prepInteractables( pxlRoomObj, colliderType );
         return;
       }
@@ -248,7 +248,7 @@ export class Colliders{
 
           // Perhaps degenerative or empty face
           //   I was seeing it in some instances, so I'm checking for it
-          if( v0.length() == 0 && v1.length() == 0 && v2.length() == 0 ){
+          if( v0.length() === 0 && v1.length() === 0 && v2.length() === 0 ){
             continue;
           }
 
@@ -290,7 +290,7 @@ export class Colliders{
 
 
           // Face-Vertex data for grid location association
-          let curColliderName = collider.name != "" ? collider.name : "collider_" + colliderBaseName;
+          let curColliderName = collider.name !== "" ? collider.name : "collider_" + colliderBaseName;
           let faceKey = this.getGridKey(curColliderName,"_face_", this.flattenVector3( v0 ), this.flattenVector3( v1 ), this.flattenVector3( v2 ) );
           let faceVerts = {
               "object" : collider,
@@ -310,7 +310,7 @@ export class Colliders{
           // -- -- --
 
           // Triangle is self contained within 1 grid location
-          if( minGridX == maxGridX && minGridZ == maxGridZ ){
+          if( minGridX === maxGridX && minGridZ === maxGridZ ){
             this.addFaceToGridLocation( roomName, colliderType, minGridX, minGridZ, faceKey );
             continue;
           }
@@ -318,7 +318,7 @@ export class Colliders{
           // -- -- --
 
           // Third edge segment is used for edge-grid intersection detection
-          let edge3 = v2.clone().sub(v1);
+          //let edge3 = v2.clone().sub(v1);
 
           // -- -- --
 
@@ -332,9 +332,8 @@ export class Colliders{
               //   I was running into some issues with the grid key generation, so log all grid locations
               //     This does add some overhead to castRay(), but it's still WAY less than checking all triangles in a mesh
               this.addFaceToGridLocation( roomName, colliderType, gx, gz, faceKey );
-              continue;
 
-
+              /*
               let gridXMin = gx * gridSize;
               let gridXMax = (gx + 1) * gridSize;
               let gridZMin = gz * gridSize;
@@ -373,6 +372,8 @@ export class Colliders{
               if (u >= 0 && v >= 0 && (u + v) < 1) {
                 this.addFaceToGridLocation( roomName, colliderType, gx, gz, faceKey );
               }
+              */
+
             }
           }
         }
@@ -414,7 +415,7 @@ export class Colliders{
     let curInteractables = pxlRoomObj.getColliders( colliderType );
     //console.log( curInteractables );
 
-    if( curInteractables.length == 0 ) return; // No interactables found, user may have removed objects from the scene during runtime
+    if( curInteractables.length === 0 ) return; // No interactables found, user may have removed objects from the scene during runtime
 
     // Build interactable collider base data
     if( !this.roomColliderData.hasOwnProperty( roomName ) ){
@@ -423,9 +424,9 @@ export class Colliders{
 
     // -- -- --
 
-    let colliderBaseName = -1;
+    //let colliderBaseName = -1;
     curInteractables.forEach( (collider)=>{
-      colliderBaseName++;
+      //colliderBaseName++;
       let colliderFaceVerts = collider.geometry.attributes.position.array;
       let colliderFaceCount = colliderFaceVerts.length / 3;
 
@@ -440,8 +441,8 @@ export class Colliders{
 
       // Gather interactable collider data
       this.roomColliderData[ roomName ][ curInteractableName ] = {};
-      this.roomColliderData[ roomName ][ curInteractableName ][ 'hoverable' ] = colliderType == COLLIDER_TYPE.HOVERABLE;
-      this.roomColliderData[ roomName ][ curInteractableName ][ 'clickable' ] = colliderType == COLLIDER_TYPE.CLICKABLE;
+      this.roomColliderData[ roomName ][ curInteractableName ][ 'hoverable' ] = colliderType === COLLIDER_TYPE.HOVERABLE;
+      this.roomColliderData[ roomName ][ curInteractableName ][ 'clickable' ] = colliderType === COLLIDER_TYPE.CLICKABLE;
       this.roomColliderData[ roomName ][ curInteractableName ][ 'gridSize' ] = this.baseGridSize; // Unused; it's for parity with other collider types
       this.roomColliderData[ roomName ][ curInteractableName ][ 'faceVerts' ] = {};
 
@@ -562,9 +563,9 @@ export class Colliders{
     // Default checks for front and back facing triangles
     let backFaceCheck = 1;
     let frontFaceCheck = 1;
-    if( geoSide == GEOMETRY_SIDE.FRONT ){
+    if( geoSide === GEOMETRY_SIDE.FRONT ){
       backFaceCheck = 0;
-    }else if( geoSide == GEOMETRY_SIDE.BACK ){
+    }else if( geoSide === GEOMETRY_SIDE.BACK ){
       frontFaceCheck = 0;
     }
 
@@ -572,7 +573,6 @@ export class Colliders{
     let faceKeys = roomData['faceGridGroup'][gridKey];
     //let faceKeys = Object.keys( roomData['faceVerts'] );
 
-    let hits = [];
     let retHits = {};
 
 
@@ -683,7 +683,7 @@ export class Colliders{
     faceIds = Object.keys( roomData['faceVerts'] );
 
     // No collider faces found
-    if( faceIds.length == 0 ){
+    if( faceIds.length === 0 ){
       return [];
     }
 
@@ -726,7 +726,7 @@ export class Colliders{
 
       // Calculate triangle area and barycentric coordinates
       let areaInv = (dotE0E0 * dotE1E1 - dotE0E1 * dotE0E1); // faceVerts[ 'areaInv' ];
-      if( areaInv == 0 ) continue; // Triangle is degenerate
+      if( areaInv === 0 ) continue; // Triangle is degenerate
       areaInv = 1 / (dotE0E0 * dotE1E1 - dotE0E1 * dotE0E1); // faceVerts[ 'areaInv' ];
       let u = (dotE1E1 * dotE0EOrigin - dotE0E1 * dotE1EOrigin) * areaInv;
       let v = (dotE0E0 * dotE1EOrigin - dotE0E1 * dotE0EOrigin) * areaInv;
@@ -933,13 +933,13 @@ export class Colliders{
     let stepSize = parseInt( Math.floor( colorIdList.length / 3 ) );
 
     // If stepSize is even, make it odd
-    stepSize += (stepSize & 0x0001)==0 ? 1 : 0;
+    stepSize += (stepSize & 0x0001)===0 ? 1 : 0;
 
     let randomColorIdList = [];
     for( let x = 0; x < count; ++x ){
-      if( colorIdList.length == 0 ){ // Should never run, but just in case
+      if( colorIdList.length === 0 ){ // Should never run, but just in case
         break;
-      }else if( colorIdList.length == 1 ){
+      }else if( colorIdList.length === 1 ){
         randomColorIdList.push( colorIdList.pop() );
         break;
       }
@@ -1020,7 +1020,7 @@ export class Colliders{
           vVisibility = visibility*.5+.5;
           
           vCd = vec4( normalize(colorId), 0.50 ); // Pre-calculated Blue for visible face
-          if (visibleFaceId == 1.0) {
+          if (visibleFaceId === 1.0) {
             vCd = vec4( 0.0, 1.0, 0.0, 1.0 ); // Green for visible face
           }
 
@@ -1064,8 +1064,8 @@ export class Colliders{
   stepHelper( roomObj, colliderType=COLLIDER_TYPE.FLOOR ){
     let roomName = roomObj.getName();
     let roomData = this.roomColliderData[ roomName ][ colliderType ];
-    let helperMesh = roomData[ 'helper' ];
-    let faceGridGroup = roomData[ 'faceGridGroup' ];
+    //let helperMesh = roomData[ 'helper' ];
+    //let faceGridGroup = roomData[ 'faceGridGroup' ];
 
 
     // Get current grid location
@@ -1076,17 +1076,17 @@ export class Colliders{
     let gridKey = this.getGridKey(gridX, gridZ);
 
     // Get all face keys in the current grid location
-    let faceKeys = faceGridGroup[gridKey];
+    //let faceKeys = faceGridGroup[gridKey];
 
-    if( this.prevGridKey == gridKey ){
+    if( this.prevGridKey === gridKey ){
       return;
     }
 
     // Update face-vertex visibility attribute based on grid location
-    let geometry = helperMesh.geometry;
+    /*let geometry = helperMesh.geometry;
     let visibility = geometry.attributes.visibility;
     let visibilityArray = visibility.array;
-    /*for (let i = 0; i < visibilityArray.length; i++) {
+    for (let i = 0; i < visibilityArray.length; i++) {
       visibilityArray[i] = 0;
     }*/
 

@@ -37,7 +37,6 @@
     ]
   },
   "dependencies": {
-    "pxlnav": "file:../../../",
     "three": "^0.171.0"
   }
 }

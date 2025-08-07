@@ -90,14 +90,14 @@ export class Thumbstick extends ElementBase{
     if( !e.touches || e.touches.length < 1 ){
       return -1;
     }
-    if( e.touches.length == 1 ){
+    if( e.touches.length === 1 ){
       return e.touches[0].identifier;
     }
       
     let retId = null;
     for( let x=0; x<e.touches.length; ++x ){
       let curTouch = e.touches[x];
-      if( curTouch.target == this.block ){
+      if( curTouch.target === this.block ){
         retId = curTouch.identifier;
         break;
       }
@@ -106,7 +106,7 @@ export class Thumbstick extends ElementBase{
   }
 
   getTouchInfo( e ){
-    if( this.touchId == -1 || !e.touches || e.touches.length < 1 ){
+    if( this.touchId === -1 || !e.touches || e.touches.length < 1 ){
       return null;
     }
     let touchInfo = null;

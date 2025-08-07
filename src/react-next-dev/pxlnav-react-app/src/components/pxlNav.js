@@ -52,7 +52,6 @@ import {
   DepthTexture,
   DepthFormat,
   UnsignedIntType,
-  UnsignedShortType,
   BasicShadowMap,
   PCFSoftShadowMap,
   PerspectiveCamera,
@@ -219,10 +218,10 @@ class pxlNav{
     this.loaderStepTotalCount = 9;
 
     // -- -- --
-    let pxlRoomRoot = "./pxlRooms";
+    /*let pxlRoomRoot = "./pxlRooms";
     if( options.hasOwnProperty("pxlRoomRoot") ){
       pxlRoomRoot = options["pxlRoomRoot"];
-    }
+    }*/
 
     // Enums object
     this.pxlEnums = pxlEnums;
@@ -309,10 +308,10 @@ class pxlNav{
       "camera-landed" : "Returns a [bool]; Emitted when the camera lands from a jump / fall.",
       "camera-collision" : "Returns a [bool]; Emitted when the camera collides with an object.",
       "pxlNavEventNameHere" : "Never emitted; You did some copy'pasta.",
-      "" : "** NOTE : callbacks get an event object shaped - **",
-      "" : "**  callbackFn( eventType, eventValue ) **",
-      "" : "**  eventValue = { 'type' : *eventName*, 'value' : *data* } **",
-      "" : "",
+      "." : "** NOTE : callbacks get an event object shaped - **",
+      ".." : "**  callbackFn( eventType, eventValue ) **",
+      "..." : "**  eventValue = { 'type' : *eventName*, 'value' : *data* } **",
+      "...." : "",
       "help" : "Hello! I'm here to help you!",
       "pingPong" : "Send 'ping', Get 'pong'! - pxlNav.trigger('ping');",
     };
@@ -410,7 +409,7 @@ class pxlNav{
     if( val == null ){
       val = !this.pxlTimer.active;
     }
-    if( val == true ){ // Non-strict Truthy
+    if( val === true ){ // Non-strict Truthy
       this.pxlTimer.play();
       this.step( false );
     }else{ // Non-strict Falsy
@@ -464,6 +463,10 @@ class pxlNav{
     // Initialize a base quality level
     this.pxlQuality.startBenchmark(); // Start benchmark timer
 
+    // Detect the JS framework in use
+    this.detectJSFramework();
+
+    // Check for post-process passes to load their pxlAssets
     this.checkPxlOptions();
 
     this.buildGui()
@@ -531,6 +534,70 @@ class pxlNav{
     }
   }
 
+
+  // -- -- --
+
+  detectJSFramework(){
+    // Check for Next.js first (includes React)
+    if (typeof window !== 'undefined') {
+      // Next.js specific globals
+      if (window.__NEXT_DATA__ || window.__NEXT_ROUTER__ || window.next) {
+        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.NEXT;
+        return;
+      }
+      
+      // React DevTools or React specific globals
+      if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__ || 
+          document.querySelector('[data-reactroot]') ||
+          document.querySelector('[data-react-helmet]')) {
+        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
+        return;
+      }
+    }
+    
+    // Check for build environment
+    if (typeof process !== 'undefined' && process.env) {
+      if (process.env.NEXT_RUNTIME || process.env.__NEXT_ROUTER_BASEPATH) {
+        this.pxlOptions.framework = 'next';
+        return;
+      }
+      if (process.env.REACT_APP_) {
+        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
+        return;
+      }
+    }
+    
+    // Check for bundler-specific globals
+    if (typeof __webpack_require__ !== 'undefined' || 
+        typeof webpackJsonp !== 'undefined') {
+      // Likely in a bundled React/Next environment
+      this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
+      return;
+    }
+    
+    // Fallback to native JavaScript
+    this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.NATIVE;
+    
+    // Logging the framework
+    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+      let frameworkStr = "Unknown";
+      switch( this.pxlOptions.framework ){
+        case this.pxlEnums.FRAMEWORK.NEXT :
+          frameworkStr = "Next.js";
+          break;
+        case this.pxlEnums.FRAMEWORK.REACT :
+          frameworkStr = "React.js";
+          break;
+        case this.pxlEnums.FRAMEWORK.NATIVE :
+          frameworkStr = "Native JavaScript";
+          break;
+        default :
+          frameworkStr = "Unknown";
+          break;
+      }
+      console.log("  Detected Framework : ", frameworkStr);
+    }
+  }
 
   // -- -- --
   
@@ -646,7 +713,6 @@ class pxlNav{
         this.pxlEnv.engine.debug.checkShaderErrors=true;
         //%
         
-        let bgCd=0x000000;
         let bgCdHex="#000000";
         this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
         //this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio);
@@ -656,7 +722,7 @@ class pxlNav{
         
         this.pxlEnv.engine.setPixelRatio(1);
 
-        if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
+        if(this.pxlOptions.shadowMapBiasing === pxlEnums.SHADOW_MAP.OFF){
           this.pxlEnv.engine.shadowMap.enabled=false;
         }else{
           this.pxlEnv.engine.shadowMap.enabled=true;
@@ -781,10 +847,10 @@ class pxlNav{
         
         transformList=tListIdent();
 
-        let mobileSuffix="";
+        /*let mobileSuffix="";
         if( this.mobile ){
             mobileSuffix="_mobile";
-        }
+        }*/
         
         if( this.loadEnvAssetFile ){
           //let sceneFile=this.folderDict["assetRoot"]+"EnvironmentAssets"+mobileSuffix+".fbx";
@@ -798,13 +864,13 @@ class pxlNav{
     // -- LIGHTS -- -- -- -- -- -- -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
         //Shadow Maps-
-        if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.OFF){
+        if(this.pxlOptions.shadowMapBiasing === pxlEnums.SHADOW_MAP.OFF){
           this.pxlEnv.engine.shadowMap.enabled=false;
         }else{
           this.pxlEnv.engine.shadowMap.enabled=true;
-          if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.BASIC || this.mobile){
+          if(this.pxlOptions.shadowMapBiasing === pxlEnums.SHADOW_MAP.BASIC || this.mobile){
               this.pxlEnv.engine.shadowMap.type=BasicShadowMap;
-          }else if(this.pxlOptions.shadowMapBiasing == pxlEnums.SHADOW_MAP.SOFT){
+          }else if(this.pxlOptions.shadowMapBiasing === pxlEnums.SHADOW_MAP.SOFT){
               this.pxlEnv.engine.shadowMap.type=PCFSoftShadowMap;
               //this.pxlEnv.engine.shadowMap.type=VSMShadowMap;
           }
@@ -833,7 +899,7 @@ class pxlNav{
     let stillLoadingCheck=false;
     let keys=Object.keys(tmpThis.pxlEnv.geoLoadList);
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
-      stillLoadingCheck=tmpThis.pxlEnv.geoLoadList[keys[x]]==0;
+      stillLoadingCheck=tmpThis.pxlEnv.geoLoadList[keys[x]]===0;
       stillLoadingCheck = stillLoadingCheck && !tmpThis.pxlEnv.roomSceneList[x]?.booted;
       if(stillLoadingCheck){ // If entry isn't 1, means not fully loaded
         break;
@@ -862,9 +928,9 @@ class pxlNav{
     let keys=Object.keys(tmpThis.pxlEnv.geoLoadList);
     let bootOnFirst = !pxlOptions["fullLoadPreBoot"];
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
-      stillLoadingCheck = tmpThis.pxlEnv.geoLoadList[keys[x]]==0;
+      stillLoadingCheck = tmpThis.pxlEnv.geoLoadList[keys[x]]===0;
       stillLoadingCheck = stillLoadingCheck && !tmpThis.pxlEnv.roomSceneList[x]?.booted;
-      if( bootOnFirst && keys[x] == this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
+      if( bootOnFirst && keys[x] === this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
         break;
       }
     }
@@ -909,7 +975,7 @@ class pxlNav{
    */
   runPrepDrawScenes(runner=0, jumpCam=true, cmdList=[]){
 
-    if( runner == 0 ){
+    if( runner === 0 ){
       this.pxlGuiDraws.stepLoader("Room Prep"); // --
     }
 
@@ -925,7 +991,7 @@ class pxlNav{
       // Erroring here means shader failure in scene
       this.pxlEnv.mapRender( false );
       
-      if(runner%10==0){
+      if(runner%10===0){
         let exitingRoom=cmdList.pop();
         // Snapshots / Env Map Gen
         //pxlEnv.getSceneSnapshot(exitingRoom);
@@ -1200,9 +1266,9 @@ class pxlNav{
         break;
       case "camera":
         let curEventVal = eventValue.toLowerCase();
-        if( curEventVal == "roam" ){
+        if( curEventVal === "roam" ){
           this.pxlCamera.toggleMovement( true ); // Enable camera movement from user inputs
-        }else if( curEventVal == "static" ){
+        }else if( curEventVal === "static" ){
           this.pxlCamera.toggleMovement( false ); // Prevent camera movement from user inputs
         }
         break;
@@ -1212,10 +1278,11 @@ class pxlNav{
       case "roommessage":
         let roomEventType = eventObj["type"];
         let roomEventValue = eventObj["value"];
-        if(eventValue==null){
+        if(eventValue===null){
           eventValue=this.pxlEnv.currentRoom;
         }
         this.pxlEnv.sendRoomMessage( eventValue, roomEventType, roomEventValue );
+        break;
       default:
         break;
     }
@@ -1227,14 +1294,13 @@ class pxlNav{
    * @param {*} callbackFunc 
    */
   subscribe( eventType, callbackFunc ){
-    let triggerHelp = false;
     if( this.validEventsKeys.includes( eventType ) ){
-      if( eventType == "test" ){
+      if( eventType === "test" ){
         console.log("Test Event : `pxlNav.subscribe( 'test', ... )` was used; subscription list -");
-      }else if( eventType == "pxlNavEventNameHere" ||  eventType == "help" ){
-        if( eventType == "pxlNavEventNameHere" ){
+      }else if( eventType === "pxlNavEventNameHere" ||  eventType === "help" ){
+        if( eventType === "pxlNavEventNameHere" ){
           console.warn("Warning : `pxlNav.subscribe( 'pxlNavEventNameHere', ... )` was used; need some help?");
-        }else if( eventType == "help" ){
+        }else if( eventType === "help" ){
           console.log("Help Requested : `pxlNav.subscribe( 'help', ... )` was used; Subscription items--");
         }
 
@@ -1247,9 +1313,9 @@ class pxlNav{
 
       }else{
         let eventSplit = eventType.split("-");
-        if( eventSplit[0] == "device" ){
+        if( eventSplit[0] === "device" ){
           this.pxlDevice.subscribe(  eventSplit[1], callbackFunc );
-        }else if( eventSplit[0] == "camera" ){
+        }else if( eventSplit[0] === "camera" ){
           let camEventType = pxlEnums.CAMERA_EVENT.MOVE;
 
           // Find the camera event type
@@ -1300,9 +1366,9 @@ class pxlNav{
   unsubscribe( eventType, callbackFunc ){
     let retValue = false;
     let eventSplit = eventType.split("-");
-    if( eventSplit[0] == "device" ){
+    if( eventSplit[0] === "device" ){
       retValue = this.pxlDevice.unsubscribe(  eventSplit[1], callbackFunc );
-    }else if( eventSplit[0] == "camera" ){
+    }else if( eventSplit[0] === "camera" ){
       let camEventType = pxlEnums.CAMERA_EVENT.MOVE;
 
       // Find the camera event type
@@ -1383,7 +1449,7 @@ export {
 };
 
 // Default export for React compatibility
-export default {
+const pxlNavDefault = {
   pxlNavVersion, 
   pxlNav, 
   pxlEnums, 
@@ -1394,4 +1460,6 @@ export default {
   pxlShaders,
   pxlBase
 };
+
+export default pxlNavDefault;
 

@@ -129,6 +129,10 @@ export class User{
       case this.pxlEnums.USER_SPEED.BOOST:
         this.moveSpeed = this.moveSpeedBase * this.moveSpeedBoost;
         break;
+      default:
+        //Something broke, reset to base
+        this.moveSpeed = this.moveSpeedBase;
+        break;
     }
   }
 
@@ -148,15 +152,15 @@ export class User{
     return false;
   }
   checkItemPickUp(itemName){
-    if(itemName=="LowGravity"){
-      if(this.lowGrav==0){
+    if(itemName==="LowGravity"){
+      if(this.lowGrav===0){
         this.lowGrav=1;
         return true;
       }else{
         return false;
       }
-    }else if( itemName=="LizardKing" ){
-      if(this.lKing==0){
+    }else if( itemName==="LizardKing" ){
+      if(this.lKing===0){
         this.lKing=1;
                 this.lKingWarp.set( ...this.lKingActive );
                 this.lizardKingPass.enabled=true;
@@ -165,8 +169,8 @@ export class User{
       }else{
         return false;
       }
-    }else if( itemName=="StarField" ){
-      if(this.sField==0){
+    }else if( itemName==="StarField" ){
+      if(this.sField===0){
         this.sField=1;
                 this.starFieldPass.enabled=true;
                 //this.lKingRoomPass.enabled=true;
@@ -174,8 +178,8 @@ export class User{
       }else{
         return false;
       }
-    }else if( itemName=="InfinityZoom" ){
-      if(this.iZoom==0){
+    }else if( itemName==="InfinityZoom" ){
+      if(this.iZoom===0){
         this.iZoom=1;
                 this.crystallinePass.enabled=true;
         return true;
@@ -185,15 +189,15 @@ export class User{
     }
   }
   toggleTankRotate(active=null){
-    this.tankStrafe= active==null ? !this.tankStrafe : active;
+    this.tankStrafe= active===null ? !this.tankStrafe : active;
     this.tankStrageText= this.tankStrafe ? "Left/Right Rotation" : "Left/Right Strafe" ;
   }
   toggleMouseInf(active=null){
-    this.invertMouse= active==null ? !this.invertMouse : active;
+    this.invertMouse= active===null ? !this.invertMouse : active;
     this.invertMouseText= this.invertMouse ? "Revert Mouse" : "Invert Mouse" ;
   }
   toggleFpsStats(){
-    /*if(this.pxlTimer.fpsStats == -1){
+    /*if(this.pxlTimer.fpsStats === -1){
       this.pxlTimer.fpsStats=new Stats();
       document.body.appendChild(this.pxlTimer.fpsStats.domElement);
       this.pxlTimer.fpsStats.update();

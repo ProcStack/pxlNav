@@ -12,12 +12,11 @@ import {
   Vector2,
   Vector3,
   Quaternion,
-  Object3D,
   Euler
 } from "../../libs/three/three.module.min.js";
 
-import { pxlUserSettings } from "../core/Options.js";
-import { VERBOSE_LEVEL, COLLIDER_TYPE, CAMERA_EVENT } from "../core/Enums.js";
+//import { pxlUserSettings } from "../core/Options.js";
+import { VERBOSE_LEVEL, COLLIDER_TYPE } from "../core/Enums.js";
 
 // TODO : Extend this damn monolith of a chunky boy
 //          Camera, Player Controller, Force Influence / Collision
@@ -326,11 +325,11 @@ export class Camera{
         // Transferables Status
         let ab= new ArrayBuffer(1);
         worker.postMessage(ab, [ab]); // ab.byteLength -> If transfer successful
-        this.workerTransfers=ab.byteLength==0; // Can transfer ArrayBuffers directly
+        this.workerTransfers=ab.byteLength===0; // Can transfer ArrayBuffers directly
         
         // Message Functions
         this.workerMessage= async ( msg )=>{
-            if( msg.type == "update" ){
+            if( msg.type === "update" ){
                 tmpThis.updateMainValues( msg );
             }
         }
@@ -338,8 +337,8 @@ export class Camera{
             tmpThis.worker.postMessage({type, state})
         }
         this.deviceKey= async ( key=false, state=false )=>{
-            if( typeof key == "number"){
-            }else if( typeof key == "string"){
+            if( typeof key === "number"){
+            }else if( typeof key === "string"){
                 let type="key";
                 tmpThis.worker.postMessage({type, key, state})
             }
@@ -398,7 +397,7 @@ export class Camera{
       this.roomStandingHeight[roomName]=this.standingHeight;
     }
     
-    if( roomName=="default" ){
+    if( roomName==="default" ){
       this.standingHeight=val;
     }
 
@@ -580,7 +579,7 @@ export class Camera{
    */
   setCameraRotateEasing( val ){
     if( !Array.isArray(val) ){
-      if( typeof val == "number" ){
+      if( typeof val === "number" ){
         val=[val,val];
         this.warn("Warning : Camera.setCameraEasing() expects an array of two numeric values, [PC Easing 0-1, Mobile Easing 0-1]; Default is [.55,.45]");
       }else{
@@ -818,7 +817,7 @@ export class Camera{
     }
     
     // Check if camera calculations should be ran
-    this.camUpdated= this.camUpdated || this.hasMoved || this.hasRotated || this.hasGravity || this.cameraMovement[0]!=0 || this.cameraMovement[1]!=0 ;// || this.pxlDevice.cursorLockActive;
+    this.camUpdated= this.camUpdated || this.hasMoved || this.hasRotated || this.hasGravity || this.cameraMovement[0]!==0 || this.cameraMovement[1]!==0 ;// || this.pxlDevice.cursorLockActive;
     this.updateCamera();
 
 
@@ -862,7 +861,7 @@ export class Camera{
     
     //let stillMoving=false;
     // PC Mouse Movement
-    if(this.pxlDevice.touchMouseData.velocity!=null && this.pxlDevice.mobile==0){
+    if(this.pxlDevice.touchMouseData.velocity!=null && this.pxlDevice.mobile===0){
       if(velEaseMag<this.posRotEasingThreshold){
         this.pxlDevice.touchMouseData.velocity.multiplyScalar(0);
         //this.pxlDevice.touchMouseData.velocityEase.multiplyScalar(0);
@@ -885,7 +884,7 @@ export class Camera{
    * @private
    */
   buildDeviceMonitors(){
-    let camObject=this;
+    //let camObject=this;
     //window.addEventListener('deviceorientation', (e)=>{camObject.devicePoseData(camObject,e)} );
     //window.addEventListener('orientationchange', (e)=>{camObject.deviceOrientationData(camObject,e)} );
     //window.addEventListener('devicemotion', (e)=>{camObject.deviceMotionData(camObject,e)} );
@@ -938,7 +937,7 @@ export class Camera{
       camObj.cameraPose.accelZeroed[0]+=acc.x;
       camObj.cameraPose.accelZeroed[1]+=acc.y;
       camObj.cameraPose.accelZeroed[2]+=acc.z;
-      if(camObj.cameraPose.accelCalCount==camObj.cameraPose.accelCalibration){
+      if(camObj.cameraPose.accelCalCount===camObj.cameraPose.accelCalibration){
         camObj.cameraPose.accelZeroed[0]*=camObj.cameraPose.accelCalDiv;
         camObj.cameraPose.accelZeroed[1]*=camObj.cameraPose.accelCalDiv;
         camObj.cameraPose.accelZeroed[2]*=camObj.cameraPose.accelCalDiv;
@@ -1005,7 +1004,7 @@ export class Camera{
     
     this.pxlDevice.touchMouseData.netDistance.set(0,0);
     
-    if( newPosition == null ){
+    if( newPosition === null ){
       newPosition = this.camera.position.clone();
     }
     
@@ -1176,7 +1175,7 @@ export class Camera{
     this.pxlEnv.currentRoom=roomName;
     this.pxlAutoCam.curRoom=roomName;
     
-    let isMainRoom=roomName==this.pxlEnv.mainRoom;
+    let isMainRoom=roomName===this.pxlEnv.mainRoom;
     //this.pxlEnv.delayPass.uniforms.roomComposer.value= isMainRoom ? 0 : 1;
     if( this.pxlUser.iZoom ){
       let tDiff= isMainRoom ? this.pxlEnv.roomComposer : this.pxlEnv.mapComposer;
@@ -1184,7 +1183,7 @@ export class Camera{
       this.pxlEnv.delayPass.uniforms.tDiffusePrev.value= tDiff.renderTarget1.texture;
       this.pxlEnv.delayPass.uniforms.tDiffusePrevRoom.value= tDiffPrev.renderTarget1.texture;
       setTimeout( ()=>{
-        if(  prevRoom != roomName ){
+        if(  prevRoom !== roomName ){
           if( isMainRoom ){
             this.pxlEnv.roomComposer.reset();
           }else{
@@ -1196,7 +1195,7 @@ export class Camera{
         },500);
       },100);
     }
-    //this.pxlEnv.delayPass.uniforms.tDiffusePrev.value= roomName==this.pxlEnv.mainRoom ? this.pxlEnv.mapComposer.renderTarget1.texture : this.pxlEnv.roomComposer.renderTarget1.texture;
+    //this.pxlEnv.delayPass.uniforms.tDiffusePrev.value= roomName===this.pxlEnv.mainRoom ? this.pxlEnv.mapComposer.renderTarget1.texture : this.pxlEnv.roomComposer.renderTarget1.texture;
         
     //if(roomName!=this.pxlEnv.mainRoom || start){
     if( start ){
@@ -1205,7 +1204,7 @@ export class Camera{
         return;
       }
 
-      if( roomName != prevRoom ){
+      if( roomName !== prevRoom ){
         roomEnv.start();
       }
 
@@ -1316,20 +1315,19 @@ export class Camera{
         }
         
         this.hotKeyTriggered=true;
-    if( hotkey == 0 ){ // Lobby
+    if( hotkey === 0 ){ // Lobby
       //this.warpEventTriggered( 1, this.pxlEnv.mainRoom, 'init' );
       this.warpEventTriggered( 1, this.pxlEnv.currentRoom, 'init' );
     }
     
     // Hotkeys are set for a specific scene, make 3d scene file dependant
-    return;
-    if( hotkey == 1 ){ // Canyon
+    /*if( hotkey === 1 ){ // Canyon
       //this.warpEventTriggered( 1, this.pxlEnv.mainRoom, this.portalList['Portal_8'] );
-    }else if( hotkey == 2 ){ // Dance Hall
+    }else if( hotkey === 2 ){ // Dance Hall
       //this.warpEventTriggered( 1, "ShadowPlanet", 'init' );
-    }else if( hotkey == 3 ){ // Sunflower Room
+    }else if( hotkey === 3 ){ // Sunflower Room
       //this.warpEventTriggered( 1, this.pxlEnv.mainRoom, this.portalList['Portal_0'] );
-    }
+    }*/
   }
 
 
@@ -1395,13 +1393,13 @@ export class Camera{
    */
   camJump(curTime){
     let timeDelta= (curTime-this.pxlDevice.keyDownCount[2]) ;
-    let fpsRateAdjust=1;//Math.min(1, 1/(20*this.pxlTimer.msRunner.y));
+    //let fpsRateAdjust=1;//Math.min(1, 1/(20*this.pxlTimer.msRunner.y));
     // let jumpPerc=Math.min(1, timeDelta/(this.cameraMaxJumpHold[this.pxlUser.lowGrav]*fpsRateAdjust) );
     let jumpPerc=Math.min(1, timeDelta / (this.cameraMaxJumpHold[this.pxlUser.lowGrav] ) ) ;
         
     if(this.cameraJumpActive){
       let jumpRate=jumpPerc ;
-      if(jumpRate==1){
+      if(jumpRate===1){
         this.cameraJumpActive=false;
       }else{
         jumpRate=(1-jumpRate)*(1-jumpRate);
@@ -1411,7 +1409,7 @@ export class Camera{
     }
     this.cameraJumpVelocity*=(1-jumpPerc);//*.5+.5;
 
-    if( jumpPerc==1 ){
+    if( jumpPerc===1 ){
       this.cameraJumpActive=false;
     }
   }
@@ -1453,17 +1451,17 @@ export class Camera{
         this.gravityRate = Math.min( 1, ((this.gravityRate+this.gravityMax))) * this.gravityCount;
         //this.gravityRate +=  this.gravityRate * this.gravityCount;
       }
-      if( this.gravityRate != 0 ){
+      if( this.gravityRate !== 0 ){
         // gMult not used, testing for need
-        let gMult=1;
+        //let gMult=1;
         if( !this.hasGravity ){
           this.gravityRate=this.gravityRate>.01 ? this.gravityRate*this.gravityEaseOutRate*gravityRate * deltaTime : 0;
-          gMult= this.gravityRate;
-        }else{
+          //gMult= this.gravityRate;
+        }/*else{
           //gMult=this.gravityRate*.08*gravityRate;
           gMult=this.gravityRate;
-        }
-        gMult=Math.min(1, gMult);
+        }*/
+        //gMult=Math.min(1, gMult);
         
         this.standingHeightGravInfluence = Math.min(1, this.gravityRate / this.gravityMax ) * this.standingMaxGravityOffset;
         //this.standingHeightGravInfluence = Math.min(1, gMult / this.gravityMax ) * this.standingMaxGravityOffset;
@@ -1541,7 +1539,7 @@ export class Camera{
     let objHit=null;
     this.movementBlocked=false;
     
-    if( (this.cameraMoveLength>0 || this.colliderPrevObjHit==null || this.nearestFloorObjName==null) &&
+    if( (this.cameraMoveLength>0 || this.colliderPrevObjHit===null || this.nearestFloorObjName===null) &&
            this.cameraBooted && this.pxlEnv.roomSceneList[this.pxlEnv.currentRoom].collidersExist
         ){
       this.colliderValidityChecked=true; // Prevent doublechecking object validity post collision detection
@@ -1553,10 +1551,10 @@ export class Camera{
       let castHeight= 150*this.maxStepHeight ;
       castPos.y += castHeight + this.maxStepHeight;
       
-      let resetKeyDown=false;
+      //let resetKeyDown=false;
       var rayHits=[];
       
-      let curQuadrant= ( ~~(castPos.x>0)+"" ) + ( ~~(castPos.z>0)+"" );
+      //let curQuadrant= ( ~~(castPos.x>0)+"" ) + ( ~~(castPos.z>0)+"" );
       
       if( curRoomObj.hasColliderType( COLLIDER_TYPE.WALL ) ){
         rayHits = this.pxlColliders.castRay( this.pxlEnv.currentRoom, castPos, castDir, COLLIDER_TYPE.WALL );
@@ -1572,7 +1570,7 @@ export class Camera{
           }
           
           let closestDist=-99999;
-          let yPrevRef=curCamPos.y;
+          //let yPrevRef=curCamPos.y;
           let curName;
           let curCollisionPos=this.nearestFloorHit;
           let validHitCheck=false;
@@ -1584,7 +1582,7 @@ export class Camera{
             let camDist=curHit.y;//- curCamPos.y; // ## Why??
             let validHit=camDist < this.maxStepHeight;
             validHitCheck = validHitCheck ? validHitCheck : validHit;
-            if( (curDist<closestDist && validHit) || objHit==null){
+            if( (curDist<closestDist && validHit) || objHit===null){
               objHit=curName;
               closestDist=curDist;
               curCollisionPos=curHit;
@@ -1596,7 +1594,7 @@ export class Camera{
           if( !validHitCheck || ((curCamPos.y) < curCollisionPos.y && (this.nearestFloorHitPrev.y-curCollisionPos.y > (this.maxStepHeight+this.getStandingHeight()) && !this.hasGravity) && ( (curCamPos.y+this.maxStepHeight+this.getStandingHeight()) < curCollisionPos.y && this.hasGravity) ) ){
               
               //objHit=this.nearestFloorObjName;
-              if(this.cameraMovement[0] != 0 || this.cameraMovement[1] != 0 ){
+              if(this.cameraMovement[0] !== 0 || this.cameraMovement[1] !== 0 ){
                   validHitCheck=true;
                   this.hasGravity=false;
                   this.hasJumpLock=true;
@@ -1626,7 +1624,7 @@ export class Camera{
           
           //this.colliderValid=validHitCheck;
           if( validHitCheck ){
-              if( objHit == null ){
+              if( objHit === null ){
                   this.nearestFloorHit = this.nearestFloorHitPrev;
                   this.nearestFloorObjName = this.nearestFloorObjNamePrev;
                   if( Math.abs(curCamPos.y-this.nearestFloorHit.y) > (this.maxStepHeight+this.getStandingHeight()) ){
@@ -1647,7 +1645,7 @@ export class Camera{
       }else{
         // ## Find orientation to gravitational source if any exist in Room Environment
         let stepUpDist=this.maxStepHeight;//+this.cameraJumpVelocity;
-        let validDistRange=stepUpDist+this.getStandingHeight();
+        //let validDistRange=stepUpDist+this.getStandingHeight();
         //castPos.y=curCamPos.y+stepUpDist;
         castPos=curCamPos.clone(); //.add(new Vector3(0,100,0));
         castPos.y += castHeight + this.maxStepHeight;
@@ -1692,7 +1690,7 @@ export class Camera{
               curCollisionPos=curHit;
               break;
             }else if( !this.itemCheck(curName, validHit) ){
-              if(camDist<closestDist || objHit==null){
+              if(camDist<closestDist || objHit===null){
                 objHit=curName;
                 closestDist=camDist;
                 curCollisionPos=curHit;
@@ -1700,7 +1698,7 @@ export class Camera{
             }
           }
           
-          if( this.nearestFloorObjName==null && objHit!=null){
+          if( this.nearestFloorObjName===null && objHit!=null){
             this.nearestFloorHitPrev=curCollisionPos;
             this.nearestFloorObjNamePrev=objHit;
                         
@@ -1737,7 +1735,7 @@ export class Camera{
             
             this.nearestFloorHit=curCollisionPos;
             this.nearestFloorObjName=objHit;
-            if( objHit == null ){
+            if( objHit === null ){
                 this.colliderValid=false;
                 this.hasGravity=true;
             }
@@ -1764,7 +1762,7 @@ export class Camera{
 ///////////////////////////////
 // Collider Event Triggers  //
 /////////////////////////////
-  // Should only run when this.colliderValid==false
+  // Should only run when this.colliderValid===false
   // ## 
   /**
    * Checks if the collider is valid.
@@ -1829,11 +1827,11 @@ export class Camera{
     
     // -- Check for change between different Collider objects -- //
     // -- Changes may trigger Audio and Screen Visual Effects -- //
-    this.colliderShiftActive=this.colliderCurObjHit!=checkObject || this.colliderShiftActive ;
+    this.colliderShiftActive=this.colliderCurObjHit!==checkObject || this.colliderShiftActive ;
     this.colliderPrevObjHit= this.colliderCurObjHit;
     this.colliderCurObjHit=checkObject;
     // If the volume adjust is mid transition, keep the fade rolling
-    this.colliderShiftActive=this.colliderShiftActive || !(this.colliderAdjustPerc==1 || this.colliderAdjustPerc==0);
+    this.colliderShiftActive=this.colliderShiftActive || !(this.colliderAdjustPerc===1 || this.colliderAdjustPerc===0);
     
     // Fade Up/Down Audio/Video effects per room names
     // ## These should be handled by the Room Environment itself
@@ -1850,12 +1848,12 @@ export class Camera{
       
       let curExp=1.0;
       // ## Convert to function dictionary per Room Environment's Collider[objName]
-      if(this.colliderCurObjHit == "AudioTrigger_1"){ // Sunflower Room
+      if(this.colliderCurObjHit === "AudioTrigger_1"){ // Sunflower Room
         this.pxlEnv.currentAudioZone=1;
         curExp= curExp - curExposure*this.uniformScalars.darkBase; // ## Don't do it this way... blend, don't add offset
         this.uniformScalars.exposureUniformBase=curExp;
 
-      }else if(this.colliderCurObjHit == "AudioTrigger_2"){ // Lobby
+      }else if(this.colliderCurObjHit === "AudioTrigger_2"){ // Lobby
         this.pxlEnv.currentAudioZone=2;
         let animPerc=1;
         curExp= this.uniformScalars.curExp + curExposure*this.uniformScalars.brightBase*animPerc;  // ## Don't do it this way... blend, don't add offset
@@ -1869,11 +1867,11 @@ export class Camera{
       }
       
       // Transition has completed when True
-      this.colliderShiftActive=!(this.colliderAdjustPerc==1 || this.colliderAdjustPerc==0);
+      this.colliderShiftActive=!(this.colliderAdjustPerc===1 || this.colliderAdjustPerc===0);
             
       // If Lobby geomtry is visible, but no longer in the Lobby, toggle visiblity
             // Runs once, at the moment of collider change
-      if( this.colliderPrevObjHit=="AudioTrigger_2" && this.colliderCurObjHit!=this.colliderPrevObjHit){
+      if( this.colliderPrevObjHit==="AudioTrigger_2" && this.colliderCurObjHit!==this.colliderPrevObjHit){
         this.proximityScaleTrigger=true; // Fade In proximity range
         this.pxlAudio.setFadeActive(1);
       }
@@ -1930,7 +1928,7 @@ export class Camera{
         if( this.pxlUser.itemActiveTimer.length>0 ){
             this.pxlUser.itemActiveTimer[0]=this.pxlTimer.curMS;
         }else{
-            if( this.pxlUser.mPick.length==0){
+            if( this.pxlUser.mPick.length===0){
                 this.pxlUser.mPick=this.pxlUtils.randomizeArray( ['LizardKing', 'StarField', 'InfinityZoom'] );
             }
             //this.pxlUser.mPick="LizardKing";
@@ -1946,32 +1944,32 @@ export class Camera{
      * @returns {boolean} - Whether the item was activated.
      */
     itemActive( curName=null, curNameBase=null ){
-        if( curName==null ){
+        if( curName===null ){
             return false;
         }
         let timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
         let finCmd="";
         let text="";
-        if(curName=="LowGravity"){
+        if(curName==="LowGravity"){
             text="Low Gravity";
             finCmd="this.lowGrav=0;this.itemGroupList['"+curNameBase+"'].visible=true;";
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
-        }else if(curName=="LizardKing"){
+        }else if(curName==="LizardKing"){
             text="I am the Lizard King";
             finCmd="this.lKing=0;this.lKingWarp.set(...this.lKingInactive);this.lizardKingPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
-        }else if(curName=="StarField"){
+        }else if(curName==="StarField"){
             text="Major Tom";
             finCmd="this.sField=0;this.starFieldPass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
-        }else if(curName=="InfinityZoom"){
+        }else if(curName==="InfinityZoom"){
             text="Fractal Substrate";
             finCmd="this.iZoom=0;this.crystallinePass.enabled=false;"+(!this.pxlDevice.mobile && "this.itemGroupList['"+curNameBase+"'].visible=true;this.pxlEnv.mapComposerWarpPass.needsSwap=true;this.pxlEnv.mapComposerWarpPass.enabled=false;");
             timer=this.pxlTimer.prevMS+this.pxlUser.itemRunTime;
             //this.pxlEnv.mapComposerWarpPass.needsSwap=false;
             this.pxlEnv.mapComposerWarpPass.needsSwap=true;
             setTimeout(()=>{
-                /*if( this.pxlEnv.currentRoom==this.pxlEnv.mainRoom ){
+                /*if( this.pxlEnv.currentRoom===this.pxlEnv.mainRoom ){
                     this.pxlEnv.roomComposer.reset();
                     this.pxlEnv.mapComposer.render();
                 }else{
@@ -1983,7 +1981,7 @@ export class Camera{
                 setTimeout(()=>{
                     this.pxlEnv.mapComposerWarpPass.needsSwap=false;
                     this.pxlEnv.mapComposerWarpPass.enabled=true;
-                    /*if( this.pxlEnv.currentRoom==this.pxlEnv.mainRoom ){
+                    /*if( this.pxlEnv.currentRoom===this.pxlEnv.mainRoom ){
                         this.pxlEnv.roomComposer.reset();
                     }else{
                         this.pxlEnv.mapComposer.reset();
@@ -2028,7 +2026,7 @@ export class Camera{
    * this.pxlCamera.toggleMovement( true );
    */
   toggleMovement( canMoveVal=null ){
-    if(canMoveVal == null){
+    if(canMoveVal === null){
       canMoveVal=!this.canMove;
     }
     this.canMove = canMoveVal;
@@ -2073,12 +2071,12 @@ export class Camera{
     // Check if either Left or Right direction keys are pressed
     //  Default: rate[0] is strafing movement
     //    If tank controls are enabled, rate[0] drives rotation rate
-    // this.pxlQuality.settings.leftRight == False : Tank Controls;  True : Strafing
+    // this.pxlQuality.settings.leftRight === False : Tank Controls;  True : Strafing
     //   TODO : Yeah, I know.  There is a TODO in QualityController.js to decouple movement settings
-    if((dir[0]+dir[2])==1){
+    if((dir[0]+dir[2])===1){
       strafe=dir[2]-dir[0];
       // Subtract forward/back from strafing movement to reduce diagonal super-speed
-      let turnRate=this.pxlQuality.settings.leftRight ?  this.cameraEasing[ easingMode ] : ( 1 - Math.min(1, Math.abs(this.cameraMovement[1]*.3)) ) *.5 ;
+      let turnRate = this.pxlQuality.settings.leftRight ?  this.cameraEasing[ easingMode ] : ( 1 - Math.min(1, Math.abs(this.cameraMovement[1]*.3)) ) *.5 ;
       rate[0]=( (this.pxlQuality.settings.leftRight ? 1.0 : 6.0) + (deltas[0]*(deltas[0])) * .1 ) * turnRate;
       rate[0]= Math.min( this.pxlUser.moveSpeed, rate[0] ) * this.movementScalar * this.userInputMoveScalar.x;
     }else{
@@ -2087,7 +2085,7 @@ export class Camera{
     }
     
     // Check if either Up or Down direction keys are pressed
-    if((dir[1]+dir[3])==1){
+    if((dir[1]+dir[3])===1){
       dolly=dir[3]-dir[1];
 
       // Subtract strafing movement from dolly movement to reduce diagonal super-speed
@@ -2099,7 +2097,7 @@ export class Camera{
       this.pxlDevice.keyDownCount[1]=curTime;
     }
 
-    let moveSpeed = ( rate[0]**2 + rate[1]**2 ) ** 0.5;
+    //let moveSpeed = ( rate[0]**2 + rate[1]**2 ) ** 0.5;
     
     this.hasMovementLimit=true;
     this.movementMax = 10.0; // Meters per second
@@ -2138,7 +2136,7 @@ export class Camera{
 
       // Give some base movement to the camera
       //   This way it doesn't ramp up from 0, but from the minimum movement speed
-      if( moveScalar!=0 ){
+      if( moveScalar!==0 ){
         let minimumMoveSpeed=0.1;
         moveScalar = moveScalar>0 ? Math.max(minimumMoveSpeed,moveScalar) : Math.min(-minimumMoveSpeed,moveScalar);
         userMovement.normalize().multiply(new Vector3(1,0,1)).multiplyScalar(moveScalar);
@@ -2147,10 +2145,10 @@ export class Camera{
         this.cameraMovement[0] = Math.abs(this.cameraMovement[0])<this.posRotEasingThreshold ? 0 : this.cameraMovement[0]*this.cameraMovementEase;
         this.cameraMovement[1] = Math.abs(this.cameraMovement[1])<this.posRotEasingThreshold ? 0 : this.cameraMovement[1]*this.cameraMovementEase;
 
-        if( this.cameraMovement[0] == 0 ){
+        if( this.cameraMovement[0] === 0 ){
           this.userInputMoveScalar.x=1;
         }
-        if( this.cameraMovement[1] == 0 ){
+        if( this.cameraMovement[1] === 0 ){
           this.userInputMoveScalar.y=1;
         }
         
@@ -2198,14 +2196,14 @@ export class Camera{
     if( this.canMove && this.hasGravity ){
       //curCamPos=this.checkColliderFail( curCamPos );
       
-      let validDist=this.maxStepHeight+this.gravityRate;
+      //let validDist=this.maxStepHeight+this.gravityRate;
       let jumpUpState=(curCamPos.y)<this.nearestFloorHit.y;
       /*if( jumpUpState || this.colliderFail ){
         //curCamPos.x = nPrev.x;
         //curCamPos.y = Math.max( nPrev.y, curCamPos.y-this.gravityRate );
         curCamPos.y = Math.max( 100, curCamPos.y-this.gravityRate );
         //curCamPos.z = nPrev.z;
-        if( curCamPos.y == 100 ){//nPrev.y){
+        if( curCamPos.y === 100 ){//nPrev.y){
           let nPrev=this.nearestFloorHitPrev;
           curCamPos=nPrev.clone();
           this.resetGravity();
@@ -2224,7 +2222,7 @@ export class Camera{
         }
       }else{
         curCamPos.y = Math.max( this.nearestFloorHit.y, curCamPos.y - this.gravityRate );
-        if( curCamPos.y == this.nearestFloorHit.y && curCamPos.y<this.cameraPrevPos.y ){
+        if( curCamPos.y === this.nearestFloorHit.y && curCamPos.y<this.cameraPrevPos.y ){
           this.jumpLanding();
         }
       }
@@ -2343,11 +2341,11 @@ export class Camera{
    *         This causes an inate rotation when the camera is moved to a new position
    */  
   updateRoamRotation(){
-    if(this.cameraPose.alpha==null){ // ## Should gyro exist, don't run.  But need to allow controlled look around on mobile
+    if(this.cameraPose.alpha===null){ // ## Should gyro exist, don't run.  But need to allow controlled look around on mobile
       let xGrav=this.pxlDevice.gyroGravity[2];//*this.gravityRate;//*PI;
       
-      let viewNormal=new Vector3(0,0,1);
-      let poseQuat=new Quaternion();
+      //let viewNormal=new Vector3(0,0,1);
+      //let poseQuat=new Quaternion();
       // ## Theres a better place for this....
       this.pxlDevice.touchMouseData.velocity.y=Math.min(this.touchSensitivityLimits, Math.max(-this.touchSensitivityLimits, this.pxlDevice.touchMouseData.velocity.y));
       let euler=new Euler();
@@ -2450,7 +2448,7 @@ export class Camera{
     if(!this.lookAtTargetActive){ return; }
     
     if(this.lookAtTargetActive){
-      if(this.lookAtLockFader!=0){
+      if(this.lookAtLockFader!==0){
         this.lookAtLockPerc+=(this.lookAtLockFader+Math.min(1,this.pxlDevice.touchMouseData.velocity.length()*.001))*this.lookAtLockFadeRate;
         if(this.lookAtLockPerc<0 || this.lookAtLockPerc>1){
           this.lookAtLockPerc=this.lookAtLockPerc<0?0:1;
@@ -2466,7 +2464,7 @@ export class Camera{
         let origCamQuat=this.camera.quaternion.clone();
         this.camera.lookAt(this.cameraAimTarget.position);
         let targetCamQuat=this.camera.quaternion.clone();
-        if(this.lookAtLockPerc==1){
+        if(this.lookAtLockPerc===1){
           this.camera.setRotationFromQuaternion( targetCamQuat );
         }else{
           this.camera.setRotationFromQuaternion( targetCamQuat.slerp(origCamQuat,Math.cos(this.lookAtLockPerc*this.pi)*.5+.5) );
@@ -2505,10 +2503,10 @@ export class Camera{
    * Runs the room warping camera effects.
    */
   warpCamRun(){
-    if(this.warpType==0){
+    if(this.warpType===0){
       this.setToObj( this.warpObj );
-    }else if(this.warpType==1){
-      let init=this.warpTarget=='init';
+    }else if(this.warpType===1){
+      let init=this.warpTarget==='init';
       this.warpToRoom( this.warpObj, init, this.warpTarget );
     }
     this.pxlEnv.setExposure( this.uniformScalars.exposureUniformBase );
@@ -2642,7 +2640,7 @@ export class Camera{
         
       this.updateDeviceValues( velEaseMag );
       // TODO : Enable when User class is updated
-      //this.pxlUser.localUserTurned=this.pxlDevice.touchMouseData.velocity.length() == 0;
+      //this.pxlUser.localUserTurned=this.pxlDevice.touchMouseData.velocity.length() === 0;
       
       this.prevQuaternion.copy( this.camera.quaternion );
       //this.prevWorldMatrix.set( this.camera.matrixWorld ); // Only used if running higher quality motion blur, not needed

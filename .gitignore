@@ -1,6 +1,7 @@
 # Custom
 src/pxlRooms/VoidEnvironment
 src/pxlRooms/OutletEnvironment
+.github/chatmodes*
 
 
 # Logs
