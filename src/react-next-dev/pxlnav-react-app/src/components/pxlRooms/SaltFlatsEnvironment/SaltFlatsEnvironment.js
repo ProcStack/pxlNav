@@ -30,9 +30,11 @@ import {
   LinearSRGBColorSpace,
   FrontSide,
   DoubleSide
-} from "../../libs/three/three.module.min.js";
+} from "../../libs/three/index.js";
 
-import { RoomEnvironment, pxlEffects } from "../../pxlNav.js";
+//import { RoomEnvironment, pxlEffects } from "../../pxlNav.s";
+import { RoomEnvironment } from "../../pxlNav/RoomClass.js";
+import { pxlEffects } from "../../pxlNav/effects/effects.js";
 
 import { rabbitDruidVert, rabbitDruidFrag,
          envGroundVert, envGroundFrag,

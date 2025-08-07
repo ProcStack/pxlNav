@@ -312,14 +312,22 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
   return (
     <>
       <div 
-        id="pxlNav-coreCanvas"
         ref={containerRef}
         style={{
           width: '100%',
           height: '100%',
           position: 'absolute'
-        }} 
-      />
+        }}
+      >
+        <canvas 
+          id="pxlNav-coreCanvas"
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block'
+          }}
+        />
+      </div>
       
       {/* Loading indicator */}
       {(isLoading || !isInitialized) && !loadError && (

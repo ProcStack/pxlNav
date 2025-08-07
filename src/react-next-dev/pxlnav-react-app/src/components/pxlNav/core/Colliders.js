@@ -782,6 +782,11 @@ export class Colliders{
   //   If needed, run `pxlNav.pxlUtils.screenToNDC( mX,mY, swX,swY )` to convert screen position to NDC before passing to this function
   castInteractRay( roomName, objectInteractList=[], camera=null, screenUV=Vector2(0.0, 0.0), multiHits=true ){
 
+    if( camera === null ){
+      this.error( "No camera provided for castInteractRay()" );
+      return [];
+    }
+
     // Calculate ray direction & origin
     let cameraRay = new Vector3( 0, 0, 0 );
     camera.getWorldDirection( cameraRay );

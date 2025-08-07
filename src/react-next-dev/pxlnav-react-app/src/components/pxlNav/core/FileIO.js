@@ -27,15 +27,94 @@ import {
   MeshBasicMaterial,
   MeshLambertMaterial,
 
-} from "../../libs/three/three.module.min.js";
-import { FBXLoader } from "../../libs/three/FBXLoader.js";
-
-import {MeshoptDecoder} from "../../libs/three/meshopt_decoder.module.js";
-import {GLTFLoader} from "../../libs/three/GLTFLoader.js";
-import {DRACOLoader} from "../../libs/three/DRACOLoader.js";
-import {KTX2Loader} from "../../libs/three/KTX2Loader.js";
+} from "../../libs/three/index.js";
+import { FBXLoader, MeshoptDecoder, GLTFLoader, DRACOLoader, KTX2Loader } from "../../libs/three/index.js";
 
 import { VERBOSE_LEVEL } from "./Enums.js";
+
+// Monkey-patch the FBXLoader to add custom userData support for pxlNav
+// This approach modifies the prototype to intercept the parsing process
+function runFBXLoaderPatch() {
+  // Standard FBX attributes that should NOT be copied to userData
+  const standardAttributes = [
+    "Culling", "DefaultAttributeIndex", "InheritType",
+    "Lcl_Translation", "Lcl_Rotation", "Lcl_Scaling", 
+    "RotationPivot", "ScalingPivot",
+    "RotationActive", "ScalingMax", "RotationOffset", "fbx_node_path",
+    "Shading", "Version", "attrName", "attrType",
+    "currentUVSet", "id", "name", "propertyList", "singleProperty",
+  ];
+
+  // We need to patch the internal FBXTreeParser class, but since it's not exported,
+  // we'll patch the FBXLoader's parse method and intercept the parsing process
+  if (typeof window !== 'undefined') {
+    const originalFBXLoaderParse = FBXLoader.prototype.parse;
+    
+    FBXLoader.prototype.parse = function(FBXBuffer, path) {
+      // Store reference to the current loader instance
+      //const loaderInstance = this;
+      
+      // Call the original parse method
+      const result = originalFBXLoaderParse.call(this, FBXBuffer, path);
+      
+      // Try to access the fbxTree from the parsing context
+      // Note: This is accessing Three.js internals and may need adjustment
+      if (typeof window.fbxTree !== 'undefined' || typeof global.fbxTree !== 'undefined') {
+        const fbxTree = window.fbxTree || global.fbxTree;
+        
+        if (fbxTree && fbxTree.Objects && fbxTree.Objects.Model) {
+          findCustomAttributes(result, fbxTree, standardAttributes);
+        }
+      }
+      
+      return result;
+    };
+  }
+}
+
+// Function to enhance the loaded scene with custom FBX attributes
+function findCustomAttributes(sceneGraph, fbxTree, standardAttributes) {
+  const modelNodes = fbxTree.Objects.Model;
+  
+  // Create a map of objects by their FBX ID for faster lookup
+  const objectMap = new Map();
+  
+  sceneGraph.traverse((child) => {
+    if (child.ID !== undefined) {
+      objectMap.set(child.ID, child);
+    }
+  });
+  
+  // Process each model node and add custom attributes - exactly like your custom FBXLoader
+  for (const nodeID in modelNodes) {
+    const id = parseInt(nodeID);
+    const node = modelNodes[nodeID];
+    const model = objectMap.get(id);
+    
+    if (model && node) {
+      // Replicate the exact logic from your custom FBXLoader
+      let nodeAttrs = Object.keys(node);
+      nodeAttrs.forEach((attr) => {
+        console.log(attr);
+        if (!standardAttributes.includes(attr)) {
+          if (!model.userData) model.userData = {};
+          model.userData[attr] = node[attr].value;
+        }
+      });
+      
+      // Mark as processed by pxlNav
+      model.userData.pxlNavEnhanced = true;
+    }
+  }
+}
+
+// Initialize the enhancements
+runFBXLoaderPatch();
+
+// Separated for debugging  
+function createFBXLoader(manager) {
+  return new FBXLoader(manager);
+}
 
 export class FileIO{
   constructor( folderDict={}){
@@ -1001,7 +1080,7 @@ pSystemBuild( mesh, envObj ){
       this.pxlEnv.geoLoadList[meshKey]=0;
     }
     
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
     fbxLoader.load( objPath, (curFbx)=>{
       let groups=curFbx.children;
       let groupTypes={};
@@ -1315,7 +1394,7 @@ pSystemBuild( mesh, envObj ){
 
     // TODO : Do new FBXLoader objects really need to be created?
     //          Sounds like the potential for a memory leak if not handled correctly
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
 
     this.loadRoomFile( fbxLoader, envObj, settingsObj );
   }
@@ -2326,7 +2405,7 @@ pSystemBuild( mesh, envObj ){
     let materialList = envObj.materialList ;
     // TODO : Do new FBXLoader objects really need to be created?
     //          Sounds like the potential for a memory leak if not handled correctly
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
     fbxLoader.load( rigPath, (curFbx)=>{
 
       let groups=curFbx.children;
@@ -2393,7 +2472,7 @@ pSystemBuild( mesh, envObj ){
       envScene.add(curFbx);
       curFbx.frustumCulled = false;
 
-      var animLoader = new FBXLoader();
+      var animLoader = createFBXLoader();
       let promisList = [];
       let animKeys = Object.keys( animPath );
       animKeys.forEach( (animKey)=>{

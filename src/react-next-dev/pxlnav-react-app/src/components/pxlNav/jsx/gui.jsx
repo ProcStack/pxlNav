@@ -1,13 +1,13 @@
 // File is in progress and not fully functional yet.
 // This file is intended to be used with React and Next.js
-
+/*
 'use client'; // Next.js specific directive to enable client-side rendering
 import { useRef } from 'react';
 
 import React, { useEffect, useState } from 'react';
-import { getPxlNav, subscribePxlNav, unsubscribePxlNav } from '../../pxlNavBridge';
+import { getPxlNav, subscribePxlNav, unsubscribePxlNav } from '../../../utils/pxlNavBridge';
 
-export default function pxlNavHUD() {
+export default function PxlNavHUD() {
   const [hudVisibility, setHudVisibility] = useState( true );
   const [currentRoom, setCurrentRoom] = useState( '' );
   const componentId = useRef( 'hud-' + Math.random().toString(36).substring(2) );
@@ -46,8 +46,8 @@ export default function pxlNavHUD() {
           {hudVisibility ? 'Hide HUD' : 'Show HUD'}
         </button>
       </div>
-      
-      {/* Add more React-based HUD components */}
+      {}
     </div>
   );
 }
+*/

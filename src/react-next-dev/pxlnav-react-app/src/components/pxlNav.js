@@ -64,7 +64,7 @@ import {
   SRGBColorSpace,
   LinearSRGBColorSpace,
   ColorManagement
-} from "./libs/three/three.module.min.js";
+} from "./libs/three/index.js";
 
 import { pxlBase } from './pxlNav/pxlBase.js';
 import { pxlEnums } from './pxlNav/core/Enums.js';
@@ -75,7 +75,6 @@ import { pxlEffects } from './pxlNav/effects/effects.js';
 import { RoomEnvironment } from './pxlNav/RoomClass.js';
 
 const pxlCore = "pxlNav-coreCanvas"; // Name of DIV in Index
-const pxlNavVersion = "1.0.0-dev";
 
 var mapW,mapH;
 let sW = window.innerWidth;
@@ -397,7 +396,7 @@ class pxlNav{
     this.pxlGuiDraws.setLoaderPhrases( this.pxlOptions["loaderPhrases"] );
 
     if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
-      console.log("pxlNav v" + pxlNavVersion +" set to Verbose Info Mode");
+      console.log("pxlNav v1.0.0-dev set to Verbose Info Mode");
       console.log("  With Three.js v171");
       console.log("Booting pxlNav...");
     }
@@ -607,6 +606,12 @@ class pxlNav{
         
       this.pxlGuiDraws.pxlNavCanvas=document.getElementById(pxlCore);
       
+      if( !this.pxlGuiDraws.pxlNavCanvas ){
+        console.error("pxlNav: Canvas element with ID '" + pxlCore + "' not found in DOM");
+        reject(new Error("Canvas element not found: " + pxlCore));
+        return;
+      }
+      
       this.pxlGuiDraws.pxlNavCanvas.width= window.innerWidth * this.pxlQuality.screenResPerc;
       this.pxlGuiDraws.pxlNavCanvas.height= window.innerHeight * this.pxlQuality.screenResPerc;
       
@@ -686,16 +691,29 @@ class pxlNav{
 
   bootEnvironment(){
     return new Promise( (resolve, reject)=>{
+        // Check if canvas exists and is valid
+        if( !this.pxlGuiDraws.pxlNavCanvas ){
+          console.error("pxlNav: Canvas not available for WebGLRenderer");
+          reject(new Error("Canvas not available for WebGLRenderer"));
+          return;
+        }
+        
         // Rederer
-        this.pxlEnv.engine=new WebGLRenderer({
-            canvas: this.pxlGuiDraws.pxlNavCanvas,
-            powerPreference : "low-power",
-            alpha:true,
-            antialias: false,
-            sortObjects:true,
-            depth:true,
-            //logarithmicDepthBuffer:true,
-        });
+        try {
+          this.pxlEnv.engine=new WebGLRenderer({
+              canvas: this.pxlGuiDraws.pxlNavCanvas,
+              powerPreference : "low-power",
+              alpha:true,
+              antialias: false,
+              sortObjects:true,
+              depth:true,
+              //logarithmicDepthBuffer:true,
+          });
+        } catch( err ) {
+          console.error("pxlNav: Failed to create WebGLRenderer:", err);
+          reject(new Error("Failed to create WebGLRenderer: " + err.message));
+          return;
+        }
         var options = {
             format : RGBAFormat,
             antialias: false,
@@ -795,18 +813,24 @@ class pxlNav{
     
     if( this.assetsToLoadDict["Cloud3d"] ){
         this.pxlEnv.cloud3dTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Cloud3d.jpg", null, {"encoding":LinearSRGBColorSpace});
-        this.pxlEnv.cloud3dTexture.wrapS=RepeatWrapping;
-        this.pxlEnv.cloud3dTexture.wrapT=RepeatWrapping;
+        if( this.pxlEnv.cloud3dTexture ){
+          this.pxlEnv.cloud3dTexture.wrapS=RepeatWrapping;
+          this.pxlEnv.cloud3dTexture.wrapT=RepeatWrapping;
+        }
     }
     if( this.assetsToLoadDict["SoftNoise"] ){  
         this.pxlEnv.softNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_Soft3d.jpg" );
-        this.pxlEnv.softNoiseTexture.wrapS = RepeatWrapping;
-        this.pxlEnv.softNoiseTexture.wrapT = RepeatWrapping;
+        if( this.pxlEnv.softNoiseTexture ){
+          this.pxlEnv.softNoiseTexture.wrapS = RepeatWrapping;
+          this.pxlEnv.softNoiseTexture.wrapT = RepeatWrapping;
+        }
     }
     if( this.assetsToLoadDict["SmoothNoise"] ){  
         this.pxlEnv.detailNoiseTexture=this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"Noise_UniformSmooth.jpg" );
-        this.pxlEnv.detailNoiseTexture.wrapS = RepeatWrapping;
-        this.pxlEnv.detailNoiseTexture.wrapT = RepeatWrapping;
+        if( this.pxlEnv.detailNoiseTexture ){
+          this.pxlEnv.detailNoiseTexture.wrapS = RepeatWrapping;
+          this.pxlEnv.detailNoiseTexture.wrapT = RepeatWrapping;
+        }
     }
     if( this.assetsToLoadDict["ChromaticAberration"] ){
         let chroAberUVTexture = this.pxlUtils.loadTexture( this.folderDict["assetRoot"]+"uv_ChromaticAberration_rgb.jpg");
@@ -1435,23 +1459,16 @@ class pxlNav{
   }
 }
 
-// Named exports for ESM compatibility
-export { 
-  pxlNavVersion, 
-  pxlNav, 
-  pxlEnums, 
-  pxlUserSettings,
-  pxlOptions,
-  RoomEnvironment,
-  pxlEffects,
-  pxlShaders,
-  pxlBase
-};
+// Wait for all modules to be fully initialized before exporting
+// This prevents "Cannot access before initialization" errors
 
-// Default export for React compatibility
+// Export version as a named constant to avoid initialization timing issues
+const pxlNavVersion = "1.0.0-dev";
+
+// Default export - keep your working static object structure for the loader
 const pxlNavDefault = {
-  pxlNavVersion, 
   pxlNav, 
+  pxlNavVersion,
   pxlEnums, 
   pxlUserSettings,
   pxlOptions,
@@ -1459,7 +1476,6 @@ const pxlNavDefault = {
   pxlEffects,
   pxlShaders,
   pxlBase
-};
+}; 
 
 export default pxlNavDefault;
-

@@ -53,7 +53,6 @@ import {
   DepthTexture,
   DepthFormat,
   UnsignedIntType,
-  UnsignedShortType,
   BasicShadowMap,
   PCFSoftShadowMap,
   PerspectiveCamera,

@@ -1,8 +1,8 @@
 
 import {
   ShaderChunk
-} from "../../libs/three/three.module.min.js";
-import { pxlShaders }  from "../../pxlNav.js";
+} from "../../libs/three/index.js";
+import { pxlShaders }  from "../../pxlNav/shaders/shaders.js";
 const shaderHeader = pxlShaders.core.shaderHeader;
 
 ///////////////////////////////////////////////////////////

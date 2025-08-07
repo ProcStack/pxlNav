@@ -191,12 +191,16 @@ class RoomEnvironment{
     this.mobile = pxlNav.mobile;
 
     this.cloud3dTexture=this.pxlEnv.cloud3dTexture;
-    this.cloud3dTexture.wrapS = RepeatWrapping;
-    this.cloud3dTexture.wrapT = RepeatWrapping;
-    
+    if( this.cloud3dTexture ){
+      this.cloud3dTexture.wrapS = RepeatWrapping;
+      this.cloud3dTexture.wrapT = RepeatWrapping;
+    }
+
     this.smoothNoiseTexture=this.pxlEnv.softNoiseTexture;
-    this.smoothNoiseTexture.wrapS = RepeatWrapping;
-    this.smoothNoiseTexture.wrapT = RepeatWrapping;
+    if( this.smoothNoiseTexture ){
+      this.smoothNoiseTexture.wrapS = RepeatWrapping;
+      this.smoothNoiseTexture.wrapT = RepeatWrapping;
+    }
   }
   
   // -- -- --

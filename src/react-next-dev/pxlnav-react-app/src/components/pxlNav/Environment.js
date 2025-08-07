@@ -46,12 +46,7 @@ import { pxlOptions } from "./core/Options.js";
 // Import room loader
 import { loadRoomModule } from '../pxlRooms/index.js'; 
 
-import { EffectComposer } from '../libs/three/EffectComposer.js';
-import { RenderPass } from '../libs/three/RenderPass.js';
-import { ShaderPass } from '../libs/three/ShaderPass.js';
-import { CopyShader } from '../libs/three/CopyShader.js';
-// TODO : Remove all traces of bloom passes, implement Neurous Box Blur passes
-import { UnrealBloomPass } from '../libs/three/UnrealBloomPass.js';
+import { EffectComposer, RenderPass, ShaderPass, CopyShader, UnrealBloomPass } from '../libs/three/index.js';
 
 
 // TODO : This class needs breaking up into BaseEnvironment & MainEnvironment expand

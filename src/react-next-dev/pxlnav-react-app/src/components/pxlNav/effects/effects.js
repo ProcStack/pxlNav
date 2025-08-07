@@ -22,7 +22,7 @@
 
 import { ParticleBase, BillowSmoke, EmberWisps, FloatingDust, HeightMap } from './particles.js';
 
-const pxlEffects = { 
+export const pxlEffects = { 
   "pxlParticles" : { ParticleBase, BillowSmoke, EmberWisps, FloatingDust, HeightMap },
 };
 
@@ -31,4 +31,4 @@ const pxlEffects = {
  * @memberof pxlNav
  * @property {Object} pxlParticles - Particle effects.
  */
-export { pxlEffects };
+export default pxlEffects;
