@@ -1691,6 +1691,7 @@ export class Environment{
       this.emit( "render-prep", {
         'time': this.pxlTimer.runtime
       });
+      
 
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){
@@ -1736,6 +1737,11 @@ export class Environment{
       }
     }
         
+    // Send out event to allow for any post-render calculations
+    this.emit( "render-post", {
+      'time': this.pxlTimer.runtime
+    });
+    
     if(this.pxlTimer.active && anim){
       requestAnimationFrame( ()=>{ this.mapRender(); });
     }

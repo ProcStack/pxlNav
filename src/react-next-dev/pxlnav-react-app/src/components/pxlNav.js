@@ -245,6 +245,8 @@ class pxlNav{
 
     // -- -- --
 
+    console.log( options );
+    console.log( options.verbose );
     this.pxlOptions = Object.assign( {}, options );
     let optionKeys=Object.keys( this.pxlOptions );
     let defaultKeys=Object.keys( pxlOptions );
@@ -253,6 +255,8 @@ class pxlNav{
         this.pxlOptions[k]=pxlOptions[k];
       }
     });
+
+    console.log( this.pxlOptions );
 
     
 
@@ -292,6 +296,7 @@ class pxlNav{
       "booted" : "Emitted after the engine has fully booted and is ready to be addressed.",
       "step" : "Emitted when frame update occurs, pre render.",
       "render-prep" : "Emitted when the pxlNav engine starting to prepare for scene rendering.",
+      "render-post" : "Emitted when the pxlNav engine has finished rendering the scene.",
       "shaderEditorVis" : "Returns a [bool]; Emitted when the shader editor is toggled on or off.",
       "roomChange-Start" : "Emitted when the room change transition begins.",
       "roomChange-Middle" : "Emitted when the room change process occurs mid transition.",

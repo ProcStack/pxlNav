@@ -22,6 +22,7 @@ interface pxlNavProps {
   pxlAssetRootPath?: string;
   showOnboarding?: boolean;
   enableStaticCamera?: boolean;
+  pxlOptions?: Record<string, any>; // Allow custom pxlOptions overrides
   onBooted?: () => void;
   onError?: (error: Error) => void;
 }
@@ -34,6 +35,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
       pxlAssetRootPath = "./pxlAssets",
       showOnboarding = true,
       enableStaticCamera = false,
+      pxlOptions = {},
       onBooted,
       onError
 }) => {
@@ -95,13 +97,134 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
     }
   }, [onError, errorCount, lastErrorTime, loadError]);
 
-  // Subscription helper with cleanup tracking
-  const subscribeToPxlNav = useCallback((eventType: string, callback: Function) => {
-    if (pxlNavInstanceRef.current) {
-      pxlNavInstanceRef.current.subscribe(eventType, callback);
-      subscriptionsRef.current.push({ eventType, callback });
+  // Monitor module loading and trigger initialization
+  useEffect(() => {
+    if (pxlNavModule && !isInitialized && !pxlNavInstanceRef.current) {
+      // Module is loaded and we haven't initialized yet
+      const initializeNow = async () => {
+        const { pxlNav, pxlEnums, pxlOptions, pxlUserSettings } = pxlNavModule;
+
+        // Console logging level
+        const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
+
+        // Set a list of phrases to display during the loading process
+        const loaderPhrases = [
+          "...chasing the bats from the belfry...",
+          "...shuffling the deck...",
+          "...checking the air pressure...",
+          "...winding the clock...",
+          "...tuning the strings...",
+          "...ringing the quartz...",
+          "...crashing the glasses...",
+          "...sharpening the pencils...",
+        ];
+
+        // User settings for the default/initial pxlNav environment
+        const userSettings = Object.assign({}, pxlUserSettings);
+        userSettings['height']['standing'] = 1.75;
+        userSettings['height']['stepSize'] = 5;
+
+        // Target FPS
+        const targetFPS = {
+          'pc' : 45,
+          'mobile' : 30
+        };
+
+        // Render Scale / Resolution Scaling
+        const renderScale = {
+          'pc' : 1.0,
+          'mobile' : 1.3
+        };
+
+        const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
+        const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
+        const allowStaticRotation = false;
+        const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
+
+        const collisionScale = {
+          'gridSize' : 150,
+          'gridReference' : 1000
+        };
+
+        const options = Object.assign( {}, pxlOptions );
+        options.userSettings = userSettings;
+        options.verbose = verbose;
+        options.fps = targetFPS;
+        options.renderScale = renderScale;
+        options.antiAliasing = antiAliasing;
+        options.collisionScale = collisionScale;
+        options.pxlRoomRoot = pxlRoomRootPath;
+        options.pxlAssetRoot = pxlAssetRootPath;
+        options.showOnboarding = showOnboarding;
+        options.staticCamera = enableStaticCamera;
+        options.allowStaticRotation = allowStaticRotation;
+        options.skyHaze = skyHaze;
+        options.shadowMapBiasing = shadowMapBiasing;
+        options.loaderPhrases = loaderPhrases;
+
+        // Apply custom pxlOptions overrides - these will override any defaults above
+        if (pxlOptions && typeof pxlOptions === 'object') {
+          console.log(' Applying custom pxlOptions:', pxlOptions);
+          Object.assign(pxlOptions, options);
+        }
+
+        try {
+          // Wait a moment to ensure canvas is properly mounted
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const pxlNavManager = new pxlNav(
+            options,
+            projectTitle,
+            startingRoom,
+            roomBootList
+          );
+          
+          pxlNavInstanceRef.current = pxlNavManager;
+          console.log(' pxlNav instance created:', pxlNavInstanceRef.current);
+
+          // Subscribe to booted event
+          const bootedCallback = () => {
+            console.log(' pxlNav has booted successfully!');
+            setIsInitialized(true);
+            if (onBooted) {
+              onBooted();
+              console.log(' pxlNav has fully booted!'); // Add back the "pxlNav Booted" message
+            }
+            
+            // Additional debug: Check if the engine is rendering properly
+            setTimeout(() => {
+              if (pxlNavInstanceRef.current?.pxlTimer?.active) {
+                console.log(' Current room:', pxlNavInstanceRef.current?.pxlEnv?.currentRoom);
+                console.log(' Engine exists:', !!pxlNavInstanceRef.current?.pxlEnv?.engine);
+                console.log(' Scene exists:', !!pxlNavInstanceRef.current?.pxlEnv?.scene);
+              } else {
+                console.warn(' pxlNav Timer is not active - this may be the render issue!');
+                if (pxlNavInstanceRef.current?.start) {
+                  console.log(' Attempting to restart pxlNav timer...');
+                  pxlNavInstanceRef.current.start();
+                }
+              }
+            }, 1000);
+          };
+
+          // Subscribe directly to the pxlNav instance
+          pxlNavManager.subscribe('booted', bootedCallback);
+          subscriptionsRef.current.push({ eventType: 'booted', callback: bootedCallback });
+
+          // Initialize your PxlNav instance
+          console.log(' Initializing pxlNav...');
+          pxlNavManager.init(); 
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('pxlNav initialization failed');
+          console.error('- pxlNav initialization error:', error);
+          setLoadError(error);
+          if (onError) onError(error);
+        }
+      };
+
+      initializeNow();
     }
-  }, []);
+  }, [pxlNavModule, isInitialized, projectTitle, startingRoom, roomBootList, pxlRoomRootPath, pxlAssetRootPath, showOnboarding, enableStaticCamera, pxlOptions, onBooted, onError]);
 
   // Cleanup helper using the new unsubscribe method
   const cleanupSubscriptions = useCallback(() => {
@@ -122,136 +245,14 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
     }
   }, []);
 
-  // Initialize pxlNav when module is loaded
+  // Main cleanup effect - only runs on component unmount
   useEffect(() => {
-    if (!pxlNavModule || isInitialized) return;
-
-    const { pxlNav, pxlEnums, pxlOptions, pxlUserSettings } = pxlNavModule;
-
-    // Console logging level
-    //   Options are - NONE, ERROR, WARN, INFO
-    const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
-
-    // Set a list of phrases to display during the loading process
-    //   The loader with randomly pick a phrase from the list
-    const loaderPhrases = [
-      "...chasing the bats from the belfry...",
-      "...shuffling the deck...",
-      "...checking the air pressure...",
-      "...winding the clock...",
-      "...tuning the strings...",
-      "...ringing the quartz...",
-      "...crashing the glasses...",
-      "...sharpening the pencils...",
-    ];
-
-    // User settings for the default/initial pxlNav environment
-    //   These can be adjusted from your `pxlRoom` but easily set defaults here
-    const userSettings = Object.assign({}, pxlUserSettings);
-    userSettings['height']['standing'] = 1.75; // Standing height in units; any camera in your room's FBX will override this height once loaded
-    userSettings['height']['stepSize'] = 5; // Max step height in units
-
-    // Target FPS (Frames Per Second)
-    // Default is - PC = 60  -&-  Mobile = 30
-    const targetFPS = {
-      'pc' : 45,
-      'mobile' : 30
-    };
-
-    // Render Scale / Resolution Scaling
-    // Default is - PC = 1.0  -&-  Mobile = 1.0
-    const renderScale = {
-      'pc' : 1.0,
-      'mobile' : 1.3
-    };
-
-    // Anti-aliasing level
-    //   Options are - NONE, LOW, MEDIUM, HIGH
-    const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
-
-    // Shadow + Edge softness
-    // Default is `BASIC` - a simple shadow edge
-    //   Options are - OFF, BASIC, SOFT
-    //     *Mobile devices are limited to `OFF` or `BASIC` automatically
-    const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
-
-    // If using static cameras, allow the user to rotate the camera
-    //  Default is `false`
-    const allowStaticRotation = false;
-
-    // Visual effect for the sky
-    // Default is `OFF`
-    //  Options are - OFF, VAPOR
-    const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
-
-    // Collision Detection Grid
-    //   Collision objects are split into a grid for faster collision detection
-    //   gridSize - The size of the grid
-    //   gridReference - Grid scene reference threshold to scale `gridSize`
-    const collisionScale = {
-      'gridSize' : 150,
-      'gridReference' : 1000
-    };
-
-    const options = Object.assign( {}, pxlOptions );
-    options.userSettings = userSettings;
-    options.verbose = verbose;
-    options.fps = targetFPS;
-    options.renderScale = renderScale;
-    options.antiAliasing = antiAliasing;
-    options.collisionScale = collisionScale;
-    options.pxlRoomRoot = pxlRoomRootPath;
-    options.pxlAssetRoot = pxlAssetRootPath;
-    options.showOnboarding = showOnboarding;
-    options.staticCamera = enableStaticCamera;
-    options.allowStaticRotation = allowStaticRotation;
-    options.skyHaze = skyHaze;
-    options.shadowMapBiasing = shadowMapBiasing;
-    options.loaderPhrases = loaderPhrases;
-
-    let mounted = true;
+    // Copy the ref value to avoid stale closure
+    const currentComponentId = componentId.current;
     
-    const initializePxlNav = async () => {
-      try {
-        if (containerRef.current && !pxlNavInstanceRef.current) {
-          const pxlNavManager = new pxlNav(
-            options,
-            projectTitle,
-            startingRoom,
-            roomBootList
-          );
-
-          if (!mounted) return;
-          
-          pxlNavInstanceRef.current = pxlNavManager;
-
-          // Subscribe to booted event
-          subscribeToPxlNav('booted', () => {
-            if (mounted) {
-              console.log(' pxlNav has booted successfully!');
-              setIsInitialized(true);
-              if (onBooted) onBooted();
-            }
-          });
-
-          // Initialize your PxlNav instance
-          pxlNavManager.init(); 
-        }
-      } catch (err) {
-        if (mounted) {
-          const error = err instanceof Error ? err : new Error('pxlNav initialization failed');
-          console.error('- pxlNav initialization error:', error);
-          setLoadError(error);
-          if (onError) onError(error);
-        }
-      }
-    };
-
-    initializePxlNav();
-
-    // Cleanup on unmount
+    // Cleanup on unmount ONLY
     return () => {
-      mounted = false;
+      console.log(`- Cleaning up pxlNav component ${currentComponentId} on unmount`);
       
       // Clean up subscriptions first
       cleanupSubscriptions();
@@ -259,6 +260,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
       // Stop pxlNav
       if (pxlNavInstanceRef.current) {
         try {
+          console.log('- Stopping pxlNav instance');
           pxlNavInstanceRef.current.stop();
         } catch (err) {
           console.warn('Warning during pxlNav cleanup:', err);
@@ -266,7 +268,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
         pxlNavInstanceRef.current = null;
       }
     };
-  }, [pxlNavModule, isInitialized, projectTitle, startingRoom, roomBootList, pxlRoomRootPath, pxlAssetRootPath, showOnboarding, enableStaticCamera, subscribeToPxlNav, cleanupSubscriptions, onBooted, onError]);
+  }, [cleanupSubscriptions]); // Include cleanupSubscriptions dependency
 
   // Error display
   if (loadError) {
@@ -321,6 +323,9 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
       >
         <canvas 
           id="pxlNav-coreCanvas"
+          width={800}
+          height={600}
+          className='pxlNav-coreCanvasStyle'
           style={{
             width: '100%',
             height: '100%',

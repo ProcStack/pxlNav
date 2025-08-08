@@ -63,14 +63,16 @@ export async function loadPxlNavModule() {
     // Import the actual pxlNav module with retry logic
     const module = await attemptImport();
     
+    /*
     console.log(' Module imported successfully');
     console.log(' Module keys:', Object.keys(module));
     console.log(' Has pxlNav property:', module.hasOwnProperty('pxlNav'));
     console.log(' Has default property:', module.hasOwnProperty('default'));
-    
+    */
+
     // Add extra validation for webpack initialization
     if (module.default && typeof module.default === 'object') {
-      console.log(' Default keys:', Object.keys(module.default));
+      //console.log(' Default keys:', Object.keys(module.default));
       
       // Check if default export is properly initialized
       const defaultKeys = Object.keys(module.default);
@@ -174,4 +176,36 @@ export async function loadPxlNavModule() {
 // Helper to clear cache (useful for development/testing)
 export function clearPxlNavCache() {
   cachedModule = null;
+}
+
+// Export individual components for top-level access
+export async function getPxlEnums() {
+  try {
+    const module = await loadPxlNavModule();
+    return module.pxlEnums;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getPxlOptions() {
+  try {
+    const module = await loadPxlNavModule();
+    return module.pxlOptions;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Export both enums and options together for convenience
+export async function getPxlPrep() {
+  try {
+    const module = await loadPxlNavModule();
+    return {
+      pxlEnums: module.pxlEnums,
+      pxlOptions: module.pxlOptions
+    };
+  } catch (error) {
+    throw error;
+  }
 }
