@@ -27,13 +27,14 @@ import {
   UniformsUtils,
   UniformsLib,
   LinearFilter,
-  SRGBColorSpace,
   LinearSRGBColorSpace,
   FrontSide,
   DoubleSide
-} from "../../libs/three/three.module.min.js";
+} from "../../libs/three/index.js";
 
-import { RoomEnvironment, pxlEffects } from "../../pxlNav.js";
+//import { RoomEnvironment, pxlEffects } from "../../pxlNav.s";
+import { RoomEnvironment } from "../../pxlNav/RoomClass.js";
+import { pxlEffects } from "../../pxlNav/effects/effects.js";
 
 import { rabbitDruidVert, rabbitDruidFrag,
          envGroundVert, envGroundFrag,
@@ -154,7 +155,7 @@ export class SaltFlatsEnvironment extends RoomEnvironment{
 
   checkEyeBlink(){
     let curMesh = this.pxlAnim.getMesh( this.animRigName );
-    if( !curMesh || !curMesh.hasOwnProperty("morphTargetInfluences") || curMesh.morphTargetInfluences.length == 0 ){
+    if( !curMesh || !curMesh.hasOwnProperty("morphTargetInfluences") || curMesh.morphTargetInfluences.length === 0 ){
       return;
     }
 
@@ -231,7 +232,7 @@ export class SaltFlatsEnvironment extends RoomEnvironment{
     
     if( this.geoList.hasOwnProperty('lights') ){
       this.geoList['lights'].forEach( (light) => {
-        if( light.name == "dirLight_key_lit" ){
+        if( light.name === "dirLight_key_lit" ){
           light.castShadow = true;
         }else{
           light.castShadow = false;
@@ -275,6 +276,7 @@ export class SaltFlatsEnvironment extends RoomEnvironment{
       
       this.pxlAnim.playClip( animKey, this.animInitCycle );
     }else{
+      let fallback = 'bind';//this.pxlAnim.getFirstClip( animKey );
       this.animInitCycle = fallback;
       this.log("No animation cycle '"+this.animInitCycle+"' found; Using '"+fallback+"' instead");
     }
@@ -330,7 +332,7 @@ export class SaltFlatsEnvironment extends RoomEnvironment{
   build(){
 
     let curCharacter = this.animRigName;
-    let animFbxLoader = this.pxlFile.loadAnimFBX( this, curCharacter, this.animSource[curCharacter]['rig'], this.animSource[curCharacter]['anim'], this.animSource[curCharacter]['stateConnections']);
+    this.pxlFile.loadAnimFBX( this, curCharacter, this.animSource[curCharacter]['rig'], this.animSource[curCharacter]['anim'], this.animSource[curCharacter]['stateConnections']);
 
     
     let envGroundUniforms = UniformsUtils.merge(

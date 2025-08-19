@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "roomManifest": "node ./scripts/generateRoomManifest.js",
     "lint": "next lint"
   },
   "dependencies": {

@@ -1,0 +1,256 @@
+
+/* -- -- -- */
+
+.pxlNav-hud-parent{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  grid-gap: 0px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100; 
+  pointer-events: none;
+}
+
+.pxlNav-hud-parent-mobile{
+  pointer-events: auto;
+}
+
+.pxlNav-hudMobile-joystick-left{
+  grid-area: pnmjsLeft;
+  display: grid;
+  justify-content: start;
+  align-content: end;
+  width: 50vw;
+  height: 45vh;
+  justify-self: left;
+  align-self: end;
+  position: fixed;
+  bottom: 3vmin;
+  z-index: 103;
+  transition: margin 1.0s;
+  pointer-events: all;
+}
+.pxlNav-hudMobile-joystick-right{
+  grid-area: pnmjsRight;
+  display: grid;
+  justify-content: end;
+  align-content: end;
+  width: 50vw;
+  height: 45vh;
+  justify-self: end;
+  align-self: end;
+  position: fixed;
+  bottom: 3vmin;
+  z-index: 103;
+  transition: margin 1.0s;
+  pointer-events: all;
+}
+
+/* -- -- -- */
+
+
+.pxlNav-hudElement-thumbstick-left{
+  transform: translate(0%, -25%) !important;
+} 
+.pxlNav-hudElement-thumbstick-right{
+  transform: translate(0%, -25%) !important;
+}
+
+
+/* -- -- -- */
+
+/* -- Buffer around the thumbsticks and screen sides -- */
+/*.pxlNav-hudElement-thumbstick-block-default{
+  margin-bottom: 8vmax;
+}
+.pxlNav-hudElement-thumbstick-block-hover{
+  margin-bottom: 8vmax;
+}
+.pxlNav-hudElement-thumbstick-block-active{
+  margin-bottom: 8vmax;
+}*/
+
+
+/* -- -- -- */
+
+.pxlNav-hudElement-thumbstick {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  position: relative;
+  left: 0px;
+  top: 0px;
+  margin: 3vmin;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  max-width: 35vmin;
+  max-height: 35vmin;
+  border: solid 15px rgba(186, 186, 186, 0.749);
+  border-radius: 50vmin;
+  transform: translate(0%, 50%);
+  transition: max-width 0.35s, max-height 0.35s, border 0.5s, background-color 0.15s, margin 0.35s, top 0.35s, left 0.35s, transform 0.35s;
+}
+.pxlNav-hudElement-thumbstick-default {
+  max-width: 3vmax;
+  max-height: 3vmax;
+  margin: 20vmin 10vw;
+  justify-self: center;
+  align-self: center;
+  border: solid 10px rgba(186, 186, 186, 0.30);
+  pointer-events: none;
+}
+.pxlNav-hudElement-thumbstick-hover {
+  max-width: 6vmax;
+  max-height: 6vmax;
+  margin: 25vmin 13vmin; 
+  justify-self: center;
+  align-self: center;
+  background-color: #bbbbbb4b;
+  border: solid 15px rgba(186, 186, 186, 0.553);
+}
+.pxlNav-hudElement-thumbstick-active {
+  max-width:16vmax;
+  max-height: 16vmax;
+  margin: 3vmin 3vmin;
+  justify-self: center;
+  align-self: center;
+  background-color: rgba(118, 118, 118, 0.05);
+  border: solid 10px rgba(166, 166, 166, 0.1);
+  transition: max-width 0.85s, max-height 0.85s, border 0.5s, background-color 0.15s, margin 0.85s, top 0.35s, left 0.35s, transform 0.35s;
+}
+
+
+.pxlNav-hudElement-thumbstick-inner {
+  width: 25vmin;
+  height: 25vmin;
+  aspect-ratio: 1;
+  position: relative;
+  left: 0px;
+  top: 0px;
+  border: solid 4px rgba(186, 186, 186, 0.749);
+  background: rgba(153, 153, 153, 0.161);
+  border-radius: 30vmin;
+  transition: max-width 0.35s, max-height 0.35s, border 0.2s, background-color 0.2s, border-radius 0.2s, margin 0.35s;
+}
+.pxlNav-hudElement-thumbstick-inner-default {
+  max-width: 0vmax;
+  max-height: 0vmax;
+  justify-self: center;
+  align-self: center;
+  border: solid 4px rgba(186, 186, 186, 0.0);
+  background: rgba(153, 153, 153, 0.0);
+  pointer-events: none;
+}
+.pxlNav-hudElement-thumbstick-inner-hover {
+  max-width: 1vmax;
+  max-height: 1vmax;
+  justify-self: center;
+  align-self: center;
+  border: solid 4px rgba(129, 129, 129, 0.236);
+  background: rgba(176, 174, 174, 0.415);
+}
+.pxlNav-hudElement-thumbstick-inner-active {
+  max-width: 7vmax;
+  max-height: 7vmax;
+  justify-self: center;
+  align-self: center;
+  border: solid 6px rgba(184, 183, 183, 0.5);
+  background: rgba(161, 161, 161, 0.2);
+  transition: max-width 0.5s, max-height 0.5s, border 0.2s, background-color 0.2s, border-radius 0.s, margin 0.5s;
+}
+
+
+/* -- -- -- */
+.pxlNav-hudElement-region{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-dragRegion{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-button{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-slider{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-image{
+  width: 100%;
+  height: 100%;
+}
+.pxlNav-hudElement-text{
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+.pxlNav-hudMobile-parent{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-areas: 
+    "pnmrJump pnmrJump"
+    "pnmjsLeft pnmjsRight"
+    "pnmActionRegion pnmActionRegion";
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  bottom: 0px;
+  left: 0px;
+  z-index: 100;
+}
+
+.pxlNav-hudMobile-region-jump{
+  grid-area: pnmrJump;
+  height: 65vh;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  z-index: 102;
+}
+.pxlNav-hudMobile-region-run{
+  grid-area: pnmrRun;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 35vh;
+  z-index: 102;
+}
+.pxlNav-hudMobile-region-attack{
+  grid-area: pnmrAttack;
+}
+.pxlNav-hudMobile-region-item{
+  grid-area: pnmrItem;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 35vh;
+  z-index: 102;
+}
+
+.pxlNav-hudMobile-region-action{
+  grid-area: pnmActionRegion;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 35vh;
+  z-index: 102;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas: "pnmrRun pnmrAttack pnmrItem";
+}
