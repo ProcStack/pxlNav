@@ -1,232 +1,141 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { loadPxlNavModule } from './pxlNavLoader.js';
+import { loadPxlNavModule, getPxlEnums } from './pxlNavLoader.js';
 
-// Import pxlNav using dynamic import for better ESM compatibility
-interface PxlNavModule {
-  pxlNav: any;
-  pxlEnums: any;
-  pxlOptions: any;
-  pxlUserSettings: any;
-  pxlNavVersion: string;
-  pxlEffects: any;
-  pxlShaders: any;
-  pxlBase: any;
-  RoomEnvironment: any;
-}
-
-interface pxlNavProps {
+interface PxlNavComponentProps {
   projectTitle: string;
   startingRoom: string;
   roomBootList: string[];
-  pxlRoomRootPath?: string;
-  pxlAssetRootPath?: string;
-  showOnboarding?: boolean;
-  enableStaticCamera?: boolean;
-  pxlOptions?: Record<string, any>; // Allow custom pxlOptions overrides
+  pxlNavOptions: Record<string, any>; // Pre-configured options from parent
   onBooted?: () => void;
   onError?: (error: Error) => void;
 }
 
-const PxlNavComponent: React.FC<pxlNavProps> = ({ 
-      projectTitle = "pxlNav Environment", 
-      startingRoom = "SaltFlatsEnvironment", 
-      roomBootList = ["SaltFlatsEnvironment"],
-      pxlRoomRootPath = "../pxlRooms",
-      pxlAssetRootPath = "./pxlAssets",
-      showOnboarding = true,
-      enableStaticCamera = false,
-      pxlOptions = {},
-      onBooted,
-      onError
+const PxlNavComponent: React.FC<PxlNavComponentProps> = ({ 
+  projectTitle,
+  startingRoom,
+  roomBootList,
+  pxlNavOptions,
+  onBooted,
+  onError
 }) => {
-
   const containerRef = useRef<HTMLDivElement>(null);
   const pxlNavInstanceRef = useRef<any>(null);
   const subscriptionsRef = useRef<Array<{eventType: string, callback: Function}>>([]);
   const componentId = useRef(`pxlnav-${Date.now()}`);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<Error | null>(null);
-  const [pxlNavModule, setPxlNavModule] = useState<PxlNavModule | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
-  const [lastErrorTime, setLastErrorTime] = useState(0);
 
-  // Load the pxlNav module dynamically
+  const [pxlEnums, setPxlEnums] = useState<any>(null);
+
+  // Localized print helper — avoids overwriting global console.log
+  // print() obeys the pxlNav verbose level and is safe to call anywhere inside this component.
+  const print = React.useCallback((...args: any[]) => {
+    try {
+      const infoLevel = pxlEnums?.VERBOSE_LEVEL?.INFO;
+      const currentVerbose = pxlNavOptions?.verbose;
+
+      if (typeof infoLevel === 'number' && typeof currentVerbose === 'number') {
+        if (currentVerbose >= infoLevel) {
+          console.log(...args);
+        }
+      }
+    } catch (e) {
+      // swallow logging errors to avoid breaking the app
+      // fallback to native console.log
+      console.log(...args);
+    }
+  }, [pxlEnums, pxlNavOptions?.verbose]);
+
+  // Load and initialize pxlNav - only run once when options are available
   useEffect(() => {
-    const loadPxlNav = async () => {
+    // Prevent multiple initializations
+    if (isInitialized || pxlNavInstanceRef.current || !pxlNavOptions) {
+      return;
+    }
+
+    const initializePxlNav = async () => {
       try {
-        const moduleData = await loadPxlNavModule();
         
-        setPxlNavModule(moduleData);
-        setIsLoading(false);
-        setErrorCount(0); // Reset error count on success
+        // Load the module
+  const moduleData = await loadPxlNavModule();
+  const { pxlNav, pxlEnums } = moduleData;
+  // expose enums to the component-level state for logging and other checks
+  setPxlEnums(pxlEnums);
+
+        if( pxlNavOptions?.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+          print(' Starting pxlNav initialization...');
+        }
+
+        // Wait a moment to ensure canvas is properly mounted
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Create pxlNav instance with pre-configured options
+        // Ensure the engine receives the actual DOM container managed by this component
+        const instanceOptions = Object.assign({}, pxlNavOptions, {
+          container: containerRef.current
+        });
+
+        const pxlNavManager = new pxlNav(
+          instanceOptions,
+          projectTitle,
+          startingRoom,
+          roomBootList
+        );
+        
+  pxlNavInstanceRef.current = pxlNavManager;
+  print(' pxlNav instance created:', pxlNavInstanceRef.current);
+
+        // Subscribe to booted event
+        const bootedCallback = () => {
+          print(' pxlNav has booted successfully!');
+          setIsInitialized(true);
+          setIsLoading(false);
+          setErrorCount(0); // Reset error count on success
+          
+          if (onBooted) {
+            onBooted();
+          }
+          
+          // Debug: Check if the engine is rendering properly
+          setTimeout(() => {
+            if (pxlNavInstanceRef.current?.pxlTimer?.active) {
+              print(' Current room:', pxlNavInstanceRef.current?.pxlEnv?.currentRoom);
+              print(' Engine exists:', !!pxlNavInstanceRef.current?.pxlEnv?.engine);
+              print(' Scene exists:', !!pxlNavInstanceRef.current?.pxlEnv?.scene);
+            } else {
+              console.warn(' pxlNav Timer is not active - this may be the render issue!');
+              if (pxlNavInstanceRef.current?.start) {
+                print(' Attempting to restart pxlNav timer...');
+                pxlNavInstanceRef.current.start();
+              }
+            }
+          }, 1000);
+        };
+
+  // Subscribe to the booted event
+        pxlNavManager.subscribe('booted', bootedCallback);
+        subscriptionsRef.current.push({ eventType: 'booted', callback: bootedCallback });
+
+  // Initialize pxlNav
+  print(' Initializing pxlNav...');
+        pxlNavManager.init();
+        
       } catch (error) {
-        const currentTime = Date.now();
-        const timeSinceLastError = currentTime - lastErrorTime;
-        
-        // Throttle errors - only log if it's been more than 2 seconds since last error
-        // or if we haven't hit the max error count yet
-        setErrorCount(prev => prev + 1);
-        setLastErrorTime(currentTime);
-        
-        if (timeSinceLastError > 2000 || errorCount < 5) {
-          console.error(`Failed to load pxlNav module (attempt ${errorCount + 1}):`, error);
-        }
-        
-        // Stop trying after 10 attempts
-        if (errorCount >= 10) {
-          console.error('Maximum error attempts reached. Stopping retries.');
-          setLoadError(error as Error);
-          setIsLoading(false);
-          onError?.(error as Error);
-          return;
-        }
-        
-        // Don't update loading state immediately - allow for retry
-        if (errorCount >= 3) {
-          setLoadError(error as Error);
-          setIsLoading(false);
-          onError?.(error as Error);
-        }
+        console.error('Failed to initialize pxlNav:', error);
+        const finalError = error instanceof Error ? error : new Error('pxlNav initialization failed');
+        setLoadError(finalError);
+        setIsLoading(false);
+        onError?.(finalError);
       }
     };
 
-    // Only attempt to load if we haven't exceeded error threshold
-    if (errorCount < 10 && !loadError) {
-      loadPxlNav();
-    }
-  }, [onError, errorCount, lastErrorTime, loadError]);
+    initializePxlNav();
+  }, [pxlNavOptions, projectTitle, startingRoom, roomBootList, onBooted, onError, isInitialized]); // Added isInitialized to dependencies
 
-  // Monitor module loading and trigger initialization
-  useEffect(() => {
-    if (pxlNavModule && !isInitialized && !pxlNavInstanceRef.current) {
-      // Module is loaded and we haven't initialized yet
-      const initializeNow = async () => {
-        const { pxlNav, pxlEnums, pxlOptions, pxlUserSettings } = pxlNavModule;
-
-        // Console logging level
-        const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
-
-        // Set a list of phrases to display during the loading process
-        const loaderPhrases = [
-          "...chasing the bats from the belfry...",
-          "...shuffling the deck...",
-          "...checking the air pressure...",
-          "...winding the clock...",
-          "...tuning the strings...",
-          "...ringing the quartz...",
-          "...crashing the glasses...",
-          "...sharpening the pencils...",
-        ];
-
-        // User settings for the default/initial pxlNav environment
-        const userSettings = Object.assign({}, pxlUserSettings);
-        userSettings['height']['standing'] = 1.75;
-        userSettings['height']['stepSize'] = 5;
-
-        // Target FPS
-        const targetFPS = {
-          'pc' : 45,
-          'mobile' : 30
-        };
-
-        // Render Scale / Resolution Scaling
-        const renderScale = {
-          'pc' : 1.0,
-          'mobile' : 1.3
-        };
-
-        const antiAliasing = pxlEnums.ANTI_ALIASING.LOW;
-        const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
-        const allowStaticRotation = false;
-        const skyHaze = pxlEnums.SKY_HAZE.VAPOR;
-
-        const collisionScale = {
-          'gridSize' : 150,
-          'gridReference' : 1000
-        };
-
-        const options = Object.assign( {}, pxlOptions );
-        options.userSettings = userSettings;
-        options.verbose = verbose;
-        options.fps = targetFPS;
-        options.renderScale = renderScale;
-        options.antiAliasing = antiAliasing;
-        options.collisionScale = collisionScale;
-        options.pxlRoomRoot = pxlRoomRootPath;
-        options.pxlAssetRoot = pxlAssetRootPath;
-        options.showOnboarding = showOnboarding;
-        options.staticCamera = enableStaticCamera;
-        options.allowStaticRotation = allowStaticRotation;
-        options.skyHaze = skyHaze;
-        options.shadowMapBiasing = shadowMapBiasing;
-        options.loaderPhrases = loaderPhrases;
-
-        // Apply custom pxlOptions overrides - these will override any defaults above
-        if (pxlOptions && typeof pxlOptions === 'object') {
-          console.log(' Applying custom pxlOptions:', pxlOptions);
-          Object.assign(pxlOptions, options);
-        }
-
-        try {
-          // Wait a moment to ensure canvas is properly mounted
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          const pxlNavManager = new pxlNav(
-            options,
-            projectTitle,
-            startingRoom,
-            roomBootList
-          );
-          
-          pxlNavInstanceRef.current = pxlNavManager;
-          console.log(' pxlNav instance created:', pxlNavInstanceRef.current);
-
-          // Subscribe to booted event
-          const bootedCallback = () => {
-            console.log(' pxlNav has booted successfully!');
-            setIsInitialized(true);
-            if (onBooted) {
-              onBooted();
-              console.log(' pxlNav has fully booted!'); // Add back the "pxlNav Booted" message
-            }
-            
-            // Additional debug: Check if the engine is rendering properly
-            setTimeout(() => {
-              if (pxlNavInstanceRef.current?.pxlTimer?.active) {
-                console.log(' Current room:', pxlNavInstanceRef.current?.pxlEnv?.currentRoom);
-                console.log(' Engine exists:', !!pxlNavInstanceRef.current?.pxlEnv?.engine);
-                console.log(' Scene exists:', !!pxlNavInstanceRef.current?.pxlEnv?.scene);
-              } else {
-                console.warn(' pxlNav Timer is not active - this may be the render issue!');
-                if (pxlNavInstanceRef.current?.start) {
-                  console.log(' Attempting to restart pxlNav timer...');
-                  pxlNavInstanceRef.current.start();
-                }
-              }
-            }, 1000);
-          };
-
-          // Subscribe directly to the pxlNav instance
-          pxlNavManager.subscribe('booted', bootedCallback);
-          subscriptionsRef.current.push({ eventType: 'booted', callback: bootedCallback });
-
-          // Initialize your PxlNav instance
-          console.log(' Initializing pxlNav...');
-          pxlNavManager.init(); 
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error('pxlNav initialization failed');
-          console.error('- pxlNav initialization error:', error);
-          setLoadError(error);
-          if (onError) onError(error);
-        }
-      };
-
-      initializeNow();
-    }
-  }, [pxlNavModule, isInitialized, projectTitle, startingRoom, roomBootList, pxlRoomRootPath, pxlAssetRootPath, showOnboarding, enableStaticCamera, pxlOptions, onBooted, onError]);
-
-  // Cleanup helper using the new unsubscribe method
+  // Cleanup helper
   const cleanupSubscriptions = useCallback(() => {
     if (pxlNavInstanceRef.current && subscriptionsRef.current.length > 0) {
       let cleanedCount = 0;
@@ -238,29 +147,25 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
       });
       
       if (cleanedCount > 0) {
-        console.log(`- Cleaned up ${cleanedCount} pxlNav subscriptions for ${componentId.current}`);
+        print(`- Cleaned up ${cleanedCount} pxlNav subscriptions for ${componentId.current}`);
       }
       
       subscriptionsRef.current = [];
     }
   }, []);
 
-  // Main cleanup effect - only runs on component unmount
+  // Cleanup on unmount
   useEffect(() => {
-    // Copy the ref value to avoid stale closure
     const currentComponentId = componentId.current;
     
-    // Cleanup on unmount ONLY
     return () => {
-      console.log(`- Cleaning up pxlNav component ${currentComponentId} on unmount`);
+  print(`- Cleaning up pxlNav component ${currentComponentId} on unmount`);
       
-      // Clean up subscriptions first
       cleanupSubscriptions();
       
-      // Stop pxlNav
       if (pxlNavInstanceRef.current) {
         try {
-          console.log('- Stopping pxlNav instance');
+          print('- Stopping pxlNav instance');
           pxlNavInstanceRef.current.stop();
         } catch (err) {
           console.warn('Warning during pxlNav cleanup:', err);
@@ -268,7 +173,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
         pxlNavInstanceRef.current = null;
       }
     };
-  }, [cleanupSubscriptions]); // Include cleanupSubscriptions dependency
+  }, [cleanupSubscriptions]);
 
   // Error display
   if (loadError) {
@@ -353,7 +258,7 @@ const PxlNavComponent: React.FC<pxlNavProps> = ({
         >
           <div>- Loading pxlNav...</div>
           <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
-            {isLoading ? 'Loading module...' : 'Initializing 3D environment'}
+            Initializing 3D environment...
           </div>
         </div>
       )}

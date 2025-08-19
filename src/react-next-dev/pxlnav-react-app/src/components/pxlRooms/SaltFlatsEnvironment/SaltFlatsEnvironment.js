@@ -138,8 +138,9 @@ export class SaltFlatsEnvironment extends RoomEnvironment{
       this.checkEyeBlink();
     }
 
-    let scrollGrp = this.geoList["Scripted"]["MovingEng_grp"];
-    if( scrollGrp ){
+    if( this.geoList.hasOwnProperty("Scripted") && this.geoList["Scripted"].hasOwnProperty("MovingEng_grp") ){
+    console.log("!!!!!!!!!!!!")
+      let scrollGrp = this.geoList["Scripted"]["MovingEng_grp"];
       scrollGrp.position.z = (3.6 * this.msRunner.x) % 150.0;
       let shift = 0;
       let scrollThreshold = 150.0;

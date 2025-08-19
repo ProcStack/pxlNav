@@ -112,8 +112,6 @@ export async function loadPxlNavModule() {
         pxlBase = exports.pxlBase;
         RoomEnvironment = exports.RoomEnvironment;
         
-        console.log(' Factory function exports accessed successfully');
-        
       } catch (accessError) {
         console.error(' Error accessing default exports:', accessError);
         

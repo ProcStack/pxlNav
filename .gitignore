@@ -133,3 +133,4 @@ out
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+src/react-next-dev/pxlnav-react-app/build/*

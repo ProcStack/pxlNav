@@ -245,8 +245,6 @@ class pxlNav{
 
     // -- -- --
 
-    console.log( options );
-    console.log( options.verbose );
     this.pxlOptions = Object.assign( {}, options );
     let optionKeys=Object.keys( this.pxlOptions );
     let defaultKeys=Object.keys( pxlOptions );
@@ -256,9 +254,6 @@ class pxlNav{
       }
     });
 
-    console.log( this.pxlOptions );
-
-    
 
     // Should there not be a default `userSettings` object, build one
     //   Update these values from `pxlRoom.pxlCamera` set methods

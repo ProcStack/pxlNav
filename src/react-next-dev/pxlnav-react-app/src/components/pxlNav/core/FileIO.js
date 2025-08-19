@@ -108,9 +108,6 @@ function findCustomAttributes(sceneGraph, fbxTree, standardAttributes) {
   }
 }
 
-// Initialize the enhancements
-runFBXLoaderPatch();
-
 // Separated for debugging  
 function createFBXLoader(manager) {
   return new FBXLoader(manager);
@@ -150,6 +147,10 @@ export class FileIO{
     this.oneTwoPFour = 1.0/2.4;
     this.twelvePNineTwoDiv = 1.0/12.92;
     this.onePOFiveFiveDiv = 1.0/1.055;
+
+    
+    // Initialize the enhancements
+    runFBXLoaderPatch();
   }
   
   setDependencies( pxlNav ){

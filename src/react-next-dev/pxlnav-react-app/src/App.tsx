@@ -1,12 +1,73 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import PxlNavComponentClean from './components/PxlNavComponentClean';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import PxlNavComponent from './components/PxlNavComponent';
 import { getPxlPrep } from './components/pxlNavLoader.js';
-import { usePxlNavConfig } from './hooks/usePxlNavConfig';
+
+// Centralized pxlNav options builder for React devs
+// Keep all defaults and override logic here so developers know to look in App.tsx
+const buildPxlNavOptions = ({
+  pxlEnums,
+  pxlOptions,
+  customOptions,
+  userSettings,
+  projectSettings
+}: any) => {
+  if (!pxlEnums || !pxlOptions) return null;
+
+  // Default user settings
+  const defaultUserSettings = Object.assign({}, pxlOptions.userSettings || {});
+  defaultUserSettings['height'] = defaultUserSettings['height'] || {};
+  defaultUserSettings['height']['standing'] = userSettings?.standingHeight || 1.75;
+  defaultUserSettings['height']['stepSize'] = userSettings?.stepSize || 5;
+
+  const defaultTargetFPS = { pc: 45, mobile: 30 };
+  const defaultRenderScale = { pc: 1.0, mobile: 1.3 };
+  const defaultCollisionScale = { gridSize: 150, gridReference: 1000 };
+
+  const defaultLoaderPhrases = [
+    "...chasing the bats from the belfry...",
+    "...shuffling the deck...",
+    "...checking the air pressure...",
+    "...winding the clock...",
+    "...tuning the strings...",
+    "...ringing the quartz...",
+    "...crashing the glasses...",
+    "...sharpening the pencils...",
+  ];
+
+  const options = Object.assign({}, pxlOptions);
+  options.userSettings = Object.assign({}, defaultUserSettings, userSettings);
+  options.verbose = pxlEnums.VERBOSE_LEVEL.NONE;
+  options.fps = defaultTargetFPS;
+  options.renderScale = defaultRenderScale;
+  options.antiAliasing = pxlEnums.ANTI_ALIASING.HIGH;
+  options.collisionScale = defaultCollisionScale;
+  options.allowStaticRotation = false;
+  options.skyHaze = pxlEnums.SKY_HAZE.VAPOR;
+  options.shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
+  options.loaderPhrases = defaultLoaderPhrases;
+
+  // Project settings
+  options.pxlRoomRoot = projectSettings?.pxlRoomRootPath || "../pxlRooms";
+  options.pxlAssetRoot = projectSettings?.pxlAssetRootPath || "./pxlAssets";
+  options.showOnboarding = projectSettings?.showOnboarding ?? true;
+  options.staticCamera = projectSettings?.enableStaticCamera ?? false;
+
+  // Apply custom options last
+  if (customOptions) Object.assign(options, customOptions);
+
+  return options;
+};
 
 function App() {
   const [pxlNavStatus, setPxlNavStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<Error | null>(null);
   const [pxlConstants, setPxlConstants] = useState<any>(null);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  //const roomList = ["SaltFlatsEnvironment"];
+  //const roomList = ["SaltFlatsEnvironment", "OutletEnvironment"];
+  const roomList = ["OutletEnvironment"];
 
   // Load pxlEnums and pxlOptions at the top level
   useEffect(() => {
@@ -24,35 +85,23 @@ function App() {
   }, []);
 
   // Memoize options objects to prevent recreation on every render
-  const customOptions = useMemo(() => ({
-    verbose: pxlConstants?.pxlEnums?.VERBOSE_LEVEL.DEBUG,
-    fps: {
-      'pc': 60,
-      'mobile': 30
-    },
-    renderScale: {
-      'pc': 0.8,
-      'mobile': 1.2
-    },
-    antiAliasing: pxlConstants?.pxlEnums?.ANTI_ALIASING.HIGH,
-    skyHaze: pxlConstants?.pxlEnums?.SKY_HAZE.CLEAR,
-    shadowMapBiasing: pxlConstants?.pxlEnums?.SHADOW_MAP.SOFT,
-  }), [pxlConstants]);
+  // All pxlNav defaults and overrides live here in App.tsx
+  const customOptions = useMemo(() => ({}), [pxlConstants]);
 
   const projectSettings = useMemo(() => ({
     pxlRoomRootPath: "./pxlRooms",
     pxlAssetRootPath: "./pxlAssets",
     showOnboarding: true,
     enableStaticCamera: false
-  }), []); // Empty dependency array since these are static
+  }), []);
 
-  // Use the custom hook for configuration logic (React best practice)
-  const configuredOptions = usePxlNavConfig({
+  // Build configured options here so this file is the single source for pxlNav config
+  const configuredOptions = useMemo(() => buildPxlNavOptions({
     pxlEnums: pxlConstants?.pxlEnums,
     pxlOptions: pxlConstants?.pxlOptions,
     customOptions,
     projectSettings
-  });
+  }), [pxlConstants, customOptions, projectSettings]);
 
   const handlePxlNavBooted = () => {
     console.log(' React App : pxlNav has fully booted!');
@@ -66,7 +115,7 @@ function App() {
   };
   
   return (
-    <div className="App" style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div className="App pxlNav-app">
       {/* Status header */}
       <header style={{
         position: 'absolute',
@@ -100,12 +149,18 @@ function App() {
         )}
       </header>
 
-      {/* Only render PxlNavComponent when we have configured options */}
-      {configuredOptions && (
-        <PxlNavComponentClean 
+      <div
+        ref={containerRef}
+        id="pxlnav-react-container"
+        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+      />
+
+      {configuredOptions && containerRef.current && (
+        <PxlNavComponent
           projectTitle={"pxlNav React Test"}
-          startingRoom={"SaltFlatsEnvironment"}
-          roomBootList={["SaltFlatsEnvironment"]}
+          startingRoom={roomList[0]}
+          roomBootList={roomList}
+          // merge the DOM node into the options object:
           pxlNavOptions={configuredOptions}
           onBooted={handlePxlNavBooted}
           onError={handlePxlNavError}

@@ -221,13 +221,13 @@ export class GUIManager{
 
     pxlNav.pxlDevice.subscribe( "resize", this.resize.bind(this) );
 
+    this.createContainer();
+    this.createFailState();
+    this.buildConsole();
   }
   
   init(){
     this.cssBuildClasses();
-    this.createContainer();
-    this.createFailState();
-    this.buildConsole();
   }
 
   // -- -- --
@@ -235,11 +235,16 @@ export class GUIManager{
   // Primary container for all pxlNav DOM elements
   //   This is the parent container for all GUI elements
   createContainer(){
-    let container=document.createElement("div");
-    container.id="pxlNav-container";
-    container.classList.add("pxlNav-mainContainerStyle");
+    let container;
+    if( this.pxlOptions.hasOwnProperty("container") && this.pxlOptions.container instanceof HTMLElement ){
+      container=this.pxlOptions.container;
+    }else{
+      container=document.createElement("div");
+      container.id="pxlNav-container";
+      container.classList.add("pxlNav-mainContainerStyle");
 
-    document.body.appendChild(container);
+      document.body.appendChild(container);
+    }
 
     this.guiWindows.container={ active:true, gui:container };
   }
@@ -259,7 +264,11 @@ export class GUIManager{
     let failState=document.createElement("div");
     failState.id="pxlNav-failState";
     failState.classList.add("pxlNav-failStateStyle");
-    document.body.appendChild(failState);
+    if( this.guiWindows?.container?.gui ){
+      this.guiWindows.container.gui.appendChild(failState);
+    }else{
+      document.body.appendChild(failState);
+    }
     this.guiWindows.failState={ active:true, gui:failState };
   }
 
@@ -1596,7 +1605,11 @@ export class GUIManager{
     }
     this.guiWindowBG=bgDiv;
     //this.addToContainer( bgDiv );
-    document.body.appendChild( bgDiv );
+    if( this.guiWindows?.container?.gui ){
+      this.guiWindows.container.gui.appendChild( bgDiv );
+    }else{
+      document.body.appendChild( bgDiv );
+    }
   }
 
   toggleGuiWindowContainer(e, active, closeWindows=false ){
@@ -1605,7 +1618,7 @@ export class GUIManager{
       let targetId=target.getAttribute("id");
       if(targetId!=="guiWindowBackground"){
         // ## Bad way to do this....
-        let exitObjList=["pxlNav-container", "gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
+        let exitObjList=["pxlNav-container", "pxlnav-react-container", "pxlnav-next-container", "gui_helpGuiWindow", "gui_helpContent", "gui_infoGuiWindow", "gui_infoContent", "gui_settingsGuiWindow", "gui_settingsContent"];
         if( !exitObjList.includes( targetId ) ){
           return null;
         }
