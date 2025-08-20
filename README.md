@@ -8,6 +8,7 @@ Javascript Player Controller & Environment Manager for Three.js
 
 **Visit [procstack.github.io site](https://procstack.github.io/) to see camera location switching action.**
 
+**Now with React & NextJS support, see `./src/next-react-dev` for project examples**
 
 <p align='center'>
  <b>If you'd like to roam around a coastal environment,</b>
