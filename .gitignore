@@ -133,6 +133,6 @@ out
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-src/react-next-dev/pxlnav-react-app/build/*
-src/react-next-dev/pxlnav-next/public/pxlRooms/*/Assets/*
-src/react-next-dev/pxlnav-next/src/components/pxlRooms/*/Assets/*
+examples/react-app/build/*
+examples/nextjs/public/pxlRooms/*/Assets/*
+examples/nextjs/src/components/pxlRooms/*/Assets/*

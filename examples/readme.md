@@ -1,12 +1,26 @@
-## pxlNav Examples
+# pxlNav v1.0.0 Examples
 
-Please see `./js/pxlNavLoader_basic.js` to see an implementation of pxlNav
+To launch these examples locally,
+Run -
 
 
-Currently, `pxlNav` expects the Room files to a relative path to `pxlnav.###.js` itself.
-<br/>&nbsp;&nbsp; By default the same folder as pxlNav, `./pxlRooms`
-<br/>From `pxlNavLoader_basic.js`-
-```const pxlRoomRootPath = "pxlRooms";```
+ make sure to go into the React or Nextjs folders and run `npm install` to get started.
+<br/>Then 
 
-<br/>`pxlRooms` is the path, loading as `./pxlRooms` 
-<br/>&nbsp;&nbsp; Update it as needed, eg: `../pxlRooms`
+
+
+Here you'll find 3 folders containing examples of loading `pxlNav` with different options.
+
+### `./examples/esm`
+This is the Native Javascript ESM examples.
+ - FPS loader
+
+
+### `./examples/react-app`
+This is the React project example.
+<br/>&nbsp;&nbsp; 
+
+
+### `./examples/nextjs`
+This is the NextJS project example.
+<br/>&nbsp;&nbsp; 
