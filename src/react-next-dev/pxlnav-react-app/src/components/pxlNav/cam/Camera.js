@@ -861,7 +861,7 @@ export class Camera{
     
     //let stillMoving=false;
     // PC Mouse Movement
-    if(this.pxlDevice.touchMouseData.velocity!=null && this.pxlDevice.mobile===0){
+    if(this.pxlDevice.touchMouseData.velocity!=null && !this.pxlDevice.mobile){
       if(velEaseMag<this.posRotEasingThreshold){
         this.pxlDevice.touchMouseData.velocity.multiplyScalar(0);
         //this.pxlDevice.touchMouseData.velocityEase.multiplyScalar(0);

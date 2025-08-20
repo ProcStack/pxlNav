@@ -85,15 +85,16 @@ const baseConfig = {
       openAnalyzer: false,
     }),*/
   ],
-  /*resolve: {
+  resolve: {
     alias: {
-      '../../three/examples/jsm/postprocessing/EffectComposer.js': path.resolve(__dirname, '../node_modules/three/examples/jsm/postprocessing/EffectComposer.js'),
-      '../../three/examples/jsm/postprocessing/RenderPass.js': path.resolve(__dirname, '../node_modules/three/examples/jsm/postprocessing/RenderPass.js'),
-      '../../three/examples/jsm/postprocessing/ShaderPass.js': path.resolve(__dirname, '../node_modules/three/examples/jsm/postprocessing/ShaderPass.js'),
-      '../../three/examples/jsm/postprocessing/UnrealBloomPass.js': path.resolve(__dirname, '../node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js'),
-      '../../three/examples/jsm/shaders/CopyShader.js': path.resolve(__dirname, '../node_modules/three/examples/jsm/shaders/CopyShader.js'),
+      // Prefer project-local three build in ./src/react-next-dev/pxlnav-next/src/components/libs/three
+      'three': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/three.module.min.js'),
+      // Map explicit FBXLoader relative imports to the local copy
+      '../../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js'),
+      '../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js'),
+      './libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js')
     },
-  },*/
+  },
   externals: {
     'three' : './three.module.js',
     './libs/three/three.module.min.js' : './libs/three/three.module.min.js',

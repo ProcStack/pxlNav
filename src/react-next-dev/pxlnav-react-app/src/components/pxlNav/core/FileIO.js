@@ -28,10 +28,12 @@ import {
   MeshLambertMaterial,
 
 } from "../../libs/three/index.js";
-import { FBXLoader, MeshoptDecoder, GLTFLoader, DRACOLoader, KTX2Loader } from "../../libs/three/index.js";
+import { MeshoptDecoder, GLTFLoader, DRACOLoader, KTX2Loader } from "../../libs/three/index.js";
+import { FBXLoader } from "../../libs/three/FBXLoader.js";
 
 import { VERBOSE_LEVEL } from "./Enums.js";
 
+// EDIT : Bypassing `runFBXLoaderPatch` for now
 // Monkey-patch the FBXLoader to add custom userData support for pxlNav
 // This approach modifies the prototype to intercept the parsing process
 function runFBXLoaderPatch() {
@@ -53,12 +55,27 @@ function runFBXLoaderPatch() {
     FBXLoader.prototype.parse = function(FBXBuffer, path) {
       // Store reference to the current loader instance
       //const loaderInstance = this;
-      
+      console.log( FBXLoader)
+      console.log( FBXBuffer)
+      console.log( path)
       // Call the original parse method
       const result = originalFBXLoaderParse.call(this, FBXBuffer, path);
       
+      /*
+      connections = this.parseConnections();
+
+      const images = this.parseImages();
+      const textures = this.parseTextures( images );
+      const materials = this.parseMaterials( textures );
+      const deformers = this.parseDeformers();
+      const geometryMap = new GeometryParser().parse( deformers );
+
+      this.parseScene( deformers, geometryMap, materials );
+      */
+
+      //return sceneGraph;
+
       // Try to access the fbxTree from the parsing context
-      // Note: This is accessing Three.js internals and may need adjustment
       if (typeof window.fbxTree !== 'undefined' || typeof global.fbxTree !== 'undefined') {
         const fbxTree = window.fbxTree || global.fbxTree;
         
@@ -150,7 +167,7 @@ export class FileIO{
 
     
     // Initialize the enhancements
-    runFBXLoaderPatch();
+    //runFBXLoaderPatch();
   }
   
   setDependencies( pxlNav ){

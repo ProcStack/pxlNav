@@ -16,7 +16,8 @@ export { CopyShader } from 'three/addons/shaders/CopyShader.js';
 export { LuminosityHighPassShader } from 'three/addons/shaders/LuminosityHighPassShader.js';
 
 // Loaders
-export { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+//export { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+export { FBXLoader } from './FBXLoader.js';
 export { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 export { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 export { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
