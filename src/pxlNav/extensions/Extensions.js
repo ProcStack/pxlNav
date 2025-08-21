@@ -62,7 +62,7 @@ export class Extensions {
       }catch( loadErr ){
         console.error(`Error (1) Importing / Parsing extension '${extName}':`, loadErr);
         if( callback ){
-          callback( err, null );
+          callback( loadErr, null );
         }
       }
     }else{

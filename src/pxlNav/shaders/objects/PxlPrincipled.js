@@ -87,10 +87,10 @@ export function pxlPrincipledFrag( ShaderParms, useColor, useFog, lights, shadow
   let hasSurfaceNoise = true;
   let surfaceNoiseMult = "1.0";
   if( ShaderParms.hasOwnProperty("SurfaceNoise") ){
-    if( ShaderParms.SurfaceNoise%1 == 0 ){ // Boolean
+    if( ShaderParms.SurfaceNoise%1 === 0 ){ // Boolean
       surfaceNoiseMult = ShaderParms.SurfaceNoise+".0";
     }
-    if(surfaceNoiseMult=="0.0"){
+    if(surfaceNoiseMult === "0.0"){
       hasSurfaceNoise=false;
     }
   }
@@ -231,7 +231,7 @@ export function pxlPrincipledFrag( ShaderParms, useColor, useFog, lights, shadow
           if(useColor){
             
             let toFloatStr = ( v )=>{
-              if( v%1 == 0 ){
+              if( v%1 === 0 ){
                 return v+".0";
               }else{
                 return v+"";
@@ -261,8 +261,8 @@ export function pxlPrincipledFrag( ShaderParms, useColor, useFog, lights, shadow
         let surfaceNoiseBaseStr = "";
         let surfaceNoiseStr = "";
         let surfaceNoiseNoShadowStr = "";
-        if(hasSurfaceNoise){
-            if(surfaceNoiseMult!="1.0"){
+        if( hasSurfaceNoise ){
+            if( surfaceNoiseMult !== "1.0" ){
               surfaceNoiseBaseStr = "*"+surfaceNoiseMult;
             }
             ret+=`

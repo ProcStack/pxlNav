@@ -34,18 +34,19 @@ import {
   FogExp2,
   ShaderMaterial,
   FrontSide,
-  LinearSRGBColorSpace
+  LinearSRGBColorSpace,
+  PlaneGeometry,
+  DoubleSide,
+  Mesh
 } from "../libs/three/three.module.min.js";
 
 import { ANTI_ALIASING, VERBOSE_LEVEL, COLLIDER_TYPE } from "./core/Enums.js";
 import { pxlOptions } from "./core/Options.js";
 
-import { EffectComposer } from '../libs/three/EffectComposer.js';
-import { RenderPass } from '../libs/three/RenderPass.js';
-import { ShaderPass } from '../libs/three/ShaderPass.js';
-import { CopyShader } from '../libs/three/CopyShader.js';
-// TODO : Remove all traces of bloom passes, implement Neurous Box Blur passes
-import { UnrealBloomPass } from '../libs/three/UnrealBloomPass.js';
+// Import room loader
+import { loadRoomModule } from '../pxlRooms/index.js'; 
+
+import { EffectComposer, RenderPass, ShaderPass, CopyShader, UnrealBloomPass } from '../libs/three/index.js';
 
 
 // TODO : This class needs breaking up into BaseEnvironment & MainEnvironment expand
@@ -364,6 +365,7 @@ export class Environment{
     }
   }
     
+
   postHelpIntro(){
     // If the device is a computer, without autocam, send player details to the server
     //   TODO : This will need to be accessible from the room object and set-up networking as an extention
@@ -414,16 +416,20 @@ export class Environment{
     if( this.pxlTimer.msRunner.x > this.checkContext && this.activeContext ){
       this.checkContext=this.pxlTimer.msRunner.x+1;
       let tmpCanvas=document.createElement('canvas');
+      let ctxVal=false;
       try{
-        let ctxVal=!!tmpCanvas.getContext('webgl');
+        ctxVal=!!tmpCanvas.getContext('webgl');
       }catch(err){
         this.activeContext=true;
         this.pxlGuiDraws.pxlNavCanvas.style.display='none';
       }
+      if( !ctxVal ){
+        console.warn("WebGL Context lost, reloading pxlNav");
+      }
     }
     
     //if( this.pxlDevice.mobile && this.exposureShiftActive ){
-      //this.pxlCamera.colliderShiftActive=!(this.pxlCamera.colliderAdjustPerc==1 || this.pxlCamera.colliderAdjustPerc==0);
+      //this.pxlCamera.colliderShiftActive=!(this.pxlCamera.colliderAdjustPerc===1 || this.pxlCamera.colliderAdjustPerc===0);
       //this.updateCompUniforms(curExp);
     //}
 
@@ -443,71 +449,108 @@ export class Environment{
     });
   }
   
+  // Load room module using static imports
+  // Is this the best way?
+  //   I don't know, React is persnickety about dynamic imports
+  //   So if it works, ... at this point, then it works
+  async loadReadRoomModule(roomName) {
+    if( this.pxlOptions.hasOwnProperty("framework") && this.pxlOptions.framework === this.pxlEnums.FRAMEWORK.NATIVE ){
+      let curImportPath=`${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`;
+      try {
+        return await import(/* webpackIgnore: true */ curImportPath);
+      } catch (error) {
+        console.error(`Failed to load room module: ${curImportPath}`, error);
+        throw error;
+      }
+    }else{
+      try {
+        return await loadRoomModule(roomName);
+      } catch (error) {
+        console.error(`Failed to load room module: ${roomName}`, error);
+        throw error;
+      }
+    }
+  }
+  
+
+
   loadRoom(roomName){
-    return new Promise( (resolve, reject) =>{
+    return new Promise( async (resolve, reject) => {
 
       this.log("Loading Room - ", roomName);
       
-      let curImportPath=`${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`;
-      
-      import( curImportPath )
-        .then((module)=>{
-          this.debug("Module loaded - ", module);
-          let roomObj=new module[roomName]( roomName, `${this.pxlRoomLclRoot}/${roomName}/`, this.pxlTimer.msRunner, null, null, this.cloud3dTexture);
-          roomObj.setDependencies( this );
+      try {
+        // Use the enhanced loading system with manifest support
+        const module = await this.loadReadRoomModule(roomName)
+        
+        if (!module || !module[roomName]) {
+          throw new Error(`Room class ${roomName} not found in loaded module`);
+        }
+        
+        this.debug("Module loaded - ", module);
+        let roomObj = new module[roomName]( 
+          roomName, 
+          `${this.pxlRoomLclRoot}/${roomName}/`, 
+          this.pxlTimer.msRunner, 
+          null, 
+          null, 
+          this.cloud3dTexture
+        );
+        roomObj.setDependencies( this );
 
-          roomObj.camera=this.pxlCamera.camera;
-          roomObj.scene=new Scene();
-          if( !roomObj.userAvatarGroup ){
-              roomObj.userAvatarGroup=new Group();
-          }
-          roomObj.scene.add( roomObj.userAvatarGroup );
-          
-          var options = {
-              format : RGBAFormat,
-              antialias: false,
-              sortObjects:true,
-              alpha:true,
-              type : /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ? HalfFloatType : FloatType
-          };
-          
-          roomObj.scene.renderTarget=new WebGLRenderTarget( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc,options);
-          roomObj.scene.renderTarget.texture.format=RGBAFormat;
-          roomObj.scene.renderTarget.texture.minFilter=LinearFilter;
-          roomObj.scene.renderTarget.texture.magFilter=LinearFilter;
-          roomObj.scene.renderTarget.texture.generateMipmaps=false;
-          //roomObj.scene.renderTarget.texture.type=FloatType;
-          roomObj.scene.renderTarget.depthBuffer=true;
-          roomObj.scene.renderTarget.depthTexture = new DepthTexture( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc );
-          roomObj.scene.renderTarget.depthTexture.format=DepthFormat;
-          //roomObj.scene.renderTarget.depthTexture.type=UnsignedIntType;
-          roomObj.scene.renderTarget.depthTexture.type=UnsignedShortType;
-          
-          // World Pos Target
-          //   Remains from a Portal Room Snapshot Display system
-          //     Would be desired tech, but needs re-implementation
-          // roomObj.scene.renderWorldPos=new WebGLRenderTarget( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc,options);
-          // roomObj.scene.renderWorldPos.texture.format=RGBAFormat;
-          // roomObj.scene.renderWorldPos.texture.minFilter=NearestFilter;
-          // roomObj.scene.renderWorldPos.texture.magFilter=NearestFilter;
-          // roomObj.scene.renderWorldPos.texture.generateMipmaps=false;
-          
-          roomObj.cloud3dTexture=this.cloud3dTexture;
-          if( !this.roomNameList.includes( roomName ) ){
-            this.roomNameList.push( roomName );
-          }
-          this.roomSceneList[ roomName ]=roomObj;
-          this.debug(this.roomSceneList[ roomName ]);
-      
-          resolve(true);
-        })
-        .catch((err)=>{
-          console.error("Error Loading Room - ", roomName);
-          if(this.pxlOptions.verbose >= VERBOSE_LEVEL.ERROR){
-            console.log(err);
-          }
-          reject(err);
-        });
+        roomObj.camera=this.pxlCamera.camera;
+        roomObj.scene=new Scene();
+        if( !roomObj.userAvatarGroup ){
+            roomObj.userAvatarGroup=new Group();
+        }
+        roomObj.scene.add( roomObj.userAvatarGroup );
+        
+        var options = {
+            format : RGBAFormat,
+            antialias: false,
+            sortObjects:true,
+            alpha:true,
+            type : /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ? HalfFloatType : FloatType
+        };
+        
+        roomObj.scene.renderTarget=new WebGLRenderTarget( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc,options);
+        roomObj.scene.renderTarget.texture.format=RGBAFormat;
+        roomObj.scene.renderTarget.texture.minFilter=LinearFilter;
+        roomObj.scene.renderTarget.texture.magFilter=LinearFilter;
+        roomObj.scene.renderTarget.texture.generateMipmaps=false;
+        //roomObj.scene.renderTarget.texture.type=FloatType;
+        roomObj.scene.renderTarget.depthBuffer=true;
+        roomObj.scene.renderTarget.depthTexture = new DepthTexture( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc );
+        roomObj.scene.renderTarget.depthTexture.format=DepthFormat;
+        //roomObj.scene.renderTarget.depthTexture.type=UnsignedIntType;
+        roomObj.scene.renderTarget.depthTexture.type=UnsignedShortType;
+        
+        // World Pos Target
+        //   Remains from a Portal Room Snapshot Display system
+        //     Would be desired tech, but needs re-implementation
+        // roomObj.scene.renderWorldPos=new WebGLRenderTarget( this.pxlDevice.sW*this.pxlQuality.screenResPerc, this.pxlDevice.sH*this.pxlQuality.screenResPerc,options);
+        // roomObj.scene.renderWorldPos.texture.format=RGBAFormat;
+        // roomObj.scene.renderWorldPos.texture.minFilter=NearestFilter;
+        // roomObj.scene.renderWorldPos.texture.magFilter=NearestFilter;
+        // roomObj.scene.renderWorldPos.texture.generateMipmaps=false;
+        
+        roomObj.cloud3dTexture=this.cloud3dTexture;
+        if( !this.roomNameList.includes( roomName ) ){
+          this.roomNameList.push( roomName );
+        }
+        this.roomSceneList[ roomName ]=roomObj;
+        this.debug(this.roomSceneList[ roomName ]);
+    
+        resolve(true);
+        
+      } catch (err) {
+        console.error("Error Loading Room - ", roomName);
+        console.error("Error details:", err.message);
+        if(this.pxlOptions.verbose >= VERBOSE_LEVEL.ERROR){
+          console.error("Full error:", err);
+        }
+        reject(err);
+      }
     });
   }
   
@@ -577,7 +620,6 @@ export class Environment{
     
     this.debug("Building Room Environments - ");
     this.debug(this.roomNameList);
-    let loadPromisList=[];
     
     this.roomNameList.forEach( (r)=>{
       if( this.roomSceneList[ r ].init ){
@@ -594,7 +636,7 @@ export class Environment{
   }
     
   setFogHue( orig=[0,0], rot=[1,1] ){
-    let hsl=this.fog.color.getHSL();
+    //let hsl=this.fog.color.getHSL();
 
     let atanVals=[ rot[0]-orig[0], rot[1]-orig[1] ];
     //let scalar=(atanVals[0]+atanVals[1]);
@@ -612,36 +654,36 @@ export class Environment{
   //%=
   // Return Primary Shader Material
   readShader( objShader="" ){
-    if( objShader=="script_fog" ){
+    if( objShader==="script_fog" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
         
-      if(this.mapOverlayHeavyPass.enabled==true){
+      if( this.mapOverlayHeavyPass.enabled === true ){
         return this.mapOverlayHeavyPass.material ;
-      }else if(this.mapOverlayPass.enabled==true){
+      }else if( this.mapOverlayPass.enabled === true ){
         return this.mapOverlayPass.material ;
-      }else if(this.mapOverlaySlimPass.enabled==true){
+      }else if( this.mapOverlaySlimPass.enabled === true ){
         return this.mapOverlaySlimPass.material ;
       }
-    }else if( objShader=="script_dArrows" ){
+    }else if( objShader==="script_dArrows" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.geoList[ "dArrows" ][0].material;
-    }else if( objShader=="script_userScreens" ){
+    }else if( objShader==="script_userScreens" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.camScreenData.screenGeoList[0].material;
-    }else if( objShader=="script_warpZonePortals" ){
+    }else if( objShader==="script_warpZonePortals" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.returnPortalGlowList[0].material;
-        
-    }else if( objShader=="script_lizardking" ){
+
+    }else if( objShader==="script_lizardking" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.lizardKingPass.material;
-    }else if( objShader=="script_majorTom" ){
+    }else if( objShader==="script_majorTom" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.pxlUser.starFieldPass.material;
-    }else if( objShader=="script_fractalSubstrate" ){
+    }else if( objShader==="script_fractalSubstrate" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.pxlUser.crystallinePass.material;
-    }else if( objShader=="script_fractalEcho" ){
+    }else if( objShader==="script_fractalEcho" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.delayPass.material;
         
@@ -662,15 +704,15 @@ export class Environment{
         let setShaderMtl;
         
         let objShader=this.pxlGuiDraws.guiWindows["shaderGui"].currentShader;
-        if( objShader=="script_fog" ){
-            if(this.mapOverlayHeavyPass.enabled==true){
+        if( objShader==="script_fog" ){
+            if( this.mapOverlayHeavyPass.enabled === true ){
                 setShaderMtl= this.mapOverlayHeavyPass.material ;
-            }else if(this.mapOverlayPass.enabled==true){
+            }else if( this.mapOverlayPass.enabled === true ){
                 setShaderMtl= this.mapOverlayPass.material ;
-            }else if(this.mapOverlaySlimPass.enabled==true){
+            }else if( this.mapOverlaySlimPass.enabled === true ){
                 setShaderMtl= this.mapOverlaySlimPass.material ;
             }
-        }else if( objShader=="script_dArrows" ){
+        }else if( objShader==="script_dArrows" ){
             this.geoList[ "dArrows" ].forEach( (o)=>{
                 setShaderMtl=o.material;
                 setShaderMtl.vertexShader=vert;
@@ -678,7 +720,7 @@ export class Environment{
                 setShaderMtl.needsUpdate=true;
             });
             return;
-        }else if( objShader=="script_userScreens" ){
+        }else if( objShader==="script_userScreens" ){
             this.camScreenData.screenGeoList.forEach( (o)=>{
                 setShaderMtl=o.material;
                 setShaderMtl.vertexShader=vert;
@@ -686,7 +728,7 @@ export class Environment{
                 setShaderMtl.needsUpdate=true;
             });
             return;
-        }else if( objShader=="script_warpZonePortals" ){
+        }else if( objShader==="script_warpZonePortals" ){
             this.returnPortalGlowList.forEach( (o)=>{
                 setShaderMtl=o.material;
                 setShaderMtl.vertexShader=vert;
@@ -695,13 +737,13 @@ export class Environment{
             });
             return;
             
-        }else if( objShader=="script_lizardking" ){
+        }else if( objShader==="script_lizardking" ){
                 setShaderMtl=this.lizardKingPass.material;
-        }else if( objShader=="script_majorTom" ){
+        }else if( objShader==="script_majorTom" ){
                 setShaderMtl=this.pxlUser.starFieldPass.material;
-        }else if( objShader=="script_fractalSubstrate" ){
+        }else if( objShader==="script_fractalSubstrate" ){
                 setShaderMtl=this.pxlUser.crystallinePass.material;
-        }else if( objShader=="script_fractalEcho" ){
+        }else if( objShader==="script_fractalEcho" ){
                 setShaderMtl=this.delayPass.material;
             
         }else{
@@ -709,7 +751,7 @@ export class Environment{
             geoRead.shift();
             geoRead=geoRead.join("_");
             if( this.geoList[ geoRead ] ){
-                setShaderMtl= this.geoList[ geoRead ].material ;
+                setShaderMtl = this.geoList[ geoRead ].material ;
             }
         }
         
@@ -732,9 +774,9 @@ export class Environment{
       if(!channels){
         let assetSplit = assetName.split(".");
         let assetExt = assetSplit.pop().toLowerCase();
-        if( assetExt=="jpg" || assetExt=="jpeg"  ){
+        if( assetExt==="jpg" || assetExt==="jpeg"  ){
           channels=3;
-        }else if( assetExt=="png" ){
+        }else if( assetExt==="png" ){
           channels=4;
         }
       }
@@ -749,15 +791,15 @@ export class Environment{
     
     // A screen filled plane to render outside of effect composer passes
     buildBackgroundObject( customUniforms={}, bgVert=null, bgFrag=null){
-        let geo = new PlaneBufferGeometry();
+        let geo = new PlaneGeometry();
         
         let bgUniforms={}
         Object.assign( bgUniforms, customUniforms );
         
-        if( bgVert==null || typeof(bgVert)!="string"){
+        if( bgVert===null || typeof(bgVert)!="string"){
             bgVert=this.pxlShaders.scene.bgScreenVert();
         }
-        if( bgFrag==null || typeof(bgFrag)!="string"){
+        if( bgFrag===null || typeof(bgFrag)!="string"){
             bgFrag=this.pxlShaders.scene.bgScreenFrag();
         }
         
@@ -809,7 +851,7 @@ export class Environment{
   }
 
   clickableActions(action=null){
-    if(action == "CallToAction" && this.clickablePrevActiveObject){
+    if(action==="CallToAction" && this.clickablePrevActiveObject){
       this.pxlGuiDraws.ctaBuildPopup();
       this.objectClickableObjectList[this.clickablePrevActiveObject]['Inactive'].visible=true;
       this.objectClickableObjectList[this.clickablePrevActiveObject]['Hover'].visible=false;
@@ -819,7 +861,7 @@ export class Environment{
     
   promoActions(pName=null){
         let pLink=pName.userData.video;
-        let pScreen=pName.name;
+        //let pScreen=pName.name;
         
         if( this.promoClickableLinks.hasOwnProperty( pLink ) ){
             var link= window.open( this.promoClickableLinks[pLink], "_blank");
@@ -849,7 +891,7 @@ export class Environment{
       let objHit = rayHits.order[0];
       this.pxlDevice.setCursor("help");
       if(this.objectClickableObjectList[objHit.name]){
-        if(this.clickablePrevActiveObject==null){
+        if(this.clickablePrevActiveObject===null){
           this.clickablePrevActiveObject=objHit.name;
         }
         this.objectClickableObjectList[objHit.name]['Inactive'].visible=false;
@@ -875,7 +917,7 @@ export class Environment{
       let promoHit = rayHits.order[0];
       this.pxlDevice.setCursor("alias");
       if(this.promoClickableObjectList[promoHit.name]){
-        if(this.promoPrevActiveObject==null){
+        if(this.promoPrevActiveObject===null){
           this.promoPrevActiveObject=promoHit.name;
         }
         this.promoClickableObjectList[promoHit.name].x=1;
@@ -929,10 +971,12 @@ export class Environment{
     // -- SCENE WIDE MATERIALS  -- -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
 
+    let near = this.pxlCamera.camera?.near || 0.1;
+    let far = this.pxlCamera.camera?.far || 1000;
     this.mapWorldPosMaterial=new ShaderMaterial({
       uniforms:{
-        camNear: { type:"f", value: this.pxlCamera.camera.near },
-        camFar: { type:"f", value: this.pxlCamera.camera.far }
+        camNear: { type:"f", value: near },
+        camFar: { type:"f", value: far }
       },
       vertexShader: this.pxlShaders.rendering.worldPositionVert(),
       fragmentShader: this.pxlShaders.rendering.worldPositionFrag()
@@ -1016,13 +1060,13 @@ export class Environment{
     
       
     // Set Anti-Aliasing Quality
-    if( this.pxlOptions.antiAliasing == ANTI_ALIASING.LOW){
+    if( this.pxlOptions.antiAliasing===ANTI_ALIASING.LOW){
       this.shaderPasses.scatterMixShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing == ANTI_ALIASING.MEDIUM){
+    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.MEDIUM){
       this.shaderPasses.blurXShaderPass.enabled=true;
       this.shaderPasses.dirBlurCopyPass.enabled=true;
       this.shaderPasses.blurYShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing == ANTI_ALIASING.HIGH ){
+    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.HIGH ){
       this.shaderPasses.blurXShaderPass.enabled=true;
       this.shaderPasses.dirBlurCopyPass.enabled=true;
       this.shaderPasses.blurYShaderPass.enabled=true;
@@ -1395,7 +1439,7 @@ export class Environment{
         
         
     this.roomNameList.forEach( (r)=>{
-      if( r != this.mainRoom){
+      if( r !== this.mainRoom){
         let curPass=this.roomSceneList[ r ].applyRoomPass( this.roomComposer );
         if( curPass ){
             curPass.enabled=false;
@@ -1473,7 +1517,7 @@ export class Environment{
         // Set above, for pass to use renderTarget in uniforms
     this.delayComposer=new EffectComposer(this.engine);
     
-    let renderDelayPass = new RenderPass(this.scene, this.pxlCamera.camera);
+    //let renderDelayPass = new RenderPass(this.scene, this.pxlCamera.camera);
     //this.delayComposer.addPass(renderDelayPass);
         
     this.delayPass = new ShaderPass(
@@ -1515,7 +1559,7 @@ export class Environment{
       let fUp=Math.min( 1, curPerc*3 );
       let fDown=Math.min( 1, 3-curPerc*3 );
       
-      if(fUp==1 && fDown==1 && this.pxlCamera.warpActive){
+      if(fUp===1 && fDown===1 && this.pxlCamera.warpActive){
         this.pxlCamera.warpCamRun();
       }
       
@@ -1603,7 +1647,7 @@ export class Environment{
     this.engine.render(  prepRoom.scene || prepRoom.scene, this.pxlCamera.camera );
     prepRoom.cleanupPortalRender();
     /*
-    if( curScene == this.mainRoom ){
+    if( curScene===this.mainRoom ){
       //this.mapRender();
       
       //this.warpPortalTextures[ curScene ] = this.mapComposer.renderTarget1.texture.clone();
@@ -1633,7 +1677,7 @@ export class Environment{
         this.step();
     }
     
-    if( this.pxlTimer.runtime > this.nextRenderMS || anim==false ){
+    if( this.pxlTimer.runtime > this.nextRenderMS || anim===false ){
 
       this.prevRenderMS = this.nextRenderMS;
       this.nextRenderMS = this.pxlTimer.runtime + this.renderInterval;
@@ -1647,6 +1691,7 @@ export class Environment{
       this.emit( "render-prep", {
         'time': this.pxlTimer.runtime
       });
+      
 
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){
@@ -1692,6 +1737,11 @@ export class Environment{
       }
     }
         
+    // Send out event to allow for any post-render calculations
+    this.emit( "render-post", {
+      'time': this.pxlTimer.runtime
+    });
+    
     if(this.pxlTimer.active && anim){
       requestAnimationFrame( ()=>{ this.mapRender(); });
     }

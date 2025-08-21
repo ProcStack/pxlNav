@@ -189,7 +189,7 @@ export class EventManager {
     let currentTime = this.getRuntime();
     while( this.triggerTimeoutTimes.length > 0 && this.triggerTimeoutTimes[0] <= currentTime ){
       let triggerTime = this.triggerTimeoutTimes.shift();
-      let { eventClass, eventType, callback } = this.triggerTimeouts[triggerTime];
+      let { callback } = this.triggerTimeouts[triggerTime];
       callback(currentTime);
       delete this.triggerTimeouts[triggerTime];
     }

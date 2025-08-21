@@ -25,8 +25,8 @@ export class QualityController{
     this.bufferPercMult=1;//mobile?.3:.5,
     this.renderTargetScale=10; // ## Not implemented
     this.percentSteps=[.3,.45,.85];
-    this.fpsCounter=new Vector3(30, 0, (new Date().getTime())*.001);; // [ Cur FPS, Frame Count Since Last FPS Check, Last FPS Sample Time ]
-    this.countAtLevel=0,
+    this.fpsCounter=new Vector3(30, 0, (new Date().getTime())*.001); // [ Cur FPS, Frame Count Since Last FPS Check, Last FPS Sample Time ]
+    this.countAtLevel=0;
     this.shiftRate=.01;
     this.moduleQualityList=[];
     
@@ -116,7 +116,8 @@ export class QualityController{
     if(this.pxlCookie.hasCookie("mouse")){
       this.settings.mouse=this.pxlCookie.parseCookie("mouse");
     }
-        let cookieEntries=Object.keys( this.settingsHigh );
+    
+    //let cookieEntries=Object.keys( this.settingsHigh );
     if(this.pxlCookie.hasCookie("qualitySetting")){
       let qualitySetting=this.pxlCookie.parseCookie("qualitySetting");
             this.settings.graphics=qualitySetting;
@@ -160,12 +161,12 @@ export class QualityController{
     this.qualityStep=percStep;
     if( this.setFromBenchmark ){
       //%=
-      let levelText=["Low","Medium","High"][this.qualityStep];
+      //let levelText=["Low","Medium","High"][this.qualityStep];
       //console.log( "Setting Benchmark to "+levelText+" quality.");
       //%
       this.setQualityLevel( this.qualityStep );
     }else{
-            if(this.settingsQualityChoice==null){
+            if(this.settingsQualityChoice===null){
                 this.settingsQualityChoice=3;
             }
             
@@ -208,19 +209,19 @@ export class QualityController{
   }
   
   setGraphicsSettings( qualitySettings=null, graphicsPreset=3 ){
-    if(qualitySettings==null){
-      if(this.qualityStep==0){
+    if(qualitySettings===null){
+      if(this.qualityStep===0){
         qualitySettings=this.settingsLow;
-      }else if(this.qualityStep==1){
+      }else if(this.qualityStep===1){
         qualitySettings=this.settingsMedium;
-      }else if(this.qualityStep==2){
+      }else if(this.qualityStep===2){
         qualitySettings=this.settingsHigh;
       }else{
         return;
       }
     }
     
-    if(graphicsPreset==3){
+    if(graphicsPreset===3){
       this.checkCustomDict();
     }
     
@@ -228,7 +229,7 @@ export class QualityController{
     keys.forEach( (k)=>{
       this.setComponentQuality(k,qualitySettings[k]);
       this.settings[k]=qualitySettings[k];
-      if(graphicsPreset==3){
+      if(graphicsPreset===3){
         this.settingsCustom[k]=qualitySettings[k];
       }
     });
@@ -270,13 +271,13 @@ export class QualityController{
         
     this.setQualityCookie(val);
         
-    if(val==0){
+    if(val===0){
       this.setLowQuality();
-    }else if(val==1){
+    }else if(val===1){
       this.setMediumQuality();
-    }else if(val==2){
+    }else if(val===2){
       this.setHighQuality();
-    }else if(val==3){
+    }else if(val===3){
       this.setCustomQuality();
     }
   }    
@@ -299,15 +300,15 @@ export class QualityController{
     this.setGraphicsSettings( this.settingsCustom);
   }
   checkCustomDict(){
-    if(this.settingsCustom==null){
+    if(this.settingsCustom===null){
       this.settingsCustom={};
       let sourceDict=this.settingsHigh;
       if(this.settingsQualityChoice){
-        if(this.settingsQualityChoice==0){
+        if(this.settingsQualityChoice===0){
           sourceDict= this.settingsLow ;
-        }else if(this.settingsQualityChoice==1){
+        }else if(this.settingsQualityChoice===1){
           sourceDict= this.settingsMedium ;
-        }else if(this.settingsQualityChoice==2){
+        }else if(this.settingsQualityChoice===2){
           sourceDict= this.settingsHigh ;
         }
       }
@@ -341,11 +342,11 @@ export class QualityController{
         break;
         
       case "fog":
-        if( this.pxlEnv.mapOverlayHeavyPass ) this.pxlEnv.mapOverlayHeavyPass.enabled = val==2;
-        if( this.pxlEnv.mapOverlayPass ) this.pxlEnv.mapOverlayPass.enabled = val==1;
-        if( this.pxlEnv.mapOverlaySlimPass ) this.pxlEnv.mapOverlaySlimPass.enabled = val==0;
-        if( this.pxlEnv.mapBoxAAPass.enabled ) this.pxlEnv.mapBoxAAPass.enabled=val==2;
-        if( this.pxlEnv.mapCrossAAPass.enabled ) this.pxlEnv.mapCrossAAPass.enabled=val==1;
+        if( this.pxlEnv.mapOverlayHeavyPass ) this.pxlEnv.mapOverlayHeavyPass.enabled = val===2;
+        if( this.pxlEnv.mapOverlayPass ) this.pxlEnv.mapOverlayPass.enabled = val===1;
+        if( this.pxlEnv.mapOverlaySlimPass ) this.pxlEnv.mapOverlaySlimPass.enabled = val===0;
+        if( this.pxlEnv.mapBoxAAPass.enabled ) this.pxlEnv.mapBoxAAPass.enabled=val===2;
+        if( this.pxlEnv.mapCrossAAPass.enabled ) this.pxlEnv.mapCrossAAPass.enabled=val===1;
                 
         if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=1;
         //this.pxlEnv.pxlRenderSettings.mult=1;
@@ -354,7 +355,7 @@ export class QualityController{
           this.pxlEnv.userScreenIntensity.y =  0 ;
         }
         if(this.pxlEnv.geoList['HDRView']){
-            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
+            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val===0 ? .7 : .3;
         }
         this.settings[component]=val;
         break;
@@ -370,7 +371,7 @@ export class QualityController{
           this.pxlEnv.userScreenIntensity.y = val ? 0 : .8;
         }
         if(this.pxlEnv.geoList['HDRView']){
-            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val==0 ? .7 : .3;
+            this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val===0 ? .7 : .3;
         }
         
         if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled=val;  
@@ -395,121 +396,117 @@ export class QualityController{
     }
   }
   setDependentSettings(){
-    let multVal=1;
     let portalIntensity=1;
-        let circleGateBloom=0;
-        let circleGateColor=.6;
+    let circleGateBloom=0;
+    let circleGateColor=.6;
+
+    let mapMotionBlurPassEnabled = false;
+    let mapOverlayHeavyPassEnabled = false;
+    let mapOverlayPassEnabled = false;
+    let mapOverlaySlimPassEnabled = false;
+              
+    let mapBoxAAPassEnabled = false;
+    let mapCrossAAPassEnabled = false;
+
+    if( this.settings.fog===2 ){
+      mapMotionBlurPassEnabled =false;  
+      mapOverlayHeavyPassEnabled = true;
+      mapOverlayPassEnabled = false;
+      mapOverlaySlimPassEnabled = false;
+
+      mapBoxAAPassEnabled = true;
+      mapCrossAAPassEnabled = false;
+      portalIntensity=.5;
+                
+      /*if( this.pxlEnv.geoList['skySemiSphere'] ){
+          this.pxlEnv.geoList["skySemiSphere"].material.uniforms.fogIntensity.value=1; // Post Process Fog
+      }*/
+                
+    }else if( this.settings.fog===1 ){
+      mapMotionBlurPassEnabled = false;  
+      mapOverlayHeavyPassEnabled = false;
+      mapOverlayPassEnabled = true;
+      mapOverlaySlimPassEnabled = false;
+                
+      mapBoxAAPassEnabled = false;
+      mapCrossAAPassEnabled = true;
+      portalIntensity=.5;
+    }else{
+      mapMotionBlurPassEnabled = false;
+      mapOverlayPassEnabled = false;
+      mapOverlaySlimPassEnabled = true;
+                
+      mapBoxAAPassEnabled = false;
+      mapCrossAAPassEnabled = false;
+      portalIntensity=.4;
+    }
+
+
+    if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled = mapMotionBlurPassEnabled;
+    if( mapOverlayHeavyPassEnabled ) this.pxlEnv.mapOverlayHeavyPass.enabled = mapOverlayHeavyPassEnabled;
+    if( mapOverlayPassEnabled ) this.pxlEnv.mapOverlayPass.enabled = mapOverlayPassEnabled;
+    if( mapOverlaySlimPassEnabled ) this.pxlEnv.mapOverlaySlimPass.enabled = mapOverlaySlimPassEnabled;
+              
+    if( mapBoxAAPassEnabled ) this.pxlEnv.mapBoxAAPass.enabled = mapBoxAAPassEnabled;
+    if( mapCrossAAPassEnabled ) this.pxlEnv.mapCrossAAPass.enabled = mapCrossAAPassEnabled;
+
+
     
-        let mapMotionBlurPassEnabled = false;
-        let mapOverlayHeavyPassEnabled = false;
-        let mapOverlayPassEnabled = false;
-        let mapOverlaySlimPassEnabled = false;
-                  
-        let mapBoxAAPassEnabled = false;
-        let mapCrossAAPassEnabled = false;
+    if( this.settings.bloom ){
+      if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=true;  
 
-        if( this.settings.fog==2 ){
-          mapMotionBlurPassEnabled =false;  
-          mapOverlayHeavyPassEnabled = true;
-          mapOverlayPassEnabled = false;
-          mapOverlaySlimPassEnabled = false;
+      if( this.pxlEnv.roomBloomPass) this.pxlEnv.roomBloomPass.enabled=true;  
 
-          mapBoxAAPassEnabled = true;
-          mapCrossAAPassEnabled = false;
-          multVal=1.00;
-          portalIntensity=.5;
-                    
-          /*if( this.pxlEnv.geoList['skySemiSphere'] ){
-              this.pxlEnv.geoList["skySemiSphere"].material.uniforms.fogIntensity.value=1; // Post Process Fog
-          }*/
-                    
-        }else if( this.settings.fog==1 ){
-          mapMotionBlurPassEnabled = false;  
-          mapOverlayHeavyPassEnabled = false;
-          mapOverlayPassEnabled = true;
-          mapOverlaySlimPassEnabled = false;
-                    
-          mapBoxAAPassEnabled = false;
-          mapCrossAAPassEnabled = true;
-          multVal=1.15;
-          portalIntensity=.5;
-        }else{
-          mapMotionBlurPassEnabled = false;
-          mapOverlayPassEnabled = false;
-          mapOverlaySlimPassEnabled = true;
-                    
-          mapBoxAAPassEnabled = false;
-          mapCrossAAPassEnabled = false;
-          multVal=1.;
-          portalIntensity=.4;
-        }
+      if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=true;  
 
-
-        if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled = mapMotionBlurPassEnabled;
-        if( mapOverlayHeavyPassEnabled ) this.pxlEnv.mapOverlayHeavyPass.enabled = mapOverlayHeavyPassEnabled;
-        if( mapOverlayPassEnabled ) this.pxlEnv.mapOverlayPass.enabled = mapOverlayPassEnabled;
-        if( mapOverlaySlimPassEnabled ) this.pxlEnv.mapOverlaySlimPass.enabled = mapOverlaySlimPassEnabled;
-                  
-        if( mapBoxAAPassEnabled ) this.pxlEnv.mapBoxAAPass.enabled = mapBoxAAPassEnabled;
-        if( mapCrossAAPassEnabled ) this.pxlEnv.mapCrossAAPass.enabled = mapCrossAAPassEnabled;
-
-
-        
-        if( this.settings.bloom ){
-          if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=true;  
-
-          if( this.pxlEnv.roomBloomPass) this.pxlEnv.roomBloomPass.enabled=true;  
-
-          if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=true;  
-
-          this.pxlEnv.userScreenIntensity.x=.65;
-          this.pxlEnv.userScreenIntensity.y=0;
-                    circleGateBloom=1;
-                    circleGateColor=.25;
-        }else{
-          if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=false;
-          if( this.pxlEnv.roomBloomPass ) this.pxlEnv.roomBloomPass.enabled=false;
-          if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=false;
-          
-          if( this.pxlEnv?.mapComposerGlow?.renderTarget2 ){
-            this.pxlEnv.engine.setRenderTarget(this.pxlEnv.mapComposerGlow.renderTarget2);
-            this.pxlEnv.engine.clear();
-          }
-          if( this.pxlEnv?.roomGlowPass?.renderTarget2 ){
-            this.pxlEnv.engine.setRenderTarget(this.pxlEnv.roomGlowPass.renderTarget2);
-            this.pxlEnv.engine.clear();
-          }
-          
-          this.pxlEnv.engine.setRenderTarget(null);
-                    
-          this.pxlEnv.userScreenIntensity.x=.8;
-          this.pxlEnv.userScreenIntensity.y=0;
-                    
-          //multVal=1.0;
-          portalIntensity=1;
-                    circleGateBloom=0;
-                    circleGateColor=.5;
-        }
-                let cGate=this.pxlEnv.geoList['Circular_Gate'];
-        if( cGate ){
-                    cGate.material.uniforms.bloomBoost.value=circleGateBloom;
-                }
+      this.pxlEnv.userScreenIntensity.x=.65;
+      this.pxlEnv.userScreenIntensity.y=0;
+      circleGateBloom=1;
+      circleGateColor=.25;
+    }else{
+      if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=false;
+      if( this.pxlEnv.roomBloomPass ) this.pxlEnv.roomBloomPass.enabled=false;
+      if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=false;
+      
+      if( this.pxlEnv?.mapComposerGlow?.renderTarget2 ){
+        this.pxlEnv.engine.setRenderTarget(this.pxlEnv.mapComposerGlow.renderTarget2);
+        this.pxlEnv.engine.clear();
+      }
+      if( this.pxlEnv?.roomGlowPass?.renderTarget2 ){
+        this.pxlEnv.engine.setRenderTarget(this.pxlEnv.roomGlowPass.renderTarget2);
+        this.pxlEnv.engine.clear();
+      }
+      
+      this.pxlEnv.engine.setRenderTarget(null);
                 
-                if( this.pxlEnv.geoList['HDRView'] ){
-                    this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value= this.settings.bloom ? .3 : .7;
-                }
+      this.pxlEnv.userScreenIntensity.x=.8;
+      this.pxlEnv.userScreenIntensity.y=0;
                 
-                let cVid=this.pxlEnv.geoList['CirculateGateVideoSphere'];
-        if( cVid ){
-                    cVid.material.color.r=circleGateColor;
-                    cVid.material.color.g=circleGateColor;
-                    cVid.material.color.b=circleGateColor;
-                }
-                
-        if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=portalIntensity;
-        //this.pxlEnv.pxlRenderSettings.mult=multVal;
-        this.pxlEnv.pxlCamera.colliderCurObjHit=null;
-        //this.pxlEnv.setExposure(multVal);
+      portalIntensity=1;
+      circleGateBloom=0;
+      circleGateColor=.5;
+    }
+
+    let cGate=this.pxlEnv.geoList['Circular_Gate'];
+    if( cGate ){
+      cGate.material.uniforms.bloomBoost.value=circleGateBloom;
+    }
+    
+    if( this.pxlEnv.geoList['HDRView'] ){
+      this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value= this.settings.bloom ? .3 : .7;
+    }
+    
+    let cVid=this.pxlEnv.geoList['CirculateGateVideoSphere'];
+    if( cVid ){
+      cVid.material.color.r=circleGateColor;
+      cVid.material.color.g=circleGateColor;
+      cVid.material.color.b=circleGateColor;
+    }
+            
+    if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=portalIntensity;
+    //this.pxlEnv.pxlRenderSettings.mult=multVal;
+    this.pxlEnv.pxlCamera.colliderCurObjHit=null;
+    //this.pxlEnv.setExposure(multVal);
   }
   
 };

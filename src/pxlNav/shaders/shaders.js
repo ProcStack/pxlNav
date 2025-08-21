@@ -25,7 +25,7 @@ import * as particles from '../effects/particles/shaders.js';
 import * as rendering from './rendering.js';
 import * as scene from './scene.js';
 
-export var pxlShaders={
+export const pxlShaders={
   'animated':animated,
   'core':core,
   'objects':objects,

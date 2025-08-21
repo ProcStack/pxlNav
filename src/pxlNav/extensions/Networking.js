@@ -12,8 +12,26 @@
 
 import { ExtensionBase } from "./ExtensionBase.js";
 
+// IO Dummy Class
+class io {
+  constructor(url, options) {
+    this.url = url;
+    this.options = options;
+  }
+
+  on(event, callback) {
+    // Dummy implementation
+  }
+
+  emit(event, data) {
+    // Dummy implementation
+  }
+}
+
+
 export default class Networking extends ExtensionBase {
   constructor( socketio ){
+    super("Networking");
     this.status=false;
     // AccessToken is grabbed from OAuth2 authentication of the account.
     this.accessToken = "";
@@ -29,23 +47,23 @@ export default class Networking extends ExtensionBase {
 
     // Use this function to see what messages are recieved when running test events in OBS or Streamlabs or which ever streaming software you use.
     //   Look in the console for the event:##### submessages that come in for specific levels of events.
-    socket.on('event', (data) => {
+    this.socket.on('event', (data) => {
       console.log(data);
       // Structure as on https://github.com/StreamElements/widgets/blob/master/CustomCode.md#on-event
     });
 
     /*
-    socket.on('event:test', (data) => {
+    this.socket.on('event:test', (data) => {
       console.log(data);
       // Structure as on https://github.com/StreamElements/widgets/blob/master/CustomCode.md#on-event
     });
     
-    socket.on('event:update', (data) => {
+    this.socket.on('event:update', (data) => {
       console.log(data);
       // Structure as on https://github.com/StreamElements/widgets/blob/master/CustomCode.md#on-session-update
     });
 
-    socket.on('event:reset', (data) => {
+    this.socket.on('event:reset', (data) => {
       console.log(data);
       // Structure as on https://github.com/StreamElements/widgets/blob/master/CustomCode.md#on-session-update
     });
@@ -54,26 +72,26 @@ export default class Networking extends ExtensionBase {
 
     // Default events --
     // Socket connected
-    socket.on('connect', onConnect);
+    this.socket.on('connect', this.onConnect);
     // Socket unplugged
-    socket.on('disconnect', onDisconnect);
+    this.socket.on('disconnect', this.onDisconnect);
     // Socket is the correct cat in the tubes
-    socket.on('authenticated', onAuthenticated);
+    this.socket.on('authenticated', this.onAuthenticated);
     // We don't accept dogs here sir
-    socket.on('unauthorized', console.error);
+    this.socket.on('unauthorized', console.error);
 
   }
 
   onConnect() {
     console.log('Successfully connected to the websocket');
-    //socket.emit('authenticate', {method: 'oauth2', token: this.accessToken});
-    socket.emit('authenticate', {method: 'jwt', token: this.jwtToken});
+    //this.socket.emit('authenticate', {method: 'oauth2', token: this.accessToken});
+    this.socket.emit('authenticate', {method: 'jwt', token: this.jwtToken});
   }
 
   onDisconnect() {
     console.log('Disconnected from websocket');
     this.status = false;
-    onConnect()
+    this.onConnect()
   }
 
   onAuthenticated(data) {

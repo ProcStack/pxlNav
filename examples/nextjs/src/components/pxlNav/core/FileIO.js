@@ -308,7 +308,7 @@ export class FileIO{
 
 
   checkForColorSpace( curEnv, curObject ){
-    if( curObject.type != "Mesh" ){
+    if( curObject.type !== "Mesh" ){
       return;
     }
     return;

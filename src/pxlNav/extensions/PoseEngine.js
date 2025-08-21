@@ -2,7 +2,7 @@
 import { ExtensionBase } from './ExtensionBase.js';
 import { MediaPipePoseEngine } from './PoseEngine/MediaPipe.js';
 
-const pxlPoseEngineList = [
+export const pxlPoseEngineList = [
   'MediaPipe'
   /*
   'PoseNet',

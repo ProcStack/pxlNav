@@ -11,7 +11,7 @@
 //
 
 
-import { DEVICE_ACTION, HUD_DRAW, HUD_ELEMENT } from "../core/Enums.js";
+import { DEVICE_ACTION, HUD_ELEMENT } from "../core/Enums.js";
 
 import { ElementBase } from "./elements/elementBase.js";
 import { DragRegion } from "./elements/dragRegion.js";

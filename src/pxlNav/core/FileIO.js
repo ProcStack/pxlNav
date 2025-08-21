@@ -12,35 +12,31 @@ import {
   Color,
   Group,
   Mesh,
-  Points,
-  PointsMaterial,
   Float32BufferAttribute,
   BufferGeometry,
-  BufferAttribute,
   InstancedMesh,
   DoubleSide,
   FrontSide,
   BackSide,
+  SRGBColorSpace,
   DynamicDrawUsage,
   Matrix4,
   Quaternion,
-  Euler,
   Box3,
   ShaderMaterial,
-  LinearSRGBColorSpace,
-  SRGBColorSpace,
-  NoColorSpace,
   LOD,
-  SpotLight
-} from "../../libs/three/three.module.min.js";
+  MeshBasicMaterial,
+  MeshLambertMaterial,
+} from "../../libs/three/index.js";
+import { MeshoptDecoder, GLTFLoader, DRACOLoader, KTX2Loader } from "../../libs/three/index.js";
 import { FBXLoader } from "../../libs/three/FBXLoader.js";
 
-import {MeshoptDecoder} from "../../libs/three/meshopt_decoder.module.js";
-import {GLTFLoader} from "../../libs/three/GLTFLoader.js";
-import {DRACOLoader} from "../../libs/three/DRACOLoader.js";
-import {KTX2Loader} from "../../libs/three/KTX2Loader.js";
-
 import { VERBOSE_LEVEL } from "./Enums.js";
+
+// Separated for debugging  
+function createFBXLoader(manager) {
+  return new FBXLoader(manager);
+}
 
 export class FileIO{
   constructor( folderDict={}){
@@ -76,6 +72,7 @@ export class FileIO{
     this.oneTwoPFour = 1.0/2.4;
     this.twelvePNineTwoDiv = 1.0/12.92;
     this.onePOFiveFiveDiv = 1.0/1.055;
+
   }
   
   setDependencies( pxlNav ){
@@ -214,15 +211,15 @@ export class FileIO{
       if( mesh.userData.hasOwnProperty("receiveShadow") && mesh.userData.receiveShadow ){
         mesh.receiveShadow=true;
       }
-      if( mesh.userData.hasOwnProperty("Shader") && mesh.userData.Shader!="" ){
-        let toShader = mesh.userData.Shader.trim()
+      if( mesh.userData.hasOwnProperty("Shader") && mesh.userData.Shader !== "" ){
+        //let toShader = mesh.userData.Shader.trim()
         if( !envObj.shaderGeoList ) {
           envObj.shaderGeoList={};
         }
         envObj.shaderGeoList[mesh.name]=mesh;
       }
       
-      if( mesh.userData.hasOwnProperty("Emitter") && mesh.userData.Emitter != "" ){
+      if( mesh.userData.hasOwnProperty("Emitter") && mesh.userData.Emitter !== "" ){
         if( !envObj.emitterList ) {
           envObj.emitterList={};
         }
@@ -277,8 +274,9 @@ export class FileIO{
             // Check for child UserData
             let gChildren = g.children
             gChildren.forEach( (c)=>{
+              this.checkForColorSpace( envObj, c );
               this.checkForUserData( envObj, envScene, c )
-              if( c.type == "Group" ){
+              if( c.type === "Group" ){
               // g.add(c);
                 c.position.set( pos.x+c.position.x, pos.y+c.position.y, pos.z+c.position.z )
                 c.rotation.set( rot.x, rot.y, rot.z )
@@ -301,6 +299,30 @@ export class FileIO{
             g.updateMatrix();
             g.visible=false;
             //mesh.add(g);
+          }
+        });
+      }
+    }
+  }
+
+
+
+  checkForColorSpace( curEnv, curObject ){
+    if( curObject.type !== "Mesh" ){
+      return;
+    }
+    return;
+
+    // pxlNav was built using the raw image as is
+    // three introduced color management and automatic sRGB conversion in v153
+    // This will flip
+    if( curEnv.revertColorSpaceList.includes(curObject.name) ){
+      let curMaterial = curObject.material;
+      if( curMaterial && curMaterial.type === "MeshPhongMaterial" ){
+        let mapAttributes = ['map','alphaMap','aoMap','envMap','lightMap','normalMap','specularMap'];
+        mapAttributes.forEach( (attr)=>{
+          if( curMaterial.hasOwnProperty(attr) && curMaterial[attr] ){
+            curMaterial[attr].colorSpace = SRGBColorSpace;
           }
         });
       }
@@ -346,7 +368,7 @@ export class FileIO{
   // -- -- --
   
   canAppendChildren( envObj, mesh ){
-    if( mesh.type != "Group" ){
+    if( mesh.type !== "Group" ){
       return false;
     }
     
@@ -454,15 +476,15 @@ export class FileIO{
     }
 
     if( !(mesh.hasOwnProperty("userData") &&
-     ( mesh.userData.hasOwnProperty("Instance")) ||
-     mesh.userData.hasOwnProperty("MobileInstance") )){
+      (mesh.userData.hasOwnProperty("Instance") ||
+      mesh.userData.hasOwnProperty("MobileInstance"))) ){
       return false;
     }
     if( !envObj.baseInstancesList.hasOwnProperty(mesh.userData.Instance) ){
       this.warn(`Instance '${mesh.userData.Instance}' not found for ${mesh.name}`);
       return false;
     }
-    
+
     let name = mesh.name;
     this.log("Generate Instance - ",name);
     
@@ -509,7 +531,7 @@ export class FileIO{
     // Base variables
 
     let hasLods = false;
-    let hasInstSettings = {};
+    //let hasInstSettings = {};
     let instanceBaseObject = null;
     let foundInstLODLevels = {};
 
@@ -615,7 +637,7 @@ export class FileIO{
             curMesh.userData.MobileInstance : curMesh.userData.Instance;
         let instBase = envObj.baseInstancesList[ instBaseName ];
 
-        if( curMesh.type == "Mesh" ){
+        if( curMesh.type === "Mesh" ){
           let matrix = new Matrix4();
           let position = new Vector3();
           let normal = new Vector3();
@@ -681,6 +703,7 @@ export class FileIO{
             }
           }
           if( instanceMatricies.length > 0 ){
+            
             let instancedMesh = new InstancedMesh(instBase.geometry, instBase.material, instanceMatricies.length);
             instancedMesh.instanceMatrix.setUsage(DynamicDrawUsage);
 
@@ -718,8 +741,9 @@ export class FileIO{
               envObj.geoList['InstanceObjects'][name] = instancedMesh;
               curMesh.parent.add(instancedMesh);
             }
+            
             curMesh.visible = false;
-            curMesh.parent.remove(curMesh);
+            //curMesh.parent.remove(curMesh);
           }
         }else{
           // Clone the base instance; single instance
@@ -834,16 +858,16 @@ pSystemBuild( mesh, envObj ){
 
   try{
     let curMesh = mesh;
-    let curPos = curMesh.position;
-    let curRot = curMesh.rotation;
-    let curScale = curMesh.scale;
+    //let curPos = curMesh.position;
+    //let curRot = curMesh.rotation;
+    //let curScale = curMesh.scale;
 
-    if( curMesh.type == "Mesh" ){
-      let matrix = new Matrix4();
+    if( curMesh.type === "Mesh" ){
+      //let matrix = new Matrix4();
       let position = new Vector3();
-      let normal = new Vector3();
-      let quaternion = new Quaternion();
-      let scale = new Vector3(1, 1, 1);
+      //let normal = new Vector3();
+      //let quaternion = new Quaternion();
+      //let scale = new Vector3(1, 1, 1);
       const hasColor = curMesh.geometry.attributes.hasOwnProperty("color");
       let userDataKeys = Object.keys( curMesh.userData );
       let userDataKeysLower = userDataKeys.map( (c)=> c.toLowerCase() );
@@ -883,14 +907,14 @@ pSystemBuild( mesh, envObj ){
           }
           
           
-          let curInstScale = scale;
+          //let curInstScale = scale;
           if( hasColor ){
             let curScalar = curMesh.geometry.attributes.color.getX(x);
             if( hasFitScale ){
               // Scale the object based on object parameter `minScale` & `maxScale`
               curScalar = minScale + (maxScale - minScale) * curScalar;
             }
-            curInstScale = new Vector3(curScalar, curScalar, curScalar);
+            //curInstScale = new Vector3(curScalar, curScalar, curScalar);
           }
           particlePositions.push( position.x );
           particlePositions.push( position.y );
@@ -935,7 +959,7 @@ pSystemBuild( mesh, envObj ){
         return;
         
         // -- -- --
-
+        /*
         let curGeo = curMesh.geometry;
         let pointMtl = null;
         
@@ -974,7 +998,7 @@ pSystemBuild( mesh, envObj ){
         envObj.materialList[ curMesh.name ] = pointMtl;
 
         console.log( pointMesh)
-
+        */
       }
     }
   }catch(e){
@@ -1001,14 +1025,12 @@ pSystemBuild( mesh, envObj ){
   //          If a material has transparency & reflective settings, should be flagged "glass"  
   //            Even if its not in the "Scene" group.
   loadSceneFBX(objPath, imgPath, transList, verboseLoading,meshKey,addToScene){
-    if(meshKey!=''){ // Prep for IsLoaded checks
+    if(meshKey!==''){ // Prep for IsLoaded checks
       this.pxlEnv.geoLoadListComplete=0;
       this.pxlEnv.geoLoadList[meshKey]=0;
     }
-    let addedGlow=0;
-    let pingCount=0;
     
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
     fbxLoader.load( objPath, (curFbx)=>{
       let groups=curFbx.children;
       let groupTypes={};
@@ -1059,88 +1081,94 @@ pSystemBuild( mesh, envObj ){
           let lowGravMtl=null;
           let lizardKingMtl=null;
           let infinityZoomMtl=null;
-          let starFieldMtl=null;
-          while(ch.length>0){
-            let g=ch.pop();
-            //ch.push(...c.children);
-            if(g.type == "Group"){
-              let curChildren=g.children;
-              curChildren.forEach( (c)=>{
-                if(c.name.includes("Item")){
-                  if( g.name.includes("LowGravity")){
-                    if(lowGravMtl==null){
-                      lowGravMtl=new ShaderMaterial({
-                        uniforms:{
-                          color:{value : c.material.emissive.clone() },
-                          alphaMap:{type:'t',value : c.material.map },
-                          cloudNoise:{type : 't',value : this.pxlEnv.cloud3dTexture},
-                          time:{ value:this.pxlTimer.msRunner },
-                          intensity: {  type:"f", value: 1.5 },
-                          rate: { type:"f", value: this.pxlUser.itemRotateRate }
-                        },
-                        vertexShader:this.pxlShaders.objects.itemVert(),
-                        fragmentShader:this.pxlShaders.objects.itemFrag(),
-                        transparent:true,
-                        side:DoubleSide,
-                        depthTest:true,
-                        depthWrite:false,
-                      });
-                    }
-                    c.material=lowGravMtl;
-                  }else if( g.name.includes("LizardKing") ){
-                    if( lizardKingMtl==null ){
-                      lizardKingMtl= c.material.clone();
-                      lizardKingMtl.emissiveMap=lizardKingMtl.map;
-                      lizardKingMtl.emissive=new Color( 0x808080 );
-                    }
-                    c.material=lizardKingMtl;
-                  }else if( g.name.includes("StarField") ){
-                    //c.material.emissiveMap=c.material.map;
-                    //c.material.emissive=new Color( 0x808080 );
-                  }else if( g.name.includes("InfinityZoom") ){
-                    if(infinityZoomMtl==null){
-                      infinityZoomMtl=new ShaderMaterial({
-                        uniforms:{
-                          color:{value : c.material.map },
-                          cloudNoise:{type : 't',value : this.pxlEnv.cloud3dTexture},
-                          time:{ value:this.pxlTimer.msRunner },
-                          intensity: {  type:"f", value: 1.0 },
-                          rate: { type:"f", value: this.pxlUser.itemRotateRate }
-                        },
-                        vertexShader:this.pxlShaders.core.defaultVert(),
-                        fragmentShader:this.pxlShaders.objects.itemZoomFrag(),
-                        transparent:true,
-                        side:DoubleSide,
-                        depthTest:true,
-                        depthWrite:true,
-                      });
-                    }
-                    c.material=infinityZoomMtl;
-                  }
-                  this.pxlUser.itemList[g.name]=c;
-                }else if(c.name.includes("ItemBase")){
-                  if(baseMtl==null){
-                    baseMtl=new ShaderMaterial({
+          //let starFieldMtl=null;
+          
+          // Process children function to avoid closure issues
+          const processChildren = (curChildren, groupName) => {
+            curChildren.forEach( (c)=>{
+              if(c.name.includes("Item")){
+                if( groupName.includes("LowGravity")){
+                  if(lowGravMtl===null || lowGravMtl===undefined){
+                    lowGravMtl=new ShaderMaterial({
                       uniforms:{
                         color:{value : c.material.emissive.clone() },
                         alphaMap:{type:'t',value : c.material.map },
                         cloudNoise:{type : 't',value : this.pxlEnv.cloud3dTexture},
                         time:{ value:this.pxlTimer.msRunner },
                         intensity: {  type:"f", value: 1.5 },
-                        rate: { type:"f", value: this.pxlUser.itemBaseRotateRate }
+                        rate: { type:"f", value: this.pxlUser.itemRotateRate }
                       },
-                      vertexShader:this.pxlShaders.objects.itemBaseVert(),
-                      fragmentShader:this.pxlShaders.objects.itemBaseFrag(),
+                      vertexShader:this.pxlShaders.objects.itemVert(),
+                      fragmentShader:this.pxlShaders.objects.itemFrag(),
                       transparent:true,
                       side:DoubleSide,
                       depthTest:true,
                       depthWrite:false,
                     });
                   }
-                  c.material=baseMtl;
-                  this.pxlUser.itemBaseList.push(c);
+                  c.material=lowGravMtl;
+                }else if( groupName.includes("LizardKing") ){
+                  if( lizardKingMtl===null || lizardKingMtl===undefined ){
+                    lizardKingMtl= c.material.clone();
+                    lizardKingMtl.emissiveMap=lizardKingMtl.map;
+                    lizardKingMtl.emissive=new Color( 0x808080 );
+                  }
+                  c.material=lizardKingMtl;
+                }else if( groupName.includes("StarField") ){
+                  //c.material.emissiveMap=c.material.map;
+                  //c.material.emissive=new Color( 0x808080 );
+                }else if( groupName.includes("InfinityZoom") ){
+                  if(infinityZoomMtl===null || infinityZoomMtl===undefined){
+                    infinityZoomMtl=new ShaderMaterial({
+                      uniforms:{
+                        color:{value : c.material.map },
+                        cloudNoise:{type : 't',value : this.pxlEnv.cloud3dTexture},
+                        time:{ value:this.pxlTimer.msRunner },
+                        intensity: {  type:"f", value: 1.0 },
+                        rate: { type:"f", value: this.pxlUser.itemRotateRate }
+                      },
+                      vertexShader:this.pxlShaders.core.defaultVert(),
+                      fragmentShader:this.pxlShaders.objects.itemZoomFrag(),
+                      transparent:true,
+                      side:DoubleSide,
+                      depthTest:true,
+                      depthWrite:true,
+                    });
+                  }
+                  c.material=infinityZoomMtl;
                 }
-              });
+                this.pxlUser.itemList[groupName]=c;
+              }else if(c.name.includes("ItemBase")){
+                if(baseMtl===null || baseMtl===undefined){
+                  baseMtl=new ShaderMaterial({
+                    uniforms:{
+                      color:{value : c.material.emissive.clone() },
+                      alphaMap:{type:'t',value : c.material.map },
+                      cloudNoise:{type : 't',value : this.pxlEnv.cloud3dTexture},
+                      time:{ value:this.pxlTimer.msRunner },
+                      intensity: {  type:"f", value: 1.5 },
+                      rate: { type:"f", value: this.pxlUser.itemBaseRotateRate }
+                    },
+                    vertexShader:this.pxlShaders.objects.itemBaseVert(),
+                    fragmentShader:this.pxlShaders.objects.itemBaseFrag(),
+                    transparent:true,
+                    side:DoubleSide,
+                    depthTest:true,
+                    depthWrite:false,
+                  });
+                }
+                c.material=baseMtl;
+                this.pxlUser.itemBaseList.push(c);
+              }
+            });
+          };
+          
+          while(ch.length>0){
+            let g=ch.pop();
+            //ch.push(...c.children);
+            if(g.type === "Group"){
+              let curChildren=g.children;
+              processChildren(curChildren, g.name);
               
               addToScene[0].add(g);
               this.pxlUser.itemGroupList[g.name]=g;
@@ -1150,14 +1178,14 @@ pSystemBuild( mesh, envObj ){
         }
       });
       
-      if(meshKey!=''){
+      if(meshKey!==''){
         this.pxlEnv.geoList[meshKey]=curFbx;
         this.pxlEnv.geoLoadList[meshKey]=1;
       }
       this.pxlEnv.geoLoadList[meshKey]=1;
 
     }, undefined, (err)=>{
-      if(meshKey!=''){
+      if(meshKey!==''){
         this.pxlEnv.geoLoadList[meshKey]=1;
       }
     });
@@ -1189,24 +1217,25 @@ pSystemBuild( mesh, envObj ){
     this.setLogging( curSettings.enableLogging );
 
     // Verify File Path
-    if( curSettings.filePath == '' ){
+    if( (curSettings.filePath === null || curSettings.filePath === "") 
+        && roomObj.hasOwnProperty("sceneFile") ){
       curSettings.filePath = roomObj.sceneFile;
     }
     // If no file path is provided, warn and return
-    if( curSettings.filePath == null || curSettings.filePath == "" ){
+    if( curSettings.filePath === null || curSettings.filePath === "" ){
       this.warn("No Path Provided for Environment Load");
       curSettings.filePath = null;
       return curSettings;
     }
 
     // Read File Type
-    if( curSettings.fileType == this.pxlEnums.FILE_TYPE.AUTO || typeof curSettings.fileType != "number" ){
+    if( curSettings.fileType === this.pxlEnums.FILE_TYPE.AUTO || typeof curSettings.fileType !== "number" ){
       let fileType = curSettings.filePath.split('.').pop().toLowerCase();
-      if( fileType == "fbx" ){
+      if( fileType === "fbx" ){
         curSettings.fileType = this.pxlEnums.FILE_TYPE.FBX;
-      }else if( fileType == "glb" ){
+      }else if( fileType === "glb" ){
         curSettings.fileType = this.pxlEnums.FILE_TYPE.GLB;
-      }else if( fileType == "gltf" ){
+      }else if( fileType === "gltf" ){
         curSettings.fileType = this.pxlEnums.FILE_TYPE.GLTF;
       }
     }
@@ -1214,7 +1243,7 @@ pSystemBuild( mesh, envObj ){
 
     // Set "Loader" mesh key, the key used to monitor the loading status of the current file
     //   This is only used during the loading process and is not used for any other purpose
-    if( curSettings.meshKey == '' ){
+    if( curSettings.meshKey === '' ){
       curSettings.meshKey = roomObj.getName();
     }
 
@@ -1235,13 +1264,13 @@ pSystemBuild( mesh, envObj ){
   loadPath( envObj, filePath = null, settingsObj={} ){
     // Verify settings
     let curSettings = Object.assign( this.getSettings(), settingsObj );
-    if( filePath != null && filePath != "" ){
+    if( filePath !== null && filePath !== "" ){
       curSettings.filePath = filePath;
     }
 
     // Parse settings
     curSettings = this.readSettings( envObj, curSettings );
-    if( curSettings.filePath == null ){
+    if( curSettings.filePath === null || curSettings.filePath === "" ){
       return;
     }
 
@@ -1254,7 +1283,7 @@ pSystemBuild( mesh, envObj ){
   loadRoom( envObj, settingsObj = {} ){
     // Parse settings
     let curSettings = this.readSettings( envObj, settingsObj );
-    if( curSettings.filePath == null ){
+    if( curSettings.filePath === null || curSettings.filePath === "" ){
       return;
     }
 
@@ -1262,9 +1291,9 @@ pSystemBuild( mesh, envObj ){
     let fileType = curSettings.fileType;
 
     // Check File Type
-    if( fileType == this.pxlEnums.FILE_TYPE.FBX ){
+    if( fileType === this.pxlEnums.FILE_TYPE.FBX ){
       this.loadRoomFBX( envObj, curSettings );
-    }else if( fileType == this.pxlEnums.FILE_TYPE.GLB || fileType == this.pxlEnums.FILE_TYPE.GLTF ){
+    }else if( fileType === this.pxlEnums.FILE_TYPE.GLB || fileType === this.pxlEnums.FILE_TYPE.GLTF ){
       this.loadRoomGLTF( envObj, curSettings );
     }
   }
@@ -1315,7 +1344,7 @@ pSystemBuild( mesh, envObj ){
 
     // TODO : Do new FBXLoader objects really need to be created?
     //          Sounds like the potential for a memory leak if not handled correctly
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
 
     this.loadRoomFile( fbxLoader, envObj, settingsObj );
   }
@@ -1348,7 +1377,7 @@ pSystemBuild( mesh, envObj ){
       //envScene.add(curFbx);
       let groups=curScene.children;
 
-      if( groups.length == 1 ){
+      if( groups.length === 1 ){
         let curGroup = groups[0];
         let isMainScene = curGroup.name.toLowerCase().includes("scene");
         if( !isMainScene ){
@@ -1366,7 +1395,7 @@ pSystemBuild( mesh, envObj ){
       });
 
       // Verbose Logging Step Count
-      let count=0;
+      //let count=0;
       /* - Used as -
         count++;
         this.log("Step Count - ",count);
@@ -1383,13 +1412,11 @@ pSystemBuild( mesh, envObj ){
           envObj.defaultCamLocation = defaultCamLocation;
         }
 
-        let rootCamObjects = false;
         let checkGroups = groups[groupTypes['camera']].children;
         checkGroups.forEach( (c,x)=>{
           let curName = c.name.toLowerCase();
           if( curName.includes("position") || curName.includes("lookat") || curName.includes("returnposition") || curName.includes("returnlookat") ){
             ch.push(c);
-            rootCamObjects=true;
           }else{
             if( c.children.length > 0 ){
               ch.push(...c.children);
@@ -1401,7 +1428,7 @@ pSystemBuild( mesh, envObj ){
         ch.forEach( (c,x)=>{
           c.matrixAutoUpdate=false;
           let parentName = c.parent.name.toLowerCase();
-          if( parentName == groups[groupTypes['camera']].name.toLowerCase() ){
+          if( parentName === groups[groupTypes['camera']].name.toLowerCase() ){
             parentName = "default";
           }
           
@@ -1465,7 +1492,7 @@ pSystemBuild( mesh, envObj ){
         while(ch.length>0){
           let g=ch.pop();
           //ch.push(...c.children);
-          if(g.type == "Group"){
+          if(g.type === "Group"){
             let autoPathDict={};
             let curChildren=g.children;
             curChildren.forEach( (c)=>{
@@ -1481,7 +1508,7 @@ pSystemBuild( mesh, envObj ){
       }
 
       // @ Loaded Scene File - Environment Group; 'Instances'
-      if(groupNames.indexOf('instances')>-1 && this.pxlQuality.detailLimit == 0){
+      if(groupNames.indexOf('instances')>-1 && this.pxlQuality.detailLimit === 0){
         let ch=[...groups[groupTypes['instances']].children];
         this.log("Instances - ",groups[groupTypes['instances']]);
         
@@ -1492,8 +1519,9 @@ pSystemBuild( mesh, envObj ){
           if( !envObj.hasOwnProperty("baseInstancesList") ){
             envObj.baseInstancesList = {};
           }
-          let chList = []
+
           ch.forEach( (c,x)=>{
+            this.checkForColorSpace( envObj, c );
             this.checkForUserData( envObj, envScene, c );
 
             if( materialList.hasOwnProperty( c.name ) ){
@@ -1516,17 +1544,7 @@ pSystemBuild( mesh, envObj ){
                 }
               }
               c.matrixAutoUpdate=false;
-            }else{
-              if( c.material.map && !c.material.emissiveMap && c.material.color.r>0 ){
-                let curMap = c.material.map;
-                c.material.emissiveMap=curMap;
-                c.material.emissiveIntensity=c.material.color.r*.4;
-                c.material.emissive= c.material.color.clone();
-                
-              }
-              
             }
-
 
             envObj.baseInstancesNames.push( c );
             envObj.baseInstancesList[c.name]=c;
@@ -1552,15 +1570,15 @@ pSystemBuild( mesh, envObj ){
                 envObj.geoList['lights']=[];
             }
 
-            if( c.type == "PointLight" ){
+            if( c.type === "PointLight" ){
 
-              let lightTypeSplit = c.name.split("_");
-              let lightType = lightTypeSplit[0];
+              //let lightTypeSplit = c.name.split("_");
+              //let lightType = lightTypeSplit[0];
 
               /*
               // Still working out the kinks for Spot Lights
               //
-              if( lightType.toLowerCase() == "spot" ){
+              if( lightType.toLowerCase() === "spot" ){
                 try{
                 // Spot Light --
 
@@ -1609,7 +1627,7 @@ pSystemBuild( mesh, envObj ){
 
                 c.decay = Math.max( 1.1, Math.min( 3.0, c.intensity ));
                 //c.decay = 2;
-                c.distance = c.distance == 0 ?  1000 * c.intensity : c.distance;
+                c.distance = c.distance === 0 ?  1000 * c.intensity : c.distance;
               //}
             }
 
@@ -1637,7 +1655,6 @@ pSystemBuild( mesh, envObj ){
         let ch = [...groups[groupId].children];
         this.log("MainScene - ",groups[groupId]);
 
-        let curObjId = -1;
         while(ch.length>0){
           //curObjId++;
           
@@ -1649,10 +1666,11 @@ pSystemBuild( mesh, envObj ){
           
           this.log( `Cur Object - ${c.name}` );
           this.debug( c );
+          this.checkForColorSpace( envObj, c );
           this.checkForUserData( envObj, envScene, c );
 
           if(c.isMesh){
-            if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show == 0) ){
+            if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show === 0) ){
               c.visible = false;
             }
             
@@ -1727,7 +1745,7 @@ pSystemBuild( mesh, envObj ){
                 envObj.lightList[ c.type ] = [];
               }
               envObj.lightList[ c.type ].push( c );
-            }else if( c.type == "Group" ){
+            }else if( c.type === "Group" ){
               let addChildren = true;
               
               if(c.userData.hasOwnProperty("scripted") || c.userData.hasOwnProperty("Scripted") ){
@@ -1764,6 +1782,7 @@ pSystemBuild( mesh, envObj ){
                 ch.push(...c.children);
                 if(c.isMesh){
             
+                    this.checkForColorSpace( envObj, c );
                     this.checkForUserData( envObj, envScene, c );
           
                     let cBackMat=c.material.clone();
@@ -1831,19 +1850,19 @@ pSystemBuild( mesh, envObj ){
             if(child.isMesh){
               child.visible=false;
 
-              if( pName == "colliderwalls"){ // Movement limiting walls
+              if( pName === "colliderwalls"){ // Movement limiting walls
                 envObj.antiColliderActive=true;
                 envObj.antiColliderList.push( child );
 
               // TODO : ColliderTops are implemented in `Ground` colliders to a degree.
               //          Full removal of the `ColliderTops` collider group is pending
-              }else if( pName == "collidertops"){ // Top surface of wall, standable top
+              }else if( pName === "collidertops"){ // Top surface of wall, standable top
                 envObj.antiColliderTopActive=true;
                 envObj.antiColliderTopList.push( child );
 
               }else{ // `Ground`, `RoomWarp`, & All Other Colliders
 
-                if( pName == "roomwarpzone"){
+                if( pName === "roomwarpzone"){
                   envObj.hasRoomWarp=true;
                   envObj.roomWarp.push(child);
                 }
@@ -1899,6 +1918,7 @@ pSystemBuild( mesh, envObj ){
           ch.push(...c.children);
           if(c.isMesh){
             
+            this.checkForColorSpace( envObj, c );
             this.checkForUserData( envObj, envScene, c );
           
             let mtl=new MeshBasicMaterial({
@@ -1929,6 +1949,7 @@ pSystemBuild( mesh, envObj ){
           ch.push(...c.children);
           if(c.isMesh){
             
+            this.checkForColorSpace( envObj, c );
             this.checkForUserData( envObj, envScene, c );
           
             let mtl=new MeshLambertMaterial();
@@ -1936,12 +1957,12 @@ pSystemBuild( mesh, envObj ){
               let mtlMap=c.material.map.clone();
               mtl.map=mtlMap;
               //mtl.color=new Color( 0x888888 );
-              mtl.emissiveMap=mtlMap;
-              mtl.emissiveIntensity=.5;
+              //mtl.emissiveMap=mtlMap;
+              //mtl.emissiveIntensity=.5;
               c.material=mtl;
             }else{
               mtl.color=c.material.color.clone();
-              mtl.emissive=c.material.emissive.clone();
+              //mtl.emissive=c.material.emissive.clone();
               //mtl.side=DoubleSide;
               mtl.side=FrontSide;
               mtl.flatShading=true;
@@ -2025,6 +2046,7 @@ pSystemBuild( mesh, envObj ){
           ch.push(...c.children);
           if(c.isMesh){
             
+            this.checkForColorSpace( envObj, c );
             this.checkForUserData( envObj, envScene, c );
           
             let uValues={
@@ -2073,6 +2095,7 @@ pSystemBuild( mesh, envObj ){
           ch.push(...c.children);
           if(c.isMesh){
             
+            this.checkForColorSpace( envObj, c );
             this.checkForUserData( envObj, envScene, c );
           
             let name=c.name;
@@ -2178,7 +2201,7 @@ pSystemBuild( mesh, envObj ){
           let g=ch.pop();
           //ch.push(...c.children);
           // ## Set up Environment Assets for Item List
-          if(g.type == "Group"){
+          if(g.type === "Group"){
             let curChildren=g.children;
             if( curChildren.length > 0 ){
               curChildren.forEach( (c)=>{
@@ -2275,7 +2298,7 @@ pSystemBuild( mesh, envObj ){
               envObj.objectClickable.push(child);
               envScene.add(child);
               
-              if(pName=="Hover"){
+              if(pName==="Hover"){
                 child.visible=false;
               }
             }
@@ -2304,7 +2327,7 @@ pSystemBuild( mesh, envObj ){
       if( settingsObj.hasOwnProperty("onError") ){
         settingsObj.onError(err);
       }else{
-        if(meshKey!=''){
+        if(meshKey!==''){
           this.pxlEnv.geoLoadList[meshKey]=1;
         }
         this.log("Error Loading FBX");
@@ -2319,18 +2342,17 @@ pSystemBuild( mesh, envObj ){
 
 
   loadAnimFBX( envObj, meshKey, rigPath, animPath, stateConnections ){
-    if(meshKey==''){ // Prep for IsLoaded checks
+    if(meshKey===''){ // Prep for IsLoaded checks
         meshKey = envObj.getName();
     }
     this.pxlEnv.geoLoadListComplete=0;
     this.pxlEnv.geoLoadList[meshKey]=0;
 
-    let addedGlow=0;
     let envScene = envObj.scene;
     let materialList = envObj.materialList ;
     // TODO : Do new FBXLoader objects really need to be created?
     //          Sounds like the potential for a memory leak if not handled correctly
-    var fbxLoader=new FBXLoader();
+    var fbxLoader = createFBXLoader();
     fbxLoader.load( rigPath, (curFbx)=>{
 
       let groups=curFbx.children;
@@ -2340,6 +2362,7 @@ pSystemBuild( mesh, envObj ){
       groups.forEach((c,x)=>{ let curName=c.name.split("_")[0]; groupNames.push(curName); groupTypes[curName]=x; });
 
       curFbx.traverse((c)=>{
+        this.checkForColorSpace( envObj, c );
         this.checkForUserData( envObj, envScene, c );
 
         if( c.isMesh ){
@@ -2397,14 +2420,14 @@ pSystemBuild( mesh, envObj ){
       envScene.add(curFbx);
       curFbx.frustumCulled = false;
 
-      var animLoader = new FBXLoader();
+      var animLoader = createFBXLoader();
       let promisList = [];
       let animKeys = Object.keys( animPath );
       animKeys.forEach( (animKey)=>{
         let curAnimPath = animPath[animKey];
         let animPromise = new Promise((resolve, reject) => {
           animLoader.load( curAnimPath, (animFbx)=>{
-            if( animFbx.animations.length == 0 ){
+            if( animFbx.animations.length === 0 ){
               this.log("No animations found in file", curAnimPath);
               this.log(animFbx);
               resolve();
@@ -2445,9 +2468,10 @@ pSystemBuild( mesh, envObj ){
           this.log("Error Entry- '"+runner+"'");
         }
         
+        this.checkForColorSpace( envObj, c );
         this.checkForUserData( envObj, envScene, c );
         if(c.isMesh){
-          if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show == 0) ){
+          if( c.userData.hasOwnProperty("Show") && (!c.userData.Show || c.userData.Show === 0) ){
             c.visible = false;
           }
           
@@ -2487,10 +2511,10 @@ pSystemBuild( mesh, envObj ){
           c.matrixAutoUpdate=true;
           //envScene.add(c);
             
-        }else if( c.type == "Group" ){
+        }else if( c.type === "Group" ){
           groups.push( ...c.children );
           c.frustumCulled = false;
-        }else if(  c.type == "Bone" ){
+        }else if(  c.type === "Bone" ){
           
           c.frustumCulled = false;
           groups.push( ...c.children );
@@ -2504,7 +2528,7 @@ pSystemBuild( mesh, envObj ){
       envObj.animPostLoad(meshKey);
       */
     }, null, (err)=>{
-      if(meshKey!=''){
+      if(meshKey!==''){
         this.pxlEnv.geoLoadList[meshKey]=1;
       }
     });
@@ -2523,7 +2547,7 @@ pSystemBuild( mesh, envObj ){
       diffuse:{type:"t",value:null},
       time:{ value:this.pxlTimer.msRunner }
     };
-    if(customUniforms!=null){
+    if(customUniforms!==null){
       uniforms=Object.assign({},uniforms,customUniforms);
     }
     
@@ -2550,7 +2574,7 @@ pSystemBuild( mesh, envObj ){
     var removedCount=0;
     var children=curObj.children;
     for(var x=0; x<children.length; ++x){
-      if(children[x].type == "Group"){
+      if(children[x].type === "Group"){
         curObj.remove(children[x]);
         removedCount++;
       }
@@ -2562,7 +2586,7 @@ pSystemBuild( mesh, envObj ){
     var ret=null;
     var children=curObj.children;
     for(var x=0; x<children.length; ++x){
-      if(children[x].type == "Mesh"){
+      if(children[x].type === "Mesh"){
         ret=children[x];
         break;
       }
@@ -2578,9 +2602,6 @@ pSystemBuild( mesh, envObj ){
       var max=objBBox.max;
       var objCentroid=new Vector3().addVectors(max,min).multiplyScalar(.5);
       curObj.userData={'bbox':objBBox, 'centroid':objCentroid};
-      if(mapBookHelper != null){
-        mapBookHelper.update();
-      }
     }catch(err){
       if(this.verbose >= VERBOSE_LEVEL.ERROR){
         console.log("- - - - - - - - ERROR - - - - - - - -");
@@ -2608,7 +2629,13 @@ pSystemBuild( mesh, envObj ){
     
     
     xmlHttp(){
-        return window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        if( typeof window !== "undefined" && window.XMLHttpRequest ){
+            return new XMLHttpRequest();
+        }else if( typeof window !== "undefined" && typeof window.ActiveXObject !== "undefined" ){
+            return new window.ActiveXObject("Microsoft.XMLHTTP");
+        }else{
+            throw new Error("No supported XMLHttpRequest implementation found.");
+        }
     }
     
   // ## Added for Google Drive doc reading
@@ -2616,15 +2643,21 @@ pSystemBuild( mesh, envObj ){
   static getURLContent(url){
     return new Promise( (resolve, reject)=>{
             //let xhrRequest= this.xmlHttp();
-            let xhrRequest= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+            let xhrRequest = null;
+
+        if( typeof window !== "undefined" && window.XMLHttpRequest ){
+            xhrRequest = new XMLHttpRequest();
+        }else if( typeof window !== "undefined" && typeof window.ActiveXObject !== "undefined" ){
+            xhrRequest = new window.ActiveXObject("Microsoft.XMLHTTP");
+        }
       /*xhrRequest.onreadystatechange=(e)=>{
-        if(xhrRequest.readyState==4 && xhrRequest.status==200){
+        if(xhrRequest.readyState===4 && xhrRequest.status===200){
           return xhrRequest.responceText;
         }
       };*/
       xhrRequest.open("GET",url);//,false);
       xhrRequest.onload=(e)=>{
-        if(xhrRequest.readyState==4 && ( xhrRequest.status>=200 && xhrRequest.status<300 ) ){
+        if(xhrRequest.readyState===4 && ( xhrRequest.status>=200 && xhrRequest.status<300 ) ){
           resolve(xhrRequest.response);
         }else{
           resolve(xhrRequest.statusText);
@@ -2642,7 +2675,7 @@ pSystemBuild( mesh, envObj ){
     }
         let xhrRequest= this.xmlHttp();
     xhrRequest.onreadystatechange=function(){
-      if (this.readyState == 4 && this.status == 200) {
+      if (this.readyState === 4 && this.status === 200) {
         if( callback && typeof( callback ) === 'function' ){
           callback( xhrRequest.responseText );
         }
@@ -2672,7 +2705,7 @@ pSystemBuild( mesh, envObj ){
             xhrRequest.send();
 
             xhrRequest.onreadystatechange=function(){
-                if( this.readyState == this.DONE ){
+                if( this.readyState === this.DONE ){
                     resolve( this.status<400 );
                 }
             }
@@ -2707,7 +2740,7 @@ pSystemBuild( mesh, envObj ){
 
                 worker.postMessage( { type: "urlExists", data: url } );
             }else{
-                let resp= this.urlExistsFallback( url ).then( (resp)=>{
+                this.urlExistsFallback( url ).then( (resp)=>{
                     resolve( resp );
                 });
             }

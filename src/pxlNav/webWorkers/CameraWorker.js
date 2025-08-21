@@ -1,5 +1,6 @@
+/* eslint-disable */
 //import { Vector2, Vector3, Quaternion, Euler, Raycaster } from  "three";
-importScripts("../../libs/three/three.module.min.js");
+importScripts("../../libs/three/three.min.js");
 
 const stats={
     active:true,
@@ -11,26 +12,28 @@ const stats={
     jumpKey:false,
     keyDownCount: [0,0,0], // Left/Right, Forward/Back, Jump
     lowGrav: 0,
-  gravityActive: false,
-  gravitySourceActive: false,
+    gravityActive: false,
+    gravitySourceActive: false,
     gravityRate: 0,
-  gravityMax: 9.8*3,
-  gravityEaseOutRate: .80,
+    gravityMax: 9.8*3,
+    gravityEaseOutRate: .80,
     jumpStartTime: 0,
     
     cameraJumpActive: false,
     cameraAllowJump: true,
-  cameraJumpHeight: 0,
-  cameraJumpInitImpulse: [2,12], // [ Grav, Low Grav ]
-  cameraJumpImpulse: 0,
-  cameraJumpImpulseEaseOut: .85,
-  cameraMaxJumpHold: [2,7], // Second; [ Grav, Low Grav ]
+    cameraJumpHeight: 0,
+    cameraJumpInitImpulse: [2,12], // [ Grav, Low Grav ]
+    cameraJumpImpulse: 0,
+    cameraJumpImpulseEaseOut: .85,
+    cameraMaxJumpHold: [2,7], // Second; [ Grav, Low Grav ]
     cameraJumpInAir: false,
+      
+    standingHeight: 16,
+    standingHeightGravInfluence: 0,
+    standingMaxGravityOffset: 10, // Usage -  ( standingHeight / standingHeightGravInfluence ) * standingMaxGravityOffset
+    maxStepHeight: 10, // Max distance up or down, like walking up and down stairs.
     
-  standingHeight: 16,
-  standingHeightGravInfluence: 0,
-  standingMaxGravityOffset: 10, // Usage -  ( standingHeight / standingHeightGravInfluence ) * standingMaxGravityOffset
-  maxStepHeight: 10, // Max distance up or down, like walking up and down stairs.
+    objectJumpLock: false,
     
     jumpIter:null,
     fpsCap:null,
@@ -101,7 +104,7 @@ const funcs={
         funcs.setDirKeyDown();
     },
     "setDirKeyDown": ()=>{
-        if(!messageCalls.dirKey.includes(1)){
+        if(!stats.dirKey.includes(1)){ // Changed from messageCalls.dirKey
             stats.dirKeyDown=false;
         }
     },
@@ -195,7 +198,7 @@ const funcs={
         
     if(stats.cameraJumpActive){
       let jumpRate=jumpPerc ;
-      if(jumpRate==1){
+      if(jumpRate===1){
         stats.cameraJumpActive=false;
       }else{
         jumpRate=(1-jumpRate)*(1-jumpRate);
@@ -205,7 +208,7 @@ const funcs={
     }
     stats.cameraJumpImpulse*=(1-jumpPerc);//*.5+.5;
 
-    if( jumpPerc==1 ){
+    if( jumpPerc===1 ){
       stats.cameraJumpActive=false;
     }
   },
@@ -223,7 +226,7 @@ const funcs={
   "killJumpImpulse": ()=>{
     let toImpulse=stats.cameraJumpImpulse * stats.cameraJumpImpulseEaseOut;
     stats.cameraJumpImpulse= toImpulse>.1 ? toImpulse : 0;
-        if( stats.cameraJumpImpulse == 0 ){
+        if( stats.cameraJumpImpulse === 0 ){
             stats.jumpStartTime=0;
         }
   },

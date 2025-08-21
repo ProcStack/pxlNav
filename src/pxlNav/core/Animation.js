@@ -237,6 +237,18 @@ export class Animation{
     return null;
   }
 
+  getFallbackCycle( animName ){
+    if( this.objNames.includes( animName ) ){
+      let clipNames = Object.keys( this.objects[ animName ][ 'clips' ] );
+      if( clipNames.length > 0 ){
+        return clipNames[0]; // Return the first clip as fallback
+      }
+    }else{
+      
+    }
+    return null;
+  }
+
   /**
    * Play a clip on an object
    * @method
@@ -287,7 +299,7 @@ export class Animation{
         clip.setEffectiveWeight( weight );
         if( disableOthers ){
           clipNames.forEach( (clipKey)=>{
-            if( clipKey != clipName ){
+            if( clipKey !== clipName ){
               let nonClip = this.objects[ animName ][ 'clips' ][ clipKey ];
               nonClip.enabled = false;
               nonClip.setEffectiveTimeScale( 1 );

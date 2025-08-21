@@ -8,6 +8,10 @@ export class Video{
     this.pxlGuiDraws=pxlGuiDraws;
     this.pxlEnv=null;
     
+    this.videojs=null; // VideoJS Library
+    this.Hls=null; // HLS.js Library
+    this.IVSPlayer=null; // Amazon IVS Player Library
+
     this.posted=false;
     
     this.djStreamUrl="";//  '.m3u8' url;
@@ -37,7 +41,7 @@ export class Video{
         this.buildPromoVideos();
     }
     buildVideoBlock(){
-    if(this.screenVideoBlock==null){
+    if(this.screenVideoBlock===null){
       let svbObj=document.createElement( "div" );
       svbObj.classList.add( "videoScreenBlockStyle" );
       document.body.appendChild( svbObj );
@@ -222,7 +226,7 @@ export class Video{
     }
     setScreensToStreams( active=0, streamId="dj" ){
         let curTexture = streamId;
-        if( typeof curTexture == "string" ){
+        if( typeof curTexture === "string" ){
             curTexture = this.getTexture( streamId );
             if( !curTexture ){
                 active=0;
@@ -293,7 +297,7 @@ export class Video{
         if( this.videoStreams[ streamId ]['videoTexture'] ){
             this.videoStreams[ streamId ]['videoTexture'].dispose();
             this.videoStreams[ streamId ]['videoTexture'] = null;
-            this.videoStreams[ streamId ]['checkScreens'] = forceValue == null ? true : forceValue ;
+            this.videoStreams[ streamId ]['checkScreens'] = forceValue === null ? true : forceValue ;
         }
     }
     
@@ -301,8 +305,8 @@ export class Video{
         this.setScreensToStreams( 0, streamId );
         this.disposeVideoTexture( streamId, false );
         let curTexture = this.getTexture( streamId );
-        // if( this.videoStreams[ streamId ]['mode'] == 1 ){
-            // curTexture = this.videoStreams[ streamId ]['player'].currentLevel == -1 ? null : curTexture;
+        // if( this.videoStreams[ streamId ]['mode'] === 1 ){
+            // curTexture = this.videoStreams[ streamId ]['player'].currentLevel === -1 ? null : curTexture;
         // }
         
         this.videoStreams[ streamId ]['videoTexture'] = curTexture;
@@ -316,10 +320,10 @@ export class Video{
     // Adapted from packed hls.js npm module
     hlsPreflight(){
         let ms=window.MediaSource || window.WebKitMediaSource;
-        ms = ms && typeof ms.isTypeSupported == "function" && ms.isTypeSupported('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');
+        ms = ms && typeof ms.isTypeSupported === "function" && ms.isTypeSupported('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');
         
         let sb = window.SourceBuffer || window.WebKitSourceBuffer;
-        sb = !sb || sb.prototype && typeof sb.prototype.appendBuffer == "function" && typeof sb.prototype.remove == "function";
+        sb = (!sb || sb.prototype) && typeof sb.prototype.appendBuffer === "function" && typeof sb.prototype.remove === "function";
         return ( ms && sb );
     }
     
@@ -328,7 +332,7 @@ export class Video{
         let djStreamObj=this.videoStreams[ streamId ]['obj'];
           
         if( false && this.hlsPreflight() ){// && !this.pxlEnv.mobile ) {
-            if( typeof videojs != "undefined" ){
+            if( typeof this.videojs != "undefined" ){
                 this.buildVhsPlayer( streamId );
             }else{
                 let videoScriptUrl="https://vjs.zencdn.net/7.5.4/video.min.js";
@@ -337,7 +341,7 @@ export class Video{
                 });
             }
         }else if(false){
-            if( typeof Hls != "undefined" ){
+            if( typeof this.Hls != "undefined" ){
                 this.buildHlsPlayer( streamId );
             }else{
                 let hlsScriptUrl="https://cdn.jsdelivr.net/npm/hls.js@latest";
@@ -348,7 +352,7 @@ export class Video{
         }else if(false && djStreamObj.canPlayType('application/vnd.apple.mpegurl')) {
             this.buildFallbackPlayer( streamId );
         }else{
-            if( typeof IVSPlayer != "undefined" ){
+            if( typeof this.IVSPlayer !== "undefined" ){
                 this.buildIvsPlayer( streamId );
             }else{
                 let ivsScriptUrl="https://player.live-video.net/1.1.2/amazon-ivs-player.min.js";
@@ -360,16 +364,16 @@ export class Video{
     }
     
     buildVhsPlayer( streamId ){
-        if( videojs ) { // Just double checking
+        if( this.videojs ) { // Just double checking
             this.videoStreams[ streamId ]['mode']=1;
             //djStreamObj.volume = 1;
             let djStreamObj=this.videoStreams[ streamId ]['obj'];
             
-            let player = videojs(djStreamObj, { "controls": false, "autoplay": true, "preload": "auto"});
+            let player = this.videojs(djStreamObj, { "controls": false, "autoplay": true, "preload": "auto"});
             
-            videojs.log.level('off');
+            this.videojs.log.level('off');
             //%=
-            videojs.log.level('error');
+            this.videojs.log.level('error');
             //%
             
             this.videoStreams[ streamId ]['player']=player;
@@ -381,7 +385,7 @@ export class Video{
                     promise.catch(function(error) {
                         document.addEventListener("click", function vhsClickMonitor(e){
                             let ns = player.networkState();
-                            if( ns==1 || ns==2 ){
+                            if( ns===1 || ns===2 ){
                                 player.play();
                                 document.removeEventListener('click', vhsClickMonitor);
                             }
@@ -406,7 +410,7 @@ export class Video{
                     setTimeout( ()=>{
                         let curTime=player.currentTime();
                         let curDur=player.duration();
-                        if( prevTime==curTime && prevDur == curDur ){
+                        if( prevTime===curTime && prevDur === curDur ){
                             this.pxlFile.urlExists( player.src() ).then( (resp)=>{
                                 if( !resp ){
                                     tmpThis.ended(  streamId  );   
@@ -444,12 +448,12 @@ export class Video{
     }
     
     buildHlsPlayer( streamId ){
-        if(Hls.isSupported()) { // Just double checking
+        if(this.Hls && this.Hls.isSupported()) { // Just double checking
             this.videoStreams[ streamId ]['mode']=4;
             //djStreamObj.volume = 1;
             let djStreamObj=this.videoStreams[ streamId ]['obj'];
             
-            var hls = new Hls({
+            var hls = new this.Hls({
                 "enableWorker": true,
                 "liveBackBufferLength": 900,
                 "startLevel":2,
@@ -464,14 +468,14 @@ export class Video{
             //}
             this.videoStreams[ streamId ]['player']=hls;
             let tmpThis=this;
-            hls.on(Hls.Events.MEDIA_ATTACHED,function(msg) {
+            hls.on(this.Hls.Events.MEDIA_ATTACHED,function(msg) {
                 //tmpThis.ready( streamId );
                 tmpThis.ready( streamId );
             });
-            hls.on(Hls.Events.BUFFER_CREATED,function(msg) {
+            hls.on(this.Hls.Events.BUFFER_CREATED,function(msg) {
                 //tmpThis.ready( streamId );
             });
-            hls.on(Hls.Events.MANIFEST_PARSED,function(msg) {
+            hls.on(this.Hls.Events.MANIFEST_PARSED,function(msg) {
                 //djStreamObj.play();
                 //tmpThis.start( streamId );
                 //djStreamObj.play();
@@ -481,24 +485,24 @@ export class Video{
             hls.streamController.onMediaEnded=function(msg) {
                 tmpThis.ended(  streamId  );
             }
-            /*hls.on(Hls.Events.MEDIA_DETACHING,function(msg) {
+            /*hls.on(this.Hls.Events.MEDIA_DETACHING,function(msg) {
                 console.log("media detach", msg);
             });*/
-            hls.on(Hls.Events.ERROR,function( hlsErr, errDetails ) {
+            hls.on(this.Hls.Events.ERROR,function( hlsErr, errDetails ) {
                 if( errDetails.fatal ){
                     tmpThis.ended(  streamId  );
-                }else if( errDetails.details=="bufferFullError" || errDetails.details=="bufferAppendingError" ){
+                }else if( errDetails.details === "bufferFullError" || errDetails.details === "bufferAppendingError" ){
                     hls.recoverMediaError();
                 }
             });
       
             //jmaConnect.pxlEnv.pxlVideo.videoStreams['dj']['player'].currentLevel
-            hls.on(Hls.Events.STREAM_STATE_TRANSITION,function(msg, detail) {
-                if( detail.previousState == "PARSED" && detail.nextState == "IDLE" ){
+            hls.on(this.Hls.Events.STREAM_STATE_TRANSITION,function(msg, detail) {
+                if( detail.previousState === "PARSED" && detail.nextState === "IDLE" ){
                     tmpThis.videoStreams[ streamId ]['activeLevel']=hls.currentLevel;
-                    if( hls.currentLevel == -1){
+                    if( hls.currentLevel === -1){
                         setTimeout( ()=>{
-                            if( hls.currentLevel == -1){ // Initialization will fail to -1, catch any level change after
+                            if( hls.currentLevel === -1){ // Initialization will fail to -1, catch any level change after
                                 /*tmpThis.videoStreams[ streamId ]['active']=false;
                                 tmpThis.ended( streamId );
                                 tmpThis.resetEnvSettings( streamId );*/
@@ -547,28 +551,28 @@ export class Video{
             tmpThis.ended(  streamId  );
         });
         /*
-        hls.on(Hls.Events.MEDIA_ATTACHED,function(msg) {
+        hls.on(this.Hls.Events.MEDIA_ATTACHED,function(msg) {
             tmpThis.ready( streamId );
         });
-        hls.on(Hls.Events.MANIFEST_PARSED,function(msg) {
+        hls.on(this.Hls.Events.MANIFEST_PARSED,function(msg) {
             djStreamObj.play();
             tmpThis.start( streamId );
         });
         hls.streamController.onMediaEnded=function(msg) {
             tmpThis.ended(  streamId  );
         }
-        hls.on(Hls.Events.ERROR,function( hlsErr, errDetails ) {
+        hls.on(this.Hls.Events.ERROR,function( hlsErr, errDetails ) {
             tmpThis.ended(  streamId  );
         });
         */
         //djStreamObj.volume = 1;
     }
     buildIvsPlayer( streamId ){
-        if (IVSPlayer.isPlayerSupported) {
+        if (this.IVSPlayer.isPlayerSupported) {
             this.videoStreams[ streamId ]['mode']=3;
             
             let djStreamObj=this.videoStreams[ streamId ]['obj'];
-            const player = IVSPlayer.create();
+            const player = this.IVSPlayer.create();
             player.attachHTMLVideoElement(djStreamObj);
             player.setAutoplay(true);
             player.setLogLevel("Error");
@@ -577,7 +581,7 @@ export class Video{
             this.videoStreams[ streamId ]['checkScreens']=false;
             
             let tmpThis=this;
-            let playerState = IVSPlayer.PlayerState;
+            let playerState = this.IVSPlayer.PlayerState;
             player.addEventListener(playerState.READY,(msg)=>{
                 tmpThis.ready( streamId );
             });
@@ -588,7 +592,7 @@ export class Video{
                 tmpThis.ended( streamId );
             });
             
-            let playerEvent = IVSPlayer.PlayerEventType;
+            let playerEvent = this.IVSPlayer.PlayerEventType;
             player.addEventListener(playerEvent.ERROR, (err, code, source, msg)=>{
                 tmpThis.ended(  streamId, err );
             });
@@ -646,7 +650,7 @@ export class Video{
     loadVideoStream( statusResolve, streamDict){
         console.log(statusResolve);
         if( streamDict['player'] ){
-            if( statusResolve == 200 ){
+            if( statusResolve === 200 ){
                 if( streamDict['player'].core.paused && !streamDict['loading'] ){
                     streamDict['player'].load( streamDict['url'] );
                     //this.videoStreams['dj']['player'].play();
@@ -659,7 +663,7 @@ export class Video{
                 }else{
                     streamDict['loading']=false;
                 }
-            }else if(statusResolve == 0){
+            }else if(statusResolve === 0){
                 streamDict['delayCheck']=10;
             }
             
@@ -722,8 +726,8 @@ export class Video{
     }
     checkVideoError( streamId ){ // Check if needed for Video.js - VHS
         let curPlayer= this.videoStreams[ streamId ];
-        if( curPlayer["active"] && curPlayer['mode']==4 ){
-            if( curPlayer['obj'].videoWidth == 0 ){
+        if( curPlayer["active"] && curPlayer['mode'] === 4 ){
+            if( curPlayer['obj'].videoWidth === 0 ){
                 if( !curPlayer['obj'].paused && curPlayer['player'].streamController.lastCurrentTime > 10 ){
                     this.destroyPlayer( streamId );
                     this.videoStreams[ streamId ]["active"]=false;
@@ -731,7 +735,7 @@ export class Video{
                     this.buildHlsPlayer( streamId );
                     this.videoStreams[ streamId ]['player'].recoverMediaError();
                 }
-            }else if( curPlayer['obj'].webkitDecodedFrameCount == curPlayer['prevFrame'] ){
+            }else if( curPlayer['obj'].webkitDecodedFrameCount === curPlayer['prevFrame'] ){
                 this.videoStreams[ streamId ]['prevFrameCount']+=1;
                 if( this.videoStreams[ streamId ]['prevFrameCount'] > 50){
                     //%=
@@ -747,7 +751,7 @@ export class Video{
             }else{
                 this.videoStreams[ streamId ]['prevFrame']=curPlayer['obj'].webkitDecodedFrameCount;
                 ////this.videoStreams[ streamId ]['player'].loadLevel=-1;
-                if( this.videoStreams[ streamId ]['player'].nextLevel != -1 ){
+                if( this.videoStreams[ streamId ]['player'].nextLevel !== -1 ){
                     this.videoStreams[ streamId ]['player'].nextLevel=-1;
                 }
                 this.videoStreams[ streamId ]['prevFrameCount']=0;
@@ -769,8 +773,8 @@ export class Video{
         if( curStream['active'] ){
             return;
         }
-        let videoObj=curStream['obj']; 
-        let player=curStream['player']; 
+        //let videoObj=curStream['obj']; 
+        //let player=curStream['player']; 
         // streamController.appended
         let active=this.getStreamState( streamId );
         this.videoStreams[ streamId ]['active'] = active;
@@ -832,9 +836,9 @@ export class Video{
             return;
         }
         
-        this.destroyPlayer( streamId ); // Relies on active==true
+        this.destroyPlayer( streamId ); // Relies on active===true
         
-        let active=curStream['mode']==4 ? !curStream['player'].liveTracker.atLiveEdge() : !curStream['obj'].paused ;
+        let active=curStream['mode']===4 ? !curStream['player'].liveTracker.atLiveEdge() : !curStream['obj'].paused ;
 
         this.videoStreams[ streamId ]['active'] = active;
 
@@ -853,7 +857,7 @@ export class Video{
         this.pxlAudio.djAudioObj.byScript=true;
         let djDevice=this.pxlAudio.djAudioObj;
         let djSource=djDevice.children[0];
-        if( djSource.getAttribute("src") == ""){
+        if( djSource.getAttribute("src") === ""){
             djSource.setAttribute("src",this.pxlAudio.djUrlSource);
             djDevice.load();
             djDevice.muted=this.pxlAudio.djMuted || !this.pxlAudio.roomAudioStopped;
@@ -873,11 +877,11 @@ export class Video{
         
         let errorList=["ErrorNetworkIO", "networkError","mediaError","internalException"];
         if( errorList.includes( type ) ){
-            tmpThis.videoStreams[ streamId ]['active']=false;
+            this.videoStreams[ streamId ]['active']=false;
         }
     }
     destroyPlayer( streamId, force=false ){
-        if( this.videoStreams[ streamId ]['mode'] == 4 && ( this.videoStreams[ streamId ]['active'] || force ) ){
+        if( this.videoStreams[ streamId ]['mode'] === 4 && ( this.videoStreams[ streamId ]['active'] || force ) ){
             if( this.videoStreams[ streamId ]['player'] ){
                 this.videoStreams[ streamId ]['player'].detachMedia();
                 //this.videoStreams[ streamId ]['player'].removeAllListeners();
@@ -899,10 +903,10 @@ export class Video{
         if( this.videoStreams['performer'] ){
             performerVidStopped=!this.videoStreams['performer']['active'];
         }
-        if( streamData.hasOwnProperty('dj') == true && djVidStopped ){
+        if( streamData.hasOwnProperty('dj') === true && djVidStopped ){
             this.checkForDjStream= streamData['dj'] && this.videoAudioEvent['dj'];
         }
-        if( streamData.hasOwnProperty('performer') == true && performerVidStopped ){
+        if( streamData.hasOwnProperty('performer') === true && performerVidStopped ){
             this.checkForPerformerStream= streamData['performer'] && this.videoAudioEvent['performer'];
         }
         

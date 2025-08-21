@@ -64,6 +64,16 @@
 
   <!-- pxlNav necessary tags -->
     <canvas id="pxlNav-coreCanvas" height='1' width='1' class="pxlNav-coreCanvasStyle" ></canvas>
+    <!-- Import map to resolve bare module specifiers (e.g. "three" and "three/addons/...") in the browser.
+         Adjust the version below if your project uses a different Three.js release. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.171.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.171.0/examples/jsm/"
+      }
+    }
+    </script>
     <script type="module" src="pxlNavLoader_dev.js?v=2025-02-04"></script>
 
 </body>

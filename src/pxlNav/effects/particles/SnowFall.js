@@ -7,7 +7,7 @@ import {
   NearestMipmapNearestFilter
 } from "../../../libs/three/three.module.min.js";
 
-import ParticleBase from './ParticleBase.js';
+import { ParticleBase } from './ParticleBase.js';
 import { snowSettings, snowFallVert, snowFallFrag } from './shaders/SnowShader.js';
 
 // Free floaties in the environment

@@ -18,8 +18,8 @@ const http = require('http').createServer(app);
 let indexFile = "index.htm";
 if(args.length > 0 && args[0] == "examples"){
   console.log("Booting in 'Live' mode")
-  console.log("Serving from: ./examples");
-  app.use( express.static(path.join(__dirname, 'examples')) );
+  console.log("Serving from: ./examples/esm");
+  app.use( express.static(path.join(__dirname, 'examples','esm')) );
 }else{
   indexFile = "indexDev.htm";
   console.log("Booting in 'Developer' mode");

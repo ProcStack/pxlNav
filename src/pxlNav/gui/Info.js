@@ -1,5 +1,6 @@
 
-export class HelpGui extends GuiDraws{
+import { GUI } from "./GUI.js";
+export class InfoGui extends GUI{
   constructor(){
     super();
   }

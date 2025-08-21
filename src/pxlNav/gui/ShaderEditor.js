@@ -37,7 +37,7 @@ export class ShaderEditor {
   }
   
   addSlider(parentObj, label, val, min, max, step, callback, args){
-    if( typeof(parentObj) == "string" ){
+    if( typeof(parentObj) === "string" ){
       parentObj=document.getElementById( parentObj );
     }
     let sliderParent=document.createElement("div");
@@ -81,9 +81,9 @@ export class ShaderEditor {
   
   updateShaderTextFields( objRead=null ){
     let roomShader;
-    let type="shaderGui";
+    //let type="shaderGui";
     if( !objRead ){
-      objRead= this.pxlEnv.currentRoom==this.pxlEnv.mainRoom ? this.currentShader : this.pxlEnv.roomSceneList[ this.pxlEnv.currentRoom ].getCurrentShader();
+      objRead= this.pxlEnv.currentRoom===this.pxlEnv.mainRoom ? this.currentShader : this.pxlEnv.roomSceneList[ this.pxlEnv.currentRoom ].getCurrentShader();
     }
     
     try{
@@ -117,7 +117,7 @@ export class ShaderEditor {
         };
         curType = typeof(roomShader.uniforms[x].value)
         
-        if( curType == "object"){
+        if( curType === "object"){
           curType=""
           let curVal = roomShader.uniforms[x].value;
           if(!curVal){
@@ -130,7 +130,7 @@ export class ShaderEditor {
           }
         }else{
           if( typeDict.hasOwnProperty( roomShader.uniforms[x].type ) ){
-            curType = roomShader.uniforms[x].type=="i" ? "i" : "";
+            curType = roomShader.uniforms[x].type==="i" ? "i" : "";
           }
           if( typeDict.hasOwnProperty( roomShader.uniforms[x].type ) ){
             curType = typeDict[roomShader.uniforms[x].type];
@@ -199,7 +199,7 @@ export class ShaderEditor {
     let objectShaderOptions="";
     geoKeys.forEach( (k)=>{
       if( ["Mesh","Points"].includes( geoList[k].type ) ){
-        if(geoList[k].material.type == "ShaderMaterial" ){
+        if(geoList[k].material.type === "ShaderMaterial" ){
           let curOpt=k.substring(0,1).toUpperCase()+k.substring(1,k.length);
           objectShaderOptions+="<option value='geo_" + k + "'>" + curOpt + "</option>";
         }
@@ -472,8 +472,8 @@ export class ShaderEditor {
         let textObj=e.target;
         let posStart=textObj.selectionStart;
         let posEnd=textObj.selectionEnd;
-        let pos=parseInt( (posStart+posEnd)*.5 );
-        if(posStart!=posEnd){
+        //let pos=parseInt( (posStart+posEnd)*.5 );
+        if(posStart!==posEnd){
           this.pxlEnv.pxlGuiDraws.guiWindows["shaderGui"].prevSelectStart=posStart;
           this.pxlEnv.pxlGuiDraws.guiWindows["shaderGui"].prevSelectEnd=posEnd;
         }
@@ -485,11 +485,11 @@ export class ShaderEditor {
     let end=this.pxlEnv.pxlGuiDraws.guiWindows["shaderGui"].prevSelectEnd;
     let textObj=e.target;
     
-    let posStart=textObj.selectionStart;
-    let posEnd=textObj.selectionEnd; 
+    //let posStart=textObj.selectionStart;
+    //let posEnd=textObj.selectionEnd; 
     let textValue=textObj.value;
     let selectStr=textValue.substring(start, end+20 );
-    let selectMatcher=selectStr.match(/[a-zA-Z0-9\.\_\[\]]+/);
+    let selectMatcher=selectStr.match(/[a-zA-Z0-9._[\]]+/);
     if( selectMatcher && !selectStr[0].match(/\n/)){
       end = start+selectMatcher[0].length;
     }
@@ -521,22 +521,22 @@ export class ShaderEditor {
 
     let shift=e.shiftKey;
     let ctrl=e.ctrlKey;
-    let alt=e.altKey;
+    //let alt=e.altKey;
     let numPad=keyCode.includes("Numpad");
-    let breaker = keyHit == "Enter" || keyHit == "Tab" || ( keyCode=="KeyD" && ctrl ) || ( keyCode=="KeyK" && ctrl ) || ( numPad && ctrl ) || ( keyCode.includes("Arrow") && ctrl);
+    let breaker = keyHit === "Enter" || keyHit === "Tab" || ( keyCode==="KeyD" && ctrl ) || ( keyCode==="KeyK" && ctrl ) || ( numPad && ctrl ) || ( keyCode.includes("Arrow") && ctrl);
     if( !breaker ){ return false; }
     
     e.preventDefault();
 
     let textObj=e.target;
     
-    if( keyCode=="NumpadAdd" ){
+    if( keyCode === "NumpadAdd" ){
       let cs=window.getComputedStyle(textObj);
       let csSize=parseFloat(cs.fontSize) + 2;
       textObj.style.fontSize = csSize;
       return false;
     }
-    if( keyCode == "NumpadSubtract" ){
+    if( keyCode === "NumpadSubtract" ){
       let cs=window.getComputedStyle(textObj);
       let csSize=parseFloat(cs.fontSize) - 2;
       textObj.style.fontSize = csSize;
@@ -548,40 +548,40 @@ export class ShaderEditor {
 
     let textValue=textObj.value;
     if( keyCode.includes("Arrow") ){
-      if( posStart == posEnd ){
+      if( posStart === posEnd ){
         return false;
       }
       let searchStr=textValue.substring(posStart, posEnd );
       let reg, searchBin, cpos;
-      if( keyCode=="ArrowUp" ){
+      if( keyCode==="ArrowUp" ){
         searchBin=textValue.substring( 0, posStart );
         posStart=searchBin.search( /.*$/ );
 
 
         keyCode="ArrowLeft";
-      }else if( keyCode=="ArrowDown" ){
+      }else if( keyCode==="ArrowDown" ){
         searchBin=textValue.substring( posEnd, textValue.length );
         posEnd=searchBin.search( /\n/ ) + posEnd;
 
         keyCode="ArrowRight";
       }
 
-      if( keyCode=="ArrowLeft" ){
+      if( keyCode==="ArrowLeft" ){
         reg=new RegExp(searchStr+".*",'gm');
         searchBin=textValue.substring( 0, posStart );
 
         let mLineMatches= [...searchBin.matchAll( searchStr, "g" )];
 
-        if( mLineMatches.length == 0){
+        if( mLineMatches.length === 0){
           mLineMatches= [...textValue.matchAll( searchStr, "g" )];
 
-          if( mLineMatches.length == 0){
+          if( mLineMatches.length === 0){
             return false;
           }
         }
         cpos=mLineMatches.pop().index;
       }
-      if( keyCode=="ArrowRight" ){
+      if( keyCode==="ArrowRight" ){
         reg=new RegExp(searchStr,'m');
         searchBin=textValue.substring( posEnd, textValue.length );
 
@@ -627,7 +627,7 @@ export class ShaderEditor {
     }
     
 
-    if( keyHit=="Enter" && ctrl){
+    if( keyHit==="Enter" && ctrl){
       this.children.updateObj.click();
       textObj.focus();
       textObj.setSelectionRange( posStart, posEnd );
@@ -641,22 +641,22 @@ export class ShaderEditor {
       let hasSel=repStr.length > 0;
       let preBuffer=textValue.substr( posStart-1,1);
 
-      preBuffer = /[\w|\d]/.test(preBuffer) && repStr.length==0 ? " " : ""; // Add a space if need be
+      preBuffer = /[\w|\d]/.test(preBuffer) && repStr.length===0 ? " " : ""; // Add a space if need be
       let postBuffer=textValue.substr( posEnd+1,1);
-      postBuffer = /[\w|\d]/.test(postBuffer) && repStr.length==0 ? " " : ""; // Add a space if need be
+      postBuffer = /[\w|\d]/.test(postBuffer) && repStr.length===0 ? " " : ""; // Add a space if need be
 
       let postPos=posStart+preBuffer.length;
-      if( keyCode=="Numpad1" ){
+      if( keyCode==="Numpad1" ){
         let vType= "float(";
         postPos+=vType.length;
         repStr= hasSel ? repStr : ".0" ;
         repStr= vType+repStr+")";
-      }else if( keyCode=="Numpad2" ){
+      }else if( keyCode==="Numpad2" ){
         let vType= "vec2(";
         postPos+=vType.length;
         repStr= hasSel ? repStr : ".0, .0" ;
         repStr= vType+repStr+")";
-      }else if( keyCode=="Numpad3" ){
+      }else if( keyCode==="Numpad3" ){
         let vType= "vec3(";
         postPos+=vType.length;
         repStr= hasSel ? repStr : ".0, .0, .0" ;
@@ -676,13 +676,13 @@ export class ShaderEditor {
     
     let curPos=Math.min(posStart,posEnd);
     let prevValues=textValue.substr(0, curPos );
-    if( keyCode=="KeyK" ){
+    if( keyCode==="KeyK" ){
       let searchSelection=false;
-      let runMult=false;
-      let cList=[];
+      //let runMult=false;
+      //let cList=[];
 
       let newStart,origEnd,selection;
-      if( posStart != posEnd ){
+      if( posStart !== posEnd ){
         newStart=prevValues.search( /.*$/ );
         origEnd=posEnd;
         selection=textValue.substring(newStart, posEnd );
@@ -691,16 +691,16 @@ export class ShaderEditor {
 
       if( !searchSelection){
         let strPos=prevValues.search( /[\S\w].*$/ );
-        let forward=false;
-        if( strPos == -1 ){ // Ugh...
+        //let forward=false;
+        if( strPos === -1 ){ // Ugh...
           let futureValues=textValue.substring(curPos, textValue.length );
 
           strPos=futureValues.search( /(?:[^\s])/ );
 
-          if( strPos == -1 ){ return false; }
+          if( strPos === -1 ){ return false; }
 
           strPos+=curPos;
-          forward=true;
+          //forward=true;
         }
 
         let cStart=strPos;
@@ -710,7 +710,7 @@ export class ShaderEditor {
           cEnd+=2;
           let ss=textValue.substr( cStart, 2 );
 
-          if(ss!="//"){
+          if(ss!=="//"){
             return false;
           }
           posStart-=2;
@@ -718,7 +718,7 @@ export class ShaderEditor {
         }else{
           let ss=textValue.substr( cStart, 2 );
 
-          if(ss=="//"){
+          if(ss==="//"){
             return false;
           }
           cText="//";
@@ -753,13 +753,13 @@ export class ShaderEditor {
         insertList.forEach( (mid) => {
           let ss=selection.substr( mid, 2 );
           if(shift){
-            if(ss!="//"){
+            if(ss!=="//"){
               return;
             }
 
             selection=selection.substring(0,mid)+selection.substring(mid+2,selection.length);
           }else{
-            if(ss=="//"){
+            if(ss==="//"){
               return;
             }
             selection=selection.substring(0,mid)+"//"+selection.substring(mid,selection.length);
@@ -779,14 +779,14 @@ export class ShaderEditor {
 
     let prevValuesList=prevValues.split("\n");
 
-    if( keyHit=="Enter" || keyHit=="Tab" ){
+    if( keyHit==="Enter" || keyHit==="Tab" ){
       let curLine=prevValuesList.pop();
-      if( curLine.length == 0){
+      if( curLine.length === 0){
         curLine=prevValuesList.pop();
       }
       let spacer=curLine.replace(/[\S\w].*$/g, "");
-      if(keyHit == "Tab"){
-        spacer=spacer.length==0 ? " " : spacer.substr(0,1);
+      if(keyHit === "Tab"){
+        spacer=spacer.length===0 ? " " : spacer.substr(0,1);
         if(spacer === " "){
           spacer="  ";
         }else{
@@ -799,13 +799,13 @@ export class ShaderEditor {
       let inText=spacer;
       let cPosStart=posStart;
       let cPosEnd=posEnd;
-      if( keyHit=="Tab" && posStart!=posEnd ){
+      if( keyHit==="Tab" && posStart!==posEnd ){
         let curSel=textValue.substring( posStart, posEnd );
         curSel=curSel.split("\n");
         if( shift ){
-          curSel=curSel.map( (s)=>{ return s=="" ? s : s.replace(spacer, "")});
+          curSel=curSel.map( (s)=>{ return s==="" ? s : s.replace(spacer, "")});
         }else{
-          curSel=curSel.map( (s)=>{ return s=="" ? s : spacer+s});
+          curSel=curSel.map( (s)=>{ return s==="" ? s : spacer+s});
         }
         inText=curSel.join("\n");
         cPosEnd=cPosStart + inText.length;
@@ -818,8 +818,8 @@ export class ShaderEditor {
       return false;
     }
 
-		if(keyCode=="KeyD" && ctrl){
-      if( posStart == posEnd ){
+		if(keyCode==="KeyD" && ctrl){
+      if( posStart === posEnd ){
         let textValueArray= textValue.split( "\n" );
         prevValuesList.pop()
         let prevCount=prevValuesList.length; 
@@ -860,7 +860,7 @@ export class ShaderEditor {
     let html="";
     let getSelected=this.pxlEnv.roomSceneList[ this.pxlEnv.currentRoom ].getCurrentShader()
     keys.forEach( (k)=>{
-      let sel= k==getSelected ? " selected" : "";
+      let sel= k===getSelected ? " selected" : "";
       html+=`<option value="${k}" ${sel}>${editables[k]}</option>`;
     });
     pulldown.innerHTML=html;
@@ -920,7 +920,7 @@ export class ShaderEditor {
 		this.updateShaderList();
 		this.updateShaderTextFields( this.children.shaderSelect.value);
 		
-		active= active==null ? !this.active : active;
+		active= active===null ? !this.active : active;
 		this.active=active;
 		this.guiManager.promptFader( this.gui, active );
 		this.guiManager.promptFader( this.helpGui, active );
@@ -980,12 +980,12 @@ export class ShaderEditor {
     let minSize = Math.max(150, window.innerHeight * .135);
     let sizeShift= guiWindow.fieldBodyHeight-minSize;
     
-    vertSize= area=="vertObj" ? sizeShift : minSize;
-    fragSize= area=="fragObj" ? sizeShift : minSize;
+    vertSize= area==="vertObj" ? sizeShift : minSize;
+    fragSize= area==="fragObj" ? sizeShift : minSize;
     guiWindow.vertObj.style.maxHeight=vertSize+"px";
     guiWindow.fragObj.style.maxHeight=fragSize+"px";
     
-    let fieldParent=document.getElementById("gui_shaderEditorParent");
+    //let fieldParent=document.getElementById("gui_shaderEditorParent");
     this.gui.style.maxWidth = this.editorWidthMinMax['max']+"vw";
     
     if( this.children?.shaderSelect ){
@@ -1016,7 +1016,7 @@ export class ShaderEditor {
     //   But with DOM elements over the top of it in z-index
     for( let x=0; x<clickTargetStack.length; ++x ){
       let curObj = clickTargetStack[x];
-      if( curObj.id == "gui_shaderEditorParent" ){
+      if( curObj.id === "gui_shaderEditorParent" ){
         return;
       }
     }

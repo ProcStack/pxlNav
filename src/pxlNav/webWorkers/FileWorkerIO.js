@@ -1,3 +1,4 @@
+/* eslint-disable */
 self.onmessage = function (event) {
     let {type, data}=event.data;
     if ( type === "urlExists") {
@@ -10,7 +11,15 @@ self.onmessage = function (event) {
 };
 
 function xmlHttp(){
-    return XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+    if( window.XMLHttpRequest ){
+        return new XMLHttpRequest();
+    }else if( window.ActiveXObject ){
+        try {
+            return new ActiveXObject("Msxml2.XMLHTTP");
+        }catch(e){
+            return new ActiveXObject("Microsoft.XMLHTTP");
+        }
+    }
 }
 
 function urlExists( url ){

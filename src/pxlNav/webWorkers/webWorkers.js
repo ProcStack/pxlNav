@@ -1,3 +1,4 @@
+/* eslint-disable */
 importScripts( '../js/PLYLoader.js' );
 onmessage = function (oEvent) {
   var loader = new THREE.PLYLoader();

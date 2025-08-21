@@ -1,5 +1,12 @@
+/**
+ * @namespace pxlAudio
+ * @description Audio handling
+ */
 
-const SoundLibrary = [
+// Audio
+import { Vector3, Vector4 } from "../../libs/three/three.module.min.js";
+
+/*const SoundLibrary = [
 	"./sounds/bits.ogg",
 	"./sounds/bonus-2.ogg",
 	"./sounds/bonus-3.ogg",
@@ -13,15 +20,7 @@ const SoundLibrary = [
 	"./sounds/positive-game-sound-4.ogg",
 	"./sounds/positive-win-game-sound-4.ogg",
 	"./sounds/the-award-2.ogg"
-];
-
-/**
- * @namespace pxlAudio
- * @description Audio handling
- */
-
-// Audio
-import { Vector3, Vector4 } from "../../libs/three/three.module.min.js";
+];*/
 
 export class Audio{
   constructor(){
@@ -37,6 +36,7 @@ export class Audio{
     this.audioEq=new Vector4(0,0,0,0);
     this.audioWorker=null;
     this.audioProcessor=null;
+    this.audioCtx=null;
         
     this.djUrlSource="//"; // URL to the audio source
     this.djMuted=false;
@@ -271,7 +271,7 @@ export class Audio{
             let mediaStreamSource=null;
 
             function connectAudioDeviceData(e){
-                if(this.audioContext.state == "suspended"){
+                if(this.audioContext.state === "suspended"){
                     this.audioContext.resume();
                 }
                 analyser = this.audioContext.createAnalyser();
@@ -314,7 +314,7 @@ export class Audio{
     // ## Cut this down should FPS be hit
         if( false && domObj instanceof HTMLMediaElement ){
             // for cross browser
-            if(this.audioCtx==null){
+            if(this.audioCtx===null){
               const AudioContext = window.AudioContext || window.webkitAudioContext;
               this.audioCtx = new AudioContext();
             }
@@ -399,7 +399,7 @@ export class Audio{
   }
     
   djPlayerMuteToggle(val=null){
-    this.djMuted= val==null ? !this.djMuted : val;
+    this.djMuted= val===null ? !this.djMuted : val;
 
     if( val!=null ){
       this.pxlGuiDraws.toggleIcon(this.pxlGuiDraws.hudIcons.musicIcon, !val, true );
@@ -408,7 +408,7 @@ export class Audio{
     if( this.djAudioObj ){
       this.djAudioObj.muted=this.djMuted;
       this.djAudioObj.byScript=true;
-      this.djAudioObj.volume=this.djAudioObj.volume;
+      //this.djAudioObj.volume=this.djAudioObj.volume;
     }
     if( this.pxlVideo && this.pxlEnv.posted ){
       this.pxlVideo.setMuted( "dj", this.djMuted );
@@ -416,7 +416,7 @@ export class Audio{
   }
   
   setFadeActive( dir=1 ){
-    if( this.fadeDir == dir ){
+    if( this.fadeDir === dir ){
       return;
     }
     this.fadeDir=dir;
@@ -428,7 +428,7 @@ export class Audio{
       this.fadePerc+=this.fadeAdjustRate*this.fadeDir;
 
       if( this.fadePerc<0 || this.fadePerc>1 ){
-        this.fadePerc= this.fadeDir == 1 ? 1 : 0;
+        this.fadePerc= this.fadeDir === 1 ? 1 : 0;
         this.fadeActive=false;
         return;
       }

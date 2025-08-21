@@ -22,11 +22,8 @@
 
 
 import {
-  Vector2,
   Vector3,
   Color,
-  Group,
-  Object3D,
   AmbientLight,
   FogExp2,
   SRGBColorSpace,
@@ -72,6 +69,7 @@ export class OutletEnvironment extends RoomEnvironment{
 		// Environment Shader 
 		this.spiralizerUniforms={};
 		this.materialList={};
+		this.revertColorSpaceList=[];
     
 		// Device Field-of-View
     this.pxlCamFOV={ 'PC':60, 'MOBILE':80 };
@@ -237,12 +235,9 @@ builBugs(){
     // Add some bugs jumping in the grass
     this.builBugs();
 
+
     if( this.geoList.hasOwnProperty('LightHouse_geo') ){
       let lhMtl = this.geoList['LightHouse_geo'].material;
-      if( lhMtl.map && !lhMtl.emissiveMap ){
-        lhMtl.emissiveMap = lhMtl.map;
-        lhMtl.emissive.set( 0x404040 );
-      }
       // Certain material types in programs don't support AlphaMaps as it seems
       //   I'll need to investigate which programs have which limitations in what materials
       if( !lhMtl.alphaMap ){
@@ -252,11 +247,11 @@ builBugs(){
       }
     }
 
-    if( this.geoList.hasOwnProperty('woodenDock_geo') ){
-      let wdMtl = this.geoList['woodenDock_geo'].material;
-      if( wdMtl.map && !wdMtl.emissiveMap ){
-        wdMtl.emissiveMap = wdMtl.map;
-        wdMtl.emissive.set( 0x404040 );
+    if( this.geoList?.InstanceObjects?.barrelA_inst ){
+      let wdMtl = this.geoList['InstanceObjects']['barrelA_inst'].material;
+      if( wdMtl.map ){
+        wdMtl.map = this.pxlUtils.loadTexture( this.assetPath+"BarrelV1_diffuse.webp", null, { 'colorSpace':SRGBColorSpace } );
+        wdMtl.specularMap = wdMtl.map;
       }
     }
     
@@ -569,7 +564,15 @@ builBugs(){
 
     this.materialList[ "creekWater_geo" ] = creekWaterMat;
     
-  //
+    // -- -- -- 
+
+    // Revert Color Space Changes to specific Meshes
+    this.revertColorSpaceList.push('barrel_geo');
+    this.revertColorSpaceList.push('LightHouse_geo');
+    this.revertColorSpaceList.push('woodenDock_geo');
+    this.revertColorSpaceList.push('mushroomA_lod0_geo');
+    this.revertColorSpaceList.push('mushroomA_lod1_geo');
+
     // -- -- -- 
     
     // 'meshIsChild' - Some GLTF compressions splits Meshes -&- Transforms into Parent-Child relationships
@@ -582,7 +585,7 @@ builBugs(){
     loadSettings['meshIsChild'] = true; // If your GLB has been "optimized" to split transforms & meshes
     loadSettings['enableLogging'] = true;
 		//let fieldFbxLoader = this.pxlFile.loadRoom( this, loadSettings );
-		let fieldFbxLoader = this.pxlFile.loadRoom( this );
+		this.pxlFile.loadRoom( this );
 		
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- //
 		

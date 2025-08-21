@@ -1,8 +1,45 @@
 
-var audioStream=null;
-var audioProcessor=null;
-var audioEQ=[0,0,0,0];
-var audioBPM=[0,0];
+//var audioStream=null;
+//var audioProcessor=null;
+//var audioEQ=[0,0,0,0];
+//var audioBPM=[0,0];
+
+// Audio analysis variables
+var analyser = null;
+var frequencyChannels = 256;
+var determineAmbientNoise = false;
+var ambientAgregate = [];
+var ambientDataArr = [];
+
+// Voice recording variables
+var voiceRecording = false;
+var detectVoice = false;
+var voiceKillTime = 0;
+var voiceTimeLength = 3000; // 3 seconds default
+
+// Canvas drawing functions (these would need to be implemented based on your needs)
+function drawFreqArray(canvasId, freqArray) {
+    // Implementation needed based on your canvas drawing requirements
+    console.log(`Drawing frequency data to ${canvasId}`, freqArray);
+}
+
+function drawTimeArray(canvasId, timeArray) {
+    // Implementation needed based on your canvas drawing requirements
+    console.log(`Drawing time domain data to ${canvasId}`, timeArray);
+}
+
+function drawTrainingCanvas(freqArray, timeArray) {
+    // Implementation needed based on your training canvas requirements
+    console.log('Drawing training data', { freqArray, timeArray });
+}
+
+function stopRecord() {
+    // Implementation needed based on your recording stop logic
+    voiceRecording = false;
+    detectVoice = false;
+    console.log('Recording stopped');
+}
+
 
 
 class WhiteNoiseProcessor extends AudioWorkletProcessor {

@@ -14,8 +14,7 @@ export class SVGUtils {
     if(style!=null){
       svgObj.classList.add(style);
     }
-        
-    let tmpThis=this;
+    
     let svgPromiseObj=Promise.resolve( FileIO.getURLContent( url ) );
     svgPromiseObj.then( (c)=>{
       svgObj.innerHTML=c;
@@ -32,8 +31,7 @@ export class SVGUtils {
   // Only Used Once
   static svgRawPromise( url ){
     let ret={};
-        
-    let tmpThis=this;
+    
     let svgPromiseObj=Promise.resolve( FileIO.getURLContent( url ) );
     svgPromiseObj.then( (c)=>{
       let tmpDiv=document.createElement( "div" );
@@ -92,10 +90,10 @@ export class SVGUtils {
                 let svgWidth=ret.svg.getAttribute("width");
                 for(let c=0; c<children.length; ++c){
                     let curChild=children[c];
-                    if(id=="speakerIcon"){
+                    if(id==="speakerIcon"){
                         let svgNS=svgObj.getAttribute("xmlns");
-                        let svgHeightBox=parseInt( svgHeight );
-                        let svgWidthBox=parseInt( svgWidth );
+                        //let svgHeightBox=parseInt( svgHeight );
+                        //let svgWidthBox=parseInt( svgWidth );
                         let iconButton = document.createElementNS(svgNS, "rect");
                         iconButton.setAttribute( "x", -1 );
                         iconButton.setAttribute( "y", -1 );
@@ -111,7 +109,7 @@ export class SVGUtils {
                         
                     }
                     let cId=curChild.getAttribute( "id" );
-                    if(cId=="mute"){
+                    if(cId==="mute"){
                         ret.mute=curChild;
                         ret.mute.style.transformOrigin= "50% 50%";
                         ret.mute.style.filter= "alpha(opacity=0)";
@@ -150,12 +148,12 @@ export class SVGUtils {
                         ret.svg.appendChild(loadingPath);
                         
                         this.toggleIcon( ret, curVal );
-                    }else if(cId=="caret"){
+                    }else if(cId==="caret"){
                         ret.caret=curChild;
                         ret.caret.style.transformOrigin= "50% 50%";
                         ret.caret.style.transition= "transform .5s";
                         this.flipIcon( ret, false );
-                    }else if(cId=="state"){
+                    }else if(cId==="state"){
                         curChild.style.display= "none";
                         ret.state= curChild ;
                     }else{

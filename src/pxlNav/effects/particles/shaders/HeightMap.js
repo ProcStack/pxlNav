@@ -182,8 +182,8 @@ export function heightMapVert( userDustData = {} ){
       #if NUM_POINT_LIGHTS > 0
         float lightInf = 1.0;
         for(int x = 0; x < NUM_POINT_LIGHTS; ++x ){
-            vec3 lightVector = normalize(pos - pointLights[i]);
-            lightInf = min(lightInf, length(pos - pointLights[i]) *.05 );
+            vec3 lightVector = normalize(pos - pointLights[x].position);
+            lightInf = min(lightInf, length(pos - pointLights[x].position) *.05 );
         }
         vAlpha*=(1.0-lightInf)*.8+.2;
       #endif

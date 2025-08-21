@@ -17,7 +17,6 @@ import {
   RGBAFormat,
   RGFormat,
   RGBFormat,
-  LuminanceFormat,
   DepthFormat,
   MeshBasicMaterial
 } from "../../libs/three/three.module.min.js";
@@ -31,12 +30,13 @@ export class Utils{
     this.assetRoot=assetRoot;
     this.mobile=mobile;
     this.pxlTimer=null;
+    this.pxlEnums=null;
     this.verboseLoading=false;
     this.texLoader=new ImageLoader();
     this.textLoaderArray=[];
     // Texture formats, use as needed
     // ImageLoader's defauls; images load as RGBAFormat by default, and JPG as RGBAFormat
-    this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, LuminanceFormat, DepthFormat ];
+    this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, DepthFormat ];
   }
 
   get curMS(){
@@ -45,6 +45,7 @@ export class Utils{
 
   setDependencies( pxlNav ){
     this.pxlTimer=pxlNav.pxlTimer;
+    this.pxlEnums=pxlNav.pxlEnums;
   }
   
   updateUrl(url,state={},title=""){
@@ -78,7 +79,7 @@ export class Utils{
   }
     
   checkInt(val){
-    return (val%1)==0;
+    return (val%1)===0;
   }
 
   degToRad(deg){
@@ -134,7 +135,7 @@ export class Utils{
     let strip=document.createElement( "div" );
     strip.innerHTML=messageString;
     strip=strip.innerText;
-    let matcher=strip.match(/([a-zA-Z0-9\s\w-+()\[\]])+/g);
+    let matcher=strip.match(/([a-zA-Z0-9\s\w-+()[\]])+/g);
 
     if(matcher){
       strip=matcher.join("");
@@ -196,13 +197,13 @@ export class Utils{
   
   hexToRgb( hex ) {
     let buffer=hex[0];
-    if(buffer=="#"){
+    if(buffer==="#"){
       hex=hex.substr( 1, 6 );
     }else{
       hex=hex.substr( 0, 6 );
     }
     let r,g,b;
-    if(hex.length==3){
+    if(hex.length===3){
       r=hex[0]+hex[0];
       g=hex[1]+hex[1];
       b=hex[2]+hex[2];
@@ -231,9 +232,9 @@ export class Utils{
       let ccLength=charCode.length;
       if(ccLength>6){
         let offset=1;
-        if(string=="tussin"){
+        if(string==="tussin"){
           offset=0;
-        }else if(string=="fexofenadine"){
+        }else if(string==="fexofenadine"){
           offset=-1;
         }
         let reader=Math.max(0,parseInt((ccLength-6)/2+offset));
@@ -257,7 +258,7 @@ export class Utils{
       */
     }
     
-    if( zoFit==true ){
+    if( zoFit===true ){
       stringColor[0]=stringColor[0]/255;
       stringColor[1]=stringColor[1]/255;
       stringColor[2]=stringColor[2]/255;
@@ -272,7 +273,7 @@ export class Utils{
   // Convert Color/Vector3 to sRGB Color Space
   colorTosRGB( color ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.tosRGB(color.r);
@@ -305,7 +306,7 @@ export class Utils{
   // Convert Color/Vector3 to Linear Color Space
   colorToLinear( color ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.toLinear(color.r);
@@ -336,7 +337,7 @@ export class Utils{
 
   gammaCorrectColor( color, gammaIn="2.2", gammaOut="1.8" ){
     // Check if the colorue is a color object
-    if( typeof color == "object" ){
+    if( typeof color === "object" ){
       // Color Object
       if( color.hasOwnProperty && color.hasOwnProperty("r") ){
         color.r = this.gammaCorrect(color.r, gammaIn, gammaOut);
@@ -369,8 +370,8 @@ export class Utils{
 
   // TODO : Prep & re-implement THREE.GammaFactor -> pxlNav.pxlDevice.GammaFactor
   // TODO : pxlDevice OS detect needs to be implement for color conversion between known OS color spaces
-  convertColor( color, space=COLOR_SHIFT.KEEP ){
-    if( space == COLOR_SHIFT.KEEP ){
+  convertColor( color, space=this.pxlEnums.COLOR_SHIFT.KEEP ){
+    if( space === this.pxlEnums.COLOR_SHIFT.KEEP ){
       return color;
     }
 
@@ -390,30 +391,30 @@ export class Utils{
     let retColor = color.clone();
     switch (space) {
       // Assuming color adjustments have been made with shader math --
-      case COLOR_SHIFT.sRGB_TO_LINEAR:
+      case this.pxlEnums.COLOR_SHIFT.sRGB_TO_LINEAR:
         retColor = this.colorTosRGB(retColor);
         break;
-      case COLOR_SHIFT.LINEAR_TO_sRGB:
+      case this.pxlEnums.COLOR_SHIFT.LINEAR_TO_sRGB:
         retColor = this.colorToLinear(retColor);
         break;
 
       // TODO : These need to be checked, added for completeness, not tested
-      case COLOR_SHIFT.WINDOWS_TO_UNIX:
+      case this.pxlEnums.COLOR_SHIFT.WINDOWS_TO_UNIX:
         retColor = this.gammaCorrectColor(retColor, "2.2", "1.8");
         break;
-      case COLOR_SHIFT.UNIX_TO_WINDOWS:
+      case this.pxlEnums.COLOR_SHIFT.UNIX_TO_WINDOWS:
         retColor = this.gammaCorrectColor(retColor, "1.8", "2.2");
         break;
-      case COLOR_SHIFT.LINEAR_TO_WINDOWS:
+      case this.pxlEnums.COLOR_SHIFT.LINEAR_TO_WINDOWS:
         retColor = this.gammaCorrectColor(retColor, "1.0", "2.2");
         break;
-      case COLOR_SHIFT.WINDOWS_TO_LINEAR:
+      case this.pxlEnums.COLOR_SHIFT.WINDOWS_TO_LINEAR:
         retColor = this.gammaCorrectColor(retColor, "2.2", "1.0");
         break;
-      case COLOR_SHIFT.LINEAR_TO_UNIX:
+      case this.pxlEnums.COLOR_SHIFT.LINEAR_TO_UNIX:
         retColor = this.gammaCorrectColor(retColor, "1.0", "1.8");
         break;
-      case COLOR_SHIFT.UNIX_TO_LINEAR:
+      case this.pxlEnums.COLOR_SHIFT.UNIX_TO_LINEAR:
         retColor = this.gammaCorrectColor(retColor, "1.8", "1.0");
         break;
       default:
@@ -430,7 +431,7 @@ export class Utils{
     let tmpArr=[...inputArr];
     let retArr=[];
     while( tmpArr.length > 0){
-      let rand=tmpArr.length==1 ? 0 : parseInt(Math.random()*21*tmpArr.length)%tmpArr.length;
+      let rand=tmpArr.length===1 ? 0 : parseInt(Math.random()*21*tmpArr.length)%tmpArr.length;
       retArr.push( tmpArr.splice( rand, 1 )[0] );
     }
     return retArr;
@@ -465,7 +466,7 @@ export class Utils{
         return new Vector3(x,y,z);
     }
     
-  //this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, LuminanceFormat, DepthFormat ];
+  //this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, DepthFormat ];
   loadTexture(imgPath,channels=null,mods={}){
     // ## Check how textLoaderArray textures are being handled after being disposed
 
@@ -473,12 +474,13 @@ export class Utils{
     if( !imgPath.includes( "/") ){
       imgPath = this.assetRoot + imgPath;
     }
-
+    
+    let texture=null;
     if(typeof(this.textLoaderArray[imgPath]) != "undefined"){
       texture=this.textLoaderArray[imgPath];
     }else{
       //var texLoader=new ImageLoader(verboseLoading);
-      var texture=new Texture();
+      texture=new Texture();
       let modKeys = Object.keys(mods);
       this.texLoader.load(imgPath,
         (tex)=>{

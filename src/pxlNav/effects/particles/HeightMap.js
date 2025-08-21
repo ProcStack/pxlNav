@@ -192,7 +192,7 @@ export class HeightMap extends ParticleBase{
     this.spawnMapPath = path;
 
     // If the spawnMap includes wind direction data in Green & Blue channels
-    if( channels == 3 ){
+    if( channels === 3 ){
       channels = 4;
     }
     this.spawnMapMode = channels;

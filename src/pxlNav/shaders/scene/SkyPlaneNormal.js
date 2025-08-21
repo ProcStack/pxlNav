@@ -92,7 +92,7 @@ export function skyPlaneNormalFrag(){
 
         
         float baseDepth = texture2D(envDiffuse,vUv).x;
-        float stencil = baseDepth==1.0 ? 1.0 : 0.0;
+        float stencil = baseDepth===1.0 ? 1.0 : 0.0;
         
         float reachDepth = 0.0 ;
         const int runCount=5;

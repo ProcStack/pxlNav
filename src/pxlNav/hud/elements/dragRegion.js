@@ -5,7 +5,7 @@
 //
 
 import { ElementBase } from './elementBase.js';
-import { HUD_DRAW, HUD_ELEMENT } from "../../core/Enums.js";
+import { HUD_ELEMENT } from "../../core/Enums.js";
 
 export class DragRegion extends ElementBase{
   constructor( name="hudDrawRegion", data = {} ){
