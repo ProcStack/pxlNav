@@ -9,7 +9,7 @@ const replaceValue = 'import';
 const destPaths = [
   filePath,
   path.join(__dirname, '../dist/pxlNav.esm.js'),
-  path.join(__dirname, '../examples/js/pxlNav.esm.js')
+  path.join(__dirname, '../examples/esm/js/pxlNav.esm.js')
 ];
 
 
@@ -25,9 +25,11 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     return;
   }
 
-  const result = data.replace(searchValue, replaceValue);
+  //const result = data.replace(searchValue, replaceValue);
+  const result = data;
 
   destPaths.forEach((destPath) => {
+    console.log(`Writing modified file to: ${destPath}`);
     fs.writeFile(destPath, result, 'utf8', (err) => {
       if (err) {
         console.error('Error writing file:', err);

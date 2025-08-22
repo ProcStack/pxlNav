@@ -4,7 +4,9 @@ const esbuild = require('esbuild');
 const cssEntryFile = './src/style/pxlNavStyle.css';
 const cssOutputFiles = [
   './dist/pxlNavStyle.min.css',
-  './examples/style/pxlNavStyle.min.css'
+  './examples/esm/pxlNavStyle.min.css',
+  './examples/react-app/public/pxlNavStyle.min.css',
+  './examples/nextjs/public/pxlNavStyle.min.css'
   ];
 
 // Bundle and minify the CSS

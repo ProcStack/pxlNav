@@ -42,6 +42,17 @@ const baseConfig = {
       }
     ]
   },
+  // Keep pxlRooms imports unbundled so consumers can provide their own pxlRooms/index.js
+  externals: [
+    function({ request }, callback) {
+      // If the import path refers to pxlRooms (any depth), treat it as external so webpack
+      // will not bundle it and the runtime consumer can provide their own module.
+      if (typeof request === 'string' && request.indexOf('pxlRooms') !== -1) {
+        return callback(null, 'commonjs ' + request);
+      }
+      callback();
+    }
+  ],
   optimization: {
     minimize: true,
     minimizer: [
@@ -87,31 +98,15 @@ const baseConfig = {
   ],
   resolve: {
     alias: {
-      // Prefer project-local three build in ./src/react-next-dev/pxlnav-next/src/components/libs/three
-      'three': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/three.module.min.js'),
+      'three/addons/': path.resolve(__dirname, '../node_modules/three/examples/jsm/'),
       // Map explicit FBXLoader relative imports to the local copy
-      '../../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js'),
-      '../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js'),
-      './libs/three/FBXLoader.js': path.resolve(__dirname, '../src/react-next-dev/pxlnav-next/src/components/libs/three/FBXLoader.js')
+      '../../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/libs/three/FBXLoader.js'),
+      '../libs/three/FBXLoader.js': path.resolve(__dirname, '../src/libs/three/FBXLoader.js'),
+      './libs/three/FBXLoader.js': path.resolve(__dirname, '../src/libs/three/FBXLoader.js')
     },
   },
-  externals: {
-    'three' : './three.module.js',
-    './libs/three/three.module.min.js' : './libs/three/three.module.min.js',
-    '../libs/three/three.module.min.js' : './libs/three/three.module.min.js',
-    '../../libs/three/three.module.min.js' : './libs/three/three.module.min.js',
-    '../../../libs/three/three.module.min.js' : './libs/three/three.module.min.js',
-    '../../../../libs/three/three.module.min.js' : './libs/three/three.module.min.js',
-    '../../three/EffectComposer.js' : './libs/three/three.module.min.js',
-    './pxlNav.js' : './pxlNav.esm.js',
-    '../../pxlNav.js' : '../../pxlNav.esm.js',
-    '../libs/three/EffectComposer.js': "./libs/three/EffectComposer.js",
-    '../libs/three/RenderPass.js': "./libs/three/RenderPass.js",
-    '../libs/three/ShaderPass.js': "./libs/three/ShaderPass.js",
-    '../libs/three/UnrealBloomPass.js': "./libs/three/UnrealBloomPass.js",
-    '../libs/three/CopyShader.js': "./libs/three/CopyShader.js",
-    '../../libs/three/FBXLoader.js': "./libs/three/FBXLoader.js",
-  },
+  // Note: target-specific externals are added per-output below (CJS/UMD/ESM) so we can
+  // treat 'three' differently for UMD (global THREE) vs ESM/CJS (import/require 'three').
 };
 
 
@@ -129,6 +124,19 @@ const cjsConfig = merge(baseConfig, {
       export: 'default',
     },
   },
+  // For CommonJS consumers, require/import 'three' from node_modules
+  externals: [
+    ...(baseConfig.externals || []),
+    {
+      'three': {
+        commonjs: 'three',
+        commonjs2: 'three',
+        amd: 'three',
+        root: 'THREE'
+      },
+      './libs/three/three.module.min.js': './libs/three/three.module.min.js',
+    }
+  ],
 });
 
 // UMD Configuration
@@ -143,6 +151,18 @@ const umdConfig = merge(baseConfig, {
       export: 'default',
     },
   },
+  // For UMD (browser) builds, expect a global THREE variable at runtime
+  externals: [
+    ...(baseConfig.externals || []),
+    {
+      'three': {
+        root: 'THREE',
+        commonjs: 'three',
+        commonjs2: 'three',
+        amd: 'three'
+      }
+    }
+  ],
 });
 
 // ESM Configuration
@@ -158,6 +178,13 @@ const esmConfig = merge(baseConfig, {
   experiments: {
     outputModule: true,
   },
+  // For ESM consumers, keep 'three' as an external import
+  externals: [
+    ...(baseConfig.externals || []),
+    {
+      'three': 'three'
+    }
+  ],
 });
 
 module.exports = [cjsConfig, umdConfig, esmConfig];

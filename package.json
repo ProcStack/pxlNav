@@ -21,7 +21,6 @@
     "start-esm": "npm run examples",
     "start-react": "npm --prefix ./examples/react-app run start",
     "start-next": "npm --prefix ./examples/nextjs run dev",
-    "prebuild": "npm run generate-room-manifest",
     "tar": "npm pack",
     "jsdoc-show": "start ./docs/jsdoc/index.html",
     "jsdoc-gen": "npx jsdoc -c ./packing/jsdoc.config.json --readme ./packing/jsdoc.readme.md",
@@ -42,20 +41,24 @@
     "controller",
     "framework"
   ],
-  "main": "dist/pxlNav.esm.js",
-  "module": "dist/pxlNav.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "builds/pxlNav.cjs.js",
+  "module": "builds/pxlNav.esm.js",
+  "types": "index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/pxlNav.esm.js",
-      "require": "./index.js",
-      "types": "./index.d.ts"
+      "types": "./index.d.ts",
+      "import": "./builds/pxlNav.esm.js",
+      "require": "./builds/pxlNav.cjs.js",
+      "default": "./builds/pxlNav.umd.js"
     }
   },
+  "browser": "builds/pxlNav.umd.js",
+  "unpkg": "builds/pxlNav.umd.js",
   "files": [
     "devExamples.js",
     "index.js",
-    "index.d.ts"
+    "index.d.ts",
+    "builds/"
   ],
   "bugs": {
     "url": "https://github.com/ProcStack/pxlNav/issues"

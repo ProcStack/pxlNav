@@ -18,7 +18,7 @@ export const roomInfo = {
 
 // Room loader function for compatibility
 export async function loadRoomModule( roomName ){
-  const rooms = { SaltFlatsEnvironment };
+  const rooms = { };
   if( rooms[roomName] ){
     return { [roomName]: rooms[roomName] };
   }
