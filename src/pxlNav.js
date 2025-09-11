@@ -740,9 +740,9 @@ class pxlNav{
         };
         this.pxlEnv.engine=this.pxlRendering.engine;
         this.pxlRendering.engine.autoClear=true;
-        ColorManagement.enabled = false;
-        this.pxlRendering.engine.outputColorSpace = SRGBColorSpace;
-        //this.pxlRendering.engine.outputColorSpace = LinearSRGBColorSpace;
+        ColorManagement.enabled = true;
+        //this.pxlRendering.engine.outputColorSpace = SRGBColorSpace;
+        this.pxlRendering.engine.outputColorSpace = LinearSRGBColorSpace;
         
         this.pxlRendering.engine.debug.checkShaderErrors=false;
         //%= Dev
@@ -1488,7 +1488,7 @@ class pxlNav{
 // This prevents "Cannot access before initialization" errors
 
 // Export version as a named constant to avoid initialization timing issues
-const pxlNavVersion = "1.0.0-dev";
+const pxlNavVersion = "1.0.0";
 
 // Default export - keep your working static object structure for the loader
 const pxlNavDefault = {
