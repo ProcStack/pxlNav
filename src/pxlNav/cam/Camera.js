@@ -80,6 +80,7 @@ export class Camera{
     this.pxlAudio=null;
     this.pxlTimer=null;
     this.pxlAutoCam=null;
+    this.pxlRendering=null;
     this.pxlEnv=null;
     this.pxlColliders=null;
     this.pxlUser=null;
@@ -270,6 +271,7 @@ export class Camera{
     this.pxlAudio=pxlNav.pxlAudio;
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlAutoCam=pxlNav.pxlAutoCam;
+    this.pxlRendering=pxlNav.pxlRendering;
     this.pxlEnv=pxlNav.pxlEnv;
     this.pxlColliders=pxlNav.pxlColliders;
     this.pxlUser=pxlNav.pxlUser;
@@ -1208,7 +1210,7 @@ export class Camera{
         roomEnv.start();
       }
 
-      this.pxlEnv.roomRenderPass.scene=roomEnv.scene;
+      this.pxlRendering.roomRenderPass.scene=roomEnv.scene;
 
       let camLocName = objTarget.toLowerCase();
       if( roomEnv.camLocation.hasOwnProperty( camLocName ) ){
@@ -1881,7 +1883,7 @@ export class Camera{
       }
       
       // Set scene exposure on post-process composer passes 
-      this.pxlEnv.updateCompUniforms(curExp);
+      this.pxlRendering.updateCompUniforms(curExp);
             
 
       // Scale proximity visual

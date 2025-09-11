@@ -17,6 +17,7 @@ export class Device{
   constructor(projectTitle, pxlCore, mobile){
     this.projectTitle=projectTitle;
     this.pxlCore=pxlCore;
+    this.pxlRendering=null;
     this.pxlEnv=null;
     this.pxlEnums=null;
     this.pxlTimer=null;
@@ -155,6 +156,7 @@ export class Device{
   }
 
   setDependencies( pxlNav ){
+    this.pxlRendering=pxlNav.pxlRendering;
     this.pxlEnv=pxlNav.pxlEnv;
     this.pxlEnums=pxlNav.pxlEnums;
     this.pxlTimer=pxlNav.pxlTimer;
@@ -1286,51 +1288,12 @@ export class Device{
     this.pxlEnv.scene.renderTarget.setSize(this.mapW,this.mapH);
     this.pxlEnv.scene.renderWorldPos.setSize(this.mapW,this.mapH);
     
-    if( this.pxlEnv.mapComposer ) this.pxlEnv.mapComposer.setSize(this.mapW,this.mapH);
-    if( this.pxlEnv.mapComposerGlow ) this.pxlEnv.mapComposerGlow.setSize(this.mapW,this.mapH);
-    
-    // For external rooms --
-    if( this.pxlEnv.roomComposer ){
-      this.pxlEnv.roomComposer.setSize( this.mapW,this.mapH);
-    }
-  
-    if( this.pxlEnv.roomGlowPass ){
-      this.pxlEnv.roomGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
-    }
-
-    // -- -- -- -- -- -- --
-        
-    // For texture swapping --
-    if( this.pxlEnv.delayComposer ) this.pxlEnv.delayComposer.setSize(this.mapW,this.mapH);
-
-    // -- -- -- -- -- -- --
-        
-    if( this.pxlEnv.mapGlowPass ){
-      this.pxlEnv.mapGlowPass.setSize(this.mapW*this.pxlQuality.bloomPercMult,this.mapH*this.pxlQuality.bloomPercMult);
-    }
-    
-    if( this.pxlEnv.mapMotionBlurPass ){
-      this.pxlEnv.mapMotionBlurPass.setSize(this.mapW*this.pxlQuality.mBlurPercMult,this.mapH*this.pxlQuality.mBlurPercMult);
-    }
-    
-    if( this.pxlEnv.mapOverlayHeavyPass ){
-      this.pxlEnv.mapOverlayHeavyPass.setSize(this.mapW,this.mapH);
-      this.pxlEnv.mapOverlayHeavyPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
-    }
-    
-    if( this.pxlEnv.mapOverlayPass ){
-      this.pxlEnv.mapOverlayPass.setSize(this.mapW,this.mapH);
-      this.pxlEnv.mapOverlayPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
-    }
-
-    if( this.pxlEnv.mapOverlaySlimPass ){
-      this.pxlEnv.mapOverlaySlimPass.setSize(this.mapW,this.mapH);
-      this.pxlEnv.mapOverlaySlimPass.uniforms.ratio.value = Math.min( 1, this.mapW/this.mapH );
-    }
     
 
     // Set main pxlNav canvas size
     this.setCanvasSize( this.sW, this.sH );
+
+    this.pxlRendering.resize( this.mapW, this.mapH );
 
 
     this.pxlGuiDraws.loading=true;
@@ -1362,7 +1325,7 @@ export class Device{
     this.screenResDeltaPerc.x=this.sW/this.origRes.x;
     this.screenResDeltaPerc.y=this.sH/this.origRes.y;
 
-    this.pxlEnv.updateCompUniforms();
+    this.pxlRendering.updateCompUniforms();
     
     this.pxlEnv.roomNameList.forEach( (r)=>{
       this.pxlEnv.roomSceneList[ r ].pxlCamAspect = aspectRatio ;

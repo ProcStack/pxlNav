@@ -43,10 +43,6 @@ import {
 import { ANTI_ALIASING, VERBOSE_LEVEL, COLLIDER_TYPE } from "./core/Enums.js";
 import { pxlOptions } from "./core/Options.js";
 
-// Import room loader
-import { loadRoomModule } from '../pxlRooms/index.js'; 
-
-import { EffectComposer, RenderPass, ShaderPass, CopyShader, UnrealBloomPass } from '../libs/three/index.js';
 
 
 // TODO : This class needs breaking up into BaseEnvironment & MainEnvironment expand
@@ -63,10 +59,12 @@ export class Environment{
     this.parentGroupList[mainRoom]=[];
     this.parentNameList=[];
     this.pxlOptions=options;
+    this.pxlRendering=null;
 
 
 
     // -- -- -- --
+
     // TODO : Move to pxlQuality, when I finally get to that module
     this.prevRenderMS=0;
     this.prevRuntimeMS=0;
@@ -80,6 +78,7 @@ export class Environment{
       this.fps = mobile ? this.pxlOptions.fps.Mobile : this.pxlOptions.fps.PC;
     }
     this.renderInterval = 1.0 / this.fps;
+
     // -- -- -- --
 
     let pxlRoomName = "Default";
@@ -192,35 +191,6 @@ export class Environment{
     this.warpVisualFader=new Vector2(0,1);
     this.warpVisualCmd=null;
 
-    // ## Move passes to a dict
-    this.stepShaderFuncArr=[];
-    this.mapMotionBlurPass=null;
-    this.mapCopyMotionBlurPass=null;
-    this.mapOverlayHeavyPass=null;
-    this.mapOverlayPass=null;
-    this.mapOverlaySlimPass=null;
-    this.mapBoxAAPass=null;
-    this.mapCrossAAPass=null;
-    this.mapWorldPosMaterial=null;
-    this.mapGlowPass=null;
-    this.mapGlowMotionBlur=null;
-    this.mapComposer=null;
-    this.mapComposerMotionBlur=null;
-    this.mapComposerBloom=null;
-    this.mapComposerGlow=null;
-    this.chromaticAberrationPass=null;
-    this.chroAberrationRoomPass=null;
-    this.lizardKingPass=null;
-    this.lizardKingRoomPass=null;
-    this.mapComposerWarpPass=null;
-    this.blurScreenMerge=null;
-    this.pxlRenderSettings={
-      'exposure':1.0,
-      'mult':( mobile ? 1.0 : 1.0 ),
-      'bloomStrength':0.5,
-      'bloomThresh':.6,
-      'bloomRadius':.05,
-    }
     this.exposureShiftActive=false;
 
     this.delayComposer=null;
@@ -229,8 +199,6 @@ export class Environment{
     this.chroAberMult=new Vector2(1,0);
     this.blurDirCur=new Vector2(0,0);
     this.blurDirPrev=new Vector2(0,0);
-    
-    this.shaderPasses={};
     
     this.roomComposer=null;
     this.roomRenderPass=null;
@@ -282,6 +250,7 @@ export class Environment{
     this.pxlEnums=pxlNav.pxlEnums;
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlAnim=pxlNav.pxlAnim;
+    this.pxlRendering=pxlNav.pxlRendering;
     this.pxlColliders=pxlNav.pxlColliders;
     this.pxlAutoCam=pxlNav.pxlAutoCam;
     this.pxlAudio=pxlNav.pxlAudio;
@@ -430,7 +399,7 @@ export class Environment{
     
     //if( this.pxlDevice.mobile && this.exposureShiftActive ){
       //this.pxlCamera.colliderShiftActive=!(this.pxlCamera.colliderAdjustPerc===1 || this.pxlCamera.colliderAdjustPerc===0);
-      //this.updateCompUniforms(curExp);
+      //this.pxlRendering.updateCompUniforms(curExp);
     //}
 
     this.emit( "step", {
@@ -449,53 +418,35 @@ export class Environment{
     });
   }
   
-  // Load room module using static imports
-  // Is this the best way?
-  //   I don't know, React is persnickety about dynamic imports
-  //   So if it works, ... at this point, then it works
-  async loadReadRoomModule(roomName) {
-    if( this.pxlOptions.hasOwnProperty("framework") && this.pxlOptions.framework === this.pxlEnums.FRAMEWORK.NATIVE ){
-      let curImportPath=`${this.pxlRoomLclRoot}/${roomName}/${roomName}.js`;
-      try {
-        return await import(/* webpackIgnore: true */ curImportPath);
-      } catch (error) {
-        console.error(`Failed to load room module: ${curImportPath}`, error);
-        throw error;
-      }
+  loadRoomByName( roomName ){
+    let roomListNames = Object.keys( this.roomSceneList );
+    if( roomListNames.includes( roomName ) ){
+      let roomObj = this.roomSceneList[ roomName ];
+      this.loadRoom( roomObj );
     }else{
-      try {
-        return await loadRoomModule(roomName);
-      } catch (error) {
-        console.error(`Failed to load room module: ${roomName}`, error);
-        throw error;
-      }
+      this.warn("Room '"+roomName+"' not found, cannot load.");
     }
   }
-  
 
-
-  loadRoom(roomName){
+  loadRoom(roomObj){
     return new Promise( async (resolve, reject) => {
+
+      let roomName = roomObj.roomName;
 
       this.log("Loading Room - ", roomName);
       
       try {
-        // Use the enhanced loading system with manifest support
-        const module = await this.loadReadRoomModule(roomName)
-        
-        if (!module || !module[roomName]) {
-          throw new Error(`Room class ${roomName} not found in loaded module`);
-        }
-        
-        this.debug("Module loaded - ", module);
-        let roomObj = new module[roomName]( 
+        // Updated in v1.0.0 to use RoomEnvironment class objects
+        //   This means the rooms must be imported as modules and passed to pxlNav when built
+
+        /*let roomObj = new module[roomName]( 
           roomName, 
           `${this.pxlRoomLclRoot}/${roomName}/`, 
           this.pxlTimer.msRunner, 
           null, 
           null, 
           this.cloud3dTexture
-        );
+        );*/
         roomObj.setDependencies( this );
 
         roomObj.camera=this.pxlCamera.camera;
@@ -504,7 +455,7 @@ export class Environment{
             roomObj.userAvatarGroup=new Group();
         }
         roomObj.scene.add( roomObj.userAvatarGroup );
-        
+          
         var options = {
             format : RGBAFormat,
             antialias: false,
@@ -534,13 +485,13 @@ export class Environment{
         // roomObj.scene.renderWorldPos.texture.magFilter=NearestFilter;
         // roomObj.scene.renderWorldPos.texture.generateMipmaps=false;
         
-        roomObj.cloud3dTexture=this.cloud3dTexture;
+        //roomObj.cloud3dTexture=this.cloud3dTexture;
         if( !this.roomNameList.includes( roomName ) ){
           this.roomNameList.push( roomName );
         }
         this.roomSceneList[ roomName ]=roomObj;
         this.debug(this.roomSceneList[ roomName ]);
-    
+
         resolve(true);
         
       } catch (err) {
@@ -657,13 +608,14 @@ export class Environment{
     if( objShader==="script_fog" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
         
-      if( this.mapOverlayHeavyPass.enabled === true ){
-        return this.mapOverlayHeavyPass.material ;
-      }else if( this.mapOverlayPass.enabled === true ){
-        return this.mapOverlayPass.material ;
-      }else if( this.mapOverlaySlimPass.enabled === true ){
-        return this.mapOverlaySlimPass.material ;
+      if( this.pxlRendering.mapOverlayHeavyPass.enabled === true ){
+        return this.pxlRendering.mapOverlayHeavyPass.material ;
+      }else if( this.pxlRendering.mapOverlayPass.enabled === true ){
+        return this.pxlRendering.mapOverlayPass.material ;
+      }else if( this.pxlRendering.mapOverlaySlimPass.enabled === true ){
+        return this.pxlRendering.mapOverlaySlimPass.material ;
       }
+
     }else if( objShader==="script_dArrows" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.geoList[ "dArrows" ][0].material;
@@ -676,7 +628,7 @@ export class Environment{
 
     }else if( objShader==="script_lizardking" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
-      return this.lizardKingPass.material;
+      return this.pxlRendering.lizardKingPass.material;
     }else if( objShader==="script_majorTom" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
       return this.pxlUser.starFieldPass.material;
@@ -685,7 +637,7 @@ export class Environment{
       return this.pxlUser.crystallinePass.material;
     }else if( objShader==="script_fractalEcho" ){
       this.pxlGuiDraws.guiWindows["shaderGui"].currentShader=objShader;
-      return this.delayPass.material;
+      return this.pxlRendering.delayPass.material;
         
     }else{
       let geoRead=objShader.split("_");
@@ -705,12 +657,12 @@ export class Environment{
         
         let objShader=this.pxlGuiDraws.guiWindows["shaderGui"].currentShader;
         if( objShader==="script_fog" ){
-            if( this.mapOverlayHeavyPass.enabled === true ){
-                setShaderMtl= this.mapOverlayHeavyPass.material ;
-            }else if( this.mapOverlayPass.enabled === true ){
-                setShaderMtl= this.mapOverlayPass.material ;
-            }else if( this.mapOverlaySlimPass.enabled === true ){
-                setShaderMtl= this.mapOverlaySlimPass.material ;
+            if( this.pxlRendering.mapOverlayHeavyPass.enabled === true ){
+                setShaderMtl= this.pxlRendering.mapOverlayHeavyPass.material ;
+            }else if( this.pxlRendering.mapOverlayPass.enabled === true ){
+                setShaderMtl= this.pxlRendering.mapOverlayPass.material ;
+            }else if( this.pxlRendering.mapOverlaySlimPass.enabled === true ){
+                setShaderMtl= this.pxlRendering.mapOverlaySlimPass.material ;
             }
         }else if( objShader==="script_dArrows" ){
             this.geoList[ "dArrows" ].forEach( (o)=>{
@@ -738,13 +690,13 @@ export class Environment{
             return;
             
         }else if( objShader==="script_lizardking" ){
-                setShaderMtl=this.lizardKingPass.material;
+                setShaderMtl=this.pxlRendering.lizardKingPass.material;
         }else if( objShader==="script_majorTom" ){
                 setShaderMtl=this.pxlUser.starFieldPass.material;
         }else if( objShader==="script_fractalSubstrate" ){
                 setShaderMtl=this.pxlUser.crystallinePass.material;
         }else if( objShader==="script_fractalEcho" ){
-                setShaderMtl=this.delayPass.material;
+                setShaderMtl=this.pxlRendering.delayPass.material;
             
         }else{
             let geoRead=objShader.split("_");
@@ -931,19 +883,6 @@ export class Environment{
     }
   }
 
-  // Set composer uniforms
-  updateCompUniforms(exposure=null){
-    if(exposure){
-      this.pxlRenderSettings.exposure=exposure*this.pxlRenderSettings.mult;
-    }
-    if(this.mapOverlayPass){
-      this.mapMotionBlurPass.uniforms.exposure.value = this.pxlRenderSettings.exposure;
-      this.mapOverlayHeavyPass.uniforms.exposure.value = this.pxlRenderSettings.exposure;
-      this.mapOverlayPass.uniforms.exposure.value = this.pxlRenderSettings.exposure;
-      this.mapOverlaySlimPass.uniforms.exposure.value = this.pxlRenderSettings.exposure;
-      //this.blurScreenMerge.uniforms.exposure.value = this.pxlRenderSettings.exposure;
-    }
-  }
 
 // -- -- -- -- -- -- -- -- -- -- -- //
 
@@ -957,591 +896,23 @@ export class Environment{
 
 // -- -- -- -- -- -- -- -- -- -- -- //
 
-  // Build composers and passes
   buildComposers(){
-        
-        // Set up swapable frame buffers, for prior frame reads
-        /*EffectComposer.prototype.swapBuffer = ()=>{
-            let tmpBuffer = this.renderTarget2;
-            this.renderTarget2 = this.renderTarget1;
-            this.renderTarget1 = tmpBuffer;
-        };*/
-        
-    ///////////////////////////////////////////////////
-    // -- SCENE WIDE MATERIALS  -- -- -- -- -- -- -- //
-    ///////////////////////////////////////////////////
-
-    let near = this.pxlCamera.camera?.near || 0.1;
-    let far = this.pxlCamera.camera?.far || 1000;
-    this.mapWorldPosMaterial=new ShaderMaterial({
-      uniforms:{
-        camNear: { type:"f", value: near },
-        camFar: { type:"f", value: far }
-      },
-      vertexShader: this.pxlShaders.rendering.worldPositionVert(),
-      fragmentShader: this.pxlShaders.rendering.worldPositionFrag()
-    });
-    //this.mapWorldPosMaterial.side=DoubleSide;
-    this.mapWorldPosMaterial.side=FrontSide;
-    this.mapWorldPosMaterial.name="mapWorldPosMaterial";
-      
-    ///////////////////////////////////////////////////
-    // -- 2-Step Blur Composer  -- -- -- -- -- -- -- //
-    ///////////////////////////////////////////////////
-
-    this.blurComposer = new EffectComposer(this.engine);
+    this.pxlRendering.buildComposers();
     
-    this.shaderPasses.blurXShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.time },
-          tDiffuse: { value: null },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [1,0], 4, 1.8 ),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.shaderPasses.blurXShaderPass.material.uniforms.pDiffuse = this.scene.renderGlowTarget.texture;
-    this.shaderPasses.blurXShaderPass.material.transparent = true;
-    this.shaderPasses.blurXShaderPass.needsSwap = true;
-    this.shaderPasses.blurXShaderPass.enabled=false;
-    this.shaderPasses.blurXShaderPass.name="blurXShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.blurXShaderPass );
-    
-    
-    this.shaderPasses.dirBlurCopyPass = new ShaderPass(CopyShader);
-    this.shaderPasses.dirBlurCopyPass.enabled=false;
-    this.shaderPasses.dirBlurCopyPass.name="dirBlurCopyPass";
-    this.blurComposer.addPass(this.shaderPasses.dirBlurCopyPass);
-    
-    this.shaderPasses.blurYShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.time },
-          tDiffuse: { value: null },
-          //pDiffuse: { value: this.scene.renderGlowTarget.texture },
-          //pDiffuse: { value: this.blurComposer.writeBuffer.texture },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [0,1], 4, 1.3 ),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.shaderPasses.blurYShaderPass.material.uniforms.pDiffuse = this.scene.renderGlowTarget.texture;
-    this.shaderPasses.blurYShaderPass.material.transparent = true;
-    this.shaderPasses.blurYShaderPass.enabled=false;
-    this.shaderPasses.blurYShaderPass.name="blurYShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.blurYShaderPass );
-  
-    
-    this.shaderPasses.scatterMixShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.time },
-          tDiffuse: { value: null },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.mixBlurShaderPass(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.shaderPasses.scatterMixShaderPass.material.uniforms.pDiffuse = this.scene.renderGlowTarget.texture;
-    this.shaderPasses.scatterMixShaderPass.material.transparent = true;
-    this.shaderPasses.scatterMixShaderPass.enabled=false;
-    this.shaderPasses.scatterMixShaderPass.name="scatterMixShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.scatterMixShaderPass );
-    
-      
-    // Set Anti-Aliasing Quality
-    if( this.pxlOptions.antiAliasing===ANTI_ALIASING.LOW){
-      this.shaderPasses.scatterMixShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.MEDIUM){
-      this.shaderPasses.blurXShaderPass.enabled=true;
-      this.shaderPasses.dirBlurCopyPass.enabled=true;
-      this.shaderPasses.blurYShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.HIGH ){
-      this.shaderPasses.blurXShaderPass.enabled=true;
-      this.shaderPasses.dirBlurCopyPass.enabled=true;
-      this.shaderPasses.blurYShaderPass.enabled=true;
-      this.shaderPasses.scatterMixShaderPass.enabled=true;
-    }
-
-
-
-
-    ///////////////////////////////////////////////////
-    // -- POST PROCESSING; MAIN MENU  -- -- -- -- -- //
-    ///////////////////////////////////////////////////
-    // Post Processing
-    
-    this.mapComposerMotionBlur=new EffectComposer(this.engine);
-    
-    this.mapMotionBlurPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          exposure:{type:"f",value:this.pxlRenderSettings.exposure},
-          time:{ value:this.pxlTimer.msRunner },
-          camRotXYZ:{ value:this.pxlCamera.camRotXYZ },
-          blurDirCur:{ type:'f',value:this.blurDirCur },
-          blurDirPrev:{ type:'f',value:this.blurDirPrev },
-          noiseTexture: { value: this.cloud3dTexture },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.motionBlurPostProcess(this.pxlDevice.screenRes,this.pxlDevice.mobile),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapMotionBlurPass.material.uniforms.rDiffuse = this.scene.renderTarget.texture;
-    this.mapMotionBlurPass.needsSwap = true;
-    this.mapMotionBlurPass.name = "mapMotionBlurPass";
-    this.mapComposerMotionBlur.addPass(this.mapMotionBlurPass);
-    this.mapMotionBlurPass.enabled=false;
-    this.mapComposerMotionBlur.renderToScreen=false;
-    //this.mapComposerMotionBlur.autoClear=false;
-    
-    // -- -- -- -- -- -- -- -- -- -- //
-    
-    this.mapComposerGlow=new EffectComposer(this.engine);
-    
-    let renderGlowPass = new RenderPass(this.scene, this.pxlCamera.camera);
-    this.mapComposerGlow.addPass(renderGlowPass);
-    
-    this.blurScreenMerge = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          mtDiffuse: { value: null },
-          exposure:{type:"f",value:this.pxlRenderSettings.exposure}
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.compLayersPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.blurScreenMerge.material.uniforms.rDiffuse = this.scene.renderTarget.texture;
-    // TODO : Motion Blur pass, performance is slow but should be enableable through 'options'
-    //this.blurScreenMerge.material.uniforms.mtDiffuse = this.mapComposerMotionBlur.renderTarget2.texture;
-    this.blurScreenMerge.material.uniforms.mtDiffuse = this.scene.renderTarget.texture;
-    this.blurScreenMerge.needsSwap = true;
-    this.blurScreenMerge.name = "blurScreenMerge";
-    this.mapComposerGlow.addPass(this.blurScreenMerge);
-    
-    let glowCopyPassBlur = new ShaderPass(CopyShader);
-    glowCopyPassBlur.name = "glowCopyPassBlur";
-    this.mapComposerGlow.addPass(glowCopyPassBlur);
-    
-    //this.mapGlowPass = new UnrealBloomPass( new Vector2( this.pxlDevice.mapW*this.pxlQuality.bloomPercMult, this.pxlDevice.mapH*this.pxlQuality.bloomPercMult ), .28, 0.08, 0.13 );
-    //this.mapGlowPass.threshold = this.pxlRenderSettings.bloomThresh;
-    //this.mapGlowPass.strength = this.pxlRenderSettings.bloomStrength;
-    //this.mapGlowPass.radius = this.pxlRenderSettings.bloomRadius;
-    /*this.mapGlowPass = new BloomPass( this.pxlRenderSettings.bloomStrength, 50, 4, 512);
-    this.mapGlowPass.threshold = this.pxlRenderSettings.bloomThresh;
-    this.mapGlowPass.strength = this.pxlRenderSettings.bloomStrength;
-    this.mapGlowPass.radius = this.pxlRenderSettings.bloomRadius;*/
-    //this.mapGlowPass.clear=true;
-    
-    //this.mapComposerGlow.addPass(this.mapGlowPass);
-    this.mapComposerGlow.renderToScreen=false;
-    this.mapComposerGlow.autoClear=true;
-
-    this.mapOverlayHeavyPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          gamma:{type:"f",value:this.pxlDevice.gammaCorrection},
-          exposure:{type:"f",value:this.pxlRenderSettings.exposure},
-          time:{ value:this.pxlTimer.msRunner },
-          camPos: { value: this.pxlCamera.camera.position },
-          ratio:{ type:'f',value: 1 },
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          bloomTexture: { value: null },
-          sceneDepth: { value: null },
-          scenePos: { value: null },
-          noiseTexture: { value: this.cloud3dTexture },
-          fogMult: { value: this.fogMult },
-          proximityMult: { value: 1 },
-          //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.finalOverlayHeavyShader(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapOverlayHeavyPass.material.uniforms.rDiffuse = this.scene.renderTarget.texture;
-    this.mapOverlayHeavyPass.material.uniforms.bloomTexture = this.mapComposerGlow.renderTarget2.texture;
-    this.mapOverlayHeavyPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-    this.mapOverlayHeavyPass.material.uniforms.scenePos = this.scene.renderWorldPos.texture;
-    this.mapOverlayHeavyPass.needsSwap = true;
-    this.mapOverlayHeavyPass.name = "mapOverlayHeavyPass";
-
-    this.mapOverlayPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          gamma:{type:"f",value:this.pxlDevice.gammaCorrection},
-          exposure:{type:"f",value:this.pxlRenderSettings.exposure},
-          time:{ value:this.pxlTimer.msRunner },
-                    camPos: { value: this.pxlCamera.camera.position },
-          ratio:{ type:'f',value: 1 },
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          bloomTexture: { value: null },
-          sceneDepth: { value: null },
-          scenePos: { value: null },
-          noiseTexture: { value: this.cloud3dTexture },
-          fogMult: { value: this.fogMult },
-          proximityMult: { value: 1 },
-          //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.finalOverlayShader(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapOverlayPass.material.uniforms.rDiffuse = this.scene.renderTarget.texture;
-    this.mapOverlayPass.material.uniforms.bloomTexture = this.mapComposerGlow.renderTarget2.texture;
-    this.mapOverlayPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-    this.mapOverlayPass.material.uniforms.scenePos = this.scene.renderWorldPos.texture;
-    this.mapOverlayPass.needsSwap = true;
-    this.mapOverlayPass.name = "mapOverlayPass";
-    
-    this.mapOverlaySlimPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          gamma:{type:"f",value:this.pxlDevice.gammaCorrection},
-          exposure:{type:"f",value:this.pxlRenderSettings.exposure},
-          time:{ value:this.pxlTimer.msRunner },
-          camPos: { value: this.pxlCamera.camera.position },
-          ratio:{ type:'f',value: 1 },
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          bloomTexture: { value: null },
-          sceneDepth: { value: null },
-          fogMult: { value: this.fogMult },
-          proximityMult: { value: 1 },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.finalOverlaySlimShader(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapOverlaySlimPass.material.uniforms.rDiffuse = this.scene.renderTarget.texture;
-    //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
-    this.mapOverlaySlimPass.material.uniforms.bloomTexture = this.mapComposerGlow.renderTarget2.texture;
-    this.mapOverlaySlimPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-    this.mapOverlaySlimPass.needsSwap = true;
-    this.mapOverlaySlimPass.name = "mapOverlaySlimPass";
-
-    // -- -- -- -- -- -- -- -- -- -- //
-    
-    this.mapGlowPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          ratio:{ type:'f',value: 1 },
-          tDiffuse: { value: null },
-          rDiffuse: { value: null },
-          sceneDepth: { value: null },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.glowPassPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapGlowPass.material.uniforms.rDiffuse = this.scene.renderGlowTarget.texture;
-    this.mapGlowPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-    this.mapGlowPass.needsSwap = true;
-    this.mapGlowPass.name = "mapGlowPass";
-
-    // -- -- -- -- -- -- -- -- -- -- //
-    
-    this.mapComposer = new EffectComposer(this.engine);
-    
-    this.mapComposer.addPass( this.mapOverlayHeavyPass );
-    this.mapComposer.addPass( this.mapOverlayPass );
-    this.mapComposer.addPass( this.mapOverlaySlimPass );
-    this.mapComposer.addPass( this.mapGlowPass );
-    this.mapOverlayHeavyPass.enabled=false;
-    this.mapOverlayPass.enabled=false;
-    //this.mapOverlayPass.autoClear=true;
-    //this.mapOverlaySlimPass.enabled=false;
-    
-        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.pxlUser.lKingWarp=new Vector2( ...this.pxlUser.lKingInactive );
-        
-    this.lizardKingPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          time:{ value:this.pxlTimer.msRunner },
-          ratio: { value: this.pxlDevice.screenRes },
-          noiseTexture: { value: this.cloud3dTexture },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.lKingPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-        this.pxlUser.lizardKingPass=this.lizardKingPass;
-        this.lizardKingPass.enabled=false;
-        this.pxlUser.lizardKingPass.name = "lizardKingPass";
-    
-        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.pxlUser.starFieldPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          time:{ value:this.pxlTimer.msRunner },
-          ratio: { value: this.pxlDevice.screenRes },
-          noiseTexture: { value: this.cloud3dTexture },
-          starTexture: { value: this.pxlUtils.loadTexture(this.pxlUtils.assetRoot+"uv_starNoise.jpg", null, {"encoding":LinearSRGBColorSpace}) },
-        },
-        vertexShader: this.pxlShaders.rendering.sFieldPostProcessVert(),
-        fragmentShader: this.pxlShaders.rendering.sFieldPostProcessFrag(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-        this.pxlUser.starFieldPass.enabled=false;
-        this.pxlUser.starFieldPass.name = "starFieldPass";
-    
-        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-    this.pxlUser.crystallinePass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          tDiffusePrev: {type:'t', value: null },
-          time:{ value:this.pxlTimer.msRunner },
-          ratio: { value: this.pxlDevice.screenRes },
-          noiseTexture: { value: this.cloud3dTexture },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.iZoomPostProcess(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-        this.pxlUser.crystallinePass.enabled=false;
-        this.pxlUser.crystallinePass.name = "crystallinePass";
-    
-        
-        
-        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-
-    
-    if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){
-      this.chromaticAberrationPass = new ShaderPass(
-        new ShaderMaterial( {
-          uniforms: {
-            tDiffuse: { value: null },
-            ratio: { value: this.pxlDevice.screenRes },
-            warpMult: { value: this.chroAberMult },
-            chroAberUVTexture: { value: this.chroAberUVTexture },
-            chroAberUVAlpha: { value: this.chroAberUVAlpha },
-            lKing: { value: this.pxlUser.lKingWarp },
-          },
-          vertexShader: this.pxlShaders.core.defaultVert(),
-          fragmentShader: this.pxlShaders.rendering.chroAberPostProcess(),
-          defines: {}
-        } ), "tDiffuse"
-      );
-      this.chromaticAberrationPass.enabled=false;
-      this.chromaticAberrationPass.name = "chromaticAberrationPass";
-      this.mapComposer.addPass( this.chromaticAberrationPass );
-    }
-    
-    if( this.pxlOptions.postProcessPasses.lizardKingPass ){
-      this.mapComposer.addPass( this.lizardKingPass );
-    }
-    //if( !this.mobile ) {
-    if( this.pxlOptions.postProcessPasses.starFieldPass ){
-      this.mapComposer.addPass( this.pxlUser.starFieldPass );
-    }
-    if( this.pxlOptions.postProcessPasses.crystallinePass ){
-      this.mapComposer.addPass( this.pxlUser.crystallinePass );
-    }
-    
-    if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){
-      this.mapComposerWarpPass = new ShaderPass(
-        new ShaderMaterial( {
-          uniforms: {
-            time:{ value:this.pxlTimer.msRunner },
-            fader:{ value:this.warpVisualFader },
-            tDiffuse: { value: null },
-            noiseTexture: { value: this.cloud3dTexture },
-            animTexture: { value: this.blockAnimTexture  },
-            //bloomTexture: { value: this.mapComposerMotionBlur.renderTarget2.texture }
-          },
-          vertexShader: this.pxlShaders.core.camPosVert(),
-          fragmentShader: this.pxlShaders.rendering.warpPostProcess(),
-          defines: {}
-        } ), "tDiffuse"
-      );
-      this.mapComposerWarpPass.needsSwap = true;
-      this.mapComposerWarpPass.enabled=false;
-      this.mapComposerWarpPass.name = "mapComposerWarpPass";
-      this.mapComposer.addPass( this.mapComposerWarpPass );
-    }
-        // 8 Samples
-    this.mapBoxAAPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          resUV:{ type:'f',value:this.pxlDevice.screenRes },
-          ratio:{ type:'f',value: 1 },
-          gamma:{type:"f",value:this.pxlDevice.gammaCorrection},
-        },
-        vertexShader: this.pxlShaders.core.camPosVert(),
-        fragmentShader: this.pxlShaders.rendering.boxAntiAliasPass(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapBoxAAPass.enabled=false;
-    this.mapBoxAAPass.name = "mapBoxAAPass";
-    this.mapComposer.addPass( this.mapBoxAAPass );
-        
-        // 4 samples
-    this.mapCrossAAPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          resUV:{ type:'f',value:this.pxlDevice.screenRes },
-          ratio:{ type:'f',value: 1 },
-          gamma:{type:"f",value:this.pxlDevice.gammaCorrection},
-        },
-        vertexShader: this.pxlShaders.core.camPosVert(),
-        fragmentShader: this.pxlShaders.rendering.crossAntiAliasPass(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.mapCrossAAPass.enabled=false;
-    this.mapCrossAAPass.name = "mapCrossAAPass";
-    this.mapComposer.addPass( this.mapCrossAAPass );
-    
-    this.mapComposer.autoClear=true;
-    
-    // -- -- -- -- -- -- -- -- -- -- //
-    
-    // External Room composer
-    let bootScene= this.roomSceneList[this.bootRoom].scene; // this.roomSceneList['ShadowPlanet'].scene ||
-    this.roomComposer=new EffectComposer(this.engine);
-
-    this.roomRenderPass = new RenderPass(bootScene, this.pxlCamera.camera);
-    this.roomRenderPass.name = "roomRenderPass";
-    this.roomComposer.addPass(this.roomRenderPass);
-        
-        
-    this.roomNameList.forEach( (r)=>{
-      if( r !== this.mainRoom){
-        let curPass=this.roomSceneList[ r ].applyRoomPass( this.roomComposer );
-        if( curPass ){
-            curPass.enabled=false;
-            this.roomComposer.addPass( curPass );
-        }
-      }
-    });
-        
-    
-    this.roomBloomPass = new UnrealBloomPass( new Vector2( this.pxlDevice.mapW*.5, this.pxlDevice.mapH*.5 ), 1.5, 0.8, 0.85 );
-    this.roomBloomPass.threshold = this.pxlRenderSettings.bloomThresh;
-    this.roomBloomPass.strength = this.pxlRenderSettings.bloomStrength;
-    this.roomBloomPass.radius = this.pxlRenderSettings.bloomRadius;
-    this.roomBloomPass.name = "roomBloomPass";
-    this.roomComposer.addPass( this.roomBloomPass );
-    
-    
-    if( this.pxlOptions.postProcessPasses.roomGlowPass ){
-      this.roomGlowPass = new ShaderPass(
-        new ShaderMaterial( {
-          uniforms: {
-            time:{ value:this.pxlTimer.msRunner },
-            ratio:{ type:'f',value: 1 },
-            tDiffuse: { value: null },
-            gDiffuse: { value: null },
-            rDiffuse: { value: null },
-            sceneDepth: { value: null },
-          },
-          vertexShader: this.pxlShaders.core.defaultVert(),
-          fragmentShader: this.pxlShaders.rendering.glowPassPostProcess(),
-          defines: {}
-        } ), "tDiffuse"
-      );
-      
-      //gDiffuse: { value: this.scene.renderGlowTarget.texture },
-      //gDiffuse: { value: this.blurComposer.renderTarget1.texture },
-      this.roomGlowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
-      this.roomGlowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
-      this.roomGlowPass.material.uniforms.sceneDepth = this.scene.renderTarget.depthTexture;
-      this.roomGlowPass.needsSwap = true;
-      this.roomGlowPass.name = "roomGlowPass";
-
-      this.roomComposer.addPass( this.roomGlowPass );
-    }
-    
-    if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){
-      this.roomComposer.addPass( this.chromaticAberrationPass );
-    }
-    
-    if( this.pxlOptions.postProcessPasses.lizardKingPass ){
-      this.roomComposer.addPass( this.lizardKingPass );
-    }
-    
-    if( this.pxlOptions.postProcessPasses.starFieldPass ){
-      this.roomComposer.addPass( this.pxlUser.starFieldPass );
-    }
-
-    if( this.pxlOptions.postProcessPasses.crystallinePass ){
-      this.roomComposer.addPass( this.pxlUser.crystallinePass );
-    }
-
-    if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){
-      this.roomComposer.addPass( this.mapComposerWarpPass );
-    }
-        
-    this.roomComposer.addPass( this.mapCrossAAPass );
-    this.roomComposer.addPass( this.mapBoxAAPass );
-        
-    this.roomComposer.autoClear=true;
-        
-        // -- -- -- -- -- -- -- -- //
-        
-    
-        // -- -- -- -- -- -- -- -- //
-        // Set above, for pass to use renderTarget in uniforms
-    this.delayComposer=new EffectComposer(this.engine);
-    
-    //let renderDelayPass = new RenderPass(this.scene, this.pxlCamera.camera);
-    //this.delayComposer.addPass(renderDelayPass);
-        
-    this.delayPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          tDiffuse: { value: null },
-          roomComposer: { type:"f", value : 0 },
-          tDiffusePrev: { value: null },
-          tDiffusePrevRoom: { value: null },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.textureStorePass(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.delayPass.material.uniforms.tDiffusePrev = this.mapComposer.renderTarget1.texture;
-    this.delayPass.material.uniforms.tDiffusePrevRoom = this.roomComposer.renderTarget1.texture;
-    //this.delayPass.needsSwap = true;
-    this.delayPass.clear=false;
-    this.delayComposer.addPass( this.delayPass );
-    this.delayComposer.renderToScreen=false;
-    this.delayComposer.autoClear=false;
-        
-    this.pxlUser.crystallinePass.uniforms.tDiffusePrev.value = this.delayComposer.renderTarget2.texture;
+    this.mapOverlayHeavyPass=this.pxlRendering.mapOverlayHeavyPass;
+    this.mapOverlayPass=this.pxlRendering.mapOverlayPass;
+    this.mapOverlaySlimPass=this.pxlRendering.mapOverlaySlimPass;
+    this.mapBoxAAPass=this.pxlRendering.mapBoxAAPass;
+    this.mapCrossAAPass=this.pxlRendering.mapCrossAAPass;
+    this.mapWorldPosMaterial=this.pxlRendering.mapWorldPosMaterial;
+    this.mapGlowPass=this.pxlRendering.mapGlowPass;
+    this.mapComposer=this.pxlRendering.mapComposer;
+    this.mapComposerMotionBlur=this.pxlRendering.mapComposerMotionBlur;
+    this.mapComposerGlow=this.pxlRendering.mapComposerGlow;
+    this.chromaticAberrationPass=this.pxlRendering.chromaticAberrationPass;
+    this.lizardKingPass=this.pxlRendering.lizardKingPass;
+    this.mapComposerWarpPass=this.pxlRendering.mapComposerWarpPass;
+    this.blurScreenMerge=this.pxlRendering.blurScreenMerge;
   }
   
   setExposure(curExp){
@@ -1550,7 +921,7 @@ export class Environment{
     curExp= curExp*animPerc; 
     this.pxlCamera.uniformScalars.exposureUniformBase=curExp;
     // Set scene exposure on post-process composer passes 
-    this.updateCompUniforms(curExp);
+    this.pxlRendering.updateCompUniforms(curExp);
   }
   
   stepWarpPass(){
@@ -1578,23 +949,11 @@ export class Environment{
         //
   }
     
-    userRemoveRemoteData( curId ){
-        //
-    }
-    
-    
-  stepShaderValues(){ // ## Switch variables in shaders to three variables to avoid this whole thing  
-    this.stepShaderFuncArr.forEach((x)=>{
-      if(typeof(x)=="object"){
-        x.step();
-      }else if(typeof(x)=="string"){
-        //console.log("shader trigger?");
-        //console.log(x);
-        //(x);
-      }
-    });
-    
+  userRemoveRemoteData( curId ){
+      //
   }
+    
+    
 
   stepAnimatedObjects(){
     if(this.pxlUser.itemListNames.length > 0){
@@ -1640,11 +999,11 @@ export class Environment{
     let prepRoom=this.roomSceneList[curScene];
     
     //this.pxlCamera.setTransform( prepRoom.camInitPos, prepRoom.camInitLookAt );
-    this.engine.setRenderTarget(prepRoom.warpZoneRenderTarget);
-    //this.engine.clear();
+    this.pxlRendering.engine.setRenderTarget(prepRoom.warpZoneRenderTarget);
+    //this.pxlRendering.engine.clear();
     
     prepRoom.prepPortalRender();
-    this.engine.render(  prepRoom.scene || prepRoom.scene, this.pxlCamera.camera );
+    this.pxlRendering.engine.render(  prepRoom.scene || prepRoom.scene, this.pxlCamera.camera );
     prepRoom.cleanupPortalRender();
     /*
     if( curScene===this.mainRoom ){
@@ -1656,7 +1015,7 @@ export class Environment{
       //prepRoom.step();
     
       prepRoom.prepPortalRender();
-      this.engine.render(  prepRoom.scene, this.pxlCamera.camera );
+      this.pxlRendering.engine.render(  prepRoom.scene, this.pxlCamera.camera );
       prepRoom.cleanupPortalRender();
       
       this.warpPortalTextures[ curScene ] = this.scene.renderTarget.clone();
@@ -1668,7 +1027,7 @@ export class Environment{
       this.setPortalTexture( this.warpPortalTextures[ curScene ], curScene );
     }*/
     
-    this.engine.setRenderTarget(null);
+    this.pxlRendering.engine.setRenderTarget(null);
   
   }
 
@@ -1684,7 +1043,7 @@ export class Environment{
 
 
       // Render appropriate room
-      this.stepShaderValues();
+      this.pxlRendering.stepShaderValues();
       this.stepAnimatedObjects();
       
       // Send out event to allow for any pre-render calculations
@@ -1697,23 +1056,23 @@ export class Environment{
       if(curRoom && curRoom.booted){
         curRoom.step();
         curRoom.camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
-        this.engine.setRenderTarget(curRoom.scene.renderTarget);
-        this.engine.clear();
-        this.engine.render( curRoom.scene, curRoom.camera);
-        this.engine.setRenderTarget(null);
+        this.pxlRendering.engine.setRenderTarget(curRoom.scene.renderTarget);
+        this.pxlRendering.engine.clear();
+        this.pxlRendering.engine.render( curRoom.scene, curRoom.camera);
+        this.pxlRendering.engine.setRenderTarget(null);
         curRoom.camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
         
         if( false && this.pxlQuality.settings.fog>0 ){
           this.pxlCamera.camera.layers.disable( 1 );
           
-          curRoom.scene.overrideMaterial=this.mapWorldPosMaterial;
-          this.engine.setRenderTarget(this.scene.renderWorldPos);
-          this.engine.clear();
-          this.engine.render( curRoom.scene, this.pxlCamera.camera);
+          curRoom.scene.overrideMaterial=this.pxlRendering.mapWorldPosMaterial;
+          this.pxlRendering.engine.setRenderTarget(this.scene.renderWorldPos);
+          this.pxlRendering.engine.clear();
+          this.pxlRendering.engine.render( curRoom.scene, this.pxlCamera.camera);
           curRoom.scene.overrideMaterial=null;
         
           this.pxlCamera.camera.layers.enable( 1 );
-          this.engine.setRenderTarget(null);
+          this.pxlRendering.engine.setRenderTarget(null);
         }
         
         if( this.mapComposerGlow && ( this.pxlQuality.settings.bloom || this.pxlQuality.settings.fog ) ){ //  || this.pxlQuality.settings.motion ){ 
@@ -1722,8 +1081,9 @@ export class Environment{
         
         this.mapRenderBlurStack( curRoom, curRoom.camera, curRoom.scene, this.scene.renderGlowTarget)
         
-        this.roomComposer.render();
-        //this.engine.render( this.roomSceneList[this.currentRoom].scene, this.pxlCamera.camera);
+        this.pxlRendering.roomComposer.render();
+        //this.pxlRendering.engine.render( this.roomSceneList[this.currentRoom].scene, this.pxlCamera.camera);
+        console.log("Rendered Room - ", this.currentRoom);
       }
       
       if( this.pxlUser.iZoom ){
@@ -1773,13 +1133,13 @@ export class Environment{
       camera.layers.disable( this.pxlEnums.RENDER_LAYER.PARTICLES );
       camera.layers.disable( this.pxlEnums.RENDER_LAYER.SKY );
       
-      this.engine.setRenderTarget(target);
+      this.pxlRendering.engine.setRenderTarget(target);
       let bgCd=0x000000;
       let curgb = scene.background.clone()
       scene.background.set( bgCd );
-      this.engine.setClearColor(bgCd, 0);
-      //this.engine.clear();
-      this.engine.render( scene, camera);
+      this.pxlRendering.engine.setClearColor(bgCd, 0);
+      //this.pxlRendering.engine.clear();
+      this.pxlRendering.engine.render( scene, camera);
       //this.scene.overrideMaterial=null;
       scene.background.r=curgb.r;
       scene.background.g=curgb.g;
@@ -1788,7 +1148,7 @@ export class Environment{
       camera.layers.enable( this.pxlEnums.RENDER_LAYER.SCENE );
       camera.layers.enable( this.pxlEnums.RENDER_LAYER.PARTICLES );
       camera.layers.enable( this.pxlEnums.RENDER_LAYER.SKY );
-      this.engine.setRenderTarget(null);
+      this.pxlRendering.engine.setRenderTarget(null);
       
       if(curRoom.geoList["GlowPass"]){
         curRoom.geoList["GlowPass"].forEach((g)=>{

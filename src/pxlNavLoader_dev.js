@@ -11,10 +11,12 @@
 
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.js';
 
+import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
+
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO, DEBUG
-const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
+const verbose = pxlEnums.VERBOSE_LEVEL.DEBUG;
 
 // The Title of your Project
 //   This will be displayed on the load bar
@@ -30,7 +32,9 @@ const pxlAssetRoot = "../../dist/pxlAssets";
 const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment", "VoidEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
+//const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment", "VoidEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
+const OutletRoom = new OutletEnvironment( "OutletEnvironment", "../pxlRooms/OutletEnvironment/")
+const bootRoomList = [ OutletRoom ];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

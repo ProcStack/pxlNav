@@ -266,10 +266,20 @@ class pxlNav{
     this.verbose = this.pxlOptions["verbose"];
     this.projectTitle = projectTitle;
     this.startingRoom = startingRoom;
+    this.startingRoomName = startingRoom.roomName;
+    
+    let roomBootListNames = [];
+    roomBootList.forEach( (r)=>{
+      roomBootListNames.push( r.roomName );
+    });
+
+    this.roomBootList = roomBootList
+
+
     if( !roomBootList.includes( startingRoom ) ){
       roomBootList.push( startingRoom );
     }
-    this.roomBootList = roomBootList
+
     this.callbacks = {};
 
     this.uriHashParms = this.findHashParms();
@@ -347,7 +357,8 @@ class pxlNav{
 
     this.pxlUser = new pxlBase.User();
 
-    this.pxlEnv = new pxlBase.Environment( this.pxlOptions, this.startingRoom, this.mobile );
+    this.pxlRendering = new pxlBase.Rendering( this.pxlOptions );
+    this.pxlEnv = new pxlBase.Environment( this.pxlOptions, this.startingRoomName, this.mobile );
     this.pxlDevice = new pxlBase.Device( projectTitle, pxlCore, this.mobile, this.autoCam );
     
     // Default Grid Size 50, Collider Bounds as reference 1000.0
@@ -386,6 +397,7 @@ class pxlNav{
     this.pxlCamera.setDependencies( this );
     this.pxlGuiDraws.setDependencies( this );
     this.pxlHUD.setDependencies( this );
+    this.pxlRendering.setDependencies( this );
 
     this.pxlDevice.init();
     this.pxlGuiDraws.prepLoader();
@@ -700,7 +712,7 @@ class pxlNav{
         
         // Rederer
         try {
-          this.pxlEnv.engine=new WebGLRenderer({
+          this.pxlRendering.engine=new WebGLRenderer({
               canvas: this.pxlGuiDraws.pxlNavCanvas,
               powerPreference : "low-power",
               alpha:true,
@@ -721,30 +733,31 @@ class pxlNav{
             alpha:true,
             type : /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ? HalfFloatType : FloatType 
         };
-        this.pxlEnv.engine.autoClear=true;
+        this.pxlEnv.engine=this.pxlRendering.engine;
+        this.pxlRendering.engine.autoClear=true;
         ColorManagement.enabled = false;
-        this.pxlEnv.engine.outputColorSpace = SRGBColorSpace;
-        //this.pxlEnv.engine.outputColorSpace = LinearSRGBColorSpace;
+        this.pxlRendering.engine.outputColorSpace = SRGBColorSpace;
+        //this.pxlRendering.engine.outputColorSpace = LinearSRGBColorSpace;
         
-        this.pxlEnv.engine.debug.checkShaderErrors=false;
+        this.pxlRendering.engine.debug.checkShaderErrors=false;
         //%= Dev
-        this.pxlEnv.engine.debug.checkShaderErrors=true;
+        this.pxlRendering.engine.debug.checkShaderErrors=true;
         //%
         
         let bgCdHex="#000000";
-        this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
+        this.pxlRendering.engine.setClearColor(this.pxlRendering.fogColor, 0);
         //this.pxlEnv.engine.setPixelRatio(window.devicePixelRatio);
-        this.pxlEnv.engine.setSize(mapW/this.pxlQuality.screenResPerc, mapH/this.pxlQuality.screenResPerc);
+        this.pxlRendering.engine.setSize(mapW/this.pxlQuality.screenResPerc, mapH/this.pxlQuality.screenResPerc);
         
-        this.pxlEnv.engine.setSize( window.innerWidth, window.innerHeight );
+        this.pxlRendering.engine.setSize( window.innerWidth, window.innerHeight );
         
-        this.pxlEnv.engine.setPixelRatio(1);
+        this.pxlRendering.engine.setPixelRatio(1);
 
         if(this.pxlOptions.shadowMapBiasing === pxlEnums.SHADOW_MAP.OFF){
-          this.pxlEnv.engine.shadowMap.enabled=false;
+          this.pxlRendering.engine.shadowMap.enabled=false;
         }else{
-          this.pxlEnv.engine.shadowMap.enabled=true;
-          this.pxlEnv.engine.shadowMap.type=BasicShadowMap;
+          this.pxlRendering.engine.shadowMap.enabled=true;
+          this.pxlRendering.engine.shadowMap.type=BasicShadowMap;
         }
         
         
@@ -954,7 +967,7 @@ class pxlNav{
     for(let x=0; x<keys.length; ++x){ // Check if any objects are still loading
       stillLoadingCheck = tmpThis.pxlEnv.geoLoadList[keys[x]]===0;
       stillLoadingCheck = stillLoadingCheck && !tmpThis.pxlEnv.roomSceneList[x]?.booted;
-      if( bootOnFirst && keys[x] === this.startingRoom && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
+      if( bootOnFirst && keys[x] === this.startingRoomName && stillLoadingCheck){ // If entry isn't 1, means not fully loaded
         break;
       }
     }
@@ -1092,6 +1105,8 @@ class pxlNav{
       if(tmpThis.pxlGuiDraws.mapPromptBG) tmpThis.pxlGuiDraws.promptFader(tmpThis.pxlGuiDraws.mapPromptBG, false,null,false);
       this.pxlDevice.hideAddressBar();
       tmpThis.emit("booted", true);
+      console.log(this.pxlGuiDraws.pxlNavCanvas);
+      console.log(this.pxlRendering.engine);
     }, 200);
   }
 
@@ -1225,10 +1240,17 @@ class pxlNav{
   
   // -- -- --
 
+  /**
+   * Add rooms to the pxlNav load list
+   * Note: As of v1.0.0, this expects an array of `pxlNav.RoomEnvironment` elements.
+   * @param {RoomEnvironment[]} roomList List of pxlNav RoomEnvironments to add to the room load list
+   */
   addRooms( roomList ){
     for( let x=0; x<roomList.length; ++x ){
       if( !this.pxlEnv.roomNameList.includes( roomList[x] ) ){
         if(this.booted){
+          // TODO : Add boot during runtime
+          this.warn("pxlNav: Cannot add rooms after boot, room '"+roomList[x]+"' not added.");
         }else{
           this.roomBootList.push( roomList[x] );
         }
@@ -1478,4 +1500,5 @@ const pxlNavDefault = {
   pxlBase
 }; 
 
+export { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions, RoomEnvironment, pxlEffects, pxlShaders, pxlBase };
 export default pxlNavDefault;

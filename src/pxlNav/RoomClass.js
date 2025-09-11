@@ -44,12 +44,8 @@ class RoomEnvironment{
    * Create a Room Environment.
    * @param {string} roomName - The name of the room.
    * @param {string|null} assetPath - The path to the assets.
-   * @param {Object|null} msRunner - The millisecond runner.
-   * @param {Object|null} camera - The camera object.
-   * @param {Object|null} scene - The scene object.
-   * @param {Object|null} cloud3dTexture - The 3D cloud texture.
    */
-  constructor( roomName='pxlRoomEnvironment', assetPath=null, msRunner=null, camera=null, scene=null, cloud3dTexture=null ){
+  constructor( roomName='pxlRoomEnvironment', assetPath=null ){
     this.roomName=roomName;
     this.pxlOptions=null;
     this.pxlEnums=null;
@@ -60,6 +56,7 @@ class RoomEnvironment{
     this.pxlColliders=null;
     this.pxlDevice=null;
     this.pxlHUD=null;
+    this.pxlRendering=null;
     this.pxlEnv=null;
     this.booted=false;
     this.initScene=true;
@@ -117,10 +114,10 @@ class RoomEnvironment{
     
     this.startTime = 0;
     this.runTime = new Vector2(0, 0);
-    this.msRunner = msRunner;
-    this.camera = camera;
+    this.msRunner = null;
+    this.camera = null;
     this.autoCamPaths = {};
-    this.scene = scene;
+    this.scene = null;
     this.lightList = {}
     this.geoList = {}
     this.glassGroup = null;
@@ -181,6 +178,7 @@ class RoomEnvironment{
   setDependencies( pxlNav ){
     this.pxlOptions = pxlNav.pxlOptions;
     this.pxlEnums = pxlNav.pxlEnums;
+    this.pxlRendering = pxlNav.pxlRendering;
     this.pxlEnv = pxlNav;
     this.pxlFile = pxlNav.pxlFile;
     this.pxlAnim = pxlNav.pxlAnim;
@@ -190,6 +188,8 @@ class RoomEnvironment{
     this.pxlHUD = pxlNav.pxlHUD;
     this.pxlColliders = pxlNav.pxlColliders;
     this.mobile = pxlNav.mobile;
+    this.msRunner = this.pxlTimer.msRunner;
+
 
     this.cloud3dTexture=this.pxlEnv.cloud3dTexture;
     if( this.cloud3dTexture ){
@@ -260,11 +260,11 @@ class RoomEnvironment{
       //this.resetCamera();
     }
 
-    this.pxlEnv.engine.setClearColor(this.fogColor, 0);
+    this.pxlRendering.engine.setClearColor(this.fogColor, 0);
 
     /*this.spiralizerPass.enabled=true;
-    this.bloomPreState=this.pxlEnv.roomBloomPass.enabled;  
-    this.pxlEnv.roomBloomPass.enabled=false;  */
+    this.bloomPreState=this.pxlRendering.roomBloomPass.enabled;  
+    this.pxlRendering.roomBloomPass.enabled=false;  */
   }
   
   /**
@@ -285,17 +285,17 @@ class RoomEnvironment{
       });
     }*/
     
-    //this.pxlEnv.engine.setClearColor(this.pxlEnv.fogColor, 0);
+    //this.pxlRendering.engine.setClearColor(this.pxlEnv.fogColor, 0);
     
     // Render world positions for composer
     //   There must be a better way to get world positions,
     //     The render pass must have an option for this... Or could be added hHmmMMmmm
     /*this.scene.overrideMaterial=this.worldPosMaterial;
-    this.pxlEnv.engine.setRenderTarget(this.worldPosRenderTarget);
-    this.pxlEnv.engine.clear();
-    this.pxlEnv.engine.render( this.scene, this.camera );
+    this.pxlRendering.engine.setRenderTarget(this.worldPosRenderTarget);
+    this.pxlRendering.engine.clear();
+    this.pxlRendering.engine.render( this.scene, this.camera );
     this.scene.overrideMaterial=null;
-    this.pxlEnv.engine.setRenderTarget(null);*/
+    this.pxlRendering.engine.setRenderTarget(null);*/
         
   }
 
@@ -305,7 +305,7 @@ class RoomEnvironment{
    */
   stop(){
     //this.spiralizerPass.enabled=false;
-    //this.pxlEnv.roomBloomPass.enabled=this.bloomPreState;
+    //this.pxlRendering.roomBloomPass.enabled=this.bloomPreState;
   }
   
   // -- -- --

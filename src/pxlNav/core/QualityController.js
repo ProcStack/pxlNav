@@ -12,6 +12,7 @@ export class QualityController{
     this.pxlTimer=null;
     this.pxlCookie=null;
     this.pxlDevice=null;
+    this.pxlRendering=null;
     this.pxlEnv=null;
     this.msLog=0;
     this.prevMS=new Date().getTime()*.001;
@@ -90,6 +91,7 @@ export class QualityController{
     this.pxlTimer=pxlNav.pxlTimer;
     this.pxlCookie=pxlNav.pxlCookie;
     this.pxlDevice=pxlNav.pxlDevice;
+    this.pxlRendering=pxlNav.pxlRendering;
     this.pxlEnv=pxlNav.pxlEnv;
   }
 
@@ -342,14 +344,13 @@ export class QualityController{
         break;
         
       case "fog":
-        if( this.pxlEnv.mapOverlayHeavyPass ) this.pxlEnv.mapOverlayHeavyPass.enabled = val===2;
-        if( this.pxlEnv.mapOverlayPass ) this.pxlEnv.mapOverlayPass.enabled = val===1;
-        if( this.pxlEnv.mapOverlaySlimPass ) this.pxlEnv.mapOverlaySlimPass.enabled = val===0;
-        if( this.pxlEnv.mapBoxAAPass.enabled ) this.pxlEnv.mapBoxAAPass.enabled=val===2;
-        if( this.pxlEnv.mapCrossAAPass.enabled ) this.pxlEnv.mapCrossAAPass.enabled=val===1;
+        if( this.pxlRendering.mapOverlayHeavyPass ) this.pxlRendering.mapOverlayHeavyPass.enabled = val===2;
+        if( this.pxlRendering.mapOverlayPass ) this.pxlRendering.mapOverlayPass.enabled = val===1;
+        if( this.pxlRendering.mapOverlaySlimPass ) this.pxlRendering.mapOverlaySlimPass.enabled = val===0;
+        if( this.pxlRendering.mapBoxAAPass.enabled ) this.pxlRendering.mapBoxAAPass.enabled=val===2;
+        if( this.pxlRendering.mapCrossAAPass.enabled ) this.pxlRendering.mapCrossAAPass.enabled=val===1;
                 
         if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=1;
-        //this.pxlEnv.pxlRenderSettings.mult=1;
         if( this.pxlEnv.userScreenIntensity ){
           this.pxlEnv.userScreenIntensity.x = .65 ;
           this.pxlEnv.userScreenIntensity.y =  0 ;
@@ -362,9 +363,9 @@ export class QualityController{
         
       case "bloom":
         this.pxlEnv.portaluserScreenIntensity.x = val ? .4 : 1;
-        if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled = val;
-        if( this.pxlEnv.roomBloomPass )  this.pxlEnv.roomBloomPass.enabled = val;
-        if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled = val;
+        if( this.pxlRendering.mapGlowPass ) this.pxlRendering.mapGlowPass.enabled = val;
+        if( this.pxlRendering.roomBloomPass )  this.pxlRendering.roomBloomPass.enabled = val;
+        if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled = val;
         
         if( this.pxlEnv.userScreenIntensity ){
           this.pxlEnv.userScreenIntensity.x = val ? .65 : .8;
@@ -374,13 +375,13 @@ export class QualityController{
             this.pxlEnv.geoList['HDRView'].material.uniforms.cdMult.value = val===0 ? .7 : .3;
         }
         
-        if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled=val;  
+        if( this.pxlRendering.mapMotionBlurPass ) this.pxlRendering.mapMotionBlurPass.enabled=val;  
       
         this.settings[component]=val;
         break;
         
       case "motion":
-        if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled=val;  
+        if( this.pxlRendering.mapMotionBlurPass ) this.pxlRendering.mapMotionBlurPass.enabled=val;  
       
         this.settings[component]=val;
         break;
@@ -442,42 +443,42 @@ export class QualityController{
     }
 
 
-    if( this.pxlEnv.mapMotionBlurPass ) this.pxlEnv.mapMotionBlurPass.enabled = mapMotionBlurPassEnabled;
-    if( mapOverlayHeavyPassEnabled ) this.pxlEnv.mapOverlayHeavyPass.enabled = mapOverlayHeavyPassEnabled;
-    if( mapOverlayPassEnabled ) this.pxlEnv.mapOverlayPass.enabled = mapOverlayPassEnabled;
-    if( mapOverlaySlimPassEnabled ) this.pxlEnv.mapOverlaySlimPass.enabled = mapOverlaySlimPassEnabled;
+    if( this.pxlRendering.mapMotionBlurPass ) this.pxlRendering.mapMotionBlurPass.enabled = mapMotionBlurPassEnabled;
+    if( mapOverlayHeavyPassEnabled ) this.pxlRendering.mapOverlayHeavyPass.enabled = mapOverlayHeavyPassEnabled;
+    if( mapOverlayPassEnabled ) this.pxlRendering.mapOverlayPass.enabled = mapOverlayPassEnabled;
+    if( mapOverlaySlimPassEnabled ) this.pxlRendering.mapOverlaySlimPass.enabled = mapOverlaySlimPassEnabled;
               
-    if( mapBoxAAPassEnabled ) this.pxlEnv.mapBoxAAPass.enabled = mapBoxAAPassEnabled;
-    if( mapCrossAAPassEnabled ) this.pxlEnv.mapCrossAAPass.enabled = mapCrossAAPassEnabled;
+    if( mapBoxAAPassEnabled ) this.pxlRendering.mapBoxAAPass.enabled = mapBoxAAPassEnabled;
+    if( mapCrossAAPassEnabled ) this.pxlRendering.mapCrossAAPass.enabled = mapCrossAAPassEnabled;
 
 
     
     if( this.settings.bloom ){
-      if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=true;  
+      if( this.pxlRendering.mapGlowPass ) this.pxlRendering.mapGlowPass.enabled=true;  
 
-      if( this.pxlEnv.roomBloomPass) this.pxlEnv.roomBloomPass.enabled=true;  
+      if( this.pxlRendering.roomBloomPass) this.pxlRendering.roomBloomPass.enabled=true;  
 
-      if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=true;  
+      if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled=true;  
 
       this.pxlEnv.userScreenIntensity.x=.65;
       this.pxlEnv.userScreenIntensity.y=0;
       circleGateBloom=1;
       circleGateColor=.25;
     }else{
-      if( this.pxlEnv.mapGlowPass ) this.pxlEnv.mapGlowPass.enabled=false;
-      if( this.pxlEnv.roomBloomPass ) this.pxlEnv.roomBloomPass.enabled=false;
-      if( this.pxlEnv.roomGlowPass ) this.pxlEnv.roomGlowPass.enabled=false;
+      if( this.pxlRendering.mapGlowPass ) this.pxlRendering.mapGlowPass.enabled=false;
+      if( this.pxlRendering.roomBloomPass ) this.pxlRendering.roomBloomPass.enabled=false;
+      if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled=false;
       
-      if( this.pxlEnv?.mapComposerGlow?.renderTarget2 ){
-        this.pxlEnv.engine.setRenderTarget(this.pxlEnv.mapComposerGlow.renderTarget2);
-        this.pxlEnv.engine.clear();
+      if( this.pxlRendering.mapComposerGlow?.renderTarget2 ){
+        this.pxlRendering.engine.setRenderTarget(this.pxlRendering.mapComposerGlow.renderTarget2);
+        this.pxlRendering.engine.clear();
       }
-      if( this.pxlEnv?.roomGlowPass?.renderTarget2 ){
-        this.pxlEnv.engine.setRenderTarget(this.pxlEnv.roomGlowPass.renderTarget2);
-        this.pxlEnv.engine.clear();
+      if( this.pxlRendering.roomGlowPass?.renderTarget2 ){
+        this.pxlRendering.engine.setRenderTarget(this.pxlRendering.roomGlowPass.renderTarget2);
+        this.pxlRendering.engine.clear();
       }
       
-      this.pxlEnv.engine.setRenderTarget(null);
+      this.pxlRendering.engine.setRenderTarget(null);
                 
       this.pxlEnv.userScreenIntensity.x=.8;
       this.pxlEnv.userScreenIntensity.y=0;
@@ -504,7 +505,6 @@ export class QualityController{
     }
             
     if( this.pxlEnv.portaluserScreenIntensity ) this.pxlEnv.portaluserScreenIntensity.x=portalIntensity;
-    //this.pxlEnv.pxlRenderSettings.mult=multVal;
     this.pxlEnv.pxlCamera.colliderCurObjHit=null;
     //this.pxlEnv.setExposure(multVal);
   }

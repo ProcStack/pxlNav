@@ -12,6 +12,7 @@ import { User } from './core/User.js'; // User Status, Items, and States
 import { Device } from './core/Device.js'; // User's Machine / Device Dependencies
 import { Colliders } from './core/Colliders.js'; // Collision Detection and Management
 import { Animation } from './core/Animation.js'; // Rigging and skeletal animations mostly
+import { Rendering } from './core/Rendering.js'; // Rendering and Post Processing
 
 
 // Primary drawing and run time class
@@ -42,6 +43,6 @@ import { Video } from './media/Video.js';
 export const pxlBase = { 
   Utils, FileIO, QualityController, 
   CookieManager, Timer, User, Device, 
-  Colliders, Animation, Environment, GUI, HUD, 
-  Camera, AutoCamera, Extensions, 
+  Colliders, Animation, Rendering, Environment, 
+   GUI, HUD, Camera, AutoCamera, Extensions, 
   MusicUtils, Audio, Video };
