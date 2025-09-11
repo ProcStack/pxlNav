@@ -1,6 +1,11 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PxlNavComponent from './components/PxlNavComponent';
-import { getPxlPrep } from './components/pxlNavLoader.js';
+
+import pxlNav, { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
+
+import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment';
+
+console.log( pxlNavVersion );
 
 // Centralized pxlNav options builder for React devs
 // Keep all defaults and override logic here so developers know to look in App.tsx
@@ -65,16 +70,16 @@ function App() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const OutletEnv = new OutletEnvironment( "OutletEnvironment", "pxlRooms/OutletEnvironment/" )
   //const roomList = ["SaltFlatsEnvironment"];
   //const roomList = ["SaltFlatsEnvironment", "OutletEnvironment"];
-  const roomList = ["OutletEnvironment"];
+  const roomList = [ OutletEnv ];
 
   // Load pxlEnums and pxlOptions at the top level
   useEffect(() => {
     const loadPxlPrep = async () => {
       try {
-        const constants = await getPxlPrep();
-        setPxlConstants(constants);
+        setPxlConstants({ pxlEnums, pxlOptions });
       } catch (error) {
         setError(error as Error);
         setPxlNavStatus('error');

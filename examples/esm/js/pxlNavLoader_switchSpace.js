@@ -11,25 +11,26 @@
 
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
 
+
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
-const verbose = pxlEnums.VERBOSE_LEVEL.INFO;
+const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav :: The Outlet";
+const projectTitle = "pxlNav : The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "../js/pxlRooms";
+const pxlRoomRootPath = "../pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../dist/pxlAssets";
+const pxlAssetRoot = "../../builds/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
-const showOnboarding = true;
+const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["OutletEnvironment","VoidEnvironment"];
+const bootRoomList = ["CampfireEnvironment","VoidEnvironment"];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -113,7 +114,7 @@ const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
 // Set camera to static Camera Positions
 //   Locations pulled from the 'Camera' group in the pxlRoom's FBX file
 // Default is `false`
-const enableStaticCamera = false;
+const enableStaticCamera = true;
 
 // If using static cameras, allow the user to rotate the camera
 //  Default is `false`
@@ -216,38 +217,6 @@ pageListenEvents.forEach( (e)=>{
 });
 */
 
-
-// -- -- --
-
-// <div id="roomToggle" roomToggles="VoidEnvironment:Void Space;OutletEnvironment:Field">Void Space</div>
-
-let switchButton = document.getElementById("roomToggle");
-if( switchButton && switchButton.hasAttribute("roomToggles") ){
-  let roomValues = switchButton.getAttribute("roomToggles").split(";");
-  let roomLabelDict = {};
-  roomValues.forEach(curVal => {
-    let curPair = curVal.split(":");
-    roomLabelDict[curPair[0]] = curPair[1];
-  });
-  
-  switchButton.addEventListener("click", function(){
-    let switchButtonObj = document.getElementById("roomToggle");
-    if( switchButtonObj && switchButtonObj.hasAttribute("curRoom") ){ 
-      let curVal = switchButtonObj.getAttribute("curRoom");
-      let nextVal = "";
-      let labelKeys = Object.keys(roomLabelDict);
-      let curIndex = labelKeys.indexOf(curVal);
-      curIndex = (curIndex + 1) % labelKeys.length;
-      nextVal = labelKeys[curIndex];
-      switchButtonObj.innerText = roomLabelDict[nextVal];
-      switchButtonObj.setAttribute("curRoom", nextVal);
-      console.log( "Switching to room: ", nextVal );  
-      pxlNavEnv.trigger( 'warptoroom', nextVal );
-    }
-  });
-}
-
-
 // -- -- --
 
 // Display the frame rate (FPS) in the `verboseDivName` div
@@ -286,6 +255,22 @@ function setupFPSDisplay( pxlNavEnv, verboseDivName, avgCount = 4 ){
 if( enableFPSDisplay || showFPS ){
   setupFPSDisplay(pxlNavEnv, verboseDivName);
 }
+
+
+// -- -- --
+
+// Function to warp to the given camera location in the starting room
+function switchToCameraLocation( cameraName ){
+  pxlNavEnv.trigger( "warpToRoom", startingRoom, cameraName );
+}
+
+// Bind the `warpToRoom` event to the `pxlNav` object once it is fully loaded
+//   Listen to the `booted` event to know when the `pxlNav` object is ready to set the camera location
+pxlNavEnv.subscribe( "booted", ( e ) => {
+  // Switch to the starting camera location
+  switchToCameraLocation( "init" );
+});
+
 
 
 // -- -- --

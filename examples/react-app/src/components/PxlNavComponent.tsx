@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { loadPxlNavModule } from './pxlNavLoader.js';
+
+import pxlNavDefault, { pxlEnums as defaultPxlEnums, pxlOptions as defaultPxlOptions, RoomEnvironment } from 'pxlnav';
+const PxlNavClass = (pxlNavDefault as any)?.pxlNav;
+
 
 interface PxlNavComponentProps {
   projectTitle: string;
-  startingRoom: string;
-  roomBootList: string[];
+  startingRoom: RoomEnvironment;
+  roomBootList: RoomEnvironment[];
   pxlNavOptions: Record<string, any>; // Pre-configured options from parent
   onBooted?: () => void;
   onError?: (error: Error) => void;
@@ -28,14 +31,15 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
 
-  const [pxlEnums, setPxlEnums] = useState<any>(null);
+  // local copy of enums to avoid shadowing the imported symbol
+  const [localEnums, setLocalEnums] = useState<any>(defaultPxlEnums || null);
 
   // Localized print helper — avoids overwriting global console.log
   // print() obeys the pxlNav verbose level and is safe to call anywhere inside this component.
   const print = React.useCallback((...args: any[]) => {
     try {
-      const infoLevel = pxlEnums?.VERBOSE_LEVEL?.INFO;
-      const currentVerbose = pxlNavOptions?.verbose;
+      const infoLevel = localEnums?.VERBOSE_LEVEL?.INFO;
+      const currentVerbose = pxlNavOptions?.verbose ?? defaultPxlOptions?.verbose;
 
       if (typeof infoLevel === 'number' && typeof currentVerbose === 'number') {
         if (currentVerbose >= infoLevel) {
@@ -43,29 +47,25 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
         }
       }
     } catch (e) {
-      // swallow logging errors to avoid breaking the app
-      // fallback to native console.log
       console.log(...args);
     }
-  }, [pxlEnums, pxlNavOptions?.verbose]);
+  }, [localEnums, pxlNavOptions?.verbose]);
 
   // Load and initialize pxlNav - only run once when options are available
   useEffect(() => {
-    // Prevent multiple initializations
-    if (isInitialized || pxlNavInstanceRef.current || !pxlNavOptions) {
+    // Prevent multiple initializations; allow falling back to package defaults
+    if (isInitialized || pxlNavInstanceRef.current) {
       return;
     }
 
     const initializePxlNav = async () => {
       try {
         
-        // Load the module
-  const moduleData = await loadPxlNavModule();
-  const { pxlNav, pxlEnums } = moduleData;
   // expose enums to the component-level state for logging and other checks
-  setPxlEnums(pxlEnums);
+  setLocalEnums(defaultPxlEnums);
 
-        if( pxlNavOptions?.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+        const verboseLevel = pxlNavOptions?.verbose ?? defaultPxlOptions?.verbose;
+        if( verboseLevel >= defaultPxlEnums.VERBOSE_LEVEL.INFO ){
           print(' Starting pxlNav initialization...');
         }
 
@@ -74,19 +74,21 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
         
         // Create pxlNav instance with pre-configured options
         // Ensure the engine receives the actual DOM container managed by this component
-        const instanceOptions = Object.assign({}, pxlNavOptions, {
+        // Merge default package options with any provided options; container must be set
+        const baseOpts = Object.assign({}, defaultPxlOptions || {});
+        const instanceOptions = Object.assign({}, baseOpts, pxlNavOptions || {}, {
           container: containerRef.current
         });
 
-        const pxlNavManager = new pxlNav(
+  const pxlNavManager = new PxlNavClass(
           instanceOptions,
           projectTitle,
           startingRoom,
           roomBootList
         );
         
-  pxlNavInstanceRef.current = pxlNavManager;
-  print(' pxlNav instance created:', pxlNavInstanceRef.current);
+        pxlNavInstanceRef.current = pxlNavManager;
+        print(' pxlNav instance created:', pxlNavInstanceRef.current);
 
         // Subscribe to booted event
         const bootedCallback = () => {

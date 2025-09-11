@@ -41,19 +41,19 @@
     "controller",
     "framework"
   ],
-  "main": "builds/pxlNav.cjs.js",
-  "module": "builds/pxlNav.esm.js",
+  "main": "src/pxlNav.cjs.js",
+  "module": "src/pxlNav.esm.js",
+  "browser": "src/pxlNav.umd.js",
+  "unpkg": "src/pxlNav.umd.js",
   "types": "index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./builds/pxlNav.esm.js",
-      "require": "./builds/pxlNav.cjs.js",
-      "default": "./builds/pxlNav.umd.js"
+      "import": "./src/pxlNav.esm.js",
+      "require": "./src/pxlNav.cjs.js",
+      "default": "./src/pxlNav.umd.js"
     }
   },
-  "browser": "builds/pxlNav.umd.js",
-  "unpkg": "builds/pxlNav.umd.js",
   "files": [
     "devExamples.js",
     "index.js",

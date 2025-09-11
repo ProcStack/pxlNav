@@ -19,11 +19,14 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     return;
   }
 
-  const foundSearchValue = data.includes(searchValue);
+  return;
+
+  /*const foundSearchValue = data.includes(searchValue);
   if (!foundSearchValue) {
+    console.warn(`!!!!!!!!!!!`);
     console.warn(`Search value "${searchValue}" not found in ${filePath}. No changes made.`);
     return;
-  }
+  }*/
 
   //const result = data.replace(searchValue, replaceValue);
   const result = data;

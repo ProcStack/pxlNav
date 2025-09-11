@@ -16,6 +16,10 @@ import { EffectComposer, RenderPass, ShaderPass, CopyShader, UnrealBloomPass } f
 
 import { ANTI_ALIASING } from "./Enums.js";
 
+/**
+ * @namespace pxlRendering
+ * @description pxlNav Rendering
+ */
 export class Rendering{
   constructor( pxlOptions ){
     this.pxlOptions = pxlOptions;
@@ -73,11 +77,15 @@ export class Rendering{
     this.pxlDevice = pxlNav.pxlDevice;
     this.pxlCamera = pxlNav.pxlCamera;
     this.pxlShaders = pxlNav.pxlShaders;
-
   }
 
 
   // Build composers and passes
+  /**
+   * @memberof pxlRendering
+   * @function buildComposers
+   * @description Build EffectComposers and ShaderPasses
+   */
   buildComposers(){
         
         // Set up swapable frame buffers, for prior frame reads
@@ -665,6 +673,11 @@ export class Rendering{
     this.pxlUser.crystallinePass.uniforms.tDiffusePrev.value = this.delayComposer.renderTarget2.texture;
   }
 
+  /**
+   * 
+   * @param {*} canvasW 
+   * @param {*} canvasH 
+   */
   resize( canvasW, canvasH ){
     if( this.pxlEnv.mapComposer ) this.pxlEnv.mapComposer.setSize(canvasW,canvasH);
     if( this.pxlEnv.mapComposerGlow ) this.pxlEnv.mapComposerGlow.setSize(canvasW,canvasH);
@@ -716,6 +729,12 @@ export class Rendering{
 
   
   // Set composer uniforms
+  /**
+   * @memberof pxlRendering
+   * @function updateCompUniforms
+   * @description Update the exposure uniform for the rendering composers
+   * @param {number} exposure 
+   */
   updateCompUniforms(exposure=null){
     if(exposure){
       this.pxlRenderSettings.exposure=exposure*this.pxlRenderSettings.mult;
@@ -732,6 +751,11 @@ export class Rendering{
 
   // TODO : Re-implement to room passes
   //          It got disconnected during refactor
+  /**
+   * @memberof pxlRendering
+   * @function stepShaderValues
+   * @description Step shader variables for shaders that need to update values each frame
+   */
   stepShaderValues(){ // ## Switch variables in shaders to three variables to avoid this whole thing  
     this.stepShaderFuncArr.forEach((x)=>{
       if(typeof(x)=="object"){

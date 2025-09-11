@@ -1,6 +1,7 @@
 const path = require('path');
 const { IgnorePlugin } = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const BundleSitemapPlugin = require('./BundleSitemapPlugin');
 /*const CopyWebpackPlugin = require('copy-webpack-plugin');*/
 /*const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;*/
 const TerserPlugin = require('terser-webpack-plugin');
@@ -45,11 +46,33 @@ const baseConfig = {
   // Keep pxlRooms imports unbundled so consumers can provide their own pxlRooms/index.js
   externals: [
     function({ request }, callback) {
-      // If the import path refers to pxlRooms (any depth), treat it as external so webpack
-      // will not bundle it and the runtime consumer can provide their own module.
+      // Keep pxlRooms imports external so consumers can provide their own module.
       if (typeof request === 'string' && request.indexOf('pxlRooms') !== -1) {
         return callback(null, 'commonjs ' + request);
       }
+
+      if (typeof request !== 'string') {
+        return callback();
+      }
+
+  // Do not handle the bare 'three' package here — per-target externals (CJS/UMD/ESM)
+  // below will provide the correct mapping (commonjs import or UMD root). Returning
+  // an external object for the bare package at this stage can trigger module
+  // concatenation analysis to try to inspect the external and fail.
+
+      // Externalize any imports that point to local three libs (src/libs/three or ./libs/three)
+      // or the three examples in node_modules. This prevents bundling of three core/min files
+      // and the examples folder. FBXLoader is also left external here (so the runtime can supply it).
+      const threeLocalPattern = /(^\.\/libs[\\\/]three[\\\/])|(^\.\.\/libs[\\\/]three[\\\/])|([\\\/]src[\\\/]libs[\\\/]three[\\\/])|(^three[\\\/]examples[\\\/])/i;
+      if (threeLocalPattern.test(request) || /FBXLoader\.js$/.test(request)) {
+        // For local/relative three files (src/libs/three or ./libs/three) and FBXLoader
+        // return a simple commonjs external string. Returning an object with a `root`
+        // property for relative paths can confuse the module concatenation analysis
+        // (it expects a module name for the root mapping). Per-target externals
+        // (UMD/ESM/CJS) already handle the global mapping for the bare 'three' package.
+        return callback(null, 'commonjs ' + request);
+      }
+
       callback();
     }
   ],
@@ -84,6 +107,7 @@ const baseConfig = {
     new MiniCssExtractPlugin({
       filename: 'style/pxlNavStyle.css'
     }),
+  new BundleSitemapPlugin({ filename: 'pxlNav-sitemap.json' }),
     new IgnorePlugin({
       resourceRegExp: /Environment\.js$/,
       contextRegExp: /import\(.*\)/
@@ -147,9 +171,12 @@ const umdConfig = merge(baseConfig, {
     path: parentFolderPath,
     publicPath: '/',
     library: {
+      name: 'pxlNav',
       type: 'umd',
       export: 'default',
     },
+    // Ensure the bundle works in browsers, webworkers and Node-like environments
+    globalObject: "typeof self !== 'undefined' ? self : this",
   },
   // For UMD (browser) builds, expect a global THREE variable at runtime
   externals: [

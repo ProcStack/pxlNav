@@ -43,9 +43,9 @@ class RoomEnvironment{
   /**
    * Create a Room Environment.
    * @param {string} roomName - The name of the room.
-   * @param {string|null} assetPath - The path to the assets.
+   * @param {string} assetPath - The path to the assets.
    */
-  constructor( roomName='pxlRoomEnvironment', assetPath=null ){
+  constructor( roomName='pxlRoomEnvironment', assetPath='' ){
     this.roomName=roomName;
     this.pxlOptions=null;
     this.pxlEnums=null;
@@ -61,6 +61,9 @@ class RoomEnvironment{
     this.booted=false;
     this.initScene=true;
     this.active=true;
+    if( assetPath === "" ){
+      assetPath = "./pxlRooms/" + roomName + "/";
+    }
     this.assetPath=assetPath+"Assets/";
     this.mobile=false;
     
