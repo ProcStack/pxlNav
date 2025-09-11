@@ -615,8 +615,13 @@ class pxlNav{
   buildGui(){
     return new Promise( (resolve, reject)=>{
       this.pxlGuiDraws.booted();
-        
+      
       this.pxlGuiDraws.pxlNavCanvas=document.getElementById(pxlCore);
+
+      // TODO : It seems this is only needed on Native JS,
+      //          Will need to see how it impacts React/Next.js builds
+      this.pxlGuiDraws.guiWindows.container.gui.appendChild( this.pxlGuiDraws.pxlNavCanvas );
+
       
       if( !this.pxlGuiDraws.pxlNavCanvas ){
         console.error("pxlNav: Canvas element with ID '" + pxlCore + "' not found in DOM");
@@ -1105,8 +1110,6 @@ class pxlNav{
       if(tmpThis.pxlGuiDraws.mapPromptBG) tmpThis.pxlGuiDraws.promptFader(tmpThis.pxlGuiDraws.mapPromptBG, false,null,false);
       this.pxlDevice.hideAddressBar();
       tmpThis.emit("booted", true);
-      console.log(this.pxlGuiDraws.pxlNavCanvas);
-      console.log(this.pxlRendering.engine);
     }, 200);
   }
 

@@ -1083,7 +1083,6 @@ export class Environment{
         
         this.pxlRendering.roomComposer.render();
         //this.pxlRendering.engine.render( this.roomSceneList[this.currentRoom].scene, this.pxlCamera.camera);
-        console.log("Rendered Room - ", this.currentRoom);
       }
       
       if( this.pxlUser.iZoom ){

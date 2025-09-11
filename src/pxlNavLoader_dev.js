@@ -16,7 +16,7 @@ import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironmen
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO, DEBUG
-const verbose = pxlEnums.VERBOSE_LEVEL.DEBUG;
+const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 
 // The Title of your Project
 //   This will be displayed on the load bar
