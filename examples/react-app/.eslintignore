@@ -8,4 +8,4 @@ src/components/libs/three/zstddec.module.js
 
 # Ignore build outputs
 build/
-builds/
+dist/
