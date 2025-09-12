@@ -19,7 +19,7 @@ import {
   RGBFormat,
   DepthFormat,
   MeshBasicMaterial
-} from "../../libs/three/three.module.min.js";
+} from "three";
 /*LinearSRGBColorSpace,
 SRGBColorSpace,
 CubeUVRefractionMapping,*/
@@ -538,7 +538,7 @@ export class Utils{
    * @returns {Array} The duplicated array.
    * @example
    * // Duplicate an array
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav.module.js';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){

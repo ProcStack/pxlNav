@@ -16,7 +16,7 @@
 // - Example to 'mass' subscribe to events emitted from `pxlNav` is included below as well
 
 
-import { pxlNav, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+import { pxlNav, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 
 // Console logging level

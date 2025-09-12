@@ -8,10 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildTree": "node ./utils/fileTreeBuilder.js",
     "buildFiles": "cross-env NODE_ENV=production webpack --config ./packing/webpack.config.js",
-    "buildFinish": "node ./packing/buildFinish.js",
     "bundleCss": "node ./packing/bundle_css.js",
-    "build": "npm run buildFiles && npm run buildFinish && npm run bundleCss",
-    "buildAll": "npm run buildFiles && npm run buildFinish && npm run bundleCss && npm run jsdoc",
+    "build": "npm run buildFiles && npm run bundleCss",
+    "buildAll": "npm run buildFiles && npm run bundleCss && npm run jsdoc",
     "buildSingle": "cross-env NODE_ENV=production webpack --config ./packing/webpack-single.config.js",
     "lineCount": "python ./utils/recursiveFileLineCounter.py",
     "convertToCjs": "rollup --bundleConfigAsCjs -c ./packing/rollupConvert.config.js",
@@ -41,17 +40,17 @@
     "controller",
     "framework"
   ],
-  "main": "src/pxlNav.cjs.js",
-  "module": "src/pxlNav.esm.js",
-  "browser": "src/pxlNav.umd.js",
-  "unpkg": "src/pxlNav.umd.js",
+  "main": "builds/pxlNav.cjs.js",
+  "module": "builds/pxlNav.module.js",
+  "browser": "builds/pxlNav.umd.js",
+  "unpkg": "builds/pxlNav.umd.js",
   "types": "index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./src/pxlNav.esm.js",
-      "require": "./src/pxlNav.cjs.js",
-      "default": "./src/pxlNav.umd.js"
+      "import": "./builds/pxlNav.module.js",
+      "require": "./builds/pxlNav.cjs.js",
+      "default": "./builds/pxlNav.umd.js"
     }
   },
   "files": [

@@ -39,7 +39,7 @@
  */
 
 
-import { Vector2 } from "../../libs/three/three.module.min.js";
+import { Vector2 } from "three";
 
 export class Timer{
   constructor(){

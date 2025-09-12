@@ -2,7 +2,7 @@
 //import {shaderHeader} from "../core/ShaderHeader.js";
 import { 
   ShaderChunk
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 ///////////////////////////////////////////////////////////
 // Geometry Shaders                                     //

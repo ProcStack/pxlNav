@@ -1,15 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, '../builds/pxlNav.esm.js');
+const filePath = path.join(__dirname, '../builds/pxlNav.module.js');
 const searchValue = '__webpack_require__(541)';
 const replaceValue = 'import';
 
 // Copy `filePath`` to ./dist & ./examples/js
 const destPaths = [
   filePath,
-  path.join(__dirname, '../dist/pxlNav.esm.js'),
-  path.join(__dirname, '../examples/esm/js/pxlNav.esm.js')
+  path.join(__dirname, '../builds/pxlNav.module.js'),
+  path.join(__dirname, '../examples/esm/js/pxlNav.module.js')
 ];
 
 

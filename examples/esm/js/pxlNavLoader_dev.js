@@ -9,7 +9,7 @@
 //   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
 
@@ -32,7 +32,6 @@ const pxlAssetRoot = "../../builds/pxlAssets";
 const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-//const bootRoomList = ["OutletEnvironment"];//"OutletEnvironment", "VoidEnvironment"];//"SaltFlatsEnvironment",];//"VoidEnvironment"];
 const OutletRoom = new OutletEnvironment( "OutletEnvironment", "../pxlRooms/OutletEnvironment/")
 const bootRoomList = [ OutletRoom ];
 const startingRoom = bootRoomList[0];

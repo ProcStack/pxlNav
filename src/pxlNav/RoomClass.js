@@ -28,7 +28,7 @@ import {
   RepeatWrapping,
   UniformsUtils,
   UniformsLib
-} from "../libs/three/three.module.min.js";
+} from "three";
 import { pxlPrincipledVert, pxlPrincipledFrag } from "./shaders/objects/PxlPrincipled.js";
 
 import { COLLIDER_TYPE } from "./core/Enums.js";

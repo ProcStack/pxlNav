@@ -28,11 +28,11 @@ Javascript Player Controller & Environment Manager for Three.js
 --------------------------------------------------------------------------------------------
 
 ## Install Files
- - `./dist/pxlNav.esm.js` - JS Module file
- - `./dist/pxlNavStyle.min.css` - CSS Style for things like Loading bar, Shader Editor, and more
- - `./dist/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
+ - `./builds/pxlNav.module.js` - JS Module file
+ - `./builds/pxlNavStyle.min.css` - CSS Style for things like Loading bar, Shader Editor, and more
+ - `./builds/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
  - `./examples/pxlNavLoader_switchSpace.js` - Basic implementation of a external trigger to swap room environments
- - `./dist/libs/three/...` - Some changes needed to be made to the FBXLoader.js file, please include the `libs` folder along side `pxlNav.esm.js` to run pxlNav
+ - `./builds/libs/three/...` - Some changes needed to be made to the FBXLoader.js file, please include the `libs` folder along side `pxlNav.module.js` to run pxlNav
 
 &nbsp;&nbsp; **CJS & UMD versions needs testing, see `./builds` for these versions.**
 <br/>&nbsp;&nbsp; **Please bare with me while I work out any NPM packaging issues.**

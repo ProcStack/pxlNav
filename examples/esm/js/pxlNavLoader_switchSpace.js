@@ -8,9 +8,10 @@
 //       Listening to / triggering events on `pxlNav`
 //   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
+console.log("sdfsdf");
+import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
-
+import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -21,16 +22,17 @@ const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 const projectTitle = "pxlNav : The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "../pxlRooms";
+const pxlRoomRootPath = "./pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../builds/pxlAssets";
+const pxlAssetRoot = "../../pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["CampfireEnvironment","VoidEnvironment"];
+const OutletRoom = new OutletEnvironment( "OutletEnvironment", "./js/pxlRooms/OutletEnvironment/")
+const bootRoomList = [ OutletRoom ];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

@@ -66,7 +66,7 @@ pxlNavEnv.init();
 <br/>```const projectTitle = "Your Project Name";```
 
 **`pxlRoomRootPath` - Your `pxlRoom` folder path**
-<br/>&nbsp;&nbsp; by default is the same folder as `pxlNav.esm.js`**
+<br/>&nbsp;&nbsp; by default is the same folder as `pxlNav.module.js`**
 <br/>&nbsp;&nbsp; Available to change relative to the location of your `pxlNav.###.js`
 <br/>```const pxlRoomRootPath = "../pxlRooms";```
 

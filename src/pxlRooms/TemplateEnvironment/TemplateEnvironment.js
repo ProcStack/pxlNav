@@ -1,6 +1,6 @@
 
-import * as THREE from "../../three.module.min.js";
-import { pxlEffects, RoomEnvironment } from "../../pxlNav.esm.js";
+import * as THREE from "three";
+import { pxlEffects, RoomEnvironment } from "../../pxlNav.module.js";
 
 // Lets add a particle effect to the room
 //   This is lingering dust that floats around the user to give a sense of movement

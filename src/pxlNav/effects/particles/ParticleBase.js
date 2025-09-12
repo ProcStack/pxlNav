@@ -10,7 +10,7 @@ import {
   NearestMipmapNearestFilter,
   BufferGeometry,
   AdditiveBlending
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 import { RENDER_LAYER } from "../../core/Enums.js";
 
@@ -399,7 +399,7 @@ export class ParticleBase{
    * @returns {Array} Random atlas values.
    * @example
    * // Generate random atlas values
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){
@@ -425,7 +425,7 @@ export class ParticleBase{
    * @returns {Array} A list of random atlas values.
    * @example
    * // Generate a list of random atlas values
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){
@@ -447,7 +447,7 @@ export class ParticleBase{
    * @returns {Array} A random atlas value from the array.
    * @example
    * // Pick a random atlas value from an array
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){
@@ -472,7 +472,7 @@ export class ParticleBase{
    * @returns {Array} The duplicated array.
    * @example
    * // Duplicate an array
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){
@@ -493,7 +493,7 @@ export class ParticleBase{
    * @returns {Array} The duplicated array.
    * @example
    * // Duplicate an element in an array
-   * import { pxlNav } from 'pxlNav.esm.js';
+   * import { pxlNav } from 'pxlNav';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){

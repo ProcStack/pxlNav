@@ -8,7 +8,7 @@ import {
   DoubleSide,
   NearestFilter,
   NearestMipmapNearestFilter
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 import { ParticleBase } from './ParticleBase.js';
 import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
@@ -40,7 +40,7 @@ import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
  * }
  * @example
  * // Floating Dust Particle System for pxlNav
- * import { pxlEffects } from "pxlNav.esm.js";
+ * import { pxlEffects } from "pxlNav";
  * const EmberWisps = pxlEffects.pxlParticles.EmberWisps; 
  * 
  * // You can put this in yuor `fbxPostLoad()` or `build()` function

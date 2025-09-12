@@ -38,7 +38,7 @@ import {
   PlaneGeometry,
   DoubleSide,
   Mesh
-} from "../libs/three/three.module.min.js";
+} from "three";
 
 import { ANTI_ALIASING, VERBOSE_LEVEL, COLLIDER_TYPE } from "./core/Enums.js";
 import { pxlOptions } from "./core/Options.js";

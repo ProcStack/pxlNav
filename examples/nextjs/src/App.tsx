@@ -1,6 +1,18 @@
+// Test Example NextJS App using pxlNav
+//   Created by Kevin Edzenga; 2045
+//
+// This NextJS App is an example of loading the OutletEnvironment room through `pxlNav`
+// 
+// It's primarily expected that you edit the `pxlRoom` javascript itself and leave the component alone,
+//   Aside from changing settings and adding new rooms to load.
+
+
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PxlNavComponent from './components/PxlNavComponent';
-import { getPxlPrep } from './components/pxlNavLoader.js';
+
+import pxlNav, { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
+
+import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment';
 
 // Centralized pxlNav options builder for React devs
 // Keep all defaults and override logic here so developers know to look in App.tsx
@@ -65,16 +77,16 @@ function App() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  //const roomList = ["SaltFlatsEnvironment"];
-  //const roomList = ["SaltFlatsEnvironment", "OutletEnvironment"];
-  const roomList = ["OutletEnvironment"];
+  const OutletEnv = new OutletEnvironment( "OutletEnvironment", "pxlRooms/OutletEnvironment/" )
+  const roomList = [ OutletEnv ];
+
+  const versionDisp = pxlNavVersion ? ` v${pxlNavVersion}` : "";
 
   // Load pxlEnums and pxlOptions at the top level
   useEffect(() => {
     const loadPxlPrep = async () => {
       try {
-        const constants = await getPxlPrep();
-        setPxlConstants(constants);
+        setPxlConstants({ pxlEnums, pxlOptions });
       } catch (error) {
         setError(error as Error);
         setPxlNavStatus('error');
@@ -130,7 +142,7 @@ function App() {
         fontSize: '14px',
         fontFamily: 'monospace'
       }}>
-        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav React App</h3>
+        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav{versionDisp} React App</h3>
         <div>
           Status: {
             pxlNavStatus === 'loading' ? ' Loading...' :
@@ -141,11 +153,6 @@ function App() {
         {error && (
           <div style={{ color: '#ff6b6b', fontSize: '12px', marginTop: '5px' }}>
             {error.message}
-          </div>
-        )}
-        {pxlConstants && (
-          <div style={{ fontSize: '10px', marginTop: '5px', opacity: 0.8 }}>
-            Constants loaded ✓
           </div>
         )}
       </header>

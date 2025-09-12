@@ -1,11 +1,24 @@
+// Test Example React App using pxlNav
+//   Created by Kevin Edzenga; 2045
+//
+// This React App is an example of loading the OutletEnvironment room through `pxlNav`
+// 
+// This is the settings and launching point for the example app.
+//   Look for `options` below to see how to configure `pxlNav` for your project.
+// Since this file is the "display" page,
+//   You can find `App_Clean.tsx` for a minimal example without the status header and other UI elements.
+//
+// You can use this file to launch `pxlNav`
+//   While you edit the `pxlRoom` javascript itself and leave the component alone,
+
+
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PxlNavComponent from './components/PxlNavComponent';
 
-import pxlNav, { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
+// Try importing from source instead of built files
+import pxlNav, { pxlEnums, pxlOptions, pxlNavVersion } from '../../../src/pxlNav.esm.js';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment';
-
-console.log( pxlNavVersion );
 
 // Centralized pxlNav options builder for React devs
 // Keep all defaults and override logic here so developers know to look in App.tsx
@@ -71,8 +84,6 @@ function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const OutletEnv = new OutletEnvironment( "OutletEnvironment", "pxlRooms/OutletEnvironment/" )
-  //const roomList = ["SaltFlatsEnvironment"];
-  //const roomList = ["SaltFlatsEnvironment", "OutletEnvironment"];
   const roomList = [ OutletEnv ];
 
   // Load pxlEnums and pxlOptions at the top level
@@ -145,11 +156,6 @@ function App() {
         {error && (
           <div style={{ color: '#ff6b6b', fontSize: '12px', marginTop: '5px' }}>
             {error.message}
-          </div>
-        )}
-        {pxlConstants && (
-          <div style={{ fontSize: '10px', marginTop: '5px', opacity: 0.8 }}>
-            Constants loaded ✓
           </div>
         )}
       </header>

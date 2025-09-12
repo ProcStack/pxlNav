@@ -1,7 +1,7 @@
 pxlNav Root --
 = ./dist
 │    -pxlNav.cjs.js
-│    -pxlNav.esm.js
+│    -pxlNav.module.js
 └─   -pxlNavStyle.min.css
 = ./examples
 └─   -readme.md

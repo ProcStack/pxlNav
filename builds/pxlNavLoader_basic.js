@@ -6,7 +6,7 @@
 // This is an example simple implementation of `pxlNav` in a project;
 //
 
-import { pxlNav, pxlEnums, pxlOptions } from './pxlNav.esm.js';
+import { pxlNav, pxlEnums, pxlOptions } from './pxlNav.module.js';
 
 
 // Console logging level

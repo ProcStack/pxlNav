@@ -7,7 +7,7 @@ import {
   Clock,
   AnimationMixer,
   MeshStandardMaterial,
-} from "../../libs/three/three.module.min.js";
+} from "three";
 
 /**
  * @alias pxlAnim

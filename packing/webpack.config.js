@@ -54,25 +54,6 @@ const baseConfig = {
       if (typeof request !== 'string') {
         return callback();
       }
-
-  // Do not handle the bare 'three' package here — per-target externals (CJS/UMD/ESM)
-  // below will provide the correct mapping (commonjs import or UMD root). Returning
-  // an external object for the bare package at this stage can trigger module
-  // concatenation analysis to try to inspect the external and fail.
-
-      // Externalize any imports that point to local three libs (src/libs/three or ./libs/three)
-      // or the three examples in node_modules. This prevents bundling of three core/min files
-      // and the examples folder. FBXLoader is also left external here (so the runtime can supply it).
-      const threeLocalPattern = /(^\.\/libs[\\\/]three[\\\/])|(^\.\.\/libs[\\\/]three[\\\/])|([\\\/]src[\\\/]libs[\\\/]three[\\\/])|(^three[\\\/]examples[\\\/])/i;
-      if (threeLocalPattern.test(request) || /FBXLoader\.js$/.test(request)) {
-        // For local/relative three files (src/libs/three or ./libs/three) and FBXLoader
-        // return a simple commonjs external string. Returning an object with a `root`
-        // property for relative paths can confuse the module concatenation analysis
-        // (it expects a module name for the root mapping). Per-target externals
-        // (UMD/ESM/CJS) already handle the global mapping for the bare 'three' package.
-        return callback(null, 'commonjs ' + request);
-      }
-
       callback();
     }
   ],
@@ -195,7 +176,7 @@ const umdConfig = merge(baseConfig, {
 // ESM Configuration
 const esmConfig = merge(baseConfig, {
   output: {
-    filename: 'pxlNav.esm.js',
+    filename: 'pxlNav.module.js',
     //path: path.resolve( parentFolderPath, 'esm'),
     path: parentFolderPath,
     library: {
@@ -205,7 +186,13 @@ const esmConfig = merge(baseConfig, {
   experiments: {
     outputModule: true,
   },
-  // For ESM consumers, keep 'three' as an external import
+  // For ESM consumers, ask webpack to emit import-style externals by using
+  // externalsType: 'module'. Also include baseConfig externals (so pxlRooms
+  // and local three patterns remain external) and map the bare 'three'
+  // package to a module import.
+  // Emit externals as ESM imports. Keep other base externals and map the bare
+  // 'three' package to an import so webpack emits `import ... from 'three'`.
+  externalsType: 'module',
   externals: [
     ...(baseConfig.externals || []),
     {

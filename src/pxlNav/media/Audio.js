@@ -4,7 +4,7 @@
  */
 
 // Audio
-import { Vector3, Vector4 } from "../../libs/three/three.module.min.js";
+import { Vector3, Vector4 } from "three";
 
 /*const SoundLibrary = [
 	"./sounds/bits.ogg",

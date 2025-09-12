@@ -1,4 +1,4 @@
-import { LinearTransfer, Matrix3, SRGBTransfer } from './three.module.min.js';
+import { LinearTransfer, Matrix3, SRGBTransfer } from 'three';
 
 // Reference: http://www.russellcottrell.com/photo/matrixCalculator.htm
 

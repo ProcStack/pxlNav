@@ -24,7 +24,7 @@ const projectTitle = "pxlNav : The Outlet";
 const pxlRoomRootPath = "../pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../dist/pxlAssets";
+const pxlAssetRoot = "../../builds/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = false;

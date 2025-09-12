@@ -1,15 +1,15 @@
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  input: 'dist/pxlNav.esm.js',
+  input: 'builds/pxlNav.module.js',
   output: [
     {
-      file: 'dist/pxlNav.umd.js',
+      file: 'builds/pxlNav.umd.js',
       format: 'umd',
       name: 'pxlNav'
     },
     {
-    file: 'dist/pxlNav.cjs.js',
+    file: 'builds/pxlNav.cjs.js',
     format: 'cjs'
   }],
   plugins: [commonjs()]

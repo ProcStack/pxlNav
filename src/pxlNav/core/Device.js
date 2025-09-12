@@ -8,7 +8,7 @@ import {
   Vector2,
   Vector3,
   Quaternion
-} from "../../libs/three/three.module.min.js";
+} from "three";
 
 // TODO : So much dependency on outside data and classes
 //          Promote as much as possible to callback subscriptions

@@ -13,7 +13,7 @@ import {
   pxlEffects,
   pxlShaders,
   pxlBase
-} from './builds/pxlNav.esm.js';
+} from './builds/pxlNav.module.js';
 
 // Export all components
 export { 

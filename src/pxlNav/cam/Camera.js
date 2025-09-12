@@ -13,7 +13,7 @@ import {
   Vector3,
   Quaternion,
   Euler
-} from "../../libs/three/three.module.min.js";
+} from "three";
 
 //import { pxlUserSettings } from "../core/Options.js";
 import { VERBOSE_LEVEL, COLLIDER_TYPE } from "../core/Enums.js";
@@ -1154,7 +1154,7 @@ export class Camera{
     
     objTarget = objTarget || roomEnv.defaultCamLocation || "";
     objTarget = objTarget.toLowerCase()
-    let camLocName = roomName.toLowerCase();
+    let camLocName = (roomName || '').toLowerCase();
 
     let hasCurrentRoom = this.pxlEnv.roomSceneList.hasOwnProperty( this.pxlEnv.currentRoom );
     

@@ -6,7 +6,6 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "roomManifest": "node ./scripts/generateRoomManifest.js",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
@@ -37,7 +36,12 @@
     ]
   },
   "dependencies": {
-    "three": "^0.171.0",
+    "@types/react-router-dom": "^5.3.3",
+    "pxlnav": "file:../../",
+    "react-router-dom": "^7.8.2",
+    "three": "^0.171.0"
+  },
+  "resolutions": {
     "pxlnav": "file:../../"
   }
 }

@@ -45,7 +45,7 @@ import {
   Mesh,
   DoubleSide,
   AdditiveBlending
-} from "../../libs/three/three.module.min.js";
+} from "three";
 
 import { VERBOSE_LEVEL, COLLIDER_TYPE, GEOMETRY_SIDE } from "./Enums.js";
 

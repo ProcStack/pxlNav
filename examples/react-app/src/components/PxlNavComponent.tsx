@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import pxlNavDefault, { pxlEnums as defaultPxlEnums, pxlOptions as defaultPxlOptions, RoomEnvironment } from 'pxlnav';
+import pxlNavDefault, { pxlEnums as defaultPxlEnums, pxlOptions as defaultPxlOptions, RoomEnvironment } from '../../../../src/pxlNav.esm.js';
 const PxlNavClass = (pxlNavDefault as any)?.pxlNav;
 
 

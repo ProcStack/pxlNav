@@ -9,7 +9,7 @@ import {
   Vector3,
   Quaternion,
   Euler
-} from "../../libs/three/three.module.min.js";
+} from "three";
 
 /**
  * @namespace pxlAutoCam

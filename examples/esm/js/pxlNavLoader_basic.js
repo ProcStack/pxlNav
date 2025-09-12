@@ -9,7 +9,7 @@
 //   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -23,7 +23,7 @@ const projectTitle = "pxlNav :: The Outlet";
 const pxlRoomRootPath = "../js/pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../dist/pxlAssets";
+const pxlAssetRoot = "../../builds/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;

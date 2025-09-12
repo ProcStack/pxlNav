@@ -8,7 +8,7 @@ import {
   NearestMipmapNearestFilter,
   LinearMipmapLinearFilter,
   AdditiveBlending
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 import { ParticleBase } from './ParticleBase.js';
 import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
@@ -54,7 +54,7 @@ import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
  * //   With a spawn map to determine the density of the particles
  * //   Set noise and other settings to alter the particles
  * import { Object3D } from "three";
- * import { pxlEffects } from "pxlNav.esm.js";
+ * import { pxlEffects } from "pxlNav";
  * const HeightMap = pxlEffects.pxlParticles.HeightMap; 
  * 
  * // You can put this in yuor `fbxPostLoad()` or `build()` function

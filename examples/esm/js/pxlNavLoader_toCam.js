@@ -9,7 +9,7 @@
 //   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
 
-import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.esm.js';
+import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO

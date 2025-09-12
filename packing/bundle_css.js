@@ -3,7 +3,7 @@ const esbuild = require('esbuild');
 // Define the entry point and output file for CSS
 const cssEntryFile = './src/style/pxlNavStyle.css';
 const cssOutputFiles = [
-  './dist/pxlNavStyle.min.css',
+  './builds/pxlNavStyle.min.css',
   './examples/esm/pxlNavStyle.min.css',
   './examples/react-app/public/pxlNavStyle.min.css',
   './examples/nextjs/public/pxlNavStyle.min.css'

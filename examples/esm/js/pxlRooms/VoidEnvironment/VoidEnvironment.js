@@ -9,10 +9,10 @@ import {
   Color,
   AmbientLight,
   FogExp2
-} from "../../libs/three/three.module.min.js";
+} from "../../libs/three/three";
 
 import { voidBaseVert, voidBaseFrag } from "./Shaders.js";
-import { RoomEnvironment, pxlEffects } from "../../pxlNav.esm.js";
+import { RoomEnvironment, pxlEffects } from "../../pxlNav.module.js";
 
 // To add in some particle effects, you can use the `pxlEffects` module
 const FloatingDust = pxlEffects.pxlParticles.FloatingDust;

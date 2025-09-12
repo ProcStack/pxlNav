@@ -6,7 +6,7 @@ import {
   NearestFilter,
   NearestMipmapNearestFilter,
   AdditiveBlending
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 import { ParticleBase } from './ParticleBase.js';
 import { dustVert, dustFrag } from './shaders/FloatingDust.js';
@@ -44,7 +44,7 @@ import { dustVert, dustFrag } from './shaders/FloatingDust.js';
  * }
  * @example
  * // Floating Dust Particle System for pxlNav
- * import { pxlEffects } from "pxlNav.esm.js";
+ * import { pxlEffects } from "pxlNav";
  * const FloatingDust = pxlEffects.pxlParticles.FloatingDust; 
  * 
  * // You can put this in yuor `fbxPostLoad()` or `build()` function

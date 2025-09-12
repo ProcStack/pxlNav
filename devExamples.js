@@ -27,8 +27,8 @@ if(args.length > 0 && args[0] == "examples"){
   app.use( express.static(path.join(__dirname, 'src')) );
 }
 
-// Direct 'dist/pxlAssets' to './dist/pxlAssets' --
-app.use('/dist/pxlAssets', express.static(path.join(__dirname, 'dist/pxlAssets')));
+// Direct 'builds/pxlAssets' to './builds/pxlAssets' --
+app.use('/builds/pxlAssets', express.static(path.join(__dirname, 'builds/pxlAssets')));
 
 app.use(function(req, res, next) {
   if (req.url.endsWith('.js')) {

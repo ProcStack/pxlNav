@@ -3,7 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 
 export default {
-  input: 'dist/pxlNav.esm.js',
+  input: 'builds/pxlNav.module.js',
   external: id => {
     console.log(`Testing external for ID: ${id}`);
     const isExternal = /^(three|\.\/libs)/.test(id);
@@ -14,12 +14,12 @@ export default {
   },
   output: [
     {
-      file: 'dist/pxlNav.cjs.js',
+      file: 'builds/pxlNav.cjs.js',
       format: 'cjs'
     },
     {
       name: 'pxlNav',
-      file: 'dist/pxlNav.umd.js',
+      file: 'builds/pxlNav.umd.js',
       format: 'umd'
     }
   ],

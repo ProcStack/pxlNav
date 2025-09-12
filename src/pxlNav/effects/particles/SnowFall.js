@@ -5,7 +5,7 @@ import {
   DoubleSide,
   NearestFilter,
   NearestMipmapNearestFilter
-} from "../../../libs/three/three.module.min.js";
+} from "three";
 
 import { ParticleBase } from './ParticleBase.js';
 import { snowSettings, snowFallVert, snowFallFrag } from './shaders/SnowShader.js';

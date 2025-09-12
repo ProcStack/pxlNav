@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { loadPxlNavModule, getPxlEnums } from './pxlNavLoader.js';
+
+import pxlNavDefault, { pxlEnums, pxlOptions, RoomEnvironment } from 'pxlnav';
+const PxlNavClass = (pxlNavDefault as any)?.pxlNav;
+
 
 interface PxlNavComponentProps {
   projectTitle: string;
-  startingRoom: string;
-  roomBootList: string[];
+  startingRoom: RoomEnvironment;
+  roomBootList: RoomEnvironment[];
   pxlNavOptions: Record<string, any>; // Pre-configured options from parent
   onBooted?: () => void;
   onError?: (error: Error) => void;
@@ -28,13 +31,13 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
 
-  const [pxlEnums, setPxlEnums] = useState<any>(null);
+  const [localPxlEnums, setLocalPxlEnums] = useState<any>(pxlEnums);
 
   // Localized print helper — avoids overwriting global console.log
   // print() obeys the pxlNav verbose level and is safe to call anywhere inside this component.
   const print = React.useCallback((...args: any[]) => {
     try {
-      const infoLevel = pxlEnums?.VERBOSE_LEVEL?.INFO;
+      const infoLevel = localPxlEnums?.VERBOSE_LEVEL?.INFO;
       const currentVerbose = pxlNavOptions?.verbose;
 
       if (typeof infoLevel === 'number' && typeof currentVerbose === 'number') {
@@ -47,7 +50,7 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
       // fallback to native console.log
       console.log(...args);
     }
-  }, [pxlEnums, pxlNavOptions?.verbose]);
+  }, [localPxlEnums, pxlNavOptions?.verbose]);
 
   // Load and initialize pxlNav - only run once when options are available
   useEffect(() => {
@@ -59,13 +62,10 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
     const initializePxlNav = async () => {
       try {
         
-        // Load the module
-  const moduleData = await loadPxlNavModule();
-  const { pxlNav, pxlEnums } = moduleData;
   // expose enums to the component-level state for logging and other checks
-  setPxlEnums(pxlEnums);
+  setLocalPxlEnums(localPxlEnums);
 
-        if( pxlNavOptions?.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
+        if( pxlNavOptions?.verbose >= localPxlEnums.VERBOSE_LEVEL.INFO ){
           print(' Starting pxlNav initialization...');
         }
 
@@ -74,7 +74,8 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
         
         // Create pxlNav instance with pre-configured options
         // Ensure the engine receives the actual DOM container managed by this component
-        const instanceOptions = Object.assign({}, pxlNavOptions, {
+        const baseOpts = Object.assign({}, pxlOptions || {});
+        const instanceOptions = Object.assign({}, baseOpts, pxlNavOptions || {}, {
           container: containerRef.current
         });
 
@@ -87,7 +88,7 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
           pxlNavManager = (window as any).__pxlNavInstance;
           print(' Reusing existing pxlNav instance from window.__pxlNavInstance');
         } else {
-          pxlNavManager = new pxlNav(
+          pxlNavManager = new PxlNavClass(
             instanceOptions,
             projectTitle,
             startingRoom,
@@ -281,30 +282,6 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
           }}
         />
       </div>
-      
-      {/* Loading indicator */}
-      {(isLoading || !isInitialized) && !loadError && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0,0,0,0.8)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            fontFamily: 'monospace',
-            textAlign: 'center',
-            zIndex: 1000
-          }}
-        >
-          <div>- Loading pxlNav...</div>
-          <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
-            Initializing 3D environment...
-          </div>
-        </div>
-      )}
       
       {/* Debug info in development */}
       {process.env.NODE_ENV === 'development' && isInitialized && (
