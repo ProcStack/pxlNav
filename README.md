@@ -1,14 +1,13 @@
 # pxlNav v1.0.0
 Javascript Player Controller & Environment Manager for Three.js
 
+**Version 1.0.0 brings React & NextJS support!**
+<br/>**Please see `./examples/react-app` & `./examples/next` for example projects**
+
 #### Visit the [pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)
-**Now with React & NextJS support, see `./src/react-next-dev` for project samples**
 
 **Since the docs are still being written,**
 **<br>&nbsp;&nbsp; If you have any questions / feedback, feel free to join the [pxlNav Support](https://discord.gg/UqEY9mpZ9x) discord group.**
-
-**Visit [procstack.github.io site](https://procstack.github.io/) to see camera location switching action.**
-
 
 <p align='center'>
  <b>If you'd like to roam around a coastal environment,</b>

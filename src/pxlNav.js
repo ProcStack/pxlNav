@@ -474,9 +474,6 @@ class pxlNav{
     // Initialize a base quality level
     this.pxlQuality.startBenchmark(); // Start benchmark timer
 
-    // Detect the JS framework in use
-    this.detectJSFramework();
-
     // Check for post-process passes to load their pxlAssets
     this.checkPxlOptions();
 
@@ -547,71 +544,8 @@ class pxlNav{
 
 
   // -- -- --
-
-  detectJSFramework(){
-    // Check for Next.js first (includes React)
-    if (typeof window !== 'undefined') {
-      // Next.js specific globals
-      if (window.__NEXT_DATA__ || window.__NEXT_ROUTER__ || window.next) {
-        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.NEXT;
-        return;
-      }
-      
-      // React DevTools or React specific globals
-      if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__ || 
-          document.querySelector('[data-reactroot]') ||
-          document.querySelector('[data-react-helmet]')) {
-        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
-        return;
-      }
-    }
-    
-    // Check for build environment
-    if (typeof process !== 'undefined' && process.env) {
-      if (process.env.NEXT_RUNTIME || process.env.__NEXT_ROUTER_BASEPATH) {
-        this.pxlOptions.framework = 'next';
-        return;
-      }
-      if (process.env.REACT_APP_) {
-        this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
-        return;
-      }
-    }
-    
-    // Check for bundler-specific globals
-    if (typeof __webpack_require__ !== 'undefined' || 
-        typeof webpackJsonp !== 'undefined') {
-      // Likely in a bundled React/Next environment
-      this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.REACT;
-      return;
-    }
-    
-    // Fallback to native JavaScript
-    this.pxlOptions.framework = this.pxlEnums.FRAMEWORK.NATIVE;
-    
-    // Logging the framework
-    if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
-      let frameworkStr = "Unknown";
-      switch( this.pxlOptions.framework ){
-        case this.pxlEnums.FRAMEWORK.NEXT :
-          frameworkStr = "Next.js";
-          break;
-        case this.pxlEnums.FRAMEWORK.REACT :
-          frameworkStr = "React.js";
-          break;
-        case this.pxlEnums.FRAMEWORK.NATIVE :
-          frameworkStr = "Native JavaScript";
-          break;
-        default :
-          frameworkStr = "Unknown";
-          break;
-      }
-      console.log("  Detected Framework : ", frameworkStr);
-    }
-  }
-
-  // -- -- --
   
+
   buildGui(){
     return new Promise( (resolve, reject)=>{
       this.pxlGuiDraws.booted();

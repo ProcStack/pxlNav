@@ -5,8 +5,6 @@ import { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment';
 
-console.log( pxlNavVersion );
-
 // Centralized pxlNav options builder for React devs
 // Keep all defaults and override logic here so developers know to look in App.tsx
 const buildPxlNavOptions = ({
@@ -71,9 +69,9 @@ function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const OutletEnv = new OutletEnvironment( "OutletEnvironment", "pxlRooms/OutletEnvironment/" )
-  //const roomList = ["SaltFlatsEnvironment"];
-  //const roomList = ["SaltFlatsEnvironment", "OutletEnvironment"];
   const roomList = [ OutletEnv ];
+
+  const versionDisp = pxlNavVersion ? ` v${pxlNavVersion}` : "";
 
   // Load pxlEnums and pxlOptions at the top level
   useEffect(() => {
@@ -134,7 +132,7 @@ function App() {
         fontSize: '14px',
         fontFamily: 'monospace'
       }}>
-        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav React App</h3>
+        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav{versionDisp} React App</h3>
         <div>
           Status: {
             pxlNavStatus === 'loading' ? ' Loading...' :
@@ -147,17 +145,12 @@ function App() {
             {error.message}
           </div>
         )}
-        {pxlConstants && (
-          <div style={{ fontSize: '10px', marginTop: '5px', opacity: 0.8 }}>
-            Constants loaded ✓
-          </div>
-        )}
       </header>
 
       <div
         ref={containerRef}
         id="pxlnav-react-container"
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+        style={{ width: '99%', height: '99%', position: 'absolute', inset: 0 }}
       />
 
       {configuredOptions && containerRef.current && (

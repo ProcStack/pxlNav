@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "next": "14.1.0",
+    "pxlnav": "file:../../",
     "react": "^18",
-    "react-dom": "^18",
-    "three": "^0.179.1",
-    "pxlnav": "file:../../"
+    "react-dom": "^18"
+  },
+  "peerDependencies": {
+    "three": "^0.171.0"
   },
   "devDependencies": {
     "@types/node": "^20",

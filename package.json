@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildTree": "node ./utils/fileTreeBuilder.js",
-    "buildFiles": "cross-env NODE_ENV=production webpack --config ./packing/webpack.config.js",
+    "buildFiles:webpack": "cross-env NODE_ENV=production webpack --config ./packing/webpack.config.js",
+    "buildFiles": "node ./packing/esbuild.build.js && npm run convertToCjs",
     "bundleCss": "node ./packing/bundle_css.js",
     "build": "npm run buildFiles && npm run bundleCss",
     "buildAll": "npm run buildFiles && npm run bundleCss && npm run jsdoc",
@@ -54,7 +55,6 @@
     }
   },
   "files": [
-    "devExamples.js",
     "index.js",
     "index.d.ts",
     "builds/"
@@ -76,6 +76,8 @@
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/preset-env": "^7.26.7",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "babel-loader": "^9.2.1",
     "cross-env": "^7.0.3",
@@ -88,7 +90,7 @@
     "mini-css-extract-plugin": "^2.9.2",
     "path": "^0.12.7",
     "replace": "^1.2.2",
-    "rollup": "^4.28.0",
+    "rollup": "^4.50.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "terser-webpack-plugin": "^5.3.11",

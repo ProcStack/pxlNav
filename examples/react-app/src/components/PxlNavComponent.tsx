@@ -241,30 +241,6 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
         />
       </div>
       
-      {/* Loading indicator */}
-      {(isLoading || !isInitialized) && !loadError && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0,0,0,0.8)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            fontFamily: 'monospace',
-            textAlign: 'center',
-            zIndex: 1000
-          }}
-        >
-          <div>- Loading pxlNav...</div>
-          <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
-            Initializing 3D environment...
-          </div>
-        </div>
-      )}
-      
       {/* Debug info in development */}
       {process.env.NODE_ENV === 'development' && isInitialized && (
         <div 

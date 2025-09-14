@@ -47,7 +47,6 @@
  * 
  * @property {Object} pxlEnums - pxlNav {Enums} contains all the enums used in pxlNav
  * @property {Object} VERBOSE_LEVEL - Console logging levels
- * @property {Object} FRAMEWORK - Framework types
  * @property {Object} ANTI_ALIASING - Anti-aliasing settings
  * @property {Object} RENDER_LAYER - Render Order Layers
  * @property {Object} SKY_HAZE - Sky Haze settings
@@ -89,15 +88,6 @@ export const VERBOSE_LEVEL = {
 	'DEBUG' : 4
 };
 
-
-/**
- * Framework types
- */
-export const FRAMEWORK = {
-	'REACT' : 0,
-	'NEXT' : 1,
-	'NATIVE' : 2
-};
 
 /**
  * Known File Types in pxlNav
@@ -575,7 +565,6 @@ export const HUD_DRAW = {
  */
 export const pxlEnums = {
   VERBOSE_LEVEL,
-  FRAMEWORK,
   FILE_TYPE,
   ANTI_ALIASING,
   RENDER_LAYER,

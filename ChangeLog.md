@@ -7,59 +7,22 @@
 
 
 This milestone marks the addition of React and Next support for pxlNav.
-<br/> Before now it was purely written as an ESM module, which React now supports!! (As of December 5th 2024)
+<br/> Before now it was purely written as an ESM module,
 <br/> The separation of ESM and CJS was a bit bothersome, especially for someone who doesn't know React or Next
 
 <br/> I just know JavaScript
 <br/> I'm an environment kitty, not a framework kitty
 
 # Major Changes
- - pxlNav now loads as a component and attempts to draw to screen in `React`
- - pxlNav Bridge and Component files added; JSX & TS with D-Types
+ - pxlNav now loads as a component and attempts to draw to screen in `React` & `NextJS`
+ - pxlNav Types and Component files added; JSX & TS with D-Types
  - pxlNav is still formatted in ESM, and intended to be ran in Native JS as a Module for better dynamic loading of rooms.
 
 # All Changes
-Please note, if you are using `pxlNav` in `React` you need to run `npm run roomManifest`
-<br/> This will run the file `generateRoomManifest.js` which will create an `index.js` file at -
-<br/>  `pxlnav-react-app/src/components/pxlNav/index.js`
+Please note, if you are using `pxlNav` in `React` or `NextJS`,
+<br/> Put room JS files in `./src/pxlRooms/ROOM_NAME`
+<br/> Put room assets in `./public/pxlRooms/ROOM_NAME/Assets`
 
-If you have the full repo, it'll be located at -
-<br/>  `pxlNav/src/react-next-dev/pxlnav-react-app/src/components/pxlRooms/index.js`
-
-If you are running pxlNav as an ESM module, you do not need to run `roomManifest`!
-<br/> But it doesn't hurt to run for native JS, ESM mode, just not needed.
-
-This `index.js` file contains imports of your `pxlNav` rooms for React.
-<br/> Abbreviated example of `index.js` -
-```
-import { SaltFlatsEnvironment } from './SaltFlatsEnvironment/SaltFlatsEnvironment.js';
-
-// Room exports
-export {
-  SaltFlatsEnvironment
-};
-
-// Room loader function for compatibility
-export async function loadRoomModule( roomName ){ ... }
-
-// Available room names
-export const availableRooms = [ 'SaltFlatsEnvironment' ];
-```
-
-Implemented with -
-```
-import { loadRoomModule } from '../../pxlRooms/index.js';
-
-const roomLoad = loadRoomModule( 'SaltFlatsEnvironment' );
-```
-
-
-
-The React app should be able to load `pxlNav` as a module to `node_modules` when installing the `pxlnav-react-app`'s nodes.
-<br/> Next.js to come next.  Now with React more-or-less working, it should be easy to implement Next.
-
-<br/> Again, if you want to use pxlNav with React, you must run `npm run roomManifest` from your React App root
-<br/> Or just update the `pxlnav-react-app/src/components/pxlRooms/index.js` file manually.
 
 # JSX & TypeScript notes
 <br/> pxlNav is still formatted in ESM. I still intend for dynamic loads to be a primary strength of `pxlNav` to recieve server requests to load files on the fly from the server.  Building for React/Next requires all script files are known and compiled together.  This restricts the dynamicality of pxlNav, and some of the main reasons it was written outside of React to begin with.

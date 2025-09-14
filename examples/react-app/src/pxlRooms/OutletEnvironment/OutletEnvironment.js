@@ -256,7 +256,7 @@ builBugs(){
     }
     
     // Adding a basic ambient light
-    var ambientLight = new AmbientLight( 0x989898 ); // soft white light
+    var ambientLight = new AmbientLight( 0xa8a8a8 ); // soft white light
     this.scene.add( ambientLight );
     
     //this.addColliderHelper( this.geoList['colliderHelper'] );

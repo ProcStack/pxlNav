@@ -1,7 +1,7 @@
 
 const projectName = "pxlNav Examples";
 let listenIP = 'localhost';
-listenIP = '192.168.1.3'; // For testing on local network
+//listenIP = '192.168.1.3'; // For testing on local network
 var httpPort = 3000;
 
 const args = process.argv.slice(2);
