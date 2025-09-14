@@ -142,7 +142,7 @@ function App() {
         fontSize: '14px',
         fontFamily: 'monospace'
       }}>
-        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav{versionDisp} React App</h3>
+        <h3 style={{ margin: '0 0 5px 0' }}>pxlNav{versionDisp} NextJS App</h3>
         <div>
           Status: {
             pxlNavStatus === 'loading' ? ' Loading...' :
