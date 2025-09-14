@@ -135,7 +135,7 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
     };
 
     initializePxlNav();
-  }, [pxlNavOptions, projectTitle, startingRoom, roomBootList, onBooted, onError, isInitialized]); // Added isInitialized to dependencies
+  }, [pxlNavOptions, projectTitle, startingRoom, roomBootList, onBooted, onError, isInitialized, print]); // Added isInitialized to dependencies
 
   // Cleanup helper
   const cleanupSubscriptions = useCallback(() => {
@@ -154,7 +154,7 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
       
       subscriptionsRef.current = [];
     }
-  }, []);
+  }, [print]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -175,7 +175,7 @@ const PxlNavComponent: React.FC<PxlNavComponentProps> = ({
         pxlNavInstanceRef.current = null;
       }
     };
-  }, [cleanupSubscriptions]);
+  }, [cleanupSubscriptions,print]);
 
   // Error display
   if (loadError) {

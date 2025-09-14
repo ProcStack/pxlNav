@@ -22,14 +22,10 @@
 
 
 import {
-  Vector2,
   Vector3,
   Color,
-  Group,
-  Object3D,
   AmbientLight,
   FogExp2,
-  SRGBColorSpace,
   LinearSRGBColorSpace,
   RepeatWrapping,
   ClampToEdgeWrapping,
@@ -281,11 +277,11 @@ builBugs(){
       'wrapS' : RepeatWrapping,
       'wrapT' : RepeatWrapping
     };
-    let textureOptionsSRGB = {
+    /*let textureOptionsSRGB = {
       'colorSpace':SRGBColorSpace,
       'wrapS' : RepeatWrapping,
       'wrapT' : RepeatWrapping
-    };
+    };*/
     let textureOptionsLinearSRGB = {
       'colorSpace':LinearSRGBColorSpace,
       'wrapS' : RepeatWrapping,
@@ -586,7 +582,7 @@ builBugs(){
     loadSettings['meshIsChild'] = true; // If your GLB has been "optimized" to split transforms & meshes
     loadSettings['enableLogging'] = true;
 		//let fieldFbxLoader = this.pxlFile.loadRoom( this, loadSettings );
-		let fieldFbxLoader = this.pxlFile.loadRoom( this );
+		this.pxlFile.loadRoom( this );
 		
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- //
 		

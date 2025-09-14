@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PxlNavComponent from './components/PxlNavComponent';
 
-import pxlNav, { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
+import { pxlEnums, pxlOptions, pxlNavVersion } from 'pxlnav';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment';
 

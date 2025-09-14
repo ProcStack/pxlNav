@@ -73,7 +73,8 @@ const buildPxlNavOptions = ({
 function App() {
   const [pxlNavStatus, setPxlNavStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<Error | null>(null);
-  const [pxlConstants, setPxlConstants] = useState<any>(null);
+  const [localPxlEnums, setLocalPxlEnums] = useState<any>(null);
+  const [localPxlOptions, setLocalPxlOptions] = useState<any>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -86,7 +87,8 @@ function App() {
   useEffect(() => {
     const loadPxlPrep = async () => {
       try {
-        setPxlConstants({ pxlEnums, pxlOptions });
+        setLocalPxlEnums(pxlEnums);
+        setLocalPxlOptions(pxlOptions);
       } catch (error) {
         setError(error as Error);
         setPxlNavStatus('error');
@@ -98,7 +100,7 @@ function App() {
 
   // Memoize options objects to prevent recreation on every render
   // All pxlNav defaults and overrides live here in App.tsx
-  const customOptions = useMemo(() => ({}), [pxlConstants]);
+  const customOptions = useMemo(() => ({}), [localPxlEnums, localPxlOptions]);
 
   const projectSettings = useMemo(() => ({
   // Use root-relative paths so Next.js (which serves `public/` at `/`) finds assets the same as CRA
@@ -110,11 +112,11 @@ function App() {
 
   // Build configured options here so this file is the single source for pxlNav config
   const configuredOptions = useMemo(() => buildPxlNavOptions({
-    pxlEnums: pxlConstants?.pxlEnums,
-    pxlOptions: pxlConstants?.pxlOptions,
+    pxlEnums: localPxlEnums,
+    pxlOptions: localPxlOptions,
     customOptions,
     projectSettings
-  }), [pxlConstants, customOptions, projectSettings]);
+  }), [localPxlEnums, localPxlOptions, customOptions, projectSettings]);
 
   const handlePxlNavBooted = () => {
     console.log(' NextJS App : pxlNav has fully booted!');
