@@ -9,7 +9,7 @@ import {
   Color,
   AmbientLight,
   FogExp2
-} from "../../libs/three/three";
+} from "three";
 
 import { voidBaseVert, voidBaseFrag } from "./Shaders.js";
 import { RoomEnvironment, pxlEffects } from "../../pxlNav.module.js";

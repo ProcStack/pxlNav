@@ -12,6 +12,7 @@
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
+import { VoidEnvironment } from './pxlRooms/VoidEnvironment/VoidEnvironment.js';
 
 
 // Console logging level
@@ -23,17 +24,18 @@ const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 const projectTitle = "pxlNav :: The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "../pxlRooms";
+const pxlRoomRootPath = "../js/pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../builds/pxlAssets";
+const pxlAssetRoot = "../builds/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const OutletRoom = new OutletEnvironment( "OutletEnvironment", "../pxlRooms/OutletEnvironment/")
-const bootRoomList = [ OutletRoom ];
+const OutletRoom = new OutletEnvironment( "OutletEnvironment", "../js/pxlRooms/OutletEnvironment/")
+const VoidRoom = new VoidEnvironment( "VoidEnvironment", "../js/pxlRooms/VoidEnvironment/")
+const bootRoomList = [ OutletRoom, VoidRoom ];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

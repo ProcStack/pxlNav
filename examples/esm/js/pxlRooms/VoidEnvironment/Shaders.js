@@ -50,19 +50,18 @@ export function voidBaseFrag(){
       float shiftInner = 1.0 - clamp( (toCenter-.22)*.20, 0.0, 1.0 );
       
       // High freq noise warp--
-      vec4 Cd=vec4( texture2D(noiseTexture, vUv*3.1 + vec2( time.x * .01,  -time.x*.01) ).rgb * shift, vCd.r );
+      vec4 Cd=vec4( texture2D(noiseTexture, vUv*5.1 + vec2( time.x * .01,  -time.x*.01) ).rgb * shift, vCd.r );
       // Second frequency noise warp --
-      vec3 baseCd = texture2D(noiseTexture, vUv*.31 + vec2( time.x * .02,  time.x*.001) * (shift*Cd.b) - time.x*.1).rgb;
+      vec3 baseCd = texture2D(noiseTexture, vUv*1.81 + vec2( time.x * .02,  time.x*.001) * (shift*Cd.b) - time.x*.1).rgb;
       
-      vec2 nUv = vUv*2.4 + vec2( baseCd.r * 0.1779 + time.x*.1,  (-time.x*.002 + Cd.r + baseCd.x*2.) * .16 * max(baseCd.g, baseCd.b) );
+      vec2 nUv = vUv*10.4 + vec2( baseCd.r * 0.1779 + time.x*.1,  (-time.x*.002 + Cd.r + baseCd.x*2.) * .16 * max(baseCd.g, baseCd.b) );
       vec3 nCd = texture2D(noiseTexture, nUv).rgb;
-      
       
       float cdScalar = clamp( ( length(min(Cd.rgb,nCd-.61)) - 0.2) * 3.274, 0.0,1.0) * shiftInner  ;
 
       // -- -- --
       
-      Cd.rgb = min( vec3( clamp( max(Cd.z, (Cd.r)*shift )+.5, 0.0, 1. ) ), (1.0-nCd*.2) );
+      Cd.rgb = min( vec3( clamp( max(Cd.z, (Cd.r)*shift ) + (sin(time.x*.2 + nUv.x + nCd.y + nCd.z)*.05+.05), 0.0, 1. ) ), (1.0-nCd*.2) );
       Cd.rgb = min( Cd.rgb, length(baseCd)*.3+(1.-shift*.4) );
       
       

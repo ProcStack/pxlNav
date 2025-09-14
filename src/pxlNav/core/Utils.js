@@ -538,7 +538,7 @@ export class Utils{
    * @returns {Array} The duplicated array.
    * @example
    * // Duplicate an array
-   * import { pxlNav } from 'pxlNav.module.js';
+   * import { pxlNav } from 'pxlNav.js';
    * const pxlParticleBase = pxlNav.pxlEffects.pxlParticles.pxlParticle
    * 
    * build(){

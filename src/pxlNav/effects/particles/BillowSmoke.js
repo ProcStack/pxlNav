@@ -40,7 +40,7 @@ import { smokeVert, smokeFrag } from './shaders/Smoke.js';
  * }
  * @example
  * // Floating Dust Particle System for pxlNav
- * import { pxlEffects } from "pxlNav.module.js";
+ * import { pxlEffects } from "pxlNav.js";
  * const BillowSmoke = pxlEffects.pxlParticles.BillowSmoke; 
  * 
  * // You can put this in yuor `fbxPostLoad()` or `build()` function

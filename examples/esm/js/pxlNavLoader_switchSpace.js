@@ -8,10 +8,11 @@
 //       Listening to / triggering events on `pxlNav`
 //   For `pxlNav` scripting, the entry-point is `./src/js/pxlNav.js`
 //
-console.log("sdfsdf");
+
 import { pxlNav, pxlNavVersion, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
 import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
+import { VoidEnvironment } from './pxlRooms/VoidEnvironment/VoidEnvironment.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -19,20 +20,21 @@ const verbose = pxlEnums.VERBOSE_LEVEL.NONE;
 
 // The Title of your Project
 //   This will be displayed on the load bar
-const projectTitle = "pxlNav : The Outlet";
+const projectTitle = "pxlNav :: The Outlet";
 
 // pxlRoom folder path, available to change folder names or locations if desired
-const pxlRoomRootPath = "./pxlRooms";
+const pxlRoomRootPath = "../js/pxlRooms";
 
 // Asset root path
-const pxlAssetRoot = "../../pxlAssets";
+const pxlAssetRoot = "../builds/pxlAssets";
 
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = false;
 
 // Current possible rooms - "OutletEnvironment", "VoidEnvironment"
-const OutletRoom = new OutletEnvironment( "OutletEnvironment", "./js/pxlRooms/OutletEnvironment/")
-const bootRoomList = [ OutletRoom ];
+const OutletRoom = new OutletEnvironment( "OutletEnvironment", "../js/pxlRooms/OutletEnvironment/")
+const VoidRoom = new VoidEnvironment( "VoidEnvironment", "../js/pxlRooms/VoidEnvironment/")
+const bootRoomList = [ OutletRoom, VoidRoom ];
 const startingRoom = bootRoomList[0];
 
 // -- -- --
@@ -116,11 +118,11 @@ const shadowMapBiasing = pxlEnums.SHADOW_MAP.SOFT;
 // Set camera to static Camera Positions
 //   Locations pulled from the 'Camera' group in the pxlRoom's FBX file
 // Default is `false`
-const enableStaticCamera = true;
+const enableStaticCamera = false;
 
 // If using static cameras, allow the user to rotate the camera
 //  Default is `false`
-const allowStaticRotation = false;
+const allowStaticRotation = true;
 
 // Visual effect for the sky
 // Default is `OFF`
@@ -274,6 +276,21 @@ pxlNavEnv.subscribe( "booted", ( e ) => {
 });
 
 
+// -- -- --
+
+// Toggle Scene Helper Functions
+//   This is an example of switching between two rooms
+let toggleSpaceState = 0;
+const roomToggler = document.getElementById("roomToggle");
+if( roomToggler ){
+  roomToggler.addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleSpaceState = ( toggleSpaceState + 1 ) % 2;
+    // Switch to the other room
+    let newRoom = ( toggleSpaceState === 1 ) ? VoidRoom : OutletRoom;
+    pxlNavEnv.trigger( "warpToRoom", newRoom, "init" );
+  });
+}
 
 // -- -- --
 
