@@ -57,7 +57,9 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "builds/"
+    "builds/",
+    "devExamples.js",
+    "examples/"
   ],
   "bugs": {
     "url": "https://github.com/ProcStack/pxlNav/issues"

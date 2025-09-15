@@ -31,10 +31,6 @@
 //  `Colliders.castGravityRay()` and `Colliders.castInteractRay()`
 //     Are the primary functions for collision detection.
 
-/**
- * @namespace pxlColliders
- * @description Collider handling
- */
 
 import {
   Vector2,
@@ -85,6 +81,21 @@ import { VERBOSE_LEVEL, COLLIDER_TYPE, GEOMETRY_SIDE } from "./Enums.js";
 //   Grid Sizing of 100 units
 //   Reference Bounds of 500 units
 //
+/**
+ * @alias pxlColliders
+ * @class
+ * @description Collision intersection handling class; ray intersection with geometry faces.
+ * <br/>This is implemented indipendent of Three.js raycasting, and is optimized for pxlNav's needs.
+ * 
+ * When adding a 3d scene file to your room, any objects in you `SceneRoot/Colliders` group will automatically register as `pxlEnums.COLLIDER_TYPE.FLOOR` colliders.
+ * <br/>Automatically adding them to `this.pxlColliders` accessible from your room.
+ * 
+ * The reason this is indipendent of Three.js raycasting is performance.
+ * <br/>When pxlNav loads a room, it will parse the colliders in your scene, pre-calculating math data for faster & grid-optimized ray intersection.
+ * <br/>This allows for much much larger polygon counts in your colliders, as well as more complex scenes.
+ * 
+ * This is also why there is a `castGravityRay` function, it's making assumptions about what triangles to check based on the camera's X,Z position.
+ */
 export class Colliders{
   constructor( verbose=false, hashGridSizing = 100, colliderBoundsReference = 500.0 ){
     this.pxlEnv = null;
@@ -143,6 +154,16 @@ export class Colliders{
   // -- -- --
 
   // Boot room colliders and find hash map for collision detection
+  
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function prepColliders
+   * @description Add & Prepare object collider to the collision system.  Only object's with user-detail attributes `colliderType` are included.
+   * @param {object} - pxlRoom to enable the collider for; pass `this`
+   * @param {string} [colliderType=pxlEnums.COLLIDER_TYPE.FLOOR] - Type of collider to prep; see `pxlEnums.COLLIDER_TYPE`
+   * @param {number|null} [gridSize=null] - Size of the hash grid for collider face grouping; if `null`, uses default grid size of `100` units
+   */
   prepColliders( pxlRoomObj, colliderType=COLLIDER_TYPE.FLOOR, gridSize = null ){
     if( pxlRoomObj.hasColliders() ){
 
@@ -407,6 +428,15 @@ export class Colliders{
 
   // Parse vert locations, calculate barcentric coordinates, and build roomColliderData dictionary
   //   No need for grid sampling, as the likely-hood of an interactable being in the same/neighboring grid location is low
+  
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function prepInteractables
+   * @description Prepare interactable colliders for the room and add to the collision system.  Only object's with user-detail attributes `colliderType` are included.
+   * @param {object} - pxlRoom to enable the collider for; pass `this`
+   * @param {string} [colliderType=pxlEnums.COLLIDER_TYPE.HOVERABLE] - Type of interactable collider to prep; see `pxlEnums.COLLIDER_TYPE`
+   */
   prepInteractables( pxlRoomObj, colliderType=COLLIDER_TYPE.HOVERABLE ){
 
     if( !pxlRoomObj.hasColliderType( colliderType ) ) return;
@@ -545,6 +575,23 @@ export class Colliders{
   // Pages 4 & 5 -
   //   https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
   //
+  
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function castRay
+   * @description Cast a ray from an Origin (Vector3) in a given Direction (Vector3) and check for collision against the specified collider type in the given pxlRoom.  Returns an array of collision hits, sorted by distance from the origin.
+   * @param {string} roomName - Name of the pxlRoom to check collision against
+   * @param {Vector3} origin - Origin point of the ray
+   * @param {Vector3} direction - Direction vector of the ray; should be normalized
+   * @param {string} [colliderType=pxlEnums.COLLIDER_TYPE.FLOOR] - Type of collider to check against; see `pxlEnums.COLLIDER_TYPE`
+   * @param {string} [geoSide=pxlEnums.GEOMETRY_SIDE.DOUBLE] - Which side of the geometry to check against; see `pxlEnums.GEOMETRY_SIDE`
+   * @param {boolean} [multiHits=true] - If `true`, all collision hits are returned, sorted by distance from the origin; if `false`, only the closest hit is returned
+   * @returns {Array} Array of collision hit objects, sorted by distance from the origin.  Each object in the array contains -
+   * <br/>"object" : Collided Three.js object
+   * <br/>"pos" : Vector3 position of the collision
+   * <br/>"dist" : Distance from the origin
+   */
   castRay( roomName, origin, direction, colliderType=COLLIDER_TYPE.FLOOR, geoSide=GEOMETRY_SIDE.DOUBLE, multiHits=true ){
     
     if( !this.roomColliderData.hasOwnProperty( roomName ) || !this.roomColliderData[ roomName ].hasOwnProperty( colliderType ) ){
@@ -645,6 +692,21 @@ export class Colliders{
   // "object" : Collided Three.js object
   // "pos" : Vector3 position of the collision
   // "dist" : Distance from the origin
+  
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function castGravityRay
+   * @description Cast a ray from an Origin (Vector3) in gravity's direction and check for collision against the specified collider type in the given pxlRoom.  Returns an array of collision hits, sorted by distance from the origin.
+   * @param {string} roomName - Name of the pxlRoom to check collision against
+   * @param {Vector3} origin - Origin point of the ray
+   * @param {string} [colliderType=pxlEnums.COLLIDER_TYPE.FLOOR] - Type of collider to check against; see `pxlEnums.COLLIDER_TYPE`
+   * @param {boolean} [multiHits=true] - If `true`, all collision hits are returned, sorted by distance from the origin; if `false`, only the closest hit is returned
+   * @returns {Array} Array of collision hit objects, sorted by distance from the origin.  Each object in the array contains -
+   * <br/>"object" : Collided Three.js object
+   * <br/>"pos" : Vector3 position of the collision
+   * <br/>"dist" : Distance from the origin
+   */
   castGravityRay( roomName, origin, colliderType=COLLIDER_TYPE.FLOOR, multiHits=true ){
     // Check if collider type exists in the room's collider data
     if( !this.roomColliderData.hasOwnProperty( roomName ) || !this.roomColliderData[roomName].hasOwnProperty( colliderType ) ){
@@ -780,6 +842,21 @@ export class Colliders{
   // 'camera' is a three.js camera object
   // 'screenUV' is a Vector2 of the screen position in NDC, from -1 to 1
   //   If needed, run `pxlNav.pxlUtils.screenToNDC( mX,mY, swX,swY )` to convert screen position to NDC before passing to this function
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function castInteractRay
+   * @description Cast a ray from the provided camera through the specified screen UV coordinates and check for collision against the provided list of interactable objects in the given pxlRoom.  Returns an array of collision hits, sorted by distance from the camera.
+   * @param {string} roomName - Name of the pxlRoom to check collision against
+   * @param {Array} objectInteractList - Array of Three.js objects to check collision against
+   * @param {Camera} camera - Three.js camera object to cast the ray from
+   * @param {Vector2} [screenUV=Vector2(0.0, 0.0)] - Screen UV coordinates in Normalized Device Coordinates (NDC), from -1 to 1;
+   * <br/> If needed, run `pxlNav.pxlUtils.screenToNDC( mX,mY, swX,swY )` to convert screen position to NDC before passing to this function
+   * @param {boolean} [multiHits=true] - If `true`, all collision hits are returned, sorted by distance from the camera; if `false`, only the closest hit is returned
+   * @returns {Array} Array of collision hit objects, sorted by distance from the camera.  Each object in the array contains -
+   * <br/>"object" : Collided Three.js object
+   * <br/>"pos" : Vector3 position of the collision
+   */
   castInteractRay( roomName, objectInteractList=[], camera=null, screenUV=Vector2(0.0, 0.0), multiHits=true ){
 
     if( camera === null ){
@@ -958,6 +1035,22 @@ export class Colliders{
     
   // Display known triangles as a visual red when in the users grid
   //  The intersected triangle will be displayed as a green triangle
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function buildHelper
+   * @description
+   * Build a helper object for the specified room and collider type
+   * 
+   * Displays random Green -to- Blue colors per triangle in the collision object.
+   * 
+   * This is good for visualizing what your ground collider looks like,
+   * <br/> Like, if you are getting caught on the geometry while walking around.
+   * 
+   * @param {object} roomObj - pxlRoom object; you can pass `this` from within your room
+   * @param {enum} colliderType - Type of collider to build (e.g., FLOOR, WALL); see `pxlEnums.COLLIDER_TYPE`
+   * @returns {object} - Helper Mesh object containing geometry and material for the collider visualization
+   */
   buildHelper( roomObj, colliderType=COLLIDER_TYPE.FLOOR ){
     let roomName = roomObj.getName();
     let roomData = this.roomColliderData[ roomName ][ colliderType ];
@@ -1066,6 +1159,18 @@ export class Colliders{
   }
 
   // Update vertex attributes to current grid location
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function stepHelper
+   * @description
+   * *Currently not implemented!*
+   * 
+   * Update the collider helper's visible triangles to only display the grid the camera is currently in.
+   * @param {object} roomObj - pxlRoom object; you can pass `this` from within your room
+   * @param {enum} colliderType - Type of collider to build (e.g., FLOOR, WALL); see `pxlEnums.COLLIDER_TYPE`
+   * @returns {object} - Perform a single frame's calculation to update the collider helper's visible triangles based on the room object's current position
+   */
   stepHelper( roomObj, colliderType=COLLIDER_TYPE.FLOOR ){
     let roomName = roomObj.getName();
     let roomData = this.roomColliderData[ roomName ][ colliderType ];
@@ -1107,6 +1212,16 @@ export class Colliders{
     }*/
   }
 
+  /**
+   * @method
+   * @memberof pxlColliders
+   * @function setHelperActiveFace
+   * @description
+   * Passive function which toggles the "highlighted" face of the specific collision type objects
+   * @param {string} roomName - The name of the room with the specific collider type
+   * @param {enum} colliderType - Type of collider to build (e.g., FLOOR, WALL); see `pxlEnums.COLLIDER_TYPE`
+   * @param {number} faceIdx - The index of the face to highlight; set to -1 to disable highlighting
+   */
   setHelperActiveFace( roomName, colliderType=COLLIDER_TYPE.FLOOR, faceIdx=-1 ){
     let roomData = this.roomColliderData[ roomName ][ colliderType ];
     let helperMesh = roomData[ 'helper' ];
@@ -1118,7 +1233,6 @@ export class Colliders{
 
   // -- -- -- 
   
-
   destroy( animName ){
     if( this.objNames.includes( animName ) ){
       this.animMixer[ animName ].stopAllAction();

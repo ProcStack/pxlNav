@@ -43,7 +43,7 @@ import { smokeVert, smokeFrag } from './shaders/Smoke.js';
  * import { pxlEffects } from "pxlNav.js";
  * const BillowSmoke = pxlEffects.pxlParticles.BillowSmoke; 
  * 
- * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * // You can put this in yout `fbxPostLoad()` or `build()` function
  * fbxPostLoad(){
  * 
  *   let billowSmokeSystem = new BillowSmoke( room, 'billowSmoke' );

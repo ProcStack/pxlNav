@@ -350,7 +350,6 @@ export const USER_SPEED = {
  * @property {number} XR - Extended Reality input device ( Unused )
  * @property {number} VR - Virtual Reality input device ( Unused )
  * @property {number} AR - Augmented Reality input device ( Unused )
- * @property {number} HMD - Head Mounted Display input device ( Unused )
  * @property {number} OTHER - Other input device ( Unused )
  */
 export const DEVICE_TYPE = {
@@ -360,7 +359,6 @@ export const DEVICE_TYPE = {
   'XR' : 3,
   'VR' : 3, // Future Proofing - Alias for XR; VRs are XR devices
   'AR' : 3, // Future Proofing - Alias for XR; ARs are XR devices
-  'HMD' : 3, // Future Proofing - Alias for XR; HMDs are XR devices
   'OTHER' : 4
 };
 

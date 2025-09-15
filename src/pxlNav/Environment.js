@@ -1088,7 +1088,7 @@ export class Environment{
       if( this.pxlUser.iZoom ){
         this.delayComposer.render();
       }
-    }else if( this.pxlOptions.subTickCalculations ){
+    }else if( this.pxlOptions.subFrameCalculations ){
       // Step room calculations for render-independent user input and collision calculations
       let curRoom=this.roomSceneList[this.currentRoom];
       if(curRoom && curRoom.booted){

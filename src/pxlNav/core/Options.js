@@ -29,7 +29,7 @@ import { pxlEnums } from './Enums.js';
  * @property {object} gravity - User gravity settings
  * @property {number} gravity.ups - Units per Step() per Step()
  * @property {number} gravity.max - Max gravity rate
- * @property {object} deadZone - User dead zone settings
+ * @property {object} deadZone - User dead zone settings.  The amount of 'tilt' or movement before the input is recognized
  * @property {number} deadZone.controller - Dead zone for controller input, in stick tilt
  * @property {number} deadZone.touch - Dead zone for touch input, in pixels
  * @property {number} deadZone.xr - Dead zone for XR input, in hand detection precision
@@ -143,6 +143,13 @@ export const pxlUserSettings = {
  * @description Default options for pxlNav
  * 
  * Pass a pxlOptions object to the pxlNav constructor to override these defaults.
+ * 
+ * Note : From `postProcessPasses`, only `postProcessPasses.roomGlowPass` is implemented currently
+ * <br/>         The passes are all added, but options to control them are not yet implemented
+ * <br/>       However,
+ * <br/>         `lizardKingPass`, `starFieldPass`, and `crystallinePass` can be triggered manually on `pxlUser`
+ * <br/>         They will be implemented through triggers in a future version of `pxlNav`
+ * 
  * @property {number} verbose - Verbosity level for console logging
  * @property {object} fps - Frames per second settings
  * @property {number} fps.pc - FPS for desktop
@@ -151,17 +158,20 @@ export const pxlUserSettings = {
  * @property {boolean} autoCamera - Whether the camera is automatically controlled
  * @property {boolean} allowStaticRotation - Whether static rotation is allowed
  * @property {pxlUserSettings} userSettings - User settings for pxlNav; set to a `pxlUserSettings` object
- * @property {boolean} subTickCalculations - Whether to calculate sub-ticks
- * @property {string} pxlRoomRoot - Path to room assets
- * @property {string} pxlAssetRoot - Path to asset assets
- * @property {boolean} showOnboarding - Whether to show onboarding
- * @property {object} onboarding - Onboarding settings
- * @property {object} onboarding.pc - Onboarding settings for desktop
+ * @property {boolean} subFrameCalculations - Whether to run sub-frame calculations.
+ * <br/>This 'separates' Camera & User calculations from the frame rate; allowing a more responsive control at lower frame rates.
+ * <br/>Enable this if you have heavy object/polygon scenes where player interaction is important.
+ * <br/>*Please note, this is heavy on the CPU, so only use it if you need it.*
+ * @property {string} pxlRoomRoot - Path to pxlRoom root path
+ * @property {string} pxlAssetRoot - Path to pxlAsset root path
+ * @property {boolean} showOnboarding - Whether to show the 'Onboarding' how-to intro screen
+ * @property {object} onboarding - Onboarding settings object
+ * @property {object} onboarding.pc - Onboarding settings for Desktop browsers
  * @property {string} onboarding.pc.message - Onboarding message for desktop
  * @property {string[]} onboarding.pc.messageStyle - Onboarding message style for desktop
  * @property {string} onboarding.pc.buttonText - Onboarding button text for desktop
  * @property {string[]} onboarding.pc.buttonStyle - Onboarding button style for desktop
- * @property {object} onboarding.mobile - Onboarding settings for mobile
+ * @property {object} onboarding.mobile - Onboarding settings for Mobile browsers
  * @property {string} onboarding.mobile.message - Onboarding message for mobile
  * @property {string[]} onboarding.mobile.messageStyle - Onboarding message style for mobile
  * @property {string} onboarding.mobile.buttonText - Onboarding button text for mobile
@@ -176,11 +186,12 @@ export const pxlUserSettings = {
  * @property {string} skyHaze - Sky haze level
  * @property {object} postProcessPasses - Post-process passes settings
  * @property {boolean} postProcessPasses.roomGlowPass - Whether to enable room glow pass
- * @property {boolean} postProcessPasses.mapComposerWarpPass - Whether to enable map composer warp pass
- * @property {boolean} postProcessPasses.chromaticAberrationPass - Whether to enable chromatic aberration pass
- * @property {boolean} postProcessPasses.lizardKingPass - Whether to enable lizard king pass
- * @property {boolean} postProcessPasses.starFieldPass - Whether to enable star field pass
- * @property {boolean} postProcessPasses.crystallinePass - Whether to enable crystalline pass
+ * @property {boolean} postProcessPasses.motionBlurPass - Whether to enable motion blur pass ( Not implemented yet )
+ * @property {boolean} postProcessPasses.mapComposerWarpPass - Whether to enable map composer warp pass ( Not implemented yet )
+ * @property {boolean} postProcessPasses.chromaticAberrationPass - Whether to enable chromatic aberration pass ( Not implemented yet )
+ * @property {boolean} postProcessPasses.lizardKingPass - Whether to enable lizard king pass ( Enable through `pxlUser` during runtime for now )
+ * @property {boolean} postProcessPasses.starFieldPass - Whether to enable star field pass ( Enable through `pxlUser` during runtime for now )
+ * @property {boolean} postProcessPasses.crystallinePass - Whether to enable crystalline pass ( Enable through `pxlUser` during runtime for now )
  * @example
  * // Example usage
  *  import { pxlNav, pxlOptions } from './pxlNav.js';
@@ -220,7 +231,7 @@ export const pxlUserSettings = {
  *   'autoCamera' : false,
  *   'allowStaticRotation' : false,
  *   'userSettings' : Object.assign({}, pxlUserSettings),
- *   'subTickCalculations' : false,
+ *   'subFrameCalculations' : false,
  *   'pxlRoomRoot' : "./pxlRooms",
  *   'pxlAssetRoot' : "./pxlAssets",
  *   'showOnboarding' : true,
@@ -249,6 +260,7 @@ export const pxlUserSettings = {
  *   'skyHaze' : pxlEnums.SKY_HAZE.OFF,
  *   'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
  *      'roomGlowPass' : false,
+ *      'motionBlurPass' : false,
  *      'mapComposerWarpPass' : false,
  *      'chromaticAberrationPass' : false,
  *      'lizardKingPass' : false,
@@ -272,7 +284,7 @@ export const pxlOptions = {
     'autoCamera' : false,
     'allowStaticRotation' : false,
     'userSettings' : Object.assign({}, pxlUserSettings),
-    'subTickCalculations' : false,
+    'subFrameCalculations' : false,
     'pxlRoomRoot' : "./pxlRooms",
     'pxlAssetRoot' : "./pxlAssets",
     'showOnboarding' : true,
@@ -301,6 +313,7 @@ export const pxlOptions = {
     'skyHaze' : pxlEnums.SKY_HAZE.OFF,
     'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
         'roomGlowPass' : false,
+        'motionBlurPass' : false,
         'mapComposerWarpPass' : false,
         'chromaticAberrationPass' : false,
         'lizardKingPass' : false,

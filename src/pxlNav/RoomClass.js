@@ -751,6 +751,8 @@ class RoomEnvironment{
 
   /**
    * Step the collider helper.
+   * 
+   * Not required, as the helper's step function isn't fully implemented yet.
    * @param {number} [colliderType=COLLIDER_TYPE.FLOOR] - The type of collider.
    * @example
    * // To add a floor collider helper

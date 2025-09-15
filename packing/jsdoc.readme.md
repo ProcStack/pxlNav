@@ -4,6 +4,9 @@
 These are the docs for **`pxlNav`**
 <br>&nbsp;&nbsp; A javascript Player Controller & Environment Manager for Three.js
 
+Quick link to - <a href="./pxlRoom%2520RoomEnvironment.html">pxlRoom Docs</a>
+
+
 **Since the docs are still being written,**
 **<br>&nbsp;&nbsp; If you have any questions / feedback, feel free to join the [pxlNav Support](https://discord.gg/UqEY9mpZ9x) discord group.**
 

@@ -18,6 +18,7 @@
 
 import { pxlNav, pxlEnums, pxlUserSettings, pxlOptions } from './pxlNav.module.js';
 
+import { OutletEnvironment } from './pxlRooms/OutletEnvironment/OutletEnvironment.js';
 
 // Console logging level
 //   Options are - NONE, ERROR, WARN, INFO
@@ -36,8 +37,10 @@ const pxlAssetRoot = "./pxlAssets";
 // Show the onboarding screen after the loading bar completes
 const showOnboarding = true;
 
-// Current possible rooms - "OutletEnvironment", "SaltFlatsEnvironment", "OutletEnvironment", "VoidEnvironment"
-const bootRoomList = ["OutletEnvironment"];
+// Create your pxlRoom list
+//   This is where you create your pxlRoom file and pass it to `pxlNav`
+const OutletRoom = new OutletEnvironment( "OutletEnvironment", "./js/pxlRooms/OutletEnvironment" );
+const bootRoomList = [ OutletRoom ];
 const startingRoom = bootRoomList[0];
 
 // -- -- --

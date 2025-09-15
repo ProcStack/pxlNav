@@ -117,92 +117,104 @@ export class Rendering{
     // -- 2-Step Blur Composer  -- -- -- -- -- -- -- //
     ///////////////////////////////////////////////////
 
-    this.blurComposer = new EffectComposer(this.engine);
-    
-    this.shaderPasses.blurXShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          tDiffuse: { value: null },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [1,0], 4, 1.8 ),
-        defines: {}
-      } ), "tDiffuse"
-    );
+    /*
+    if( this.pxlOptions.postProcessPasses.roomBloomPass ){}
+    if( this.pxlOptions.postProcessPasses.motionBlurPass ){}
+    if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){}
+    if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){}
+    if( this.pxlOptions.postProcessPasses.lizardKingPass ){}
+    if( this.pxlOptions.postProcessPasses.starFieldPass ){}
+    if( this.pxlOptions.postProcessPasses.crystallinePass ){}
+    */
 
-    this.shaderPasses.blurXShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
-    this.shaderPasses.blurXShaderPass.material.transparent = true;
-    this.shaderPasses.blurXShaderPass.needsSwap = true;
-    this.shaderPasses.blurXShaderPass.enabled=false;
-    this.shaderPasses.blurXShaderPass.name="blurXShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.blurXShaderPass );
-    
-    
-    this.shaderPasses.dirBlurCopyPass = new ShaderPass(CopyShader);
-    this.shaderPasses.dirBlurCopyPass.enabled=false;
-    this.shaderPasses.dirBlurCopyPass.name="dirBlurCopyPass";
-    this.blurComposer.addPass(this.shaderPasses.dirBlurCopyPass);
-    
-    this.shaderPasses.blurYShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          tDiffuse: { value: null },
-          //pDiffuse: { value: this.pxlEnv.scene.renderGlowTarget.texture },
-          //pDiffuse: { value: this.blurComposer.writeBuffer.texture },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [0,1], 4, 1.3 ),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.shaderPasses.blurYShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
-    this.shaderPasses.blurYShaderPass.material.transparent = true;
-    this.shaderPasses.blurYShaderPass.enabled=false;
-    this.shaderPasses.blurYShaderPass.name="blurYShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.blurYShaderPass );
-  
-    
-    this.shaderPasses.scatterMixShaderPass = new ShaderPass(
-      new ShaderMaterial( {
-        uniforms: {
-          time:{ value:this.pxlTimer.msRunner },
-          tDiffuse: { value: null },
-          pDiffuse: { value: null },
-          resUV: { value: this.pxlDevice.screenRes },
-        },
-        vertexShader: this.pxlShaders.core.defaultVert(),
-        fragmentShader: this.pxlShaders.rendering.mixBlurShaderPass(),
-        defines: {}
-      } ), "tDiffuse"
-    );
-    this.shaderPasses.scatterMixShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
-    this.shaderPasses.scatterMixShaderPass.material.transparent = true;
-    this.shaderPasses.scatterMixShaderPass.enabled=false;
-    this.shaderPasses.scatterMixShaderPass.name="scatterMixShaderPass";
-    this.blurComposer.addPass( this.shaderPasses.scatterMixShaderPass );
+    if( this.pxlOptions.postProcessPasses.roomBloomPass ){
+      
+      this.blurComposer = new EffectComposer(this.engine);
+      
+      this.shaderPasses.blurXShaderPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            time:{ value:this.pxlTimer.msRunner },
+            tDiffuse: { value: null },
+            pDiffuse: { value: null },
+            resUV: { value: this.pxlDevice.screenRes },
+          },
+          vertexShader: this.pxlShaders.core.defaultVert(),
+          fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [1,0], 4, 1.8 ),
+          defines: {}
+        } ), "tDiffuse"
+      );
+
+      this.shaderPasses.blurXShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
+      this.shaderPasses.blurXShaderPass.material.transparent = true;
+      this.shaderPasses.blurXShaderPass.needsSwap = true;
+      this.shaderPasses.blurXShaderPass.enabled=false;
+      this.shaderPasses.blurXShaderPass.name="blurXShaderPass";
+      this.blurComposer.addPass( this.shaderPasses.blurXShaderPass );
+      
+      
+      this.shaderPasses.dirBlurCopyPass = new ShaderPass(CopyShader);
+      this.shaderPasses.dirBlurCopyPass.enabled=false;
+      this.shaderPasses.dirBlurCopyPass.name="dirBlurCopyPass";
+      this.blurComposer.addPass(this.shaderPasses.dirBlurCopyPass);
+      
+      this.shaderPasses.blurYShaderPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            time:{ value:this.pxlTimer.msRunner },
+            tDiffuse: { value: null },
+            //pDiffuse: { value: this.pxlEnv.scene.renderGlowTarget.texture },
+            //pDiffuse: { value: this.blurComposer.writeBuffer.texture },
+            pDiffuse: { value: null },
+            resUV: { value: this.pxlDevice.screenRes },
+          },
+          vertexShader: this.pxlShaders.core.defaultVert(),
+          fragmentShader: this.pxlShaders.rendering.directionalBlurPass( "pDiffuse", [0,1], 4, 1.3 ),
+          defines: {}
+        } ), "tDiffuse"
+      );
+      this.shaderPasses.blurYShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
+      this.shaderPasses.blurYShaderPass.material.transparent = true;
+      this.shaderPasses.blurYShaderPass.enabled=false;
+      this.shaderPasses.blurYShaderPass.name="blurYShaderPass";
+      this.blurComposer.addPass( this.shaderPasses.blurYShaderPass );
     
       
-    // Set Anti-Aliasing Quality
-    if( this.pxlOptions.antiAliasing===ANTI_ALIASING.LOW){
-      this.shaderPasses.scatterMixShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.MEDIUM){
-      this.shaderPasses.blurXShaderPass.enabled=true;
-      this.shaderPasses.dirBlurCopyPass.enabled=true;
-      this.shaderPasses.blurYShaderPass.enabled=true;
-    }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.HIGH ){
-      this.shaderPasses.blurXShaderPass.enabled=true;
-      this.shaderPasses.dirBlurCopyPass.enabled=true;
-      this.shaderPasses.blurYShaderPass.enabled=true;
-      this.shaderPasses.scatterMixShaderPass.enabled=true;
+      this.shaderPasses.scatterMixShaderPass = new ShaderPass(
+        new ShaderMaterial( {
+          uniforms: {
+            time:{ value:this.pxlTimer.msRunner },
+            tDiffuse: { value: null },
+            pDiffuse: { value: null },
+            resUV: { value: this.pxlDevice.screenRes },
+          },
+          vertexShader: this.pxlShaders.core.defaultVert(),
+          fragmentShader: this.pxlShaders.rendering.mixBlurShaderPass(),
+          defines: {}
+        } ), "tDiffuse"
+      );
+      this.shaderPasses.scatterMixShaderPass.material.uniforms.pDiffuse = this.pxlEnv.scene.renderGlowTarget.texture;
+      this.shaderPasses.scatterMixShaderPass.material.transparent = true;
+      this.shaderPasses.scatterMixShaderPass.enabled=false;
+      this.shaderPasses.scatterMixShaderPass.name="scatterMixShaderPass";
+      this.blurComposer.addPass( this.shaderPasses.scatterMixShaderPass );
+      
+        
+      // Set Anti-Aliasing Quality
+      if( this.pxlOptions.antiAliasing===ANTI_ALIASING.LOW){
+        this.shaderPasses.scatterMixShaderPass.enabled=true;
+      }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.MEDIUM){
+        this.shaderPasses.blurXShaderPass.enabled=true;
+        this.shaderPasses.dirBlurCopyPass.enabled=true;
+        this.shaderPasses.blurYShaderPass.enabled=true;
+      }else if( this.pxlOptions.antiAliasing===ANTI_ALIASING.HIGH ){
+        this.shaderPasses.blurXShaderPass.enabled=true;
+        this.shaderPasses.dirBlurCopyPass.enabled=true;
+        this.shaderPasses.blurYShaderPass.enabled=true;
+        this.shaderPasses.scatterMixShaderPass.enabled=true;
+      }
+
     }
-
-
 
 
     ///////////////////////////////////////////////////

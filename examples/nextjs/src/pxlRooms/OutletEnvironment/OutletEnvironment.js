@@ -22,11 +22,8 @@
 
 
 import {
-  Vector2,
   Vector3,
   Color,
-  Group,
-  Object3D,
   AmbientLight,
   FogExp2,
   SRGBColorSpace,

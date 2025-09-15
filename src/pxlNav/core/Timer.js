@@ -33,15 +33,39 @@
 //    `1.0 - Math.pow( 0.5, deltaTime * rate )`
 //      Providing a scalled rate better for blending operations
 
-/**
- * @namespace pxlTimer
- * @description Timer and time management
- */
 
 
 import { Vector2 } from "three";
 
+/**
+ * @alias pxlTimer
+ * @class
+ * @description Timer and time management
+ * <br/>Automatically managed when `pxlNav` is not paused.
+ * 
+ * From your pxlRoom, you can access the current time and delta times with:
+ * <br/>`this.msRunner.x` - Current time in milliseconds since initialization
+ * <br/>`this.msRunner.y` - Delta time in milliseconds since the last frame
+ * 
+ * You do not need to run `this.pxlTimer.curMS` to get the current time, as `this.msRunner.x` is automatically updated in your room.
+ */
 export class Timer{
+  /**
+   * Initializes a new instance of the Timer class.
+   *
+   * @constructor
+   * @property {boolean} booted - Indicates if the timer has completed booting.
+   * @property {boolean} active - Indicates if the timer is currently active.
+   * @property {Vector2} msRunner - Stores timing information as a Vector2.
+   * @property {number} curMS - Read-Only; Current time in milliseconds since the last frame update.
+   * @property {number} prevMS - Time in milliseconds at the previous frame update.
+   * @property {number} runtime - Read-Only; Time in milliseconds since the timer was initialized.
+   * @property {number} msLog - Log of milliseconds.
+   * @property {number} fpsStats - Stores frames per second statistics.
+   * @property {number} deltaTime - Time elapsed between the current and previous frame, in seconds.
+   * @property {number} avgDeltaTime - Averaged delta time, in seconds.
+   * @property {number} [avgDeltaRate=0.7] - Rate used for averaging delta time.
+   */
   constructor(){
     this.active=false;
     this.msRunner=new Vector2(0,0);
@@ -100,16 +124,37 @@ export class Timer{
   
   // Scale the time rate
   //   Since time is scaled, 
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function scaleTime
+   * @description Scale the time rate of `pxlNav`
+   * @param {number} scale Multiplier value
+   */
   scaleTime( scale ){
     this._msRate=this.baseRate*scale;
   }
 
   // -- -- --
   
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function start
+   * @description Start pxlNav's timer; alias for `play()`
+   */
   start(){
     this.play();
   }
-    
+  
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function pause
+   * @description Pause pxlNav's timer. If no state is provided, it will toggle the current active state.
+   * @param {boolean|null} [state=null] If `null`, toggle the current state. If `true` or `false`, set the state directly.
+   * @returns {boolean} The current active state after the operation.
+   */
   pause( state=null){
     if( state === null ){
       this.active=!this.active;
@@ -119,22 +164,49 @@ export class Timer{
     return this.active;
   }
   
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function play
+   * @description Run pxlNav's timer, alias for `start()`
+   * @returns {boolean} The current active state after the operation.
+   */
   play(){
     this.active=true;
     return this.active;
   }
   
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function stop
+   * @description Stop pxlNav's timer.
+   * @returns {boolean} The current active state after the operation.
+   */
   stop(){
     this.active=false;
     return this.active;
   }
   
+  /**
+   * @method
+   * @memberof pxlTimer
+   * @function toggleMSLog
+   * @description Toggle the millisecond console logging state between `0` (off) and `1` (on).
+   */
   toggleMSLog(){
     this.msLog=(this.msLog+1)%2;
   }
 
   // -- -- --
   
+  // Run time step calculations
+  /**
+   * @memberof pxlTimer
+   * @function step
+   * @description Run frame calculations for pxlNav's timer. *(Automatic when pxlNav is not paused)*
+   * @returns {void}
+   */
   step(){
     let prevTime = this._curMS; 
 		this.updateTime();
@@ -165,11 +237,25 @@ export class Timer{
   // In the case of changing rates of a Lerp,
   //  This will return a "deltaTime" influenced lerp rate
   // Note: Using deltaTime alone will cause a missmatch for your lerp rate
+  /**
+   * @memberof pxlTimer
+   * @function getLerpRate
+   * @description Get a deltaTime influenced rate for blending (Lerp / Slerp) operations. This helps prevent stuttering or mis-matched rates when using deltaTime directly.
+   * @param {number} rate 
+   * @returns {number}
+   */
   getLerpRate( rate ){
     return 1.0 - Math.pow( 0.5, this.deltaTime * rate );
   }
 
   // If the Average Delta Time works better for your needs --
+  /**
+   * @memberof pxlTimer
+   * @function getLerpAvgRate
+   * @description Get an avgDeltaTime influenced rate for blending (Lerp / Slerp) operations. This helps prevent stuttering or mis-matched rates when using avgDeltaTime directly.
+   * @param {number} rate 
+   * @returns {number}
+   */
   getLerpAvgRate( rate ){
     return 1.0 - Math.pow( 0.5, this.avgDeltaTime * rate );
   }

@@ -69,7 +69,7 @@ declare module 'pxlNav' {
     autoCamera: boolean;
     allowStaticRotation: boolean;
     userSettings: pxlUserSettings | object;
-    subTickCalculations: boolean;
+    subFrameCalculations: boolean;
     pxlRoomRoot: string;
     pxlAssetRoot: string;
     showOnboarding: boolean;
@@ -187,7 +187,6 @@ declare module 'pxlNav' {
       'XR' : number;
       'VR' : number;
       'AR' : number;
-      'HMD' : number;
       'OTHER' : number;
     };
     'DEVICE_EVENT' : {

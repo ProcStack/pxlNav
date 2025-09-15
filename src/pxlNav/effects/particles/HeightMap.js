@@ -57,7 +57,7 @@ import { heightMapVert, heightMapFrag } from './shaders/HeightMap.js';
  * import { pxlEffects } from "pxlNav";
  * const HeightMap = pxlEffects.pxlParticles.HeightMap; 
  * 
- * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * // You can put this in yout `fbxPostLoad()` or `build()` function
  * fbxPostLoad(){
  *   
  *   // Create the HeightMap system

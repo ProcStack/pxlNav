@@ -1944,6 +1944,9 @@ export class Camera{
     }
     /**
      * Activates an item.
+     * 
+     * Note : This doesn't work currently, it needs to be re-implemented
+     * 
      * @param {string} [curName=null] - The name of the item.
      * @param {string} [curNameBase=null] - The base name of the item.
      * @returns {boolean} - Whether the item was activated.

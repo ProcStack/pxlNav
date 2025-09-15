@@ -1,9 +1,3 @@
-
-/**
- * @namespace pxlUtils
- * @description Utility functions
- */
-
 import {
   Vector2,
   Vector3,
@@ -25,7 +19,18 @@ SRGBColorSpace,
 CubeUVRefractionMapping,*/
 
 
+ /**
+  * @alias pxlUtils
+  * @class
+  * @description Utility class providing various helper functions for pxlNav.
+  * @property {number} curMS - Read-Only; Current time in milliseconds since the last frame update.
+  */
 export class Utils{
+  /**
+   * Create a Utils instance.
+   * @param {string} [assetRoot="images/assets/"] - Root path for assets.
+   * @param {boolean} [mobile] - Whether running on a mobile device.
+   */
   constructor(assetRoot="images/assets/", mobile ){
     this.assetRoot=assetRoot;
     this.mobile=mobile;
@@ -38,7 +43,7 @@ export class Utils{
     // ImageLoader's defauls; images load as RGBAFormat by default, and JPG as RGBAFormat
     this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, DepthFormat ];
   }
-
+  
   get curMS(){
       return this.pxlTimer.curMS;
   }
@@ -48,6 +53,14 @@ export class Utils{
     this.pxlEnums=pxlNav.pxlEnums;
   }
   
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Update the browser URL using history API.
+   * @param {string} url - The new URL.
+   * @param {Object} [state={}] - State object for history.
+   * @param {string} [title=""] - Title for the history entry.
+   */
   updateUrl(url,state={},title=""){
       if (window.history.replaceState) {
           window.history.replaceState(state, title, url);
@@ -56,6 +69,12 @@ export class Utils{
       }
   }
   
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Copy the current room URL to the clipboard.
+   * @returns {boolean|string} Status of the copy operation.
+   */
   copyRoomUrl(){
       let url=window.location;
       let tmpFocus=document.activeElement;
@@ -78,14 +97,37 @@ export class Utils{
       return status;
   }
     
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Check if a value is an integer.
+   * @param {number} val - The value to check.
+   * @returns {boolean} True if integer, false otherwise.
+   */
   checkInt(val){
     return (val%1)===0;
   }
 
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert degrees to radians.
+   * @param {number} deg - Degrees.
+   * @returns {number} Radians.
+   */
   degToRad(deg){
     return deg*(Math.PI/180);
   }
 
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Round a number to the nearest hundredths (2 decimal places).
+   * @param {number} val - Value to round.
+   * @returns {number} Rounded value.
+   */
   toHundreths(val){ // int(val*100)*.01 returns an erronious float on semi ussual basis...
     if(!val) return 0;
 
@@ -98,6 +140,14 @@ export class Utils{
     }
   }
 
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Round a number to the nearest tenths (1 decimal place).
+   * @param {number} val - Value to round.
+   * @returns {number} Rounded value.
+   */
   toTenths(val){ // int(val*100)*.01 returns an erronious float on semi ussual basis...
     if(!val) return 0;
 
@@ -110,6 +160,13 @@ export class Utils{
     }
   }
   
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Get the current date and time as an array.
+   * @returns {Array<string>} [date, time] in "YYYY-MM-DD" and "HH:MM:SS" format.
+   */
   getDateTime(){
     let d=new Date();
     let date=(d.getFullYear()+"").padStart(2,'0')+"-"+((d.getMonth()+1)+"").padStart(2,'0')+"-"+(d.getDate()+"").padStart(2,'0');
@@ -119,6 +176,14 @@ export class Utils{
   
   // -- -- -- //
 
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Strictly clean a string from HTML and non-alphanumeric characters.
+   * @param {string} messageString - String to clean.
+   * @returns {string} Cleaned string.
+   */
   cleanStrict( messageString ){
     let strip=document.createElement( "div" );
     strip.innerHTML=messageString;
@@ -130,7 +195,15 @@ export class Utils{
     }
     return strip;
   }
-    
+  
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Basic clean of a string, allowing some symbols.
+   * @param {string} messageString - String to clean.
+   * @returns {string} Cleaned string.
+   */
   cleanBasic( messageString ){
     let strip=document.createElement( "div" );
     strip.innerHTML=messageString;
@@ -143,6 +216,14 @@ export class Utils{
     return strip;
   }
     
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Remove HTML from a string.
+   * @param {string} messageString - String to clean.
+   * @returns {string} Cleaned string.
+   */
   cleanString( messageString ){
     let strip=document.createElement( "div" );
     strip.innerHTML=messageString;
@@ -152,12 +233,28 @@ export class Utils{
 
 
   // Round to nearest
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Round a value to a fixed precision and return as string.
+   * @param {number} val - Value to round.
+   * @param {number} [precision=2] - Number of decimal places.
+   * @returns {string} Rounded value as string.
+   */
   toNearestStr( val, precision=2 ){
     let retVal = val.toFixed(precision);
     return retVal;
   }
 
   // Round array elements to nearest
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Round each element of an array to a fixed precision and return as array of strings.
+   * @param {Array<number>} arr - Array of numbers.
+   * @param {number} [precision=2] - Number of decimal places.
+   * @returns {Array<string>} Array of rounded strings.
+   */
   arrayToStr( arr, precision=2 ){
     let retArr = [];
     arr.forEach( (val)=>{
@@ -167,18 +264,45 @@ export class Utils{
   }
 
   // Flatten array to joined string
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Flatten an array to a joined string with specified precision and delimiter.
+   * @param {Array<number>} arr - Array of numbers.
+   * @param {number} [precision=2] - Number of decimal places.
+   * @param {string} [delimiter=","] - Delimiter for joining.
+   * @returns {string} Joined string.
+   */
   flattenArrayToStr( arr, precision=2, delimiter="," ){
     return this.arrayToStr( arr, precision ).join(delimiter);
   }
 
   // -- -- -- //
   
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Generate a random float between min and max.
+   * @param {number} min - Minimum value.
+   * @param {number} max - Maximum value.
+   * @returns {number} Random float.
+   */
   randomFloat(min,max){
     return Math.random()*(max-min)+min;
   }
 
   // -- -- -- //
 
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert screen coordinates to normalized device coordinates (NDC).
+   * @param {number} x - X coordinate.
+   * @param {number} y - Y coordinate.
+   * @param {number} width - Screen width.
+   * @param {number} height - Screen height.
+   * @returns {Vector2} NDC coordinates.
+   */
   screenToNDC( x, y, width, height ){
     let ndcX = ( x / width ) * 2 - 1;
     let ndcY = - ( y / height ) * 2 + 1;
@@ -187,14 +311,38 @@ export class Utils{
   
   // -- -- -- //
 
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a color component to hexadecimal string.
+   * @param {number} c - Color component (0-255).
+   * @returns {string} Hexadecimal string.
+   */
   componentToHex(c) {
     var hex = c.toString(16);
     return hex.padStart(2,'0');
   }
+
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert RGB values to a hexadecimal color string.
+   * @param {number} r - Red (0-255).
+   * @param {number} g - Green (0-255).
+   * @param {number} b - Blue (0-255).
+   * @returns {string} Hex color string.
+   */
   rgbToHex(r, g, b) {
     return "#" + this.componentToHex(Math.min(255, Math.max(0,Math.round(r)))) + this.componentToHex(Math.min(255, Math.max(0,Math.round(g)))) + this.componentToHex(Math.min(255, Math.max(0,Math.round(b))));
   }
   
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a hex color string to RGB array.
+   * @param {string} hex - Hex color string.
+   * @returns {Array<number>} [r, g, b] array.
+   */
   hexToRgb( hex ) {
     let buffer=hex[0];
     if(buffer==="#"){
@@ -220,6 +368,15 @@ export class Utils{
   
   // -- -- -- //
 
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Generate an RGB color from a string.
+   * @param {string} string - Input string.
+   * @param {number|null} [boost=null] - Optional boost factor.
+   * @param {boolean} [zoFit=false] - If true, normalize to [0,1].
+   * @returns {Array<number>} RGB array.
+   */
   stringToRgb( string, boost=null, zoFit=false ){
     let stringColor=[255,0,0];
     if( string ){
@@ -271,6 +428,13 @@ export class Utils{
 
 
   // Convert Color/Vector3 to sRGB Color Space
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a color or Vector3 to sRGB color space.
+   * @param {Object} color - Color or Vector3 object.
+   * @returns {Object} Converted color.
+   */
   colorTosRGB( color ){
     // Check if the colorue is a color object
     if( typeof color === "object" ){
@@ -291,6 +455,13 @@ export class Utils{
   }
 
   // Convert Linear to sRGB
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a linear value to sRGB.
+   * @param {number} val - Linear value.
+   * @returns {number} sRGB value.
+   */
   tosRGB( val ){
     // Convert the value per channel
     if( val <= 0.0031308 ){
@@ -304,6 +475,13 @@ export class Utils{
   // -- -- --
 
   // Convert Color/Vector3 to Linear Color Space
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a color or Vector3 to linear color space.
+   * @param {Object} color - Color or Vector3 object.
+   * @returns {Object} Converted color.
+   */
   colorToLinear( color ){
     // Check if the colorue is a color object
     if( typeof color === "object" ){
@@ -323,6 +501,13 @@ export class Utils{
     return color;
   }
   // Convert sRGB to Linear
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert an sRGB value to linear.
+   * @param {number} val - sRGB value.
+   * @returns {number} Linear value.
+   */
   toLinear( val ){
     if( val <= 0.04045 ){
       val *= this.twelvePNineTwoDiv;
@@ -335,6 +520,16 @@ export class Utils{
 
   // -- -- --
 
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Apply gamma correction to a color or Vector3.
+   * @param {Object} color - Color or Vector3 object.
+   * @param {number|string} [gammaIn="2.2"] - Input gamma.
+   * @param {number|string} [gammaOut="1.8"] - Output gamma.
+   * @returns {Object} Gamma-corrected color.
+   */
   gammaCorrectColor( color, gammaIn="2.2", gammaOut="1.8" ){
     // Check if the colorue is a color object
     if( typeof color === "object" ){
@@ -354,6 +549,17 @@ export class Utils{
     return color;
   }
 
+  
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Apply gamma correction to a single channel.
+   * @param {number} channel - Channel value.
+   * @param {number|string} [gammaIn="2.2"] - Input gamma.
+   * @param {number|string} [gammaOut="1.8"] - Output gamma.
+   * @returns {number} Gamma-corrected channel.
+   */
   gammaCorrection( channel, gammaIn="2.2", gammaOut="1.8" ){
     // Linearize the color
     let linearChannel = Math.pow( channel, gammaIn );
@@ -370,6 +576,14 @@ export class Utils{
 
   // TODO : Prep & re-implement THREE.GammaFactor -> pxlNav.pxlDevice.GammaFactor
   // TODO : pxlDevice OS detect needs to be implement for color conversion between known OS color spaces
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Convert a color between color spaces.
+   * @param {Object} color - Color object.
+   * @param {number} [space=this.pxlEnums.COLOR_SHIFT.KEEP] - Target color space.
+   * @returns {Object} Converted color.
+   */
   convertColor( color, space=this.pxlEnums.COLOR_SHIFT.KEEP ){
     if( space === this.pxlEnums.COLOR_SHIFT.KEEP ){
       return color;
@@ -427,6 +641,14 @@ export class Utils{
 
   // -- -- -- //
 
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Randomize the order of elements in an array.
+   * @param {Array} inputArr - Input array.
+   * @returns {Array} Randomized array.
+   */
   randomizeArray(inputArr){
     let tmpArr=[...inputArr];
     let retArr=[];
@@ -436,12 +658,28 @@ export class Utils{
     }
     return retArr;
   }
-    
+
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Get a random element from a list.
+   * @param {Array} list - List of elements.
+   * @param {number} [seed=1.14] - Optional seed.
+   * @returns {*} Random element.
+   */
   getRandom( list, seed=1.14 ){
     let randEl= Math.floor( Math.random( seed ) * list.length);
     return list[ randEl ];
   }
-    
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Apply a transformation list to an object (position, rotation, scale).
+   * @param {Object} curObj - The object to transform.
+   * @param {Object} transList - Transformation list with keys "r", "t", "s", and optional "rOrder".
+   */
   applyTransformList(curObj,transList){
     var rotate=transList["r"];
     curObj.rotateX(rotate[0]);
@@ -467,6 +705,15 @@ export class Utils{
     }
     
   //this.channelFormats=[ AlphaFormat, RedFormat, RGFormat, RGBFormat, RGBAFormat, DepthFormat ];
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Load a texture from an image path.
+   * @param {string} imgPath - Image path.
+   * @param {number|null} [channels=null] - Channel format index.
+   * @param {Object} [mods={}] - Texture modifications.
+   * @returns {Texture} Loaded texture.
+   */
   loadTexture(imgPath,channels=null,mods={}){
     // ## Check how textLoaderArray textures are being handled after being disposed
 
@@ -508,6 +755,15 @@ export class Utils{
     return texture;
   }
 
+  
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Create a VideoTexture from a video element.
+   * @param {HTMLVideoElement} videoObject - Video element.
+   * @returns {VideoTexture} Video texture.
+   */
   getVideoTexture( videoObject ){
     let videoTexture=new VideoTexture(videoObject);
     videoTexture.minFilter=LinearFilter;
@@ -517,6 +773,14 @@ export class Utils{
     return videoTexture;
   }
   
+  
+  /**
+   * @method
+   * @memberof pxlUtils
+   * @description Create a CanvasTexture and MeshBasicMaterial from a canvas.
+   * @param {HTMLCanvasElement} canvas - Canvas element.
+   * @returns {{texture: CanvasTexture, material: MeshBasicMaterial}} Texture and material.
+   */
   getCanvasTexture( canvas ){
     const texture = new CanvasTexture(canvas);
       
@@ -529,13 +793,14 @@ export class Utils{
   // -- -- -- //
 
   
+  
   /**
-   * Duplicate an array.
    * @method
-   * @memberof pxlParticles/ParticleBase
+   * @memberof pxlUtils
+   * @description Duplicate an array a specified number of times.
    * @param {Array} val - The array to duplicate.
-   * @param {number} count - The number of times to duplicate the array.
-   * @returns {Array} The duplicated array.
+   * @param {number} count - Number of times to duplicate.
+   * @returns {Array} Duplicated array.
    * @example
    * // Duplicate an array
    * import { pxlNav } from 'pxlNav.js';

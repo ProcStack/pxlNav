@@ -47,7 +47,7 @@ import { dustVert, dustFrag } from './shaders/FloatingDust.js';
  * import { pxlEffects } from "pxlNav";
  * const FloatingDust = pxlEffects.pxlParticles.FloatingDust; 
  * 
- * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * // You can put this in yout `fbxPostLoad()` or `build()` function
  * fbxPostLoad(){
  * 
  *   let floatingDustSystem = new FloatingDust( room, 'floatingDust' );

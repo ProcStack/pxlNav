@@ -95,6 +95,11 @@ export class AutoCamera{
     this.checkStatus();
   }
   
+  /**
+   * @memberof pxlAutoCam
+   * @function step
+   * @description Per-frame update of Auto Camera system
+   */
   step( force=false ){
     if( this.autoCamActive === null || this.active === null ){
       this.autoCamActive = false;
@@ -183,6 +188,11 @@ export class AutoCamera{
 // Auto Cam & Room Functions  //
 ///////////////////////////////
   
+  /**
+   * @memberof pxlAutoCam
+   * @function stepDroneCam
+   * @description Run frame calculations for camera on a track
+   */
   stepDroneCam(){
     let unique=true;
     let randDelay= Math.random( this.nextCamChange );
@@ -298,6 +308,13 @@ export class AutoCamera{
     this.pxlCamera.camUpdated=true; // Forces next frame update
   }
     
+  /**
+   * @memberof pxlAutoCam
+   * @function toggleAutoCam
+   * @description Toggle the active state of the auto camera system
+   * @param {boolean|null} [setValue=null] - If `null`, toggle the current state. If `true` or `false`, set the state directly.
+   * @param {number} [dir=1] - Direction to step the auto camera path. `1` for next, `-1` for previous.
+   */
   toggleAutoCam( setValue=null, dir=1 ){
     this.pxlEnv.fogMult.x = 1;
     if( this.autoCamPaths[ this.pxlEnv.currentRoom ] ){

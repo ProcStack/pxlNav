@@ -17,6 +17,7 @@ This milestone marks the addition of React and Next support for pxlNav.
  - pxlNav now loads as a component and attempts to draw to screen in `React` & `NextJS`
  - pxlNav Types and Component files added; JSX & TS with D-Types
  - pxlNav is still formatted in ESM, and intended to be ran in Native JS as a Module for better dynamic loading of rooms.
+ - GLTF/GLB Rooms are now supported; Supported scene files - FBX, GLTF, GLB
 
 # All Changes
 Please note, if you are using `pxlNav` in `React` or `NextJS`,

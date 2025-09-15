@@ -43,7 +43,7 @@ import { emberWispsVert, emberWispsFrag } from './shaders/EmberWisps.js';
  * import { pxlEffects } from "pxlNav";
  * const EmberWisps = pxlEffects.pxlParticles.EmberWisps; 
  * 
- * // You can put this in yuor `fbxPostLoad()` or `build()` function
+ * // You can put this in yout `fbxPostLoad()` or `build()` function
  * fbxPostLoad(){
  * 
  *   let emberWispsSystem = new EmberWisps( room, 'emberWisps' );

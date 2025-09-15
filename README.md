@@ -30,7 +30,7 @@ Javascript Player Controller & Environment Manager for Three.js
  - `./builds/pxlNav.module.js` - JS Module file
  - `./builds/pxlNavStyle.min.css` - CSS Style for things like Loading bar, Shader Editor, and more
  - `./builds/pxlNavLoader_basic.js` - Basic implementation of pxlNav; import, set options, and build.
- - `./examples/pxlNavLoader_switchSpace.js` - Basic implementation of a external trigger to swap room environments
+ - `./examples/esm/js/pxlNavLoader_switchSpace.js` - Basic implementation of a external trigger to swap room environments
  - `./builds/libs/three/...` - Some changes needed to be made to the FBXLoader.js file, please include the `libs` folder along side `pxlNav.module.js` to run pxlNav
 
 &nbsp;&nbsp; **CJS & UMD versions needs testing, see `./builds` for these versions.**
@@ -41,10 +41,10 @@ Javascript Player Controller & Environment Manager for Three.js
 
 ## The Good Bits
 **Wanna see example rooms using 3d fbx files?**
-<br/>&nbsp;&nbsp;&nbsp; [procstack.github.io Rooms](https://github.com/ProcStack/pxlNav/tree/main/examples/js/pxlRooms)
+<br/>&nbsp;&nbsp;&nbsp; [procstack.github.io Rooms](https://github.com/ProcStack/pxlNav/tree/main/examples/esm/js/pxlRooms)
 
 <br/>&nbsp;&nbsp;**For `pxlNav` Documentation -**
-<br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Documentation](https://github.com/ProcStack/pxlNav/tree/main/docs)
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)
 
 <br/>&nbsp;&nbsp;**For `pxlNav` changes between versions -**
 <br/>&nbsp;&nbsp;&nbsp;&nbsp;[pxlNav Change Log](https://github.com/ProcStack/pxlNav/blob/main/ChangeLog.md)
@@ -68,8 +68,8 @@ Javascript Player Controller & Environment Manager for Three.js
 ## In-Browser / Javascript Features
 &nbsp; _ **FPV Camera Control** on PC & Mobile
 <br/>&nbsp; _ **Navigation using W,A,S,D or Arrow Keys**
-<br/>&nbsp; _ Easily load any **FBX file** for a pxlRoom (Scene / Level) or Objects
-<br/>&nbsp;&nbsp;&nbsp; \*FBXs are 3d scene files you can make in most CGI programs; like Maya or Blender 
+<br/>&nbsp; _ Easily load any **FBX, GLTF, or GLB file** for a pxlRoom (Scene / Level) or Objects
+<br/>&nbsp;&nbsp;&nbsp; \*FBX/GLTF/GLB are 3d scene files you can make in most CGI programs; like Maya or Blender 
 
 <br/>&nbsp; _ **Animation Rig & Clip Files** are easily managed
 <br/>&nbsp; _ A simple **Animation State Machine** to set the next **Clip**
@@ -85,7 +85,7 @@ Javascript Player Controller & Environment Manager for Three.js
 
 <br/>&nbsp; _ Subscribe to **Callback** events & run **Triggers** to listen or control pxlNav from outside of pxlNav.
 <br/>&nbsp;&nbsp;&nbsp; \*You can subscribe & trigger your own custom events & code for your pxlRoom as well
-<br/>&nbsp; _ Easily assign custom materials (like OpenGL ES Shaders) to objects in your FBX when the file loads.
+<br/>&nbsp; _ Easily assign custom materials (like OpenGL ES Shaders) to objects in your 3d scene when the file loads.
 <br/>&nbsp;&nbsp;&nbsp; \*Your object will be listed under the Shader Editor's `Edit Shader` pulldown.
 *<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- `this` refers to your pxlRoom's Javascript object in code*
 <br/>
@@ -108,7 +108,7 @@ Javascript Player Controller & Environment Manager for Three.js
 <br/>&nbsp; _ **Point-to-Point Warp Pads** *( Teleporters / Portals )*
 <br/>&nbsp;&nbsp;&nbsp; \*Link a Collision Surface to a target Transform to move the user to once they step on the surface.
 <br/>&nbsp; _ **Point-to-Room Warp Pads**
-<br/>&nbsp;&nbsp;&nbsp; \*Move between other pxlRooms like changing game levels ( separate FBX files & javascript )
+<br/>&nbsp;&nbsp;&nbsp; \*Move between other pxlRooms like changing game levels ( separate 3d Scene files & javascript )
 
 <br/>&nbsp; _ **Ground Collider Objects**
 <br/>&nbsp;&nbsp;&nbsp; \*Floor terrain, things to jump on top of, floors of a building, and Walls to limit user movement.
@@ -150,7 +150,7 @@ Javascript Player Controller & Environment Manager for Three.js
 ## Work-in-Progress Features
 &nbsp; _ **Third person control** is not easily available, access it through `this.pxlCamera`
 <br/>&nbsp; _ No movement controls on **Mobile** yet
-<br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your FBX file
+<br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your 3d scene file
 <br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
 
 <br/>&nbsp; _ **Networking** as mostly been removed for safety concerns -

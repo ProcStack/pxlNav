@@ -69,7 +69,7 @@ declare module 'pxlNav' {
     autoCamera: boolean;
     allowStaticRotation: boolean;
     userSettings: pxlUserSettings | object;
-    subTickCalculations: boolean;
+    subFrameCalculations: boolean;
     pxlRoomRoot: string;
     pxlAssetRoot: string;
     showOnboarding: boolean;

@@ -7,8 +7,26 @@ npm-debug.log*
 *.tgz
 rollup.config.js
 
-# Dependency directories
+# Node
 node_modules/
+npm-debug.log
+yarn.lock
+.pnpm-debug.log
+
+# local caches
+.cache/
+.vscode/
+.idea/
+
+# Next.js & static export folders
+.next/
+out/
+
+# Examples build outputs (if you keep examples/ in files)
+examples/**/.next/
+examples/**/node_modules/
+examples/**/dist/
+examples/**/build/
 
 # Javascript packing and minifying
 packing/
@@ -24,6 +42,8 @@ docs/
 # Environment files
 .env
 .env.*
+.env.local
+.env.*.local
 
 
 # OS specific files

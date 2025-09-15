@@ -11,7 +11,8 @@
 //    If not used in pxlNav, just provide a unique prefix to the constructor
 
 /**
- * @namespace pxlCookie
+ * @alias pxlCookie
+ * @class
  * @description Cookie management
  */
 
@@ -19,7 +20,25 @@
 //   Alter the verbose check in `log()` to make this file standalone
 import { VERBOSE_LEVEL } from "./Enums.js";
 
+/**
+ * @alias pxlCookie
+ * @class
+ * @description CookieManager class for managing browser cookies with a specific prefix.
+ * <br/>Provides methods to read, write, clear, and check the existence of cookies.
+ * <br/>Handles value serialization, expiration, and path management.
+ * 
+ * Use this class if you want to store user data between sessions.
+ */
 export class CookieManager{
+  /**
+   * @memberof pxlCookie
+   * @constructor
+   * @description Creates an instance of CookieManager.
+   * @param {boolean} [verbose=false] - Enable verbose logging.
+   * @param {string} [prefix="pxlNav-"] - Prefix to prepend to all cookie names.
+   * @param {string} [path="/"] - Path for which the cookie is valid.
+   * @param {number} [expiration=30] - Number of days until the cookie expires.
+   */
   constructor(verbose=false, prefix="pxlNav-", path="/", expiration=30){
     // Suffix name to help searching and avoid cookie name conflictions
     let prepPrepend= prefix.substring(-1)==="-" ? prefix : prefix+"-" ;
@@ -56,6 +75,13 @@ export class CookieManager{
   // -- -- --
 
   // Set expiration date for the new cookie
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function getExpiration
+   * @description Returns the expiration string for a new cookie.
+   * @returns {string} Expiration string for the cookie.
+   */
   getExpiration(){ 
     let d = new Date();
     d.setTime( d.getTime() + (this.exp*24*60*60*1000) );
@@ -63,6 +89,14 @@ export class CookieManager{
   }
 
   // Is the cookie value equal to a given input?
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function isEqual
+   * @description Checks if the value of a cookie is equal to a given input.
+   * @param {string} cName - Cookie name (without prefix).
+   * @returns {boolean} True if the cookie value matches the input.
+   */
   isEqual( cName ){ 
     if( this.hasCookie(cName) ){
       this.log( cName );
@@ -71,11 +105,28 @@ export class CookieManager{
     return false;
   }
 
+  
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function getRegexp
+   * @description Returns a RegExp to match cookies with the given name.
+   * @param {string} cName - Cookie name (with or without prefix).
+   * @returns {RegExp} Regular expression for matching the cookie.
+   */
   getRegexp( cName ){
     return new RegExp( '(?=' + cName + ').*?((?=;)|(?=$))', 'g' );
   }
 
   // TODO : Validate this opposed to `getRegexp()`
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function getClearCookieRegexp
+   * @description Returns a RegExp to match cookies for clearing.
+   * @param {string} cName - Cookie name (with or without prefix).
+   * @returns {RegExp} Regular expression for matching the cookie to clear.
+   */
   getClearCookieRegexp( cName ){
     return new RegExp( '(?=' + cName + ').*?(?==)', 'g' );
   }
@@ -84,6 +135,13 @@ export class CookieManager{
   
   // Read all of CookieManager's controlled cookies
   //   Returns a dictionary of `this.prepend` cookies
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function pullData
+   * @description Reads all cookies managed by this CookieManager.
+   * @returns {Object} Dictionary of cookie names and their values.
+   */
   pullData(){ 
     let cur = document.cookie;
     let reg = this.getRegexp( this.prepend );
@@ -104,6 +162,15 @@ export class CookieManager{
   // -- -- --
 
   // Convert given value to a string
+  
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function valueToString
+   * @description Converts a given value to a string representation.
+   * @param {any} val - Value to convert.
+   * @returns {string} String representation of the value.
+   */
   valueToString(val){ 
     let type = typeof(val);
     
@@ -123,6 +190,15 @@ export class CookieManager{
   }
 
   // Convert a given variable to a string; account for arrays or not
+  
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function variableToString
+   * @description Converts a variable (including arrays) to a string representation.
+   * @param {any} arr - Variable or array to convert.
+   * @returns {string} String representation of the variable.
+   */
   variableToString(arr){ 
     if( Array.isArray(arr) ){
       let ret = arr.map((x)=>{
@@ -140,10 +216,28 @@ export class CookieManager{
   // -- -- --
 
   // Check if a cookie exists
+  
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function hasCookie
+   * @description Checks if a cookie exists.
+   * @param {string} cName - Cookie name (without prefix).
+   * @returns {boolean} True if the cookie exists.
+   */
   hasCookie( cName ){ 
     return document.cookie.includes( this.prepend + cName );
   }
   // Read the value of the cookie; returns string
+  
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function readCookie
+   * @description Reads the value of a cookie as a string.
+   * @param {string} cName - Cookie name (without prefix).
+   * @returns {string|null} Value of the cookie, or null if not found.
+   */
   readCookie( cName ){ 
     if(this.hasCookie(cName)){
       let reg = this.getRegexp( this.prepend + cName );
@@ -155,6 +249,16 @@ export class CookieManager{
     return null;
   }
   // Read the value of the cookie; returns rectified value
+  
+
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function parseCookie
+   * @description Reads and parses the value of a cookie.
+   * @param {string} cName - Cookie name (without prefix).
+   * @returns {string|number|boolean|null} Parsed value of the cookie.
+   */
   parseCookie( cName ){ 
     if( this.hasCookie(cName) ){
       let reg = this.getRegexp( this.prepend + cName );
@@ -178,6 +282,16 @@ export class CookieManager{
   // -- -- --
 
   // Read all cookie entries with the given suffix
+  
+
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function evalCookie
+   * @description Evaluates the existence or value of cookies with the given suffix.
+   * @param {string} [cName] - Cookie name (without prefix). If omitted, evaluates all managed cookies.
+   * @returns {boolean} True if the cookie(s) exist.
+   */
   evalCookie(cName){ 
     if( cName ){
       if( this.hasCookie(cName) ){
@@ -196,6 +310,14 @@ export class CookieManager{
   }
 
   // Set cookie value; setCookie( string, variable )
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function setCookie
+   * @description Sets a cookie value.
+   * @param {string} cName - Cookie name (without prefix).
+   * @param {any} cData - Value to store in the cookie.
+   */
   setCookie(cName, cData){ 
     cData = this.variableToString(cData);
     if( cData.replace ){
@@ -205,6 +327,13 @@ export class CookieManager{
   }
   
   // Add dictionary keys and values to cookies
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function addDictionary
+   * @description Adds multiple cookies from a dictionary.
+   * @param {Object} cDict - Dictionary of key-value pairs to add as cookies.
+   */
   addDictionary(cDict){ 
     let cKeys = Object.keys(cDict);
     for( let x=0; x<cKeys.length; ++x ){
@@ -222,6 +351,14 @@ export class CookieManager{
   // Parse Dict Values, Update if they exist
   //   Overwrites Input Dict
   // Returns if any items in the dict were set
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function parseDict
+   * @description Parses and updates a dictionary with values from cookies if they exist.
+   * @param {Object} cDict - Dictionary to update with cookie values.
+   * @returns {boolean} True if any items in the dictionary were set from cookies.
+   */
   parseDict(cDict){
     let keys = Object.keys( cDict );
     let ret = false;
@@ -237,6 +374,13 @@ export class CookieManager{
   // -- -- --
 
   // Clear specific cookie entry
+  /**
+   * @method
+   * @memberof pxlCookie
+   * @function clearCookie
+   * @description Clears a specific cookie or all managed cookies.
+   * @param {string|string[]} [cName] - Cookie name(s) (without prefix) to clear. If omitted, clears all managed cookies.
+   */
   clearCookie( cName ){ 
     if(!cName){
       let reg = this.getClearCookieRegexp( this.prepend );
