@@ -149,9 +149,6 @@ Javascript Player Controller & Environment Manager for Three.js
 
 ## Work-in-Progress Features
 &nbsp; _ **Third person control** is not easily available, access it through `this.pxlCamera`
-<br/>&nbsp; _ No movement controls on **Mobile** yet
-<br/>&nbsp;&nbsp;&nbsp; \*Mobile will use your Camera Position & Aim locators in your 3d scene file
-<br/>&nbsp;&nbsp;&nbsp; \*If you add an Auto Camera Rail, it'll use that by default and loop the camera on the found Curve object
 
 <br/>&nbsp; _ **Networking** as mostly been removed for safety concerns -
 <br/>&nbsp;&nbsp;&nbsp; Avatars, WebCam Video Streaming, & Mic Audio, but it can be implemented through pxlNav `Extensions`
