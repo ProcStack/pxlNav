@@ -1,0 +1,1244 @@
+
+ -- pxlNav Code Stats -- -- -- -- -- -- -- -- -- -- 
+ -- -- September 15, 2025 - -- -- -- -- -- -- -- -- 
+    Stats Overview - 
+        File Types Checked - 
+             CSS, HTM, JS, MD, TXT
+        Files Found - 
+             153
+        Total Size Of Files - 
+             2.548 MB
+        Total File Line Count - 
+             39339
+
+        Code Line Count - 
+             24216
+        Commented Line Count - 
+             9838
+
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+
+    Web Only Line Counts - 
+        Server Side pxlNav Line Count - 
+             0
+        Front-End Core pxlNav Line Count - 
+             24216
+        Artist Room Line Count - 
+             0
+
+        Developer Only Function Line Count - 
+             1711
+        Moderator Only Function Line Count - 
+             2837
+
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+
+
+** File #001 - /src/style/verbose.css **
+** Add More Comments **
+   - File Size - 1.329 KB
+   - Total Line Count - 77
+   - White Space Count - 11
+   - Comment Line Count - 0
+  ******** Expecting - 11-23
+
+
+** File #002 - /src/style/shaderBoxGuiStyle.css **
+** Add More Comments **
+   - File Size - 4.916 KB
+   - Total Line Count - 250
+   - White Space Count - 26
+   - Comment Line Count - 1
+  ******** Expecting - 37-75
+
+
+** File #003 - /src/style/settingsGuiStyle.css **
+** Add More Comments **
+   - File Size - 5.218 KB
+   - Total Line Count - 286
+   - White Space Count - 26
+   - Comment Line Count - 1
+  ******** Expecting - 42-85
+
+
+** File #004 - /src/style/pxlNavStyle.css **
+** Add More Comments **
+   - File Size - 2.073 KB
+   - Total Line Count - 128
+   - White Space Count - 18
+   - Comment Line Count - 0
+  ******** Expecting - 19-38
+
+
+** File #005 - /src/style/old/userProfileBoxGuiStyle.css **
+** Add More Comments **
+   - File Size - 3.328 KB
+   - Total Line Count - 179
+   - White Space Count - 14
+   - Comment Line Count - 1
+  ******** Expecting - 26-53
+
+
+** File #006 - /src/style/old/userControlStyles.css **
+** Add More Comments **
+   - File Size - 1.666 KB
+   - Total Line Count - 79
+   - White Space Count - 5
+   - Comment Line Count - 1
+  ******** Expecting - 11-23
+
+
+** File #007 - /src/style/old/multiverseGuiStyle.css **
+** Add More Comments **
+   - File Size - 2.962 KB
+   - Total Line Count - 162
+   - White Space Count - 21
+   - Comment Line Count - 1
+  ******** Expecting - 24-48
+
+
+** File #008 - /src/style/old/chatBoxGuiStyle.css **
+** Add More Comments **
+   - File Size - 3.337 KB
+   - Total Line Count - 186
+   - White Space Count - 16
+   - Comment Line Count - 1
+  ******** Expecting - 27-55
+
+
+** File #009 - /src/style/old/artistInfoStyle.css **
+** Add More Comments **
+   - File Size - 1.840 KB
+   - Total Line Count - 86
+   - White Space Count - 4
+   - Comment Line Count - 1
+  ******** Expecting - 12-25
+
+
+** File #010 - /src/style/infoGuiStyle.css **
+** Add More Comments **
+   - File Size - 1.0 KB
+   - Total Line Count - 60
+   - White Space Count - 3
+   - Comment Line Count - 1
+  ******** Expecting - 9-18
+
+
+** File #011 - /src/style/hudStyles.css **
+** Add More Comments **
+   - File Size - 5.574 KB
+   - Total Line Count - 256
+   - White Space Count - 23
+   - Comment Line Count - 9
+  ******** Expecting - 38-76
+
+
+** File #012 - /src/style/howToStyle.css **
+** Add More Comments **
+   - File Size - 6.516 KB
+   - Total Line Count - 414
+   - White Space Count - 21
+   - Comment Line Count - 0
+  ******** Expecting - 62-124
+
+
+** File #013 - /src/style/helpGuiStyle.css **
+** Add More Comments **
+   - File Size - 3.012 KB
+   - Total Line Count - 204
+   - White Space Count - 32
+   - Comment Line Count - 7
+  ******** Expecting - 30-61
+
+
+** File #014 - /src/style/guiRangeSliderStyle.css **
+** Add More Comments **
+   - File Size - 2.984 KB
+   - Total Line Count - 135
+   - White Space Count - 5
+   - Comment Line Count - 1
+  ******** Expecting - 20-40
+
+
+** File #015 - /src/style/guiHudDisplayStyle.css **
+** Add More Comments **
+   - File Size - 6.963 KB
+   - Total Line Count - 399
+   - White Space Count - 47
+   - Comment Line Count - 9
+  ******** Expecting - 59-119
+
+
+** File #016 - /src/style/example.css **
+** Add More Comments **
+   - File Size - 1.901 KB
+   - Total Line Count - 82
+   - White Space Count - 10
+   - Comment Line Count - 0
+  ******** Expecting - 12-24
+
+
+** File #017 - /src/style/envPopupStyle.css **
+** Add More Comments **
+   - File Size - 347 B
+   - Total Line Count - 17
+   - White Space Count - 2
+   - Comment Line Count - 1
+  ******** Expecting - 2-5
+
+
+  File #018 - /src/pxlSubRooms/templateRoom/README.txt
+   - File Size - 677 B
+   - Total Line Count - 22
+   - White Space Count - 0
+   - Comment Line Count - 10
+
+
+  File #019 - /src/pxlRooms/TemplateEnvironment/TemplateEnvironment.js
+   - File Size - 7.804 KB
+   - Total Line Count - 243
+   - White Space Count - 60
+   - Comment Line Count - 121
+
+
+** File #020 - /src/pxlRooms/TemplateEnvironment/Shaders.js **
+** Add More Comments **
+   - File Size - 742 B
+   - Total Line Count - 32
+   - White Space Count - 6
+   - Comment Line Count - 3
+  ******** Expecting - 4-9
+
+
+  File #021 - /src/pxlRooms/TemplateEnvironment/README.md
+   - File Size - 14.05 KB
+   - Total Line Count - 324
+   - White Space Count - 0
+   - Comment Line Count - 218
+
+
+** File #022 - /src/pxlRooms/OutletEnvironment/Shaders/waterWay.js **
+** Add More Comments **
+   - File Size - 5.351 KB
+   - Total Line Count - 182
+   - White Space Count - 56
+   - Comment Line Count - 20
+  ******** Expecting - 27-54
+
+
+  File #023 - /src/pxlRooms/OutletEnvironment/Shaders/pineTree.js
+   - File Size - 10.50 KB
+   - Total Line Count - 359
+   - White Space Count - 82
+   - Comment Line Count - 61
+
+
+  File #024 - /src/pxlRooms/OutletEnvironment/Shaders/instPlants.js
+   - File Size - 10.47 KB
+   - Total Line Count - 363
+   - White Space Count - 87
+   - Comment Line Count - 67
+
+
+  File #025 - /src/pxlRooms/OutletEnvironment/Shaders/envGroundShaders.js
+   - File Size - 11.52 KB
+   - Total Line Count - 351
+   - White Space Count - 87
+   - Comment Line Count - 96
+
+
+** File #026 - /src/pxlRooms/OutletEnvironment/Shaders/creekWater.js **
+** Add More Comments **
+   - File Size - 2.270 KB
+   - Total Line Count - 84
+   - White Space Count - 17
+   - Comment Line Count - 3
+  ******** Expecting - 12-25
+
+
+** File #027 - /src/pxlRooms/OutletEnvironment/Shaders.js **
+** Add More Comments **
+   - File Size - 594 B
+   - Total Line Count - 17
+   - White Space Count - 4
+   - Comment Line Count - 1
+  ******** Expecting - 2-5
+
+
+  File #028 - /src/pxlRooms/OutletEnvironment/OutletEnvironment.js
+   - File Size - 21.54 KB
+   - Total Line Count - 596
+   - White Space Count - 137
+   - Comment Line Count - 155
+
+
+  File #029 - /src/pxlNavLoader_toCam.js
+   - File Size - 7.032 KB
+   - Total Line Count - 205
+   - White Space Count - 41
+   - Comment Line Count - 85
+
+
+  File #030 - /src/pxlNavLoader_switchSpace.js
+   - File Size - 10.02 KB
+   - Total Line Count - 302
+   - White Space Count - 63
+   - Comment Line Count - 120
+
+
+  File #031 - /src/pxlNavLoader_dev.js
+   - File Size - 9.815 KB
+   - Total Line Count - 290
+   - White Space Count - 59
+   - Comment Line Count - 116
+
+
+** File #032 - /src/pxlNav/webWorkers/webWorkers.js **
+** Add More Comments **
+   - File Size - 354 B
+   - Total Line Count - 10
+   - White Space Count - 0
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+** File #033 - /src/pxlNav/webWorkers/FileWorkerIO.js **
+** Add More Comments **
+   - File Size - 852 B
+   - Total Line Count - 36
+   - White Space Count - 3
+   - Comment Line Count - 0
+  ******** Expecting - 5-10
+
+
+  File #034 - /src/pxlNav/webWorkers/CameraWorker.js
+   - File Size - 8.239 KB
+   - Total Line Count - 252
+   - White Space Count - 26
+   - Comment Line Count - 78
+
+
+** File #035 - /src/pxlNav/webWorkers/AudioProcessor.js **
+** Add More Comments **
+   - File Size - 4.080 KB
+   - Total Line Count - 140
+   - White Space Count - 27
+   - Comment Line Count - 15
+  ******** Expecting - 21-42
+
+
+  File #036 - /src/pxlNav/shaders/shaders.js
+   - File Size - 901 B
+   - Total Line Count - 35
+   - White Space Count - 3
+   - Comment Line Count - 18
+
+
+** File #037 - /src/pxlNav/shaders/scene/SkyTexture.js **
+** Add More Comments **
+   - File Size - 1.511 KB
+   - Total Line Count - 58
+   - White Space Count - 9
+   - Comment Line Count - 6
+  ******** Expecting - 8-17
+
+
+  File #038 - /src/pxlNav/shaders/scene/SkyPlaneNormal.js
+   - File Size - 5.509 KB
+   - Total Line Count - 164
+   - White Space Count - 30
+   - Comment Line Count - 40
+
+
+** File #039 - /src/pxlNav/shaders/scene/SkyPlane.js **
+** Add More Comments **
+   - File Size - 1.857 KB
+   - Total Line Count - 53
+   - White Space Count - 7
+   - Comment Line Count - 6
+  ******** Expecting - 7-15
+
+
+** File #040 - /src/pxlNav/shaders/scene/SkyObject.js **
+** Add More Comments **
+   - File Size - 3.298 KB
+   - Total Line Count - 112
+   - White Space Count - 26
+   - Comment Line Count - 15
+  ******** Expecting - 16-33
+
+
+  File #041 - /src/pxlNav/shaders/scene/HDRRoom.js
+   - File Size - 2.136 KB
+   - Total Line Count - 71
+   - White Space Count - 12
+   - Comment Line Count - 22
+
+
+** File #042 - /src/pxlNav/shaders/scene/BGScreen.js **
+** Add More Comments **
+   - File Size - 2.410 KB
+   - Total Line Count - 76
+   - White Space Count - 15
+   - Comment Line Count - 4
+  ******** Expecting - 11-22
+
+
+  File #043 - /src/pxlNav/shaders/scene.js
+   - File Size - 585 B
+   - Total Line Count - 12
+   - White Space Count - 2
+   - Comment Line Count - 7
+
+
+  File #044 - /src/pxlNav/shaders/rendering/WorldPositionPass.js
+   - File Size - 1.120 KB
+   - Total Line Count - 43
+   - White Space Count - 7
+   - Comment Line Count - 7
+
+
+** File #045 - /src/pxlNav/shaders/rendering/WarpPostProcess.js **
+** Add More Comments **
+   - File Size - 1.035 KB
+   - Total Line Count - 39
+   - White Space Count - 8
+   - Comment Line Count - 4
+  ******** Expecting - 5-11
+
+
+  File #046 - /src/pxlNav/shaders/rendering/TextureStorePass.js
+   - File Size - 732 B
+   - Total Line Count - 28
+   - White Space Count - 5
+   - Comment Line Count - 5
+
+
+** File #047 - /src/pxlNav/shaders/rendering/StarFieldPostProcess.js **
+** Add More Comments **
+   - File Size - 2.069 KB
+   - Total Line Count - 73
+   - White Space Count - 17
+   - Comment Line Count - 5
+  ******** Expecting - 10-21
+
+
+** File #048 - /src/pxlNav/shaders/rendering/MotionBlurPostProcess.js **
+** Add More Comments **
+   - File Size - 3.251 KB
+   - Total Line Count - 97
+   - White Space Count - 16
+   - Comment Line Count - 13
+  ******** Expecting - 14-29
+
+
+  File #049 - /src/pxlNav/shaders/rendering/MediaToggle.js
+   - File Size - 754 B
+   - Total Line Count - 31
+   - White Space Count - 4
+   - Comment Line Count - 6
+
+
+** File #050 - /src/pxlNav/shaders/rendering/LKingPostProcess.js **
+** Add More Comments **
+   - File Size - 1.042 KB
+   - Total Line Count - 36
+   - White Space Count - 7
+   - Comment Line Count - 4
+  ******** Expecting - 5-10
+
+
+** File #051 - /src/pxlNav/shaders/rendering/InfiniteZoomPostProcess.js **
+** Add More Comments **
+   - File Size - 1.340 KB
+   - Total Line Count - 44
+   - White Space Count - 12
+   - Comment Line Count - 4
+  ******** Expecting - 6-13
+
+
+  File #052 - /src/pxlNav/shaders/rendering/GlowPassShader.js
+   - File Size - 817 B
+   - Total Line Count - 33
+   - White Space Count - 7
+   - Comment Line Count - 4
+
+
+  File #053 - /src/pxlNav/shaders/rendering/FinalOverlayPostProcess.js
+   - File Size - 11.62 KB
+   - Total Line Count - 342
+   - White Space Count - 57
+   - Comment Line Count - 284
+
+
+** File #054 - /src/pxlNav/shaders/rendering/DirectionalBlurPass.js **
+** Add More Comments **
+   - File Size - 3.366 KB
+   - Total Line Count - 110
+   - White Space Count - 15
+   - Comment Line Count - 9
+  ******** Expecting - 16-33
+
+
+  File #055 - /src/pxlNav/shaders/rendering/DepthPostProcess.js
+   - File Size - 1023 B
+   - Total Line Count - 35
+   - White Space Count - 6
+   - Comment Line Count - 9
+
+
+  File #056 - /src/pxlNav/shaders/rendering/CompLayersPostProcess.js
+   - File Size - 1.757 KB
+   - Total Line Count - 55
+   - White Space Count - 8
+   - Comment Line Count - 28
+
+
+  File #057 - /src/pxlNav/shaders/rendering/ChroAberPostProcess.js
+   - File Size - 1.208 KB
+   - Total Line Count - 44
+   - White Space Count - 9
+   - Comment Line Count - 6
+
+
+  File #058 - /src/pxlNav/shaders/rendering/AntiAliasingPostProcess.js
+   - File Size - 2.763 KB
+   - Total Line Count - 99
+   - White Space Count - 15
+   - Comment Line Count - 70
+
+
+** File #059 - /src/pxlNav/shaders/rendering.js **
+** Add More Comments **
+   - File Size - 1.714 KB
+   - Total Line Count - 36
+   - White Space Count - 8
+   - Comment Line Count - 4
+  ******** Expecting - 5-10
+
+
+  File #060 - /src/pxlNav/shaders/objects/rgbaMapShader.js
+   - File Size - 684 B
+   - Total Line Count - 30
+   - White Space Count - 8
+   - Comment Line Count - 6
+
+
+  File #061 - /src/pxlNav/shaders/objects/TriplanarRolloff.js
+   - File Size - 2.297 KB
+   - Total Line Count - 74
+   - White Space Count - 15
+   - Comment Line Count - 13
+
+
+** File #062 - /src/pxlNav/shaders/objects/PxlPrincipled.js **
+** Add More Comments **
+   - File Size - 12.12 KB
+   - Total Line Count - 366
+   - White Space Count - 46
+   - Comment Line Count - 15
+  ******** Expecting - 54-109
+
+
+** File #063 - /src/pxlNav/shaders/objects/ItemShader.js **
+** Add More Comments **
+   - File Size - 2.166 KB
+   - Total Line Count - 82
+   - White Space Count - 8
+   - Comment Line Count - 8
+  ******** Expecting - 12-24
+
+
+  File #064 - /src/pxlNav/shaders/objects/ItemBaseShader.js
+   - File Size - 2.037 KB
+   - Total Line Count - 70
+   - White Space Count - 11
+   - Comment Line Count - 12
+
+
+  File #065 - /src/pxlNav/shaders/objects/BoostColors.js
+   - File Size - 1.105 KB
+   - Total Line Count - 42
+   - White Space Count - 8
+   - Comment Line Count - 6
+
+
+  File #066 - /src/pxlNav/shaders/objects.js
+   - File Size - 718 B
+   - Total Line Count - 16
+   - White Space Count - 6
+   - Comment Line Count - 5
+
+
+  File #067 - /src/pxlNav/shaders/core/ShaderHeader.js
+   - File Size - 754 B
+   - Total Line Count - 33
+   - White Space Count - 3
+   - Comment Line Count - 20
+
+
+** File #068 - /src/pxlNav/shaders/core/DiscardFrag.js **
+** Add More Comments **
+   - File Size - 213 B
+   - Total Line Count - 12
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+  File #069 - /src/pxlNav/shaders/core/DefaultShift.js
+   - File Size - 557 B
+   - Total Line Count - 20
+   - White Space Count - 3
+   - Comment Line Count - 3
+
+
+  File #070 - /src/pxlNav/shaders/core/Default.js
+   - File Size - 501 B
+   - Total Line Count - 18
+   - White Space Count - 3
+   - Comment Line Count - 3
+
+
+** File #071 - /src/pxlNav/shaders/core/CamPosVert.js **
+** Add More Comments **
+   - File Size - 399 B
+   - Total Line Count - 16
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 2-4
+
+
+  File #072 - /src/pxlNav/shaders/core.js
+   - File Size - 415 B
+   - Total Line Count - 10
+   - White Space Count - 2
+   - Comment Line Count - 2
+
+
+** File #073 - /src/pxlNav/shaders/animated/WallBarrierShader.js **
+** Add More Comments **
+   - File Size - 1.819 KB
+   - Total Line Count - 62
+   - White Space Count - 10
+   - Comment Line Count - 6
+  ******** Expecting - 9-18
+
+
+  File #074 - /src/pxlNav/shaders/animated/UserScreenShader.js
+   - File Size - 2.455 KB
+   - Total Line Count - 69
+   - White Space Count - 9
+   - Comment Line Count - 13
+
+
+  File #075 - /src/pxlNav/shaders/animated/ScrollTextureShader.js
+   - File Size - 1.353 KB
+   - Total Line Count - 54
+   - White Space Count - 9
+   - Comment Line Count - 8
+
+
+** File #076 - /src/pxlNav/shaders/animated/PortalBaseShader.js **
+** Add More Comments **
+   - File Size - 1.995 KB
+   - Total Line Count - 66
+   - White Space Count - 14
+   - Comment Line Count - 6
+  ******** Expecting - 9-19
+
+
+** File #077 - /src/pxlNav/shaders/animated/DArrowShaders.js **
+** Add More Comments **
+   - File Size - 1.921 KB
+   - Total Line Count - 74
+   - White Space Count - 16
+   - Comment Line Count - 7
+  ******** Expecting - 11-22
+
+
+** File #078 - /src/pxlNav/shaders/animated/ClickableBevel.js **
+** Add More Comments **
+   - File Size - 1.795 KB
+   - Total Line Count - 63
+   - White Space Count - 10
+   - Comment Line Count - 7
+  ******** Expecting - 9-18
+
+
+  File #079 - /src/pxlNav/shaders/animated/AnimatedTexture.js
+   - File Size - 1.130 KB
+   - Total Line Count - 46
+   - White Space Count - 6
+   - Comment Line Count - 9
+
+
+** File #080 - /src/pxlNav/shaders/animated/AnimatedDuelNoise.js **
+** Add More Comments **
+   - File Size - 979 B
+   - Total Line Count - 34
+   - White Space Count - 8
+   - Comment Line Count - 4
+  ******** Expecting - 5-10
+
+
+  File #081 - /src/pxlNav/shaders/animated.js
+   - File Size - 904 B
+   - Total Line Count - 14
+   - White Space Count - 2
+   - Comment Line Count - 8
+
+
+  File #082 - /src/pxlNav/pxlBase.js
+   - File Size - 1.961 KB
+   - Total Line Count - 48
+   - White Space Count - 11
+   - Comment Line Count - 22
+
+
+  File #083 - /src/pxlNav/media/Video.js
+   - File Size - 37.51 KB
+   - Total Line Count - 947
+   - White Space Count - 98
+   - Comment Line Count - 189
+
+
+  File #084 - /src/pxlNav/media/MusicUtils.js
+   - File Size - 1.857 KB
+   - Total Line Count - 75
+   - White Space Count - 13
+   - Comment Line Count - 68
+
+
+  File #085 - /src/pxlNav/media/Audio.js
+   - File Size - 14.65 KB
+   - Total Line Count - 449
+   - White Space Count - 76
+   - Comment Line Count - 99
+
+
+** File #086 - /src/pxlNav/hud/elements/thumbstick.js **
+** Add More Comments **
+   - File Size - 9.925 KB
+   - Total Line Count - 370
+   - White Space Count - 88
+   - Comment Line Count - 20
+  ******** Expecting - 55-111
+
+
+** File #087 - /src/pxlNav/hud/elements/elementBase.js **
+** Add More Comments **
+   - File Size - 3.033 KB
+   - Total Line Count - 149
+   - White Space Count - 33
+   - Comment Line Count - 17
+  ******** Expecting - 22-44
+
+
+  File #088 - /src/pxlNav/hud/elements/dragRegion.js
+   - File Size - 696 B
+   - Total Line Count - 36
+   - White Space Count - 12
+   - Comment Line Count - 7
+
+
+  File #089 - /src/pxlNav/hud/HUD.js
+   - File Size - 19.92 KB
+   - Total Line Count - 615
+   - White Space Count - 82
+   - Comment Line Count - 279
+
+
+** File #090 - /src/pxlNav/gui/utils/svgUtils.js **
+** Add More Comments **
+   - File Size - 9.789 KB
+   - Total Line Count - 240
+   - White Space Count - 26
+   - Comment Line Count - 21
+  ******** Expecting - 36-72
+
+
+** File #091 - /src/pxlNav/gui/User.js **
+** Add More Comments **
+   - File Size - 132 B
+   - Total Line Count - 10
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+** File #092 - /src/pxlNav/gui/ShaderEditor.js **
+** Add More Comments **
+   - File Size - 34.80 KB
+   - Total Line Count - 1036
+   - White Space Count - 187
+   - Comment Line Count - 87
+  ******** Expecting - 155-310
+
+
+** File #093 - /src/pxlNav/gui/Settings.js **
+** Add More Comments **
+   - File Size - 136 B
+   - Total Line Count - 10
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+** File #094 - /src/pxlNav/gui/Info.js **
+** Add More Comments **
+   - File Size - 132 B
+   - Total Line Count - 10
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+** File #095 - /src/pxlNav/gui/Help.js **
+** Add More Comments **
+   - File Size - 132 B
+   - Total Line Count - 10
+   - White Space Count - 2
+   - Comment Line Count - 0
+  ******** Expecting - 1-3
+
+
+** File #096 - /src/pxlNav/gui/GUIBase.js **
+** Add More Comments **
+   - File Size - 99.99 KB
+   - Total Line Count - 2867
+   - White Space Count - 402
+   - Comment Line Count - 315
+  ******** Expecting - 430-860
+
+
+  File #097 - /src/pxlNav/gui/GUI.js
+   - File Size - 4.669 KB
+   - Total Line Count - 117
+   - White Space Count - 26
+   - Comment Line Count - 31
+
+
+  File #098 - /src/pxlNav/extensions/readme.md
+   - File Size - 1.265 KB
+   - Total Line Count - 28
+   - White Space Count - 0
+   - Comment Line Count - 16
+
+
+** File #099 - /src/pxlNav/extensions/WebCam.js **
+** Add More Comments **
+   - File Size - 1.562 KB
+   - Total Line Count - 63
+   - White Space Count - 9
+   - Comment Line Count - 0
+  ******** Expecting - 9-18
+
+
+** File #100 - /src/pxlNav/extensions/PoseEngine/PoseEngine_worker.js **
+** Add More Comments **
+   - File Size - 1.299 KB
+   - Total Line Count - 51
+   - White Space Count - 7
+   - Comment Line Count - 5
+  ******** Expecting - 7-15
+
+
+  File #101 - /src/pxlNav/extensions/PoseEngine/MediaPipe.js
+   - File Size - 2.524 KB
+   - Total Line Count - 89
+   - White Space Count - 11
+   - Comment Line Count - 14
+
+
+  File #102 - /src/pxlNav/extensions/PoseEngine.js
+   - File Size - 790 B
+   - Total Line Count - 38
+   - White Space Count - 6
+   - Comment Line Count - 11
+
+
+  File #103 - /src/pxlNav/extensions/Networking.js
+   - File Size - 3.049 KB
+   - Total Line Count - 104
+   - White Space Count - 19
+   - Comment Line Count - 40
+
+
+** File #104 - /src/pxlNav/extensions/Extensions.js **
+** Add More Comments **
+   - File Size - 3.121 KB
+   - Total Line Count - 133
+   - White Space Count - 13
+   - Comment Line Count - 16
+  ******** Expecting - 19-39
+
+
+** File #105 - /src/pxlNav/extensions/ExtensionBase.js **
+** Add More Comments **
+   - File Size - 960 B
+   - Total Line Count - 51
+   - White Space Count - 7
+   - Comment Line Count - 6
+  ******** Expecting - 7-15
+
+
+  File #106 - /src/pxlNav/effects/particles/shaders/SnowShader.js
+   - File Size - 7.722 KB
+   - Total Line Count - 251
+   - White Space Count - 64
+   - Comment Line Count - 128
+
+
+  File #107 - /src/pxlNav/effects/particles/shaders/SnowConfettiShader.js
+   - File Size - 4.666 KB
+   - Total Line Count - 143
+   - White Space Count - 29
+   - Comment Line Count - 30
+
+
+** File #108 - /src/pxlNav/effects/particles/shaders/Smoke.js **
+** Add More Comments **
+   - File Size - 6.588 KB
+   - Total Line Count - 225
+   - White Space Count - 62
+   - Comment Line Count - 28
+  ******** Expecting - 33-67
+
+
+  File #109 - /src/pxlNav/effects/particles/shaders/README.md
+   - File Size - 245 B
+   - Total Line Count - 11
+   - White Space Count - 0
+   - Comment Line Count - 5
+
+
+** File #110 - /src/pxlNav/effects/particles/shaders/HeightMap.js **
+** Add More Comments **
+   - File Size - 7.948 KB
+   - Total Line Count - 270
+   - White Space Count - 67
+   - Comment Line Count - 26
+  ******** Expecting - 40-81
+
+
+** File #111 - /src/pxlNav/effects/particles/shaders/FloatingDust.js **
+** Add More Comments **
+   - File Size - 6.140 KB
+   - Total Line Count - 222
+   - White Space Count - 52
+   - Comment Line Count - 19
+  ******** Expecting - 33-66
+
+
+** File #112 - /src/pxlNav/effects/particles/shaders/EmberWisps.js **
+** Add More Comments **
+   - File Size - 5.409 KB
+   - Total Line Count - 193
+   - White Space Count - 57
+   - Comment Line Count - 18
+  ******** Expecting - 28-57
+
+
+** File #113 - /src/pxlNav/effects/particles/shaders/CountDownShader.js **
+** Add More Comments **
+   - File Size - 3.179 KB
+   - Total Line Count - 108
+   - White Space Count - 23
+   - Comment Line Count - 6
+  ******** Expecting - 16-32
+
+
+  File #114 - /src/pxlNav/effects/particles/shaders.js
+   - File Size - 880 B
+   - Total Line Count - 18
+   - White Space Count - 2
+   - Comment Line Count - 4
+
+
+  File #115 - /src/pxlNav/effects/particles/readme.md
+   - File Size - 55 B
+   - Total Line Count - 4
+   - White Space Count - 0
+   - Comment Line Count - 3
+
+
+** File #116 - /src/pxlNav/effects/particles/SnowFall.js **
+** Add More Comments **
+   - File Size - 2.708 KB
+   - Total Line Count - 78
+   - White Space Count - 17
+   - Comment Line Count - 6
+  ******** Expecting - 11-23
+
+
+  File #117 - /src/pxlNav/effects/particles/ParticleBase.js
+   - File Size - 20.06 KB
+   - Total Line Count - 634
+   - White Space Count - 73
+   - Comment Line Count - 271
+
+
+  File #118 - /src/pxlNav/effects/particles/HeightMap.js
+   - File Size - 12.56 KB
+   - Total Line Count - 354
+   - White Space Count - 45
+   - Comment Line Count - 150
+
+
+  File #119 - /src/pxlNav/effects/particles/FloatingDust.js
+   - File Size - 7.659 KB
+   - Total Line Count - 217
+   - White Space Count - 27
+   - Comment Line Count - 96
+
+
+  File #120 - /src/pxlNav/effects/particles/EmberWisps.js
+   - File Size - 6.410 KB
+   - Total Line Count - 180
+   - White Space Count - 18
+   - Comment Line Count - 85
+
+
+  File #121 - /src/pxlNav/effects/particles/BillowSmoke.js
+   - File Size - 6.364 KB
+   - Total Line Count - 184
+   - White Space Count - 22
+   - Comment Line Count - 84
+
+
+  File #122 - /src/pxlNav/effects/particles.js
+   - File Size - 1.698 KB
+   - Total Line Count - 50
+   - White Space Count - 11
+   - Comment Line Count - 32
+
+
+  File #123 - /src/pxlNav/effects/effects.js
+   - File Size - 1004 B
+   - Total Line Count - 34
+   - White Space Count - 6
+   - Comment Line Count - 23
+
+
+  File #124 - /src/pxlNav/effects/animations/CountDownParticles.js
+   - File Size - 22.70 KB
+   - Total Line Count - 49
+   - White Space Count - 4
+   - Comment Line Count - 21
+
+
+  File #125 - /src/pxlNav/effects/animations.js
+   - File Size - 110 B
+   - Total Line Count - 3
+   - White Space Count - 1
+   - Comment Line Count - 2
+
+
+  File #126 - /src/pxlNav/devices/XRHMD.js
+   - File Size - 0 B
+   - Total Line Count - 0
+   - White Space Count - 0
+   - Comment Line Count - 0
+
+
+  File #127 - /src/pxlNav/devices/Mobile.js
+   - File Size - 0 B
+   - Total Line Count - 0
+   - White Space Count - 0
+   - Comment Line Count - 0
+
+
+  File #128 - /src/pxlNav/devices/Keyboard.js
+   - File Size - 0 B
+   - Total Line Count - 0
+   - White Space Count - 0
+   - Comment Line Count - 0
+
+
+  File #129 - /src/pxlNav/devices/GamePad.js
+   - File Size - 3.901 KB
+   - Total Line Count - 143
+   - White Space Count - 29
+   - Comment Line Count - 26
+
+
+  File #130 - /src/pxlNav/core/readme.md
+   - File Size - 516 B
+   - Total Line Count - 8
+   - White Space Count - 0
+   - Comment Line Count - 5
+
+
+  File #131 - /src/pxlNav/core/Utils.js
+   - File Size - 23.53 KB
+   - Total Line Count - 819
+   - White Space Count - 99
+   - Comment Line Count - 328
+
+
+** File #132 - /src/pxlNav/core/User.js **
+** Add More Comments **
+   - File Size - 5.214 KB
+   - Total Line Count - 211
+   - White Space Count - 33
+   - Comment Line Count - 30
+  ******** Expecting - 31-63
+
+
+  File #133 - /src/pxlNav/core/Timer.js
+   - File Size - 8.149 KB
+   - Total Line Count - 263
+   - White Space Count - 33
+   - Comment Line Count - 142
+
+
+** File #134 - /src/pxlNav/core/Rendering.js **
+** Add More Comments **
+   - File Size - 31.23 KB
+   - Total Line Count - 786
+   - White Space Count - 104
+   - Comment Line Count - 116
+  ******** Expecting - 117-235
+
+
+** File #135 - /src/pxlNav/core/QualityController.js **
+** Add More Comments **
+   - File Size - 17.18 KB
+   - Total Line Count - 512
+   - White Space Count - 79
+   - Comment Line Count - 61
+  ******** Expecting - 76-153
+
+
+  File #136 - /src/pxlNav/core/Options.js
+   - File Size - 14.70 KB
+   - Total Line Count - 323
+   - White Space Count - 3
+   - Comment Line Count - 248
+
+
+  File #137 - /src/pxlNav/core/FileIO.js
+   - File Size - 96.36 KB
+   - Total Line Count - 2759
+   - White Space Count - 440
+   - Comment Line Count - 480
+
+
+  File #138 - /src/pxlNav/core/EventManager.js
+   - File Size - 9.068 KB
+   - Total Line Count - 300
+   - White Space Count - 55
+   - Comment Line Count - 50
+
+
+  File #139 - /src/pxlNav/core/Enums.js
+   - File Size - 17.35 KB
+   - Total Line Count - 583
+   - White Space Count - 35
+   - Comment Line Count - 386
+
+
+  File #140 - /src/pxlNav/core/Device.js
+   - File Size - 47.70 KB
+   - Total Line Count - 1389
+   - White Space Count - 200
+   - Comment Line Count - 252
+
+
+  File #141 - /src/pxlNav/core/CookieManager.js
+   - File Size - 12.02 KB
+   - Total Line Count - 396
+   - White Space Count - 45
+   - Comment Line Count - 187
+
+
+  File #142 - /src/pxlNav/core/Colliders.js
+   - File Size - 52.08 KB
+   - Total Line Count - 1246
+   - White Space Count - 220
+   - Comment Line Count - 477
+
+
+  File #143 - /src/pxlNav/core/Animation.js
+   - File Size - 12.80 KB
+   - Total Line Count - 408
+   - White Space Count - 37
+   - Comment Line Count - 147
+
+
+  File #144 - /src/pxlNav/cam/Camera.js
+   - File Size - 103.4 KB
+   - Total Line Count - 2797
+   - White Space Count - 327
+   - Comment Line Count - 1210
+
+
+  File #145 - /src/pxlNav/cam/AutoCamera.js
+   - File Size - 14.97 KB
+   - Total Line Count - 497
+   - White Space Count - 78
+   - Comment Line Count - 90
+
+
+  File #146 - /src/pxlNav/RoomClass.js
+   - File Size - 31.71 KB
+   - Total Line Count - 1024
+   - White Space Count - 127
+   - Comment Line Count - 395
+
+
+** File #147 - /src/pxlNav/Environment.js **
+** Add More Comments **
+   - File Size - 39.59 KB
+   - Total Line Count - 1173
+   - White Space Count - 190
+   - Comment Line Count - 152
+  ******** Expecting - 175-351
+
+
+  File #148 - /src/pxlNav.module.js
+   - File Size - 52.82 KB
+   - Total Line Count - 1439
+   - White Space Count - 205
+   - Comment Line Count - 403
+
+
+  File #149 - /src/pxlNav.js
+   - File Size - 52.83 KB
+   - Total Line Count - 1441
+   - White Space Count - 207
+   - Comment Line Count - 403
+
+
+  File #150 - /src/indexToCam.htm
+   - File Size - 2.799 KB
+   - Total Line Count - 79
+   - White Space Count - 10
+   - Comment Line Count - 16
+
+
+  File #151 - /src/indexSwap.htm
+   - File Size - 2.279 KB
+   - Total Line Count - 70
+   - White Space Count - 10
+   - Comment Line Count - 16
+
+
+  File #152 - /src/indexDev.htm
+   - File Size - 2.732 KB
+   - Total Line Count - 84
+   - White Space Count - 10
+   - Comment Line Count - 17
+
+
+  File #153 - /src/README.md
+   - File Size - 422 B
+   - Total Line Count - 10
+   - White Space Count - 0
+   - Comment Line Count - 9
+
+
+
+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+

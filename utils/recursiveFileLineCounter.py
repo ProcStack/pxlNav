@@ -4,16 +4,16 @@
 # Was written for Antib0dy.Club website, so there is left over variables and func
 #
 
-from os import listdir, stat
-from os.path import isfile, isdir, join, realpath
+from os import listdir, stat, makedirs
+from os.path import isfile, isdir, join, realpath, exists, dirname
 import re
 import datetime
 import math
 import chardet
 
 # Update this as need be
-repoName="procstack.github.io"
-statProjectTitle="procstack.github.io Code Stats"
+repoName="pxlNav"
+statProjectTitle="pxlNav Code Stats"
 
 # Get the absolute route to base directory; repoName
 basePath=re.split( r'[\\|/]', realpath(__file__) )
@@ -24,9 +24,9 @@ basePath="/".join( basePath[ 0:(basePath.index(repoName)+1) ] )
 statPath=[ basePath+"/_show/stats/ScriptingStats_", ".txt" ]
 
 # Recursive Directories
-dirs=[ basePath+'/Source/' ]# , basePath+'/Public/' ]
+dirs=[ basePath+'/src/' ]# , basePath+'/Public/' ]
 avoidList=[ "libs", "2024-12-07_A.js", "2024-12-08_A.js" ]
-avoidExtensions=['.psd','.gif','.png','.jpg','.fbx', '.ico', '.properties','.settings']
+avoidExtensions=['.psd','.gif','.png','.jpg','.fbx','.webm','.webp','.bk','.ico','.properties','.settings']
 
 def printList(list):
     for l in list:
@@ -328,6 +328,15 @@ date=datetime.datetime.now()
 yearmonthday=str(date.year)+"-"+str(date.month)+"-"+str(date.day)
 fileOut=yearmonthday.join( statPath )
 
-f = open(fileOut, "w+")
-f.write(fileData)
-f.close()
+# Verify folder path to output directory
+dirPath = dirname(fileOut)
+if not exists( dirPath ):
+    try:
+        makedirs( dirPath )
+    except OSError as exc: # Guard against
+        print(f"Error creating directory for stats output: {exc}")
+
+if exists( dirPath ):
+    f = open(fileOut, "w+")
+    f.write(fileData)
+    f.close()
