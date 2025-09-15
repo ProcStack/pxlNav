@@ -118,7 +118,7 @@ export class Rendering{
     ///////////////////////////////////////////////////
 
     /*
-    if( this.pxlOptions.postProcessPasses.roomBloomPass ){}
+    if( this.pxlOptions.postProcessPasses.roomGlowPass ){}
     if( this.pxlOptions.postProcessPasses.motionBlurPass ){}
     if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){}
     if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){}
@@ -127,7 +127,7 @@ export class Rendering{
     if( this.pxlOptions.postProcessPasses.crystallinePass ){}
     */
 
-    if( this.pxlOptions.postProcessPasses.roomBloomPass ){
+    if( this.pxlOptions.postProcessPasses.roomGlowPass ){
       
       this.blurComposer = new EffectComposer(this.engine);
       
@@ -590,15 +590,16 @@ export class Rendering{
     });
         
     
-    this.roomBloomPass = new UnrealBloomPass( new Vector2( this.pxlDevice.mapW*.5, this.pxlDevice.mapH*.5 ), 1.5, 0.8, 0.85 );
-    this.roomBloomPass.threshold = this.pxlRenderSettings.bloomThresh;
-    this.roomBloomPass.strength = this.pxlRenderSettings.bloomStrength;
-    this.roomBloomPass.radius = this.pxlRenderSettings.bloomRadius;
-    this.roomBloomPass.name = "roomBloomPass";
-    this.roomComposer.addPass( this.roomBloomPass );
-    
     
     if( this.pxlOptions.postProcessPasses.roomGlowPass ){
+      this.roomBloomPass = new UnrealBloomPass( new Vector2( this.pxlDevice.mapW*.5, this.pxlDevice.mapH*.5 ), 1.5, 0.8, 0.85 );
+      this.roomBloomPass.threshold = this.pxlRenderSettings.bloomThresh;
+      this.roomBloomPass.strength = this.pxlRenderSettings.bloomStrength;
+      this.roomBloomPass.radius = this.pxlRenderSettings.bloomRadius;
+      this.roomBloomPass.name = "roomBloomPass";
+      this.roomComposer.addPass( this.roomBloomPass );
+
+
       this.roomGlowPass = new ShaderPass(
         new ShaderMaterial( {
           uniforms: {
@@ -617,6 +618,7 @@ export class Rendering{
       
       //gDiffuse: { value: this.pxlEnv.scene.renderGlowTarget.texture },
       //gDiffuse: { value: this.blurComposer.renderTarget1.texture },
+
       this.roomGlowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
       this.roomGlowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
       this.roomGlowPass.material.uniforms.sceneDepth = this.pxlEnv.scene.renderTarget.depthTexture;
