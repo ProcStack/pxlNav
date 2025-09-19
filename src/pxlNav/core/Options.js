@@ -144,7 +144,7 @@ export const pxlUserSettings = {
  * 
  * Pass a pxlOptions object to the pxlNav constructor to override these defaults.
  * 
- * Note : From `postProcessPasses`, only `postProcessPasses.roomGlowPass` is implemented currently
+ * Note : From `postProcessPasses`, only `postProcessPasses.glowPass` is implemented currently
  * <br/>         The passes are all added, but options to control them are not yet implemented
  * <br/>       However,
  * <br/>         `lizardKingPass`, `starFieldPass`, and `crystallinePass` can be triggered manually on `pxlUser`
@@ -185,7 +185,7 @@ export const pxlUserSettings = {
  * @property {boolean} loadEnvAssetFile - Whether to load environment asset file
  * @property {string} skyHaze - Sky haze level
  * @property {object} postProcessPasses - Post-process passes settings
- * @property {boolean} postProcessPasses.roomGlowPass - Whether to enable room glow pass
+ * @property {boolean} postProcessPasses.glowPass - Whether to enable room glow pass
  * @property {boolean} postProcessPasses.motionBlurPass - Whether to enable motion blur pass ( Not implemented yet )
  * @property {boolean} postProcessPasses.mapComposerWarpPass - Whether to enable map composer warp pass ( Not implemented yet )
  * @property {boolean} postProcessPasses.chromaticAberrationPass - Whether to enable chromatic aberration pass ( Not implemented yet )
@@ -259,7 +259,7 @@ export const pxlUserSettings = {
  *   'loadEnvAssetFile' : false,
  *   'skyHaze' : pxlEnums.SKY_HAZE.OFF,
  *   'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
- *      'roomGlowPass' : false,
+ *      'glowPass' : false,
  *      'motionBlurPass' : false,
  *      'mapComposerWarpPass' : false,
  *      'chromaticAberrationPass' : false,
@@ -312,7 +312,7 @@ export const pxlOptions = {
     'loadEnvAssetFile' : false,
     'skyHaze' : pxlEnums.SKY_HAZE.OFF,
     'postProcessPasses' : { // Enabling these use assets from ` pxlAssetRoot : './pxlAssets' `
-        'roomGlowPass' : false,
+        'glowPass' : false,
         'motionBlurPass' : false,
         'mapComposerWarpPass' : false,
         'chromaticAberrationPass' : false,

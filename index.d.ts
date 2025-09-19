@@ -97,7 +97,7 @@ declare module 'pxlnav' {
     loadEnvAssetFile: boolean;
     skyHaze: number;
     postProcessPasses: {
-      roomGlowPass: boolean;
+      glowPass: boolean;
       mapComposerWarpPass: boolean;
       chromaticAberrationPass: boolean;
       lizardKingPass: boolean;

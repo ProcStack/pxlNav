@@ -118,7 +118,7 @@ export class Rendering{
     ///////////////////////////////////////////////////
 
     /*
-    if( this.pxlOptions.postProcessPasses.roomGlowPass ){}
+    if( this.pxlOptions.postProcessPasses.glowPass ){}
     if( this.pxlOptions.postProcessPasses.motionBlurPass ){}
     if( this.pxlOptions.postProcessPasses.mapComposerWarpPass ){}
     if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){}
@@ -127,7 +127,7 @@ export class Rendering{
     if( this.pxlOptions.postProcessPasses.crystallinePass ){}
     */
 
-    if( this.pxlOptions.postProcessPasses.roomGlowPass ){
+    if( this.pxlOptions.postProcessPasses.glowPass ){
       
       this.blurComposer = new EffectComposer(this.engine);
       
@@ -591,7 +591,7 @@ export class Rendering{
         
     
     
-    if( this.pxlOptions.postProcessPasses.roomGlowPass ){
+    if( this.pxlOptions.postProcessPasses.glowPass ){
       this.roomBloomPass = new UnrealBloomPass( new Vector2( this.pxlDevice.mapW*.5, this.pxlDevice.mapH*.5 ), 1.5, 0.8, 0.85 );
       this.roomBloomPass.threshold = this.pxlRenderSettings.bloomThresh;
       this.roomBloomPass.strength = this.pxlRenderSettings.bloomStrength;
@@ -600,7 +600,7 @@ export class Rendering{
       this.roomComposer.addPass( this.roomBloomPass );
 
 
-      this.roomGlowPass = new ShaderPass(
+      this.glowPass = new ShaderPass(
         new ShaderMaterial( {
           uniforms: {
             time:{ value:this.pxlTimer.msRunner },
@@ -619,13 +619,13 @@ export class Rendering{
       //gDiffuse: { value: this.pxlEnv.scene.renderGlowTarget.texture },
       //gDiffuse: { value: this.blurComposer.renderTarget1.texture },
 
-      this.roomGlowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
-      this.roomGlowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
-      this.roomGlowPass.material.uniforms.sceneDepth = this.pxlEnv.scene.renderTarget.depthTexture;
-      this.roomGlowPass.needsSwap = true;
-      this.roomGlowPass.name = "roomGlowPass";
+      this.glowPass.material.uniforms.gDiffuse = this.blurComposer.writeBuffer.texture;
+      this.glowPass.material.uniforms.rDiffuse = this.blurComposer.renderTarget2.texture;
+      this.glowPass.material.uniforms.sceneDepth = this.pxlEnv.scene.renderTarget.depthTexture;
+      this.glowPass.needsSwap = true;
+      this.glowPass.name = "glowPass";
 
-      this.roomComposer.addPass( this.roomGlowPass );
+      this.roomComposer.addPass( this.glowPass );
     }
     
     if( this.pxlOptions.postProcessPasses.chromaticAberrationPass ){
@@ -701,8 +701,8 @@ export class Rendering{
       this.pxlEnv.roomComposer.setSize( canvasW, canvasH);
     }
   
-    if( this.pxlEnv.roomGlowPass ){
-      this.pxlEnv.roomGlowPass.setSize(canvasW*this.pxlQuality.bloomPercMult,canvasH*this.pxlQuality.bloomPercMult);
+    if( this.pxlEnv.glowPass ){
+      this.pxlEnv.glowPass.setSize(canvasW*this.pxlQuality.bloomPercMult,canvasH*this.pxlQuality.bloomPercMult);
     }
 
     // -- -- -- -- -- -- --

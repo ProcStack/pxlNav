@@ -1,4 +1,4 @@
-# pxlNav v1.0.0 Examples
+# pxlNav v1.0.1 Examples
 
 To launch these examples locally,
 Run the associated commands in `./pxlNav` root

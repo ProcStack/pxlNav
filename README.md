@@ -1,7 +1,7 @@
-# pxlNav v1.0.0
+# pxlNav v1.0.1
 Javascript Player Controller & Environment Manager for Three.js
 
-**Version 1.0.0 brings React & NextJS support!**
+**Version 1.0.1 brings React & NextJS support!**
 <br/>**Please see `./examples/react-app` & `./examples/next` for example projects**
 
 #### Visit the [pxlNav Documentation](https://procstack.github.io/pxlNav-docs/)

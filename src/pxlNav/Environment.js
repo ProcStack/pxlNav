@@ -203,7 +203,7 @@ export class Environment{
     this.roomComposer=null;
     this.roomRenderPass=null;
     this.roomBloomPass=null;
-    this.roomGlowPass=null;
+    this.glowPass=null;
     
     this.blurComposer=null;
     this.glowPassMask = new Vector2(1.0,0.0);
@@ -436,7 +436,7 @@ export class Environment{
       this.log("Loading Room - ", roomName);
       
       try {
-        // Updated in v1.0.0 to use RoomEnvironment class objects
+        // Updated in v1.0.1 to use RoomEnvironment class objects
         //   This means the rooms must be imported as modules and passed to pxlNav when built
 
         /*let roomObj = new module[roomName]( 
@@ -1112,6 +1112,7 @@ export class Environment{
         curRoom.geoList["GlowPass"].forEach((g)=>{
           if( g.userData.hasOwnProperty('GlowPerc') ){
             let multVal = g.userData['GlowPerc']
+            console.log(g.material?.uniforms)
             if( g.material.hasOwnProperty('uniforms') && g.material.uniforms.mult ){
               g.material.uniforms.mult.value = multVal;
             }

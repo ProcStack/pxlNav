@@ -408,7 +408,7 @@ class pxlNav{
     this.pxlGuiDraws.setLoaderPhrases( this.pxlOptions["loaderPhrases"] );
 
     if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
-      console.log("pxlNav v1.0.0-dev set to Verbose Info Mode");
+      console.log("pxlNav v1.0.1-dev set to Verbose Info Mode");
       console.log("  With Three.js v171");
       console.log("Booting pxlNav...");
     }

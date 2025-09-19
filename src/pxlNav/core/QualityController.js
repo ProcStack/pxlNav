@@ -365,7 +365,7 @@ export class QualityController{
         this.pxlEnv.portaluserScreenIntensity.x = val ? .4 : 1;
         if( this.pxlRendering.mapGlowPass ) this.pxlRendering.mapGlowPass.enabled = val;
         if( this.pxlRendering.roomBloomPass )  this.pxlRendering.roomBloomPass.enabled = val;
-        if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled = val;
+        if( this.pxlRendering.glowPass ) this.pxlRendering.glowPass.enabled = val;
         
         if( this.pxlEnv.userScreenIntensity ){
           this.pxlEnv.userScreenIntensity.x = val ? .65 : .8;
@@ -458,7 +458,7 @@ export class QualityController{
 
       if( this.pxlRendering.roomBloomPass) this.pxlRendering.roomBloomPass.enabled=true;  
 
-      if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled=true;  
+      if( this.pxlRendering.glowPass ) this.pxlRendering.glowPass.enabled=true;  
 
       this.pxlEnv.userScreenIntensity.x=.65;
       this.pxlEnv.userScreenIntensity.y=0;
@@ -467,14 +467,14 @@ export class QualityController{
     }else{
       if( this.pxlRendering.mapGlowPass ) this.pxlRendering.mapGlowPass.enabled=false;
       if( this.pxlRendering.roomBloomPass ) this.pxlRendering.roomBloomPass.enabled=false;
-      if( this.pxlRendering.roomGlowPass ) this.pxlRendering.roomGlowPass.enabled=false;
+      if( this.pxlRendering.glowPass ) this.pxlRendering.glowPass.enabled=false;
       
       if( this.pxlRendering.mapComposerGlow?.renderTarget2 ){
         this.pxlRendering.engine.setRenderTarget(this.pxlRendering.mapComposerGlow.renderTarget2);
         this.pxlRendering.engine.clear();
       }
-      if( this.pxlRendering.roomGlowPass?.renderTarget2 ){
-        this.pxlRendering.engine.setRenderTarget(this.pxlRendering.roomGlowPass.renderTarget2);
+      if( this.pxlRendering.glowPass?.renderTarget2 ){
+        this.pxlRendering.engine.setRenderTarget(this.pxlRendering.glowPass.renderTarget2);
         this.pxlRendering.engine.clear();
       }
       

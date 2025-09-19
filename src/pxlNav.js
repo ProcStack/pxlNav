@@ -408,7 +408,7 @@ class pxlNav{
     this.pxlGuiDraws.setLoaderPhrases( this.pxlOptions["loaderPhrases"] );
 
     if( this.verbose >= pxlEnums.VERBOSE_LEVEL.INFO ){
-      console.log("pxlNav v1.0.0-dev set to Verbose Info Mode");
+      console.log("pxlNav v1.0.1-dev set to Verbose Info Mode");
       console.log("  With Three.js v171");
       console.log("Booting pxlNav...");
     }
@@ -1179,7 +1179,7 @@ class pxlNav{
 
   /**
    * Add rooms to the pxlNav load list
-   * Note: As of v1.0.0, this expects an array of `pxlNav.RoomEnvironment` elements.
+   * Note: As of v1.0.1, this expects an array of `pxlNav.RoomEnvironment` elements.
    * @param {RoomEnvironment[]} roomList List of pxlNav RoomEnvironments to add to the room load list
    */
   addRooms( roomList ){
@@ -1422,7 +1422,7 @@ class pxlNav{
 // This prevents "Cannot access before initialization" errors
 
 // Export version as a named constant to avoid initialization timing issues
-const pxlNavVersion = "1.0.0";
+const pxlNavVersion = "1.0.1";
 
 // Default export - keep your working static object structure for the loader
 const pxlNavDefault = {
